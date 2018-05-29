@@ -1,0 +1,369 @@
+
+!===========================================================================================
+!	License Locking Source
+!===========================================================================================
+
+keyflag=0
+dim TmpA[16]
+dim TmpB[8]
+dim TmpC[4]
+
+TmpBMin=0
+TmpCMin=0
+
+for	i = 1	to	16
+	TmpA[i] = 0
+next i
+for	i = 1	to	8
+	TmpB[i] = 0
+next i
+for	i = 1	to	4
+	TmpC[i] = 0
+next i
+
+!	Time LLL file reading
+dstr2 = ""
+value01 = 0
+channel = open ("TEXT", "C:\ProgramData\ArchiCAD\DoallPack.lll", "SEPARATOR='\n', mode = ro, FULLPATH")
+if	channel > 0	then
+	ret = input (channel, 1,0, dstr2 )
+	close channel
+endif
+if	channel = 0	then
+	keyflag = 0
+endif
+
+!	Local time reading 
+dstr1 = ""
+ch = OPEN ("DateTime", "", "%H:%M:%S")
+n = INPUT (ch, "", "", dstr1 )
+CLOSE (ch)
+
+!	Time Match
+tmpnum = 0
+
+len = STRLEN(dstr2)
+if	len = 33	then
+	
+	for	i = 18	to	33
+		str00 = strsub(dstr2,	i,	1)
+		if	str00 = "0"	then
+			tmpnum = 2
+		endif
+		if	str00 = "1"	then
+			tmpnum = 3
+		endif
+		if	str00 = "2"	then
+			tmpnum = 8
+		endif
+		if	str00 = "3"	then
+			tmpnum = 0
+		endif
+		if	str00 = "4"	then
+			tmpnum = 4
+		endif
+		if	str00 = "5"	then
+			tmpnum = 9
+		endif
+		if	str00 = "6"	then
+			tmpnum = 5
+		endif
+		if	str00 = "7"	then
+			tmpnum = 1
+		endif
+		if	str00 = "8"	then
+			tmpnum = 6
+		endif
+		if	str00 = "9"	then
+			tmpnum = 7
+		endif
+
+		TmpA[i-18+1] = tmpnum
+	next i
+
+	for	i = 1	to	8
+		TmpB[i] = (TmpA[(i-1)*2+1]+TmpA[(i-1)*2+2])%10
+	next i
+
+	for	i = 1	to	4
+		if	i = 1	then
+			str00 = strsub(dstr1,	1,	1)
+		endif
+		if	i = 2	then
+			str00 = strsub(dstr1,	2,	1)
+		endif
+		if	i = 3	then
+			str00 = strsub(dstr1,	4,	1)
+		endif
+		if	i = 4	then
+			str00 = strsub(dstr1,	5,	1)
+		endif
+
+		if	str00 = "0"	then
+			tmpnum = 0
+		endif
+		if	str00 = "1"	then
+			tmpnum = 1
+		endif
+		if	str00 = "2"	then
+			tmpnum = 2
+		endif
+		if	str00 = "3"	then
+			tmpnum = 3
+		endif
+		if	str00 = "4"	then
+			tmpnum = 4
+		endif
+		if	str00 = "5"	then
+			tmpnum = 5
+		endif
+		if	str00 = "6"	then
+			tmpnum = 6
+		endif
+		if	str00 = "7"	then
+			tmpnum = 7
+		endif
+		if	str00 = "8"	then
+			tmpnum = 8
+		endif
+		if	str00 = "9"	then
+			tmpnum = 9
+		endif
+
+		TmpC[i] = tmpnum
+
+	next i
+
+	TmpBMin = TmpB[1]*600+TmpB[2]*60+TmpB[3]*10+TmpB[4]
+	TmpCMin = TmpC[1]*600+TmpC[2]*60+TmpC[3]*10+TmpC[4]
+
+	diffmin = 9999
+	if	TmpB[5] = 0	then
+		if	TmpB[6] = 1	then
+			if	TmpB[7] = 0	then
+				if	TmpB[8] = 0	then
+					diffmin = TmpCMin - TmpBMin
+				else
+					diffmin = 9999
+				endif
+			else
+				diffmin = 9999
+			endif
+		else
+			diffmin = 9999
+		endif
+	else
+		diffmin = 9999
+	endif
+
+	if	diffmin >= 0	then
+		if	diffmin < 10	then
+			keyflag = 1
+		else
+			keyflag = 0
+		endif
+	else
+		diffmin = TmpCMin+1440 - TmpBMin
+		if	diffmin < 10	then
+			keyflag = 1
+		else
+			keyflag = 0
+		endif
+	endif
+else
+	keyflag = 0
+endif
+
+
+if	keyflag = 0	then
+	hideparameter	all
+	lock	all
+endif
+
+!===========================================================================================
+!	License Locking Source
+!===========================================================================================
+
+!===========================================================================================
+!	기본설정
+!===========================================================================================
+eps = 0.0001
+
+
+!	기울기 각도 구하기
+!-------------------------------------------------------------------------------------------
+slp1 = strRsr/strTrd
+
+slpAng = ATN(slp1)
+railAng = (90 - slpAng)
+
+x1 = strThk*sin(slpAng)
+y1 = strThk*cos(slpAng)
+
+Rng_bLndThk = -(((0 - x1)*tan(slpAng)) - y1)
+
+
+!	작업층 보이기 설정
+!-------------------------------------------------------------------------------------------
+wrkFlr_Cut = 1
+wrkFlr_Entire = 2
+wrkFlr_None = 3
+
+if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+	dim	stwrkFlr[3]
+		stwrkFlr[1] = "Cut"
+		stwrkFlr[2] = "Entire"
+		stwrkFlr[3] = "None"
+endif
+
+
+!	상부층 보이기 설정
+!-------------------------------------------------------------------------------------------
+uprFlr_Cut = 1
+uprFlr_Entire = 2
+uprFlr_None = 3
+
+if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+	dim	stuprFlr[3]
+		stuprFlr[1] = "Cut"
+		stuprFlr[2] = "Entire"
+		stuprFlr[3] = "None"
+endif
+
+
+!	CutPlaneTmp
+!	Floor Cut Plane Setting 값 가져오기
+!-------------------------------------------------------------------------------------------
+	if	bCutPln	then
+		CutPlaneTmp = GLOB_CUTPLANES_INFO[1] + GLOB_ELEVATION
+	endif
+	
+	if	not(bCutPln)	then
+		CutPlaneTmp = 0
+	endif
+
+!	치수 ON/OFF
+!-------------------------------------------------------------------------------------------
+DimPlan_Off = 1
+DimPlan_On = 2
+DimPlan_MVO = 3
+
+if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+	dim	stDimPlan[]
+		stDimPlan[1] = "Off"
+		stDimPlan[2] = "On"
+		stDimPlan[3] = "by MVO"
+endif
+
+!	치수
+!-------------------------------------------------------------------------------------------
+DimLct_Left = 1
+DimLct_Right = 2
+
+if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+	dim	stDimLct[]
+		stDimLct[1] = "좌"
+		stDimLct[2] = "우"
+endif
+
+
+!	높이 산정 방법
+!-------------------------------------------------------------------------------------------
+Calc_RsrRsrN = 1
+Calc_HgtRsrN = 2
+
+if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+	dim	stCalcHgt[]
+		stCalcHgt[1] = "Riser + RiserNumber"
+		stCalcHgt[2] = "Height + RiserNumber"
+endif
+
+if	iCalcHgt = Calc_RsrRsrN	then
+	lock	"ZZYZX"
+
+	if	GLOB_MODPAR_NAME = "strRsr" or GLOB_MODPAR_NAME = "strRsrN"	then
+		parameters	ZZYZX = strRsr*strRsrN
+	endif
+endif
+
+if	iCalcHgt = Calc_HgtRsrN	then
+	lock	"strRsr"
+
+	if	GLOB_MODPAR_NAME = "ZZYZX" or GLOB_MODPAR_NAME = "strRsrN"	then
+		parameters	strRsr = ZZYZX/strRsrN
+	endif
+endif
+
+
+!	단면 치수 설정
+!-------------------------------------------------------------------------------------------
+SectDim_Off = 1
+SectDim_On = 2
+SectDim_MVO = 3
+
+if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+	dim	stSectDim[]
+		stSectDim[1] = "Off"
+		stSectDim[2] = "On"
+		stSectDim[3] = "by MVO"
+endif
+
+
+!-------------------------------------------------------------------------------------------
+!	핸드레일
+!-------------------------------------------------------------------------------------------
+
+	!	핸드레일 단면 형상
+	!-----------------------------------------------------------------------------------------------
+	RailSect_Line = 1
+	RailSect_3D = 2
+	RailSect_MVO = 3
+
+	if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+		dim	stRailSect[]
+			stRailSect[1] = "단선"
+			stRailSect[2] = "3D형상"
+			stRailSect[3] = "by MVO"
+	endif
+
+
+	!	마감재 두께값
+	!-------------------------------------------------------------------------------------------
+		fnsThkTmp = 0
+	
+		if	not(bFns)	then
+			fnsThkTmp = 0
+		else
+			fnsThkTmp = fnsThk + basThk
+		endif
+	
+
+	!	수평바 길이
+	!-------------------------------------------------------------------------------------------
+		WhndOffTmp = 0
+
+		if	lndLength > -eps and lndLength < eps	then
+			WhndOffTmp = WhndOff1 + WhndOff2 + strTrd/2
+		else
+			WhndOffTmp = WhndOff1 + strTrd/2
+		endif
+	
+		if	bAttachTop and not(bAttachBtm)	then
+			WhndOffTmp = WhndOffTmp - hndRd*2
+		endif
+	
+
+		if	bAttachBtm and not(bAttachTop)	then
+			WhndOffTmp = WhndOffTmp + strTrd/2
+
+			if	lndLength > eps	then
+				WhndOffTmp = WhndOffTmp - WhndOff1
+			else
+				WhndOffTmp = WhndOffTmp - WhndOff1 + WhndOff2
+			endif
+		endif
+
+		if	bAttachBtm and bAttachTop	then
+			WhndOffTmp = WhndOffTmp + strTrd/2 - hndRd*3
+		endif
+	

@@ -1,0 +1,89 @@
+!===============================================================================================
+!	PC슬라브
+!===============================================================================================
+
+!	리브 유형
+!---------------------------------------------------------------------------------------
+values{2}	"iRibType_L"	RIB_UPPER,	stRibType[RIB_UPPER],
+							RIB_LOWER,	stRibType[RIB_LOWER]
+
+if	not(iRibType_L = RIB_UPPER)	then
+	lock	"ribLth_L", "addLth_L"
+endif
+if	not(iRibType_L = RIB_LOWER)	then
+	lock	"halfWdt_L", "offWdt_L", "offHgt_L"
+endif
+
+values{2}	"iRibType_R"	RIB_UPPER,	stRibType[RIB_UPPER],
+							RIB_LOWER,	stRibType[RIB_LOWER]
+
+if	not(iRibType_R = RIB_UPPER)	then
+	lock	"ribLth_R", "addLth_R"
+endif
+if	not(iRibType_R = RIB_LOWER)	then
+	lock	"halfWdt_R", "offWdt_R", "offHgt_R"
+endif
+
+!	장스팬 관련
+!---------------------------------------------------------------------------------------
+_endHgt_2 = ribHgt - endHgt
+_aEnd = atn(endOffset/(slabThk + _endHgt_2))
+_min_spanLth_Long = (endOffset + _endHgt_2*tan(_aEnd))*2
+values	"spanLth_Long"	range	[_min_spanLth_Long,	]
+values	"endOffset"	range	(0,	0.500]
+values	"endHgt"	range	(0,	ribHgt)
+
+!	리브 관련
+!---------------------------------------------------------------------------------------
+values	"nRib"		range	[2,	]
+values	"ribHgt"	range	[ribRad,	)
+values	"ribWdt"	range	(0,	)
+values	"ribGap"	range	[(ribWdt + ribRad*2),	)
+values	"ribRad"	range	(0,	)
+
+!	단스팬 길이 자동계산
+!---------------------------------------------------------------------------------------
+lock	"spanLth_Short"
+
+_spanLth_Short = ribGap*(nRib - 1)
+
+if	iRibType_L = RIB_UPPER	then
+	_spanLth_Short = _spanLth_Short + ribLth_L + addLth_L
+endif
+if	iRibType_L = RIB_LOWER	then
+	_spanLth_Short = _spanLth_Short + halfWdt_L
+endif
+
+if	iRibType_R = RIB_UPPER	then
+	_spanLth_Short = _spanLth_Short + ribLth_R + addLth_R
+endif
+if	iRibType_R = RIB_LOWER	then
+	_spanLth_Short = _spanLth_Short + halfWdt_R
+endif
+
+parameters	spanLth_Short = _spanLth_Short
+
+!	단스팬 관련
+!---------------------------------------------------------------------------------------
+_cutHgt = 0.020
+
+values	"ribLth_L"	range	[0,	]
+values	"addLth_L"	range	[0,	]
+values	"halfWdt_L"	range	(0,	)
+values	"offWdt_L"	range	[_cutHgt,	halfWdt_L]
+values	"offHgt_L"	range	[0,	ribHgt/2]
+
+values	"ribLth_R"	range	[0,	]
+values	"addLth_R"	range	[0,	]
+values	"halfWdt_R"	range	(0,	)
+values	"offWdt_R"	range	[_cutHgt,	halfWdt_R]
+values	"offHgt_R"	range	[0,	ribHgt/2]
+
+!	단면 형상 관련
+!-----------------------------------------------------------------------------------------------
+if	not(bDrawSect)	then
+	lock	"bMirrorSect", "penSect", "sectLct", "bShowHotspot"
+endif
+
+_max_sectLct = spanLth_Long - (slabThk + ribHgt)
+values	"sectLct"	range	(0,	_max_sectLct)

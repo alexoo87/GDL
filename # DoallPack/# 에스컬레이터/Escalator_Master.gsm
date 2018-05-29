@@ -1,0 +1,40 @@
+!===============================================================================================
+!	에스컬레이터
+!===============================================================================================
+unID = 100
+eps = 0.0001
+
+!	객체 유형
+!-----------------------------------------------------------------------------------------------
+OBJECT_ESCALATOR = 1
+OBJECT_MOVINGWALK = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stObjectType[]
+		stObjectType[1] = "에스컬레이터(ESCALATOR)"
+		stObjectType[2] = "무빙워크(MOVING WALK)"
+endif
+
+!	에스컬레이터 방향
+!-----------------------------------------------------------------------------------------------
+DIRECT_UP = 1
+DIRECT_DOWN = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stDirect[]
+		stDirect[1] = "상부(UP)"
+		stDirect[2] = "하부(DOWN)"
+endif
+
+!	2D 표현 방법
+!-----------------------------------------------------------------------------------------------
+VIEW_OFF = 1
+VIEW_CUT = 2
+VIEW_ENTIRE = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stViewFlr[]
+		stViewFlr[1] = "Off"
+		stViewFlr[2] = "Cut"
+		stViewFlr[3] = "Enitre"
+endif

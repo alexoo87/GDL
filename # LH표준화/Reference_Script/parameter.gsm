@@ -1,0 +1,29 @@
+
+VALUES "gs_detlevel_3D" `상세`,`단순한`,`끄기`
+
+parameters A = dBaseR, B = dBaseR, ZZYZX = dBaseH + dDetH
+
+!	평면 표기
+!-----------------------------------------------------------------------------------------------
+values{2}	"iPlanView"	PLANVIEW_KOR,		stPlanview[PLANVIEW_KOR],
+						PLANVIEW_ARCHICAD,	stPlanview[PLANVIEW_ARCHICAD],
+						PLANVIEW_MVO,		stPlanview[PLANVIEW_MVO]
+
+!	폰트 유형
+!-----------------------------------------------------------------------------------------------
+dim	_fontNames[]
+r = request("FONTNAMES_LIST", "", _fontNames)
+values	"stFontType"	_fontNames
+
+!	LH표준화 라이브러리
+!-----------------------------------------------------------------------------------------------
+if	iPlanview = PLANVIEW_MVO	then
+	success = LIBRARYGLOBAL("MEP_m_MVO.gsm",	"stFontType",	_stFontType)
+
+	if	success > eps	then
+		lock			"stFontType", "fontSize"
+		hideparameter	"stFontType", "fontSize"
+	endif
+endif
+
+

@@ -1,0 +1,2669 @@
+!===============================================================================================
+!	철골계단
+!===============================================================================================
+
+if	bTest	then
+	project2	3,	270,	2
+endif
+
+!	W.P
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+!	층 인덱스
+STORY_CURRENT = 1
+STORY_UPPER = 2
+
+if	GLOB_CH_STORY_DIST < eps	then
+	iStoryValue = STORY_CURRENT
+else
+	iStoryValue = STORY_UPPER
+endif
+
+!	공통 변수 정의
+_rsrThk = 0
+_nosLth = 0
+_endLth = stepDpt_E
+if	iPlanView = VIEW_A	then
+	if	bRsr	then	_rsrThk = rsrThk
+	if	bTrd	then	_nosLth = nosLth
+	_endLth = trdDpt_E
+endif
+
+!	Define Line Type
+define line_type	"short-dashsed"		1,	4,	0.0006,	0.0003,	0.0006,	0.0003
+
+!-----------------------------------------------------------------------------------------------
+!	외곽선(Contour Line)
+!-----------------------------------------------------------------------------------------------
+pen		penStr
+fill	65
+
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+	_offCut = (strWdt_1/2)*tan(aBrk)
+
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+	if	not(iWrkFlr = PLANVIEW_NONE & iStoryValue = STORY_CURRENT | iUprFlr = PLANVIEW_NONE & iStoryValue = STORY_UPPER | iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+		add2	0,	-(_rsrThk + _nosLth)
+			hotspot2	0,			0,	unID,	strWdt_1,	1+256	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	strWdt_1,	3		:	unID = unID + 1
+			hotspot2	strWdt_1,	0,	unID,	strWdt_1,	2		:	unID = unID + 1
+
+			add2	strWdt_1/2,	0
+				hotspot2	0,	0,			unID,	stepDpt,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	stepDpt,	3		:	unID = unID + 1
+				hotspot2	0,	stepDpt,	unID,	stepDpt,	2		:	unID = unID + 1
+			del 1
+		del 1
+	endif
+
+	!	I형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_I	then
+		!	Entire
+		!-----------------------------------------------------------------------------------------------
+		if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+			put	0,			-(_rsrThk + _nosLth),				1,
+				0,			stepDpt*(nStep_1 - 1) + _endLth,	1,
+				strWdt_1,	stepDpt*(nStep_1 - 1) + _endLth,	1,
+				strWdt_1,	-(_rsrThk + _nosLth),				1,
+				0,			-(_rsrThk + _nosLth),				1
+
+			gosub	"drawPolyB"
+
+			!	Hotspot : trdDpt_E | stepDpt_E
+			gosub	"strHotspot_I"
+		endif
+
+		!	Cut
+		!-----------------------------------------------------------------------------------------------
+		!	Current Story
+		if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+			put	0,			-(_rsrThk + _nosLth),						1,
+				0,			-(_rsrThk + _nosLth) + wrkBrkLct - _offCut,	0,
+				strWdt_1,	-(_rsrThk + _nosLth) + wrkBrkLct + _offCut,	1,
+				strWdt_1,	-(_rsrThk + _nosLth),						1,
+				0,			-(_rsrThk + _nosLth),						1
+
+			gosub	"drawPolyB"
+		endif
+
+		!	Upper Story
+		if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+			put	0,			-(_rsrThk + _nosLth) + uprBrkLct - _offCut,	1,
+				0,			stepDpt*(nStep_1 - 1) + _endLth,			1,
+				strWdt_1,	stepDpt*(nStep_1 - 1) + _endLth,			1,
+				strWdt_1,	-(_rsrThk + _nosLth) + uprBrkLct + _offCut,	0,
+				0,			-(_rsrThk + _nosLth) + uprBrkLct - _offCut,	1
+
+			gosub	"drawPolyB"
+
+			!	Hotspot : trdDpt_E | stepDpt_E
+			gosub	"strHotspot_I"
+		endif
+
+		!	None
+		!-----------------------------------------------------------------------------------------------
+		if	(iWrkFlr = PLANVIEW_NONE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_NONE & iStoryValue = STORY_UPPER)	then
+			put	0,			-(_rsrThk + _nosLth),				0,
+				0,			stepDpt*(nStep_1 - 1) + _endLth,	0,
+				strWdt_1,	stepDpt*(nStep_1 - 1) + _endLth,	0,
+				strWdt_1,	-(_rsrThk + _nosLth),				0,
+				0,			-(_rsrThk + _nosLth),				0
+
+			gosub	"drawPolyB"
+		endif
+	endif
+
+	!	L형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_L	then
+		!	Entire
+		!-----------------------------------------------------------------------------------------------
+		if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+			put	0,														-(_rsrThk + _nosLth),							1,
+				0,														stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	1,
+				strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	1,
+				strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	stepDpt*(nStep_1 - 1) + strOff_1,				1,
+				strWdt_1,												stepDpt*(nStep_1 - 1) + strOff_1,				1,
+				strWdt_1,												-(_rsrThk + _nosLth),							1,
+				0,														-(_rsrThk + _nosLth),							1
+
+			gosub	"drawPolyB"
+
+			!	Guide Line
+			gosub	"guideAddStg"
+
+			!	Hotspot : strOff_1 & strOff_2 & strWdt_2 & (trdDpt_E | stepDpt_E)
+			gosub	"strHotspot_L"
+		endif
+
+		!	Cut
+		!-----------------------------------------------------------------------------------------------
+		!	Current Story
+		if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+			put	0,			-(_rsrThk + _nosLth),						1,
+				0,			-(_rsrThk + _nosLth) + wrkBrkLct - _offCut,	0,
+				strWdt_1,	-(_rsrThk + _nosLth) + wrkBrkLct + _offCut,	1,
+				strWdt_1,	-(_rsrThk + _nosLth),						1,
+				0,			-(_rsrThk + _nosLth),						1
+
+			gosub	"drawPolyB"
+		endif
+
+		!	Upper Story
+		if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+			put	0,														-(_rsrThk + _nosLth) + uprBrkLct - _offCut,		1,
+				0,														stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	1,
+				strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	1,
+				strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	stepDpt*(nStep_1 - 1) + strOff_1,				1,
+				strWdt_1,												stepDpt*(nStep_1 - 1) + strOff_1,				1,
+				strWdt_1,												-(_rsrThk + _nosLth) + uprBrkLct + _offCut,		0,
+				0,														-(_rsrThk + _nosLth) + uprBrkLct - _offCut,		1
+
+			gosub	"drawPolyB"
+
+			!	Guide Line
+			gosub	"guideAddStg"
+
+			!	Hotspot : strOff_1 & strOff_2 & strWdt_2 & (trdDpt_E | stepDpt_E)
+			gosub	"strHotspot_L"
+		endif
+
+		!	None
+		!-----------------------------------------------------------------------------------------------
+		if	(iWrkFlr = PLANVIEW_NONE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_NONE & iStoryValue = STORY_UPPER)	then
+			put	0,														-(_rsrThk + _nosLth),							0,
+				0,														stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	0,
+				strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	0,
+				strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	stepDpt*(nStep_1 - 1) + strOff_1,				0,
+				strWdt_1,												stepDpt*(nStep_1 - 1) + strOff_1,				0,
+				strWdt_1,												-(_rsrThk + _nosLth),							0,
+				0,														-(_rsrThk + _nosLth),							0
+
+			gosub	"drawPolyB"
+		endif
+	endif
+
+	!	U형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_U	then
+		!	Entire
+		!-----------------------------------------------------------------------------------------------
+		if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+			put	0,											-(_rsrThk + _nosLth),																1,
+				0,											stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				-landLth_L,									stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				-landLth_L,									stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + landLth_D,								1,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + landLth_D,								1,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				strWdt_1 + strDist + strWdt_2,				stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				strWdt_1 + strDist + strWdt_2,				stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1) + _endLth),	1,
+				strWdt_1 + strDist,							stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1) + _endLth),	1,
+				strWdt_1 + strDist,							stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				strWdt_1,									stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				strWdt_1,									-(_rsrThk + _nosLth),																1,
+				0,											-(_rsrThk + _nosLth),																1
+
+			gosub	"drawPolyB"
+
+			!	Guide Line
+			gosub	"guideLand"
+
+			!	Hotspot : strOff_1 & strOff_2 & strDist & strWdt_2 & (trdDpt_E | stepDpt_E) & Landing
+			gosub	"strHotspot_U"
+		endif
+
+		!	Cut
+		!-----------------------------------------------------------------------------------------------
+		!	Current Story
+		if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+			put	0,			-(_rsrThk + _nosLth),						1,
+				0,			-(_rsrThk + _nosLth) + wrkBrkLct - _offCut,	0,
+				strWdt_1,	-(_rsrThk + _nosLth) + wrkBrkLct + _offCut,	1,
+				strWdt_1,	-(_rsrThk + _nosLth),						1,
+				0,			-(_rsrThk + _nosLth),						1
+
+			gosub	"drawPolyB"
+		endif
+
+		!	Upper Story
+		if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+			put	0,											-(_rsrThk + _nosLth) + uprBrkLct - _offCut,											1,
+				0,											stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				-landLth_L,									stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				-landLth_L,									stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + landLth_D,								1,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + landLth_D,								1,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				strWdt_1 + strDist + strWdt_2,				stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				strWdt_1 + strDist + strWdt_2,				stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1) + _endLth),	1,
+				strWdt_1 + strDist,							stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1) + _endLth),	1,
+				strWdt_1 + strDist,							stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				strWdt_1,									stepDpt*(nStep_1 - 1) + strOff_1,													1,
+				strWdt_1,									-(_rsrThk + _nosLth) + uprBrkLct + _offCut,											0,
+				0,											-(_rsrThk + _nosLth) + uprBrkLct - _offCut,											1
+
+			gosub	"drawPolyB"
+
+			!	Guide Line
+			gosub	"guideLand"
+
+			!	Hotspot : strOff_1 & strOff_2 & strDist & strWdt_2 & (trdDpt_E | stepDpt_E) & Landing
+			gosub	"strHotspot_U"
+		endif
+
+		!	None
+		!-----------------------------------------------------------------------------------------------
+		if	(iWrkFlr = PLANVIEW_NONE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_NONE & iStoryValue = STORY_UPPER)	then
+			put	0,											-(_rsrThk + _nosLth),																0,
+				0,											stepDpt*(nStep_1 - 1) + strOff_1,													0,
+				-landLth_L,									stepDpt*(nStep_1 - 1) + strOff_1,													0,
+				-landLth_L,									stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + landLth_D,								0,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + landLth_D,								0,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	stepDpt*(nStep_1 - 1) + strOff_1,													0,
+				strWdt_1 + strDist + strWdt_2,				stepDpt*(nStep_1 - 1) + strOff_1,													0,
+				strWdt_1 + strDist + strWdt_2,				stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1) + _endLth),	0,
+				strWdt_1 + strDist,							stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1) + _endLth),	0,
+				strWdt_1 + strDist,							stepDpt*(nStep_1 - 1) + strOff_1,													0,
+				strWdt_1,									stepDpt*(nStep_1 - 1) + strOff_1,													0,
+				strWdt_1,									-(_rsrThk + _nosLth),																0,
+				0,											-(_rsrThk + _nosLth),																0
+
+			gosub	"drawPolyB"
+		endif
+	endif
+
+!-----------------------------------------------------------------------------------------------
+!	Break Line
+!-----------------------------------------------------------------------------------------------
+pen	penEtc
+
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+	_brkHgt = 0.120
+	_referLth = _brkHgt*sin(aBrk)
+	
+	!	Draw Break Line
+	!-----------------------------------------------------------------------------------------------
+	add2	strWdt_1/2,	-(_rsrThk + _nosLth)
+		!	Current Story
+		!-----------------------------------------------------------------------------------------------
+		if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+			_bBrk = bWrkBrk
+			_brkLct = wrkBrkLct
+
+			gosub	"drawBreakLine"
+
+			!	Hotspot : wrkBrkLct
+			hotspot2	0,	0,			unID,	wrkBrkLct,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	wrkBrkLct,	3		:	unID = unID + 1
+			hotspot2	0,	wrkBrkLct,	unID,	wrkBrkLct,	2		:	unID = unID + 1
+		endif
+
+		!	Upper Story
+		!-----------------------------------------------------------------------------------------------
+		if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+			_bBrk = bUprBrk
+			_brkLct = uprBrkLct
+
+			gosub	"drawBreakLine"
+
+			!	Hotspot : uprBrkLct
+			hotspot2	0,	0,			unID,	uprBrkLct,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	uprBrkLct,	3		:	unID = unID + 1
+			hotspot2	0,	uprBrkLct,	unID,	uprBrkLct,	2		:	unID = unID + 1
+		endif
+	del 1
+
+!-----------------------------------------------------------------------------------------------
+!	단(Step)
+!-----------------------------------------------------------------------------------------------
+pen	penStr
+
+	!	I형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_I	then
+		add2	0,	-(_rsrThk + _nosLth)
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				for	i = 1	to	(nStep_1 - 1)
+					add2	0,	stepDpt*i
+						line2		0,	0,	strWdt_1,	0
+						hotline2	0,	0,	strWdt_1,	0,	unID	:	unID = unID + 1
+					del 1
+				next	i
+			endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				gosub	"drawStep_Cut_Current"
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				gosub	"drawStep_Cut_Upper"
+			endif
+		del 1
+	endif
+
+	!	L형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_L	then
+		add2	0,	-(_rsrThk + _nosLth)
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				!	1단
+				for	i = 1	to	(nStep_1 - 1)
+					add2	0,	stepDpt*i
+						line2		0,	0,	strWdt_1,	0
+						hotline2	0,	0,	strWdt_1,	0,	unID	:	unID = unID + 1
+					del 1
+				next	i
+
+				!	2단
+				gosub	"drawStep_2nd_L"
+			endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				gosub	"drawStep_Cut_Current"
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				!	1단
+				gosub	"drawStep_Cut_Upper"
+
+				!	2단
+				gosub	"drawStep_2nd_L"
+			endif
+		del 1
+	endif
+
+	!	U형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_U	then
+		add2	0,	-(_rsrThk + _nosLth)
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				!	1단
+				for	i = 1	to	(nStep_1 - 1)
+					add2	0,	stepDpt*i
+						line2		0,	0,	strWdt_1,	0
+						hotline2	0,	0,	strWdt_1,	0,	unID	:	unID = unID + 1
+					del 1
+				next	i
+
+				!	2단
+				gosub	"drawStep_2nd_U"
+			endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------l
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				gosub	"drawStep_Cut_Current"
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				!	1단
+				gosub	"drawStep_Cut_Upper"
+
+				!	2단
+				gosub	"drawStep_2nd_U"
+			endif
+		del 1
+	endif
+
+!-----------------------------------------------------------------------------------------------
+!	스트링거(Stringer)
+!-----------------------------------------------------------------------------------------------
+	!	건축
+	!-----------------------------------------------------------------------------------------------
+	if	iPlanView = VIEW_A	then
+		!	변수 정의
+		!-----------------------------------------------------------------------------------------------
+		_offCut_In = (strWdt_1/2)*tan(aBrk)
+		_offCut_Out = (strWdt_1/2 + stgWdt)*tan(aBrk)
+
+		!	I형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_I	then
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				put	0,			-yPosStg_1,							1,
+					-stgWdt,	-yPosStg_1,							1,
+					-stgWdt,	stepDpt*(nStep_1 - 1) + stepDpt_E,	1,
+					0,			stepDpt*(nStep_1 - 1) + stepDpt_E,	1,
+					0,			-yPosStg_1,							1
+
+				gosub	"drawPolyB"
+
+				_zPosTop = (stepHgt_1*(nStep_1 - 2) + stepHgt_E - zPosStg_1)
+				add2	0,	-yPosStg_1 + _zPosTop/tan(_aStr_1)
+					line2		0,	0,	-stgWdt,	0
+					hotline2	0,	0,	-stgWdt,	0,	unID	:	unID = unID + 1
+				del 1
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		-yPosStg_1,							1,
+						stgWdt,	-yPosStg_1,							1,
+						stgWdt,	stepDpt*(nStep_1 - 1) + stepDpt_E,	1,
+						0,		stepDpt*(nStep_1 - 1) + stepDpt_E,	1,
+						0,		-yPosStg_1,							1
+
+					gosub	"drawPolyB"
+
+					_zPosTop = (stepHgt_1*(nStep_1 - 2) + stepHgt_E - zPosStg_1)
+					add2	0,	-yPosStg_1 + _zPosTop/tan(_aStr_1)
+						line2		0,	0,	stgWdt,	0
+						hotline2	0,	0,	stgWdt,	0,	unID	:	unID = unID + 1
+					del 1
+				del 1
+			endif
+
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				!	1st Stringer
+				put	0,			-yPosStg_1,										1,
+					-stgWdt,	-yPosStg_1,										1,
+					-stgWdt,	-(_rsrThk + _nosLth) + wrkBrkLct - _offCut_Out,	1,
+					0,			-(_rsrThk + _nosLth) + wrkBrkLct - _offCut_In,	1,
+					0,			-yPosStg_1,										1
+
+				gosub	"drawPolyB"
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		-yPosStg_1,										1,
+						stgWdt,	-yPosStg_1,										1,
+						stgWdt,	-(_rsrThk + _nosLth) + wrkBrkLct + _offCut_Out,	1,
+						0,		-(_rsrThk + _nosLth) + wrkBrkLct + _offCut_In,	1,
+						0,		-yPosStg_1,										1
+
+					gosub	"drawPolyB"
+				del 1
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				put	0,			stepDpt*(nStep_1 - 1) + stepDpt_E,				1,
+					-stgWdt,	stepDpt*(nStep_1 - 1) + stepDpt_E,				1,
+					-stgWdt,	-(_rsrThk + _nosLth) + uprBrkLct - _offCut_Out,	1,
+					0,			-(_rsrThk + _nosLth) + uprBrkLct - _offCut_In,	1,
+					0,			stepDpt*(nStep_1 - 1) + stepDpt_E,				1
+
+				gosub	"drawPolyB"
+
+				_zPosTop = (stepHgt_1*(nStep_1 - 2) + stepHgt_E - zPosStg_1)
+				_yPosLine = -yPosStg_1 + _zPosTop/tan(_aStr_1)
+				add2	0,	_yPosLine
+					if	_yPosLine > -(_rsrThk + _nosLth) + uprBrkLct - _offCut_In	then
+						line2		0,	0,	-stgWdt,	0
+						hotline2	0,	0,	-stgWdt,	0,	unID	:	unID = unID + 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		stepDpt*(nStep_1 - 1) + stepDpt_E,				1,
+						stgWdt,	stepDpt*(nStep_1 - 1) + stepDpt_E,				1,
+						stgWdt,	-(_rsrThk + _nosLth) + uprBrkLct + _offCut_Out,	1,
+						0,		-(_rsrThk + _nosLth) + uprBrkLct + _offCut_In,	1,
+						0,		stepDpt*(nStep_1 - 1) + stepDpt_E,				1
+
+					gosub	"drawPolyB"
+
+					_zPosTop = (stepHgt_1*(nStep_1 - 2) + stepHgt_E - zPosStg_1)
+					_yPosLine = -yPosStg_1 + _zPosTop/tan(_aStr_1)
+					add2	0,	_yPosLine
+						if	_yPosLine > -(_rsrThk + _nosLth) + uprBrkLct + _offCut_Out	then
+							line2		0,	0,	stgWdt,	0
+							hotline2	0,	0,	stgWdt,	0,	unID	:	unID = unID + 1
+						endif
+					del 1
+				del 1
+			endif
+		endif
+
+		!	L형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_L	then
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				put	0,			-yPosStg_1,									1,
+					-stgWdt,	-yPosStg_1,									1,
+					-stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,	1,
+					0,			stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,	1,
+					0,			-yPosStg_1,									1
+
+				gosub	"drawPolyB"
+
+				_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+				add2	0,	-yPosStg_1 + _zPosTop/tan(_aStr_1)
+					line2		0,	0,	-stgWdt,	0
+					hotline2	0,	0,	-stgWdt,	0,	unID	:	unID = unID + 1
+				del 1
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		-yPosStg_1,									1,
+						stgWdt,	-yPosStg_1,									1,
+						stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,	1,
+						0,		stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,	1,
+						0,		-yPosStg_1,									1
+
+					gosub	"drawPolyB"
+
+					_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+					add2	0,	-yPosStg_1 + _zPosTop/tan(_aStr_1)
+						line2		0,	0,	stgWdt,	0
+						hotline2	0,	0,	stgWdt,	0,	unID	:	unID = unID + 1
+					del 1
+				del 1
+
+				!	3rd, 4th, 5th, 6th
+				gosub	"commonStg_L_A"
+			endif
+
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				!	1st Stringer
+				put	0,			-yPosStg_1,										1,
+					-stgWdt,	-yPosStg_1,										1,
+					-stgWdt,	-(_rsrThk + _nosLth) + wrkBrkLct - _offCut_Out,	1,
+					0,			-(_rsrThk + _nosLth) + wrkBrkLct - _offCut_In,	1,
+					0,			-yPosStg_1,										1
+
+				gosub	"drawPolyB"
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		-yPosStg_1,										1,
+						stgWdt,	-yPosStg_1,										1,
+						stgWdt,	-(_rsrThk + _nosLth) + wrkBrkLct + _offCut_Out,	1,
+						0,		-(_rsrThk + _nosLth) + wrkBrkLct + _offCut_In,	1,
+						0,		-yPosStg_1,										1
+
+					gosub	"drawPolyB"
+				del 1
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				put	0,			stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,		1,
+					-stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,		1,
+					-stgWdt,	-(_rsrThk + _nosLth) + uprBrkLct - _offCut_Out,	1,
+					0,			-(_rsrThk + _nosLth) + uprBrkLct - _offCut_In,	1,
+					0,			stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,		1
+
+				gosub	"drawPolyB"
+
+				_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+				_yPosLine = -yPosStg_1 + _zPosTop/tan(_aStr_1)
+				add2	0,	_yPosLine
+					if	_yPosLine > -(_rsrThk + _nosLth) + uprBrkLct - _offCut_In	then
+						line2		0,	0,	-stgWdt,	0
+						hotline2	0,	0,	-stgWdt,	0,	unID	:	unID = unID + 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,		1,
+						stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,		1,
+						stgWdt,	-(_rsrThk + _nosLth) + uprBrkLct + _offCut_Out,	1,
+						0,		-(_rsrThk + _nosLth) + uprBrkLct + _offCut_In,	1,
+						0,		stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt,		1
+
+					gosub	"drawPolyB"
+
+					_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+					_yPosLine = -yPosStg_1 + _zPosTop/tan(_aStr_1)
+					add2	0,	_yPosLine
+						if	_yPosLine > -(_rsrThk + _nosLth) + uprBrkLct + _offCut_Out	then
+							line2		0,	0,	stgWdt,	0
+							hotline2	0,	0,	stgWdt,	0,	unID	:	unID = unID + 1
+						endif
+					del 1
+				del 1
+
+				!	3rd, 4th, 5th, 6th
+				gosub	"commonStg_L_A"
+			endif
+		endif
+
+		!	U형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_U	then
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				put	0,			-yPosStg_1,							1,
+					-stgWdt,	-yPosStg_1,							1,
+					-stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1,	1
+					
+
+				if	landLth_L < stgWdt	then
+					put	-stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out,	1,
+						-landLth_L,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out,	1,
+						-landLth_L,	stepDpt*(nStep_1 - 1) + strOff_1,							1
+				endif
+
+				put	0,	stepDpt*(nStep_1 - 1) + strOff_1,	1,
+					0,	-yPosStg_1,							1
+
+				gosub	"drawPolyB"
+
+				_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+				add2	0,	-yPosStg_1 + _zPosTop/tan(_aStr_1)
+					line2		0,	0,	-stgWdt,	0
+					hotline2	0,	0,	-stgWdt,	0,	unID	:	unID = unID + 1
+				del 1
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		-yPosStg_1,							1,
+						stgWdt,	-yPosStg_1,							1,
+						stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1,	1,
+						0,		stepDpt*(nStep_1 - 1) + strOff_1,	1,
+						0,		-yPosStg_1,							1
+
+					gosub	"drawPolyB"
+
+					_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+					add2	0,	-yPosStg_1 + _zPosTop/tan(_aStr_1)
+						line2		0,	0,	stgWdt,	0
+						hotline2	0,	0,	stgWdt,	0,	unID	:	unID = unID + 1
+					del 1
+				del 1
+
+				!	3rd, 4th, 5th, 6th
+				gosub	"commonStg_U_A"
+			endif
+
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				!	1st Stringer
+				put	0,			-yPosStg_1,										1,
+					-stgWdt,	-yPosStg_1,										1,
+					-stgWdt,	-(_rsrThk + _nosLth) + wrkBrkLct - _offCut_Out,	1,
+					0,			-(_rsrThk + _nosLth) + wrkBrkLct - _offCut_In,	1,
+					0,			-yPosStg_1,										1
+
+				gosub	"drawPolyB"
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		-yPosStg_1,										1,
+						stgWdt,	-yPosStg_1,										1,
+						stgWdt,	-(_rsrThk + _nosLth) + wrkBrkLct + _offCut_Out,	1,
+						0,		-(_rsrThk + _nosLth) + wrkBrkLct + _offCut_In,	1,
+						0,		-yPosStg_1,										1
+
+					gosub	"drawPolyB"
+				del 1
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				put	0,			-(_rsrThk + _nosLth) + uprBrkLct - _offCut_In,	1,
+					-stgWdt,	-(_rsrThk + _nosLth) + uprBrkLct - _offCut_Out,	1,
+					-stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1,				1
+					
+
+				if	landLth_L < stgWdt	then
+					put	-stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out,	1,
+						-landLth_L,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out,	1,
+						-landLth_L,	stepDpt*(nStep_1 - 1) + strOff_1,							1
+				endif
+
+				put	0,	stepDpt*(nStep_1 - 1) + strOff_1,				1,
+					0,	-(_rsrThk + _nosLth) + uprBrkLct - _offCut_In,	1
+
+				gosub	"drawPolyB"
+
+				_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+				_yPosLine = -yPosStg_1 + _zPosTop/tan(_aStr_1)
+				add2	0,	_yPosLine
+					if	_yPosLine > -(_rsrThk + _nosLth) + uprBrkLct - _offCut_In	then
+						line2		0,	0,	-stgWdt,	0
+						hotline2	0,	0,	-stgWdt,	0,	unID	:	unID = unID + 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				add2	strWdt_1,	0
+					put	0,		-(_rsrThk + _nosLth) + uprBrkLct + _offCut_In,	1,
+						stgWdt,	-(_rsrThk + _nosLth) + uprBrkLct + _offCut_Out,	1,
+						stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1,				1,
+						0,		stepDpt*(nStep_1 - 1) + strOff_1,				1,
+						0,		-(_rsrThk + _nosLth) + uprBrkLct + _offCut_In,	1
+
+					gosub	"drawPolyB"
+
+					_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+					_yPosLine = -yPosStg_1 + _zPosTop/tan(_aStr_1)
+					add2	0,	_yPosLine
+						if	_yPosLine > -(_rsrThk + _nosLth) + uprBrkLct + _offCut_Out	then
+							line2		0,	0,	stgWdt,	0
+							hotline2	0,	0,	stgWdt,	0,	unID	:	unID = unID + 1
+						endif
+					del 1
+				del 1
+
+				!	3rd, 4th, 5th, 6th
+				gosub	"commonStg_U_A"
+			endif
+		endif
+	endif
+
+	!	구조
+	!-----------------------------------------------------------------------------------------------
+	if	iPlanView = VIEW_S	then
+		pen		penSym
+		fill	64
+
+		!	변수 정의
+		!-----------------------------------------------------------------------------------------------
+		symSize = symSize*GLOB_SCALE
+		_offCut_Center = (strWdt_1/2 + stgWdt/2)*tan(aBrk)
+
+		define style	"fontStyle_Guide"	stFontType,	textSize,	8,	0
+		style	"fontStyle_Guide"
+
+		!	I형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_I	then
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E) - symOff[_idx][2]
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E) - symOff[_idx][2]
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+			endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(wrkBrkLct - _offCut_Center)
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(wrkBrkLct - _offCut_Center)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(wrkBrkLct + _offCut_Center)
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(wrkBrkLct + _offCut_Center)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	uprBrkLct - _offCut_Center,	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E) - symOff[_idx][2]
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	uprBrkLct - _offCut_Center + ((stepDpt*(nStep_1 - 1) + stepDpt_E) - (uprBrkLct - _offCut_Center))/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	uprBrkLct + _offCut_Center,	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E) - symOff[_idx][2]
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + stepDpt_E)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	uprBrkLct + _offCut_Center + ((stepDpt*(nStep_1 - 1) + stepDpt_E) - (uprBrkLct + _offCut_Center))/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+			endif
+		endif
+
+		!	L형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_L	then
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt) - symOff[_idx][2]
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt) - symOff[_idx][2]
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	3rd, 4th, 5th, 6th
+				gosub	"commonStg_L_S"
+			endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(wrkBrkLct - _offCut_Center)
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(wrkBrkLct - _offCut_Center)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(wrkBrkLct + _offCut_Center)
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(wrkBrkLct + _offCut_Center)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	uprBrkLct - _offCut_Center,	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt) - symOff[_idx][2]
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	uprBrkLct - _offCut_Center + ((stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt) - (uprBrkLct - _offCut_Center))/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	uprBrkLct + _offCut_Center,	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt) - symOff[_idx][2]
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	uprBrkLct + _offCut_Center + ((stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt) - (uprBrkLct + _offCut_Center))/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	3rd, 4th, 5th, 6th
+				gosub	"commonStg_L_S"
+			endif
+		endif
+
+		!	U형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_U	then
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+			if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT) | (iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out) - symOff[_idx][2]
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_In) - symOff[_idx][2]
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_In)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_In)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	3rd, 4th, 5th, 6th
+				gosub	"commonStg_U_S"
+			endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+			!	Current Story
+			if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(wrkBrkLct - _offCut_Center)
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(wrkBrkLct - _offCut_Center)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	symOff[_idx][1],	0,	(wrkBrkLct + _offCut_Center)
+
+					!	Symbol_Start
+					_iAttach = iAttach[_idx][1]
+					add2	0,	symOff[_idx][1]
+						gosub	"drawSymbol"
+					del 1
+
+						!	Hotspot	: symOff[_idx][1]
+						gosub	"symHotspot_S"
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	(wrkBrkLct + _offCut_Center)/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+			endif
+
+			!	Upper Story
+			if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+				!	1st Stringer
+				_idx = 1
+				add2	-stgWdt/2,	0
+					!	Line
+					line2	0,	uprBrkLct - _offCut_Center,	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out) - symOff[_idx][2]
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	uprBrkLct - _offCut_Center + ((stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out) - (uprBrkLct - _offCut_Center))/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	2nd Stringer
+				_idx = 2
+				add2	strWdt_1 + stgWdt/2,	0
+					!	Line
+					line2	0,	uprBrkLct + _offCut_Center,	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out) - symOff[_idx][2]
+
+					!	Symbol_End
+					_iAttach = iAttach[_idx][2]
+					add2	0,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out)
+						mul2	1,	-1
+							add2	0,	symOff[_idx][2]
+								gosub	"drawSymbol"
+							del 1
+
+							!	Hotspot : symOff[_idx][2]
+							gosub	"symHotspot_E"
+						del 1
+					del 1
+
+					!	Guide Text
+					if	bGuide	then
+						add2	0,	uprBrkLct + _offCut_Center + ((stepDpt*(nStep_1 - 1) + strOff_1 + landDpt - endOff_Out) - (uprBrkLct + _offCut_Center))/2
+							rot2	90
+								text2	0,	0,	_idx
+							del 1
+						del 1
+					endif
+				del 1
+
+				!	3rd, 4th, 5th, 6th
+				gosub	"commonStg_U_S"
+			endif
+		endif
+	endif
+
+!-----------------------------------------------------------------------------------------------
+!	화살표 & 텍스트(Arrow & Text)
+!-----------------------------------------------------------------------------------------------
+pen	penEtc
+
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+	_arrowHgt = 0.040
+	_rCircle = 0.075
+
+	define style	"fontStyle"	stFontType,	textSize,	8,	0
+	style	"fontStyle"
+
+	r = request("Height_of_style",	"fontStyle",	_textHgt,	_descent,	_leading)
+	adjustY = textSize/2 + _descent + _leading
+	adjustY = adjustY/1000*GLOB_SCALE
+
+	!	I형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_I	then
+		add2	strWdt_1/2,	-(_rsrThk + _nosLth)
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+				!	Current Story
+				if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT)	then
+					!	Arrow & Line
+					circle2	0,	0,	_rCircle
+					line2	0,	0,	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth - _arrowHgt
+
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth - _arrowHgt
+						gosub	"drawArrow"
+					del 1
+
+					!	Text
+					gosub	"textUP"
+				endif
+
+				!	Upper Story
+				if	(iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+					!	Arrow & Line
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth
+						mul2	1,	-1
+							circle2	0,	0,	_rCircle
+							line2	0,	0,	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth - _arrowHgt
+
+							add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth - _arrowHgt
+								gosub	"drawArrow"
+							del 1
+						del 1
+					del 1
+
+					!	Text
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth
+						gosub	"textDN_I"
+					del 1
+				endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+				!	Current Story
+				if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+					!	Arrow & Line
+					circle2	0,	0,	_rCircle
+					line2	0,	0,	0,	wrkBrkLct - (_brkHgt + _arrowHgt*2)
+
+					add2	0,	wrkBrkLct - (_brkHgt + _arrowHgt*2)
+						gosub	"drawArrow"
+					del 1
+
+					!	Text
+					gosub	"textUP"
+				endif
+
+				!	Upper Story
+				if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+					!	Arrow & Line
+					add2	0,	uprBrkLct + (_brkHgt + _arrowHgt*2)
+						mul2	1,	-1
+							gosub	"drawArrow"
+						del 1
+					del 1
+
+					line2	0,	uprBrkLct + (_brkHgt + _arrowHgt*2),	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth
+						circle2	0,	0,	_rCircle
+					del 1
+
+					!	Text
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + _endLth
+						gosub	"textDN_I"
+					del 1
+				endif
+		del 1
+	endif
+
+	!	L형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_L	then
+		add2	strWdt_1/2,	-(_rsrThk + _nosLth)
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+				!	Current Story
+				if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT)	then
+					!	Arrow & Line
+					circle2	0,	0,	_rCircle
+					line2	0,	0,	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+						line2	0,	0,	strWdt_1/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth - _arrowHgt,	0
+
+						add2	strWdt_1/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth - _arrowHgt,	0
+							rot2	-90
+								gosub	"drawArrow"
+							del 1
+						del 1
+					del 1
+
+					!	Text
+					gosub	"textUP"
+				endif
+
+				!	Upper Story
+				if	(iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+					!	Arrow & Line
+					add2	0,	_arrowHgt
+						mul2	1,	-1
+							gosub	"drawArrow"
+						del 1
+					del 1
+
+					line2	0,	_arrowHgt,	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+						line2	0,	0,	strWdt_1/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	0
+
+						add2	strWdt_1/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	0
+							circle2	0,	0,	_rCircle
+						del 1
+					del 1
+
+					!	Text
+					add2	strWdt_1/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+						gosub	"textDN_L"
+					del 1
+				endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+				!	Current Story
+				if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+					!	Arrow & Line
+					circle2	0,	0,	_rCircle
+					line2	0,	0,	0,	wrkBrkLct - (_brkHgt + _arrowHgt*2)
+
+					add2	0,	wrkBrkLct - (_brkHgt + _arrowHgt*2)
+						gosub	"drawArrow"
+					del 1
+
+					!	Text
+					gosub	"textUP"
+				endif
+
+				!	Upper Story
+				if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+					!	Arrow & Line
+					add2	0,	uprBrkLct + (_brkHgt + _arrowHgt*2)
+						mul2	1,	-1
+							gosub	"drawArrow"
+						del 1
+					del 1
+
+					line2	0,	uprBrkLct + (_brkHgt + _arrowHgt*2),	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+						line2	0,	0,	strWdt_1/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	0
+
+						add2	strWdt_1/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	0
+							circle2	0,	0,	_rCircle
+						del 1
+					del 1
+
+					!	Text
+					add2	strWdt_1/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+						gosub	"textDN_L"
+					del 1
+				endif
+		del 1
+	endif
+
+	!	U형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_U	then
+		add2	strWdt_1/2,	-(_rsrThk + _nosLth)
+			!	Entire
+			!-----------------------------------------------------------------------------------------------
+				!	Current Story
+				if	(iWrkFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_CURRENT)	then
+					!	Arrow & Line
+					circle2	0,	0,	_rCircle
+					line2	0,	0,	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + landDpt/2
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + landDpt/2
+						line2	0,	0,	strWdt_1/2 + strDist + strWdt_2/2,	0
+
+						add2	strWdt_1/2 + strDist + strWdt_2/2,	0
+							line2	0,	0,	0,	-(landDpt/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth - _arrowHgt)
+
+							add2	0,	-(landDpt/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth - _arrowHgt)
+								mul2	1,	-1
+									gosub	"drawArrow"
+								del 1
+							del 1
+						del 1
+					del 1
+
+					!	Text
+					gosub	"textUP"
+				endif
+
+				!	Upper Story
+				if	(iUprFlr = PLANVIEW_ENTIRE & iStoryValue = STORY_UPPER)	then
+					!	Arrow & Line
+					add2	0,	_arrowHgt
+						mul2	1,	-1
+							gosub	"drawArrow"
+						del 1
+					del 1
+
+					line2	0,	_arrowHgt,	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + landDpt/2
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + landDpt/2
+						line2	0,	0,	strWdt_1/2 + strDist + strWdt_2/2,	0
+
+						add2	strWdt_1/2 + strDist + strWdt_2/2,	0
+							line2	0,	0,	0,	-(landDpt/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth)
+
+							add2	0,	-(landDpt/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth)
+								circle2	0,	0,	_rCircle
+							del 1
+						del 1
+					del 1
+
+					!	Text
+					add2	strWdt_1/2 + strDist + strWdt_2/2,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1) + _endLth)
+						gosub	"textDN_U"
+					del 1
+				endif
+
+			!	Cut
+			!-----------------------------------------------------------------------------------------------
+				!	Current Story
+				if	(iWrkFlr = PLANVIEW_CUT & iStoryValue = STORY_CURRENT)	then
+					!	Arrow & Line
+					circle2	0,	0,	_rCircle
+					line2	0,	0,	0,	wrkBrkLct - (_brkHgt + _arrowHgt*2)
+
+					add2	0,	wrkBrkLct - (_brkHgt + _arrowHgt*2)
+						gosub	"drawArrow"
+					del 1
+
+					!	Text
+					gosub	"textUP"
+				endif
+
+				!	Upper Story
+				if	(iUprFlr = PLANVIEW_CUT & iStoryValue = STORY_UPPER)	then
+					!	Arrow & Line
+					add2	0,	uprBrkLct + (_brkHgt + _arrowHgt*2)
+						mul2	1,	-1
+							gosub	"drawArrow"
+						del 1
+					del 1
+
+					line2	0,	uprBrkLct + (_brkHgt + _arrowHgt*2),	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + landDpt/2
+					add2	0,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + landDpt/2
+						line2	0,	0,	strWdt_1/2 + strDist + strWdt_2/2,	0
+
+						add2	strWdt_1/2 + strDist + strWdt_2/2,	0
+							line2	0,	0,	0,	-(landDpt/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth)
+
+							add2	0,	-(landDpt/2 + strOff_2 + stepDpt*(nStep_2 - 1) + _endLth)
+								circle2	0,	0,	_rCircle
+							del 1
+						del 1
+					del 1
+
+					!	Text
+					add2	strWdt_1/2 + strDist + strWdt_2/2,	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1) + _endLth)
+						gosub	"textDN_U"
+					del 1
+				endif
+		del 1
+	endif
+
+
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+!-----------------------------------------------------------------------------------------------
+"drawPolyB":	!	poly_b + Hotline
+!-----------------------------------------------------------------------------------------------
+	poly2_b	nsp/3,	1+2+4,	0,	0,	use(nsp)
+
+	for	i = 1	to	(nsp/3) - 2
+		hotline2	get(2) + (use(1) - get(1)),	use(2)	: unID = unID + 1
+	next i
+		hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1)-get(1))	: unID = unID + 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"drawBreakLine":	!	Break Line
+!-----------------------------------------------------------------------------------------------
+	if	_bBrk	then
+		add2	0,	_brkLct
+			put	-(strWdt_1/2 + 0.300),	-(strWdt_1/2 + 0.300)*tan(aBrk),
+				-(strWdt_1/2),			-(strWdt_1/2)*tan(aBrk),
+				-_referLth*cos(aBrk),	-_referLth*sin(aBrk),
+				0,						-_brkHgt,
+				0,						0,
+				0,						_brkHgt,
+				_referLth*cos(aBrk),	_referLth*sin(aBrk),
+				strWdt_1/2,				(strWdt_1/2)*tan(aBrk),
+				strWdt_1/2 + 0.300,		(strWdt_1/2 + 0.300)*tan(aBrk)
+
+			poly2	nsp/2,	1,	use(nsp)
+
+			for	i = 1	to	(nsp/2)-2
+				hotline2	get(2),	use(2)	: unID = unID + 1
+			next i
+				hotline2	get(2),	get(2)	: unID = unID + 1
+		del 1
+	endif
+return
+
+!-----------------------------------------------------------------------------------------------
+"drawStep_Cut_Current":	!	Step Line(Cutted) : Current Story
+!-----------------------------------------------------------------------------------------------
+	_nLine_Btm = int((wrkBrkLct - _offCut)/stepDpt)
+	_nLine_Cut = int((wrkBrkLct + _offCut)/stepDpt) - _nLine_Btm
+	_nLine_Upr = (nStep_1 - 1) - (_nLine_Btm + _nLine_Cut)
+
+	!	Uncut
+	for	i = 1	to	_nLine_Btm
+		add2	0,	stepDpt*i
+			line2		0,	0,	strWdt_1,	0
+			hotline2	0,	0,	strWdt_1,	0,	unID	:	unID = unID + 1
+		del 1
+	next	i
+
+	!	Cut
+	for	i = 1	to	_nLine_Cut
+		_yPosLine = stepDpt*_nLine_Btm + stepDpt*i
+		_xPosLine_M = (_yPosLine - (wrkBrkLct - _offCut))/tan(aBrk)
+		_xPosLine_S1 = strWdt_1/2 - (_brkHgt - (wrkBrkLct - _yPosLine))*tan(aBrk)
+		_xPosLine_S2 = strWdt_1/2 + (_brkHgt + (wrkBrkLct - _yPosLine))*tan(aBrk)
+
+		add2	0,	_yPosLine
+			if	_yPosLine <= (wrkBrkLct - _brkHgt)	then
+				line2	_xPosLine_M,	0,	strWdt_1,	0
+
+				hotline2	_xPosLine_M,	0,	strWdt_1,	0,	unID	:	unID = unID + 1
+			endif
+			if	_yPosLine > (wrkBrkLct - _brkHgt) & _yPosLine <= (wrkBrkLct - _referLth*sin(aBrk))	then
+				line2	_xPosLine_M,	0,	_xPosLine_S1,	0
+				line2	strWdt_1/2,		0,	strWdt_1,		0
+
+				hotline2	_xPosLine_M,	0,	_xPosLine_S1,	0,	unID	:	unID = unID + 1
+				hotline2	strWdt_1/2,		0,	strWdt_1,		0,	unID	:	unID = unID + 1
+			endif
+			if	_yPosLine > (wrkBrkLct - _referLth*sin(aBrk)) & _yPosLine <= (wrkBrkLct + _referLth*sin(aBrk))	then
+				line2	strWdt_1/2,	0,	strWdt_1,	0
+
+				hotline2	strWdt_1/2,		0,	strWdt_1,		0,	unID	:	unID = unID + 1
+			endif
+			if	_yPosLine > (wrkBrkLct + _referLth*sin(aBrk)) & _yPosLine <= (wrkBrkLct + _brkHgt)	then
+				line2	strWdt_1/2,		0,	_xPosLine_S2,	0
+				line2	_xPosLine_M,	0,	strWdt_1,		0
+
+				hotline2	strWdt_1/2,		0,	_xPosLine_S2,	0,	unID	:	unID = unID + 1
+				hotline2	_xPosLine_M,	0,	strWdt_1,		0,	unID	:	unID = unID + 1
+			endif
+			if	_yPosLine > (wrkBrkLct + _brkHgt)	then
+				line2	_xPosLine_M,	0,	strWdt_1,	0
+
+				hotline2	_xPosLine_M,	0,	strWdt_1,	0,	unID	:	unID = unID + 1
+			endif
+		del 1
+	next	i
+return
+
+!-----------------------------------------------------------------------------------------------
+"drawStep_Cut_Upper":	!	Step Line(Cutted) : Upper Story
+!-----------------------------------------------------------------------------------------------
+	_nLine_Btm = int((uprBrkLct - _offCut)/stepDpt)
+	_nLine_Cut = int((uprBrkLct + _offCut)/stepDpt) - _nLine_Btm
+	_nLine_Upr = (nStep_1 - 1) - (_nLine_Btm + _nLine_Cut)
+
+	!	Cut
+	for	i = 1	to	_nLine_Cut
+		_yPosLine = stepDpt*_nLine_Btm + stepDpt*i
+		_xPosLine_M = (_yPosLine - (uprBrkLct - _offCut))/tan(aBrk)
+		_xPosLine_S1 = strWdt_1/2 - (_brkHgt - (uprBrkLct - _yPosLine))*tan(aBrk)
+		_xPosLine_S2 = strWdt_1/2 + (_brkHgt + (uprBrkLct - _yPosLine))*tan(aBrk)
+
+		add2	0,	_yPosLine
+			if	_yPosLine <= (uprBrkLct - _brkHgt)	then
+				line2	0,	0,	_xPosLine_M,	0
+
+				hotline2	0,	0,	_xPosLine_M,	0,	unID	:	unID = unID + 1
+			endif
+			if	_yPosLine > (uprBrkLct - _brkHgt) & _yPosLine <= (uprBrkLct - _referLth*sin(aBrk))	then
+				line2	0,				0,	_xPosLine_M,	0
+				line2	_xPosLine_S1,	0,	strWdt_1/2,		0
+
+				hotline2	0,				0,	_xPosLine_M,	0,	unID	:	unID = unID + 1
+				hotline2	_xPosLine_S1,	0,	strWdt_1/2,		0,	unID	:	unID = unID + 1
+			endif
+			if	_yPosLine > (uprBrkLct - _referLth*sin(aBrk)) & _yPosLine <= (uprBrkLct + _referLth*sin(aBrk))	then
+				line2	0,	0,	strWdt_1/2,	0
+
+				hotline2	0,	0,	strWdt_1/2,	0,	unID	:	unID = unID + 1
+			endif
+			if	_yPosLine > (uprBrkLct + _referLth*sin(aBrk)) & _yPosLine <= (uprBrkLct + _brkHgt)	then
+				line2	0,				0,	strWdt_1/2,		0
+				line2	_xPosLine_S2,	0,	_xPosLine_M,	0
+
+				hotline2	0,				0,	strWdt_1/2,		0,	unID	:	unID = unID + 1
+				hotline2	_xPosLine_S2,	0,	_xPosLine_M,	0,	unID	:	unID = unID + 1
+			endif
+			if	_yPosLine > (uprBrkLct + _brkHgt)	then
+				line2	0,	0,	_xPosLine_M,	0
+
+				hotline2	0,	0,	_xPosLine_M,	0,	unID	:	unID = unID + 1
+			endif
+		del 1
+	next	i
+
+	!	Uncut
+	add2	0,	stepDpt*(_nLine_Btm + _nLine_Cut)
+		for	i = 1	to	_nLine_Upr
+			add2	0,	stepDpt*i
+				line2		0,	0,	strWdt_1,	0
+				hotline2	0,	0,	strWdt_1,	0,	unID	:	unID = unID + 1
+			del 1
+		next	i
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"drawStep_2nd_L":	!	Step Line(2nd) : L Shape
+!-----------------------------------------------------------------------------------------------
+	add2	strWdt_1 + strOff_2 - (_rsrThk + _nosLth),	(_rsrThk + _nosLth) + stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2
+		rot2	-90
+			for	i = 1	to	nStep_2
+				add2	0,	stepDpt*(i - 1)
+					line2		0,	0,	strWdt_2,	0
+					hotline2	0,	0,	strWdt_2,	0,	unID	:	unID = unID + 1
+				del 1
+			next	i
+		del 1
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"drawStep_2nd_U":	!	Step Line(2nd) : U Shape
+!-----------------------------------------------------------------------------------------------
+	add2	strWdt_1 + strDist + strWdt_2,	(_rsrThk + _nosLth)*2 + stepDpt*(nStep_1 - 1) + strOff_1 - strOff_2
+		rot2	-180
+			for	i = 1	to	nStep_2
+				add2	0,	stepDpt*(i - 1)
+					line2		0,	0,	strWdt_2,	0
+					hotline2	0,	0,	strWdt_2,	0,	unID	:	unID = unID + 1
+				del 1
+			next	i
+		del 1
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"drawArrow":	!	Arrow
+!-----------------------------------------------------------------------------------------------
+	put	0,		0,
+		0.100,	-0.060,
+		0.120,	-0.030,
+		0,		0.040,
+		-0.120,	-0.030,
+		-0.100,	-0.060,
+		0,		0
+
+	poly2	nsp/2,	1,	use(nsp)
+
+	for	i = 1	to	(nsp/2)-2
+		hotline2	get(2),	use(2)	: unID = unID + 1
+	next i
+		hotline2	get(2),	get(2)	: unID = unID + 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"textUP":
+!-----------------------------------------------------------------------------------------------
+	pen	penText
+	add2	0,	-wrkTxtLct
+		text2	0,	-adjustY,	"UP"
+	del 1
+
+		!	Hotspot : wrkTxTLct
+		hotspot2	0,	0,			unID,	wrkTxtLct,	1+128	:	unID = unID + 1
+		hotspot2	0,	1,			unID,	wrkTxtLct,	3		:	unID = unID + 1
+		hotspot2	0,	-wrkTxtLct,	unID,	wrkTxtLct,	2		:	unID = unID + 1
+	pen	penEtc
+return
+
+!-----------------------------------------------------------------------------------------------
+"textDN_I":
+!-----------------------------------------------------------------------------------------------
+	pen	penText
+	add2	0,	uprTxtLct
+		text2	0,	-adjustY,	"DN"
+	del 1
+
+	!	Hotspot : uprTxtLct
+	hotspot2	0,	0,			unID,	uprTxtLct,	1+128	:	unID = unID + 1
+	hotspot2	0,	-1,			unID,	uprTxtLct,	3		:	unID = unID + 1
+	hotspot2	0,	uprTxtLct,	unID,	uprTxtLct,	2		:	unID = unID + 1
+	pen	penEtc
+return
+
+!-----------------------------------------------------------------------------------------------
+"textDN_U":
+!-----------------------------------------------------------------------------------------------
+	pen	penText
+	add2	0,	-uprTxtLct
+		text2	0,	-adjustY,	"DN"
+	del 1
+
+	!	Hotspot : uprTxtLct
+	hotspot2	0,	0,			unID,	uprTxtLct,	1+128	:	unID = unID + 1
+	hotspot2	0,	1,			unID,	uprTxtLct,	3		:	unID = unID + 1
+	hotspot2	0,	-uprTxtLct,	unID,	uprTxtLct,	2		:	unID = unID + 1
+	pen	penEtc
+return
+
+!-----------------------------------------------------------------------------------------------
+"textDN_L":
+!-----------------------------------------------------------------------------------------------
+	pen	penText
+	add2	uprTxtLct,	0
+		rot2	90
+			text2	0,	-adjustY,	"DN"
+		del 1
+	del 1
+
+	!	Hotspot : uprTxtLct
+	hotspot2	0,			0,	unID,	uprTxtLct,	1+128	:	unID = unID + 1
+	hotspot2	-1,			0,	unID,	uprTxtLct,	3		:	unID = unID + 1
+	hotspot2	uprTxtLct,	0,	unID,	uprTxtLct,	2		:	unID = unID + 1
+	pen	penEtc
+return
+
+!-----------------------------------------------------------------------------------------------
+"strHotspot_I":
+!-----------------------------------------------------------------------------------------------
+	add2	strWdt_1/2, stepDpt*(nStep_1 - 1)
+		if	iPlanView = VIEW_A	then
+			hotspot2	0,	0,			unID,	trdDpt_E,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	trdDpt_E,	3		:	unID = unID + 1
+			hotspot2	0,	trdDpt_E,	unID,	trdDpt_E,	2		:	unID = unID + 1
+		else
+			hotspot2	0,	0,			unID,	stepDpt_E,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	stepDpt_E,	3		:	unID = unID + 1
+			hotspot2	0,	stepDpt_E,	unID,	stepDpt_E,	2		:	unID = unID + 1
+		endif
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"strHotspot_L":
+!-----------------------------------------------------------------------------------------------
+	add2	strWdt_1,	stepDpt*(nStep_1 - 1)
+		hotspot2	0,	0,			unID,	strOff_1,	1+128	:	unID = unID + 1
+		hotspot2	0,	-1,			unID,	strOff_1,	3		:	unID = unID + 1
+		hotspot2	0,	strOff_1,	unID,	strOff_1,	2		:	unID = unID + 1
+
+		add2	0,	strOff_1
+			hotspot2	0,			0,	unID,	strOff_2,	1+128	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	strOff_2,	3		:	unID = unID + 1
+			hotspot2	strOff_2,	0,	unID,	strOff_2,	2		:	unID = unID + 1
+
+			add2	strOff_2,	0
+				hotspot2	0,	0,			unID,	strWdt_2,	1+256	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	strWdt_2,	3		:	unID = unID + 1
+				hotspot2	0,	strWdt_2,	unID,	strWdt_2,	2		:	unID = unID + 1
+
+				add2	stepDpt*(nStep_2 - 1),	strWdt_2/2
+					if	iPlanView = VIEW_A	then
+						hotspot2	0,			0,	unID,	trdDpt_E,	1+128	:	unID = unID + 1
+						hotspot2	-1,			0,	unID,	trdDpt_E,	3		:	unID = unID + 1
+						hotspot2	trdDpt_E,	0,	unID,	trdDpt_E,	2		:	unID = unID + 1
+					else
+						hotspot2	0,			0,	unID,	stepDpt_E,	1+128	:	unID = unID + 1
+						hotspot2	-1,			0,	unID,	stepDpt_E,	3		:	unID = unID + 1
+						hotspot2	stepDpt_E,	0,	unID,	stepDpt_E,	2		:	unID = unID + 1
+					endif
+				del 1
+			del 1
+		del 1
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"strHotspot_U":
+!-----------------------------------------------------------------------------------------------
+	add2	strWdt_1,	stepDpt*(nStep_1 - 1)
+		hotspot2	0,	0,			unID,	strOff_1,	1+128	:	unID = unID + 1
+		hotspot2	0,	-1,			unID,	strOff_1,	3		:	unID = unID + 1
+		hotspot2	0,	strOff_1,	unID,	strOff_1,	2		:	unID = unID + 1
+
+		add2	0,	strOff_1
+			hotspot2	0,			0,	unID,	strDist,	1+128	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	strDist,	3		:	unID = unID + 1
+			hotspot2	strDist,	0,	unID,	strDist,	2		:	unID = unID + 1
+
+			add2	strDist/2,	0
+				hotspot2	0,	0,			unID,	landDpt,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	landDpt,	3		:	unID = unID + 1
+				hotspot2	0,	landDpt,	unID,	landDpt,	2		:	unID = unID + 1
+			del 1
+
+			add2	strDist,	0
+				hotspot2	0,	0,			unID,	strOff_2,	1+128	:	unID = unID + 1
+				hotspot2	0,	1,			unID,	strOff_2,	3		:	unID = unID + 1
+				hotspot2	0,	-strOff_2,	unID,	strOff_2,	2		:	unID = unID + 1
+
+				add2	strWdt_2/2,	-(strOff_2 + stepDpt*(nStep_2 - 1))
+					if	iPlanView = VIEW_A	then
+						hotspot2	0,	0,			unID,	trdDpt_E,	1+128	:	unID = unID + 1
+						hotspot2	0,	1,			unID,	trdDpt_E,	3		:	unID = unID + 1
+						hotspot2	0,	-trdDpt_E,	unID,	trdDpt_E,	2		:	unID = unID + 1
+					else
+						hotspot2	0,	0,			unID,	stepDpt_E,	1+128	:	unID = unID + 1
+						hotspot2	0,	1,			unID,	stepDpt_E,	3		:	unID = unID + 1
+						hotspot2	0,	-stepDpt_E,	unID,	stepDpt_E,	2		:	unID = unID + 1
+					endif
+				del 1
+
+				add2	0,	-(strOff_2 + stepDpt*(nStep_2 - 1) + _endLth)
+					hotspot2	0,			0,	unID,	strWdt_2,	1+256	:	unID = unID + 1
+					hotspot2	-1,			0,	unID,	strWdt_2,	3		:	unID = unID + 1
+					hotspot2	strWdt_2,	0,	unID,	strWdt_2,	2		:	unID = unID + 1
+				del 1
+			del 1
+		del 1
+	del 1
+
+	add2	0,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt
+		hotspot2	0,			landLth_D,	unID,	landLth_L,	1+128	:	unID = unID + 1
+		hotspot2	1,			landLth_D,	unID,	landLth_L,	3		:	unID = unID + 1
+		hotspot2	-landLth_L,	landLth_D,	unID,	landLth_L,	2		:	unID = unID + 1
+
+		hotspot2	-landLth_L,	0,			unID,	landLth_D,	1+128	:	unID = unID + 1
+		hotspot2	-landLth_L,	-1,			unID,	landLth_D,	3		:	unID = unID + 1
+		hotspot2	-landLth_L,	landLth_D,	unID,	landLth_D,	2		:	unID = unID + 1
+
+		add2	strWdt_1 + strDist + strWdt_2,	0
+			hotspot2	0,			landLth_D,	unID,	landLth_R,	1+128	:	unID = unID + 1
+			hotspot2	-1,			landLth_D,	unID,	landLth_R,	3		:	unID = unID + 1
+			hotspot2	landLth_R,	landLth_D,	unID,	landLth_R,	2		:	unID = unID + 1
+
+			hotspot2	landLth_R,	0,			unID,	landLth_D,	1+128	:	unID = unID + 1
+			hotspot2	landLth_R,	-1,			unID,	landLth_D,	3		:	unID = unID + 1
+			hotspot2	landLth_R,	landLth_D,	unID,	landLth_D,	2		:	unID = unID + 1
+		del 1
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"commonStg_L_A":	!	3,4,5,6 스트링거 건축 표현
+!-----------------------------------------------------------------------------------------------
+	!	3rd Stringer_L
+	add2	0,	stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt
+		put	0,						0,		1,
+			-(stgWdt + addStgLth),	0,		1,
+			-(stgWdt + addStgLth),	stgWdt,	1,
+			0,						stgWdt,	1,
+			0,						0,		1
+
+		gosub	"drawPolyB"
+	del 1
+
+	!	3rd Stringer_R
+	add2	strWdt_1,	stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt
+		put	0,												0,		1,
+			0,												stgWdt,	1,
+			strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E,	stgWdt,	1,
+			strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E,	0,		1,
+			0,												0,		1
+
+		gosub	"drawPolyB"
+
+		!	Line 1
+		add2	strOff_2 - yPosStg_2,	0
+			if	(strOff_2 - yPosStg_2) > eps	then
+				line2		0,	0,	0,	stgWdt
+				hotline2	0,	0,	0,	stgWdt,	unID	:	unID = unID + 1
+			endif
+		del 1
+
+		!	Line 2
+		_bendHgt = stgDpt + stepHgt_2 + stepThk - stgDpt*tan(_aCutStg_B2) + zPosStg_2
+		_zPosTop = stepThk + stepHgt_2*(nStep_2 - 1) + stepHgt_E - _bendHgt
+		_xPosLine = stgDpt + strOff_2 - yPosStg_2 + _zPosTop/tan(_aStr_2) - stgDpt*tan(_aCutStg_T2)
+
+		add2	_xPosLine,	0
+			if	_xPosLine < strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E	then
+				line2		0,	0,	0,	stgWdt
+				hotline2	0,	0,	0,	stgWdt,	unID	:	unID = unID + 1
+			endif
+		del 1
+	del 1
+
+	!	4th Stringer
+	add2	0,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2
+		put	-(stgWdt + addStgLth),										0,		1,
+			-(stgWdt + addStgLth),										stgWdt,	1,
+			strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E,	stgWdt,	1,
+			strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E,	0,		1,
+			-(stgWdt + addStgLth),										0,		1
+
+		gosub	"drawPolyB"
+
+		add2	strWdt_1,	0
+			!	Line 1
+			add2	strOff_2 - yPosStg_2,	0
+				line2		0,	0,	0,	stgWdt
+				hotline2	0,	0,	0,	stgWdt,	unID	:	unID = unID + 1
+			del 1
+
+			!	Line 2
+			_bendHgt = stgDpt + stepHgt_2 + stepThk - stgDpt*tan(_aCutStg_B2) + zPosStg_2
+			_zPosTop = stepThk + stepHgt_2*(nStep_2 - 1) + stepHgt_E - _bendHgt
+			_xPosLine = stgDpt + strOff_2 - yPosStg_2 + _zPosTop/tan(_aStr_2) - stgDpt*tan(_aCutStg_T2)
+
+			add2	_xPosLine,	0
+				if	_xPosLine < strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E	then
+					line2		0,	0,	0,	stgWdt
+					hotline2	0,	0,	0,	stgWdt,	unID	:	unID = unID + 1
+				endif
+			del 1
+		del 1
+	del 1
+
+	!	5th Stringer
+	add2	0,	stepDpt*(nStep_1 - 1) + strOff_1
+		put	0,			0,			1,
+			-stgWdt,	0,			1,
+			-stgWdt,	strWdt_2,	1,
+			0,			strWdt_2,	1,
+			0,			0,			1
+
+		gosub	"drawPolyB"
+	del 1
+
+	!	6th Stringer(계단 밑에 가려서 보이지 않음)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"commonStg_U_A":	!	3,4,5,6 스트링거 건축 표현
+!-----------------------------------------------------------------------------------------------
+	!	3rd Stringer
+	add2	strWdt_1 + strDist + strWdt_2,	stepDpt*(nStep_1 - 1) + strOff_1
+		put	0,		0,													1,
+			0,		-(strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E),	1,
+			stgWdt,	-(strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E),	1,
+			stgWdt,	0,													1
+
+		if	landLth_R < stgWdt	then
+			put	stgWdt,		landDpt - endOff_Out,	1,
+				landLth_R,	landDpt - endOff_Out,	1,
+				landLth_R,	0,						1
+		endif
+
+		put	0,	0,	1
+
+		gosub	"drawPolyB"
+		
+		!	Line 1
+		add2	0,	-(strOff_2 - yPosStg_2)
+			line2		0,	0,	stgWdt,	0
+			hotline2	0,	0,	stgWdt,	0,	unID	:	unID = unID + 1
+		del 1
+
+		!	Line 2
+		_zPosTop = (stepHgt_2*(nStep_2 - 2) + stepHgt_E - zPosStg_2)
+		_yPosLine = -(strOff_2 - yPosStg_2 + _zPosTop/tan(_aStr_2))
+
+		add2	0,	_yPosLine
+			if	_yPosLine > -(strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E)	then
+				line2		0,	0,	stgWdt,	0
+				hotline2	0,	0,	stgWdt,	0,	unID	:	unID = unID + 1
+			endif
+		del 1
+	del 1
+
+	!	4th Stringer
+	add2	strWdt_1 + strDist,	stepDpt*(nStep_1 - 1) + strOff_1
+		put	0,			0,													1,
+			0,			-(strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E),	1,
+			-stgWdt,	-(strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E),	1,
+			-stgWdt,	0,													1,
+			0,			0,													1
+
+		gosub	"drawPolyB"
+		
+		!	Line 1
+		add2	0,	-(strOff_2 - yPosStg_2)
+			line2		0,	0,	-stgWdt,	0
+			hotline2	0,	0,	-stgWdt,	0,	unID	:	unID = unID + 1
+		del 1
+
+		!	Line 2
+		_zPosTop = (stepHgt_2*(nStep_2 - 2) + stepHgt_E - zPosStg_2)
+		_yPosLine = -(strOff_2 - yPosStg_2 + _zPosTop/tan(_aStr_2))
+
+		add2	0,	_yPosLine
+			if	_yPosLine > -(strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E)	then
+				line2		0,	0,	-stgWdt,	0
+				hotline2	0,	0,	-stgWdt,	0,	unID	:	unID = unID + 1
+			endif
+		del 1
+	del 1
+
+	!	5th Stringer(H형강)
+
+	!	6th Stringer
+	_bDraw6th = (strDist > stgWdt*2)
+
+	if	_bDraw6th	then
+		add2	strWdt_1,	stepDpt*(nStep_1 - 1) + strOff_1
+			put	stgWdt,				0,			1,
+				strDist - stgWdt,	0,			1,
+				strDist - stgWdt,	-stgWdt,	1,
+				stgWdt,				-stgWdt,	1,
+				stgWdt,				0,			1
+
+			gosub	"drawPolyB"
+		del 1
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"commonStg_L_S":	!	3,4,5,6 스트링거 구조 표현
+!-----------------------------------------------------------------------------------------------
+	!	3rd	Stringer
+	_idx = 3
+	add2	-(stgWdt + addStgLth),	stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt/2
+		!	Line
+		line2	symOff[_idx][1],	0,	(stgWdt + addStgLth + strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E) - symOff[_idx][2],	0
+
+		!	Symbol_Start
+		_iAttach = iAttach[_idx][1]
+		add2	symOff[_idx][1],	0
+			rot2	-90
+				gosub	"drawSymbol"
+			del 1
+		del 1
+
+			!	Hotspot	: symOff[_idx][1]
+			gosub	"symHotspot_S"
+
+		!	Symbol_End
+		_iAttach = iAttach[_idx][2]
+		add2	(stgWdt + addStgLth + strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E),	0
+			mul2	-1,	1
+				add2	symOff[_idx][2],	0
+					rot2	-90
+						gosub	"drawSymbol"
+					del 1
+				del 1
+
+				!	Hotspot : symOff[_idx][2]
+				gosub	"symHotspot_E"
+			del 1
+		del 1
+
+		!	Guide Text
+		if	bGuide	then
+			add2	(stgWdt + addStgLth + strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E)/2,	0
+				text2	0,	0,	_idx
+			del 1
+		endif
+	del 1
+
+	!	4th	Stringer
+	_idx = 4
+	add2	-(stgWdt + addStgLth),	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2 + stgWdt/2
+		!	Line
+		line2	symOff[_idx][1],	0,	(stgWdt + addStgLth + strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E) - symOff[_idx][2],	0
+
+		!	Symbol_Start
+		_iAttach = iAttach[_idx][1]
+		add2	symOff[_idx][1],	0
+			rot2	-90
+				gosub	"drawSymbol"
+			del 1
+		del 1
+
+			!	Hotspot	: symOff[_idx][1]
+			gosub	"symHotspot_S"
+
+		!	Symbol_End
+		_iAttach = iAttach[_idx][2]
+		add2	(stgWdt + addStgLth + strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E),	0
+			mul2	-1,	1
+				add2	symOff[_idx][2],	0
+					rot2	-90
+						gosub	"drawSymbol"
+					del 1
+				del 1
+
+				!	Hotspot : symOff[_idx][2]
+				gosub	"symHotspot_E"
+			del 1
+		del 1
+
+		!	Guide Text
+		if	bGuide	then
+			add2	(stgWdt + addStgLth + strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E)/2,	0
+				text2	0,	0,	_idx
+			del 1
+		endif
+	del 1
+
+	!	5th Stringer
+	_idx = 5
+	add2	-stgWdt/2,	stepDpt*(nStep_1 - 1) + strOff_1
+		!	Line
+		line2	0,	symOff[_idx][1],	0,	(strWdt_2) - symOff[_idx][2]
+
+		!	Symbol_Start
+		_iAttach = iAttach[_idx][1]
+		add2	0,	symOff[_idx][1]
+			gosub	"drawSymbol"
+		del 1
+
+			!	Hotspot	: symOff[_idx][1]
+			gosub	"symHotspot_S"
+
+		!	Symbol_End
+		_iAttach = iAttach[_idx][2]
+		add2	0,	(strWdt_2)
+			mul2	1,	-1
+				add2	0,	symOff[_idx][2]
+					gosub	"drawSymbol"
+				del 1
+
+				!	Hotspot : symOff[_idx][2]
+				gosub	"symHotspot_E"
+			del 1
+		del 1
+
+		!	Guide Text
+		if	bGuide	then
+			add2	0,	(strWdt_2)/2
+				rot2	90
+					text2	0,	0,	_idx
+				del 1
+			del 1
+		endif
+	del 1
+
+	!	6th Stringer
+	_idx = 6
+	add2	strWdt_1 + stgWdt/2,	stepDpt*(nStep_1 - 1) + strOff_1
+		!	Line
+		line2	0,	symOff[_idx][1],	0,	(strWdt_2) - symOff[_idx][2]
+
+		!	Symbol_Start
+		_iAttach = iAttach[_idx][1]
+		add2	0,	symOff[_idx][1]
+			gosub	"drawSymbol"
+		del 1
+
+			!	Hotspot	: symOff[_idx][1]
+			gosub	"symHotspot_S"
+
+		!	Symbol_End
+		_iAttach = iAttach[_idx][2]
+		add2	0,	(strWdt_2)
+			mul2	1,	-1
+				add2	0,	symOff[_idx][2]
+					gosub	"drawSymbol"
+				del 1
+
+				!	Hotspot : symOff[_idx][2]
+				gosub	"symHotspot_E"
+			del 1
+		del 1
+
+		!	Guide Text
+		if	bGuide	then
+			add2	0,	(strWdt_2)/2
+				rot2	90
+					text2	0,	0,	_idx
+				del 1
+			del 1
+		endif
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"commonStg_U_S":	!	3,4,5,6 스트링거 구조 표현
+!-----------------------------------------------------------------------------------------------
+	!	3rd Stringer
+	_idx = 3
+	add2	strWdt_1 + strDist + strWdt_2 + stgWdt/2,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt)
+		mul2	1,	-1
+			!	Line
+			line2	0,	(endOff_Out) + symOff[_idx][1],	0,	(landDpt + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E) - symOff[_idx][2]
+
+			!	Symbol_Start
+			_iAttach = iAttach[_idx][1]
+			add2	0,	(endOff_Out)
+				add2	0,	symOff[_idx][1]
+					gosub	"drawSymbol"
+				del 1
+
+				!	Hotspot	: symOff[_idx][1]
+				gosub	"symHotspot_S"
+			del 1
+
+			!	Symbol_End
+			_iAttach = iAttach[_idx][2]
+			add2	0,	(landDpt + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E)
+				mul2	1,	-1
+					add2	0,	symOff[_idx][2]
+						gosub	"drawSymbol"
+					del 1
+
+					!	Hotspot : symOff[_idx][2]
+					gosub	"symHotspot_E"
+				del 1
+			del 1
+
+			!	Guide Text
+			if	bGuide	then
+				add2	0,	(landDpt + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E)/2
+					rot2	90
+						text2	0,	0,	_idx
+					del 1
+				del 1
+			endif
+		del 1
+	del 1
+
+	!	4th Stringer
+	_idx = 4
+	add2	strWdt_1 + strDist - stgWdt/2,	(stepDpt*(nStep_1 - 1) + strOff_1 + landDpt)
+		mul2	1,	-1
+			!	Line
+			line2	0,	(endOff_In) + symOff[_idx][1],	0,	(landDpt + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E) - symOff[_idx][2]
+
+			!	Symbol_Start
+			_iAttach = iAttach[_idx][1]
+			add2	0,	(endOff_In)
+				add2	0,	symOff[_idx][1]
+					gosub	"drawSymbol"
+				del 1
+
+				!	Hotspot	: symOff[_idx][1]
+				gosub	"symHotspot_S"
+			del 1
+
+			!	Symbol_End
+			_iAttach = iAttach[_idx][2]
+			add2	0,	(landDpt + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E)
+				mul2	1,	-1
+					add2	0,	symOff[_idx][2]
+						gosub	"drawSymbol"
+					del 1
+
+					!	Hotspot : symOff[_idx][2]
+					gosub	"symHotspot_E"
+				del 1
+			del 1
+
+			!	Guide Text
+			if	bGuide	then
+				add2	0,	(landDpt + strOff_2 + stepDpt*(nStep_2 - 1) + stepDpt_E)/2
+					rot2	90
+						text2	0,	0,	_idx
+					del 1
+				del 1
+			endif
+		del 1
+	del 1
+
+	!	5th Stringer(H형강)
+
+	!	6th Stringer
+	_idx = 6
+	_bDraw6th = (strDist > stgWdt*2)
+
+	if	_bDraw6th	then
+		add2	strWdt_1,	stepDpt*(nStep_1 - 1) + strOff_1 - stgWdt/2
+			line2	stgWdt + symOff[_idx][1],	0,	(strDist - stgWdt) - symOff[_idx][2],	0
+
+			!	Symbol_Start
+			_iAttach = iAttach[_idx][1]
+			add2	stgWdt,	0
+				add2	symOff[_idx][1],	0
+					rot2	-90
+						gosub	"drawSymbol"
+					del 1
+				del 1
+
+				!	Hotspot : symOff[_idx][1]
+				gosub	"symHotspot_S"
+			del 1
+
+			!	Symbol_End
+			_iAttach = iAttach[_idx][2]
+			add2	(strDist - stgWdt),	0
+				mul2	-1,	1
+					add2	symOff[_idx][2],	0
+						rot2	-90
+							gosub	"drawSymbol"
+						del 1
+					del 1
+
+					!	Hotspot : symOff[_idx][2]
+					gosub	"symHotspot_E"
+				del 1
+			del 1
+
+			!	Guide Text
+			if	bGuide	then
+				add2	strDist/2,	0
+					text2	0,	0,	_idx
+				del 1
+			endif
+		del 1
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"drawSymbol":	!	심볼 그리기
+!-----------------------------------------------------------------------------------------------
+	if	_iAttach = ATTACH_MOMENT	then
+		put	-symSize/2,	0,
+			0,			(symSize/2)*tan(60),
+			symSize/2,	0
+
+		poly2	nsp/2,	1+2+4,	get(nsp)
+	endif
+	if	_iAttach = ATTACH_PIN	then
+		line2	-symSize/2,	0,	symSize/2,	0
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"symHotspot_S":	!	심볼 오프셋 시작점 값
+!-----------------------------------------------------------------------------------------------
+	hotspot2	0,	0,					unID,	symOff[_idx][1],	1+128	:	unID = unID + 1
+	hotspot2	0,	-1,					unID,	symOff[_idx][1],	3		:	unID = unID + 1
+	hotspot2	0,	symOff[_idx][1],	unID,	symOff[_idx][1],	2		:	unID = unID + 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"symHotspot_E":	!	심볼 오프셋 끝점 값
+!-----------------------------------------------------------------------------------------------
+	hotspot2	0,	0,					unID,	symOff[_idx][2],	1+128	:	unID = unID + 1
+	hotspot2	0,	-1,					unID,	symOff[_idx][2],	3		:	unID = unID + 1
+	hotspot2	0,	symOff[_idx][2],	unID,	symOff[_idx][2],	2		:	unID = unID + 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"guideLand":	!	Guide Line(계단참)
+!-----------------------------------------------------------------------------------------------
+	if	bGuide	then
+		pen			253
+		line_type	"short-dashsed"
+
+			put	0,								stepDpt*(nStep_1 - 1) + strOff_1,			1,
+				0,								stepDpt*(nStep_1 - 1) + strOff_1 + landDpt,	1,
+				strWdt_1 + strDist + strWdt_2,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt,	1,
+				strWdt_1 + strDist + strWdt_2,	stepDpt*(nStep_1 - 1) + strOff_1,			1
+
+			poly2_	nsp/3,	1,	get(nsp)
+
+		line_type	1
+
+			_referLth = 0.002
+			add2	0,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt
+				hotspot2	0,	0,				unID,	endOff_Out,	1+128	:	unID = unID + 1
+				hotspot2	0,	1,				unID,	endOff_Out,	3		:	unID = unID + 1
+				hotspot2	0,	-endOff_Out,	unID,	endOff_Out,	2		:	unID = unID + 1
+
+				hotspot2	strWdt_1 + strDist + strWdt_2,	0,				unID,	endOff_Out,	1+128	:	unID = unID + 1
+				hotspot2	strWdt_1 + strDist + strWdt_2,	1,				unID,	endOff_Out,	3		:	unID = unID + 1
+				hotspot2	strWdt_1 + strDist + strWdt_2,	-endOff_Out,	unID,	endOff_Out,	2		:	unID = unID + 1
+
+				add2	0,	-endOff_Out
+					circle2	0,	0,	0.01
+					circle2	0,	0,	0.02
+
+					circle2	strWdt_1 + strDist + strWdt_2,	0,	0.01
+					circle2	strWdt_1 + strDist + strWdt_2,	0,	0.02
+				del 1
+
+				add2	strWdt_1 + strDist/2 + _referLth,	0
+					hotspot2	0,	0,			unID,	endOff_In,	1+128	:	unID = unID + 1
+					hotspot2	0,	1,			unID,	endOff_In,	3		:	unID = unID + 1
+					hotspot2	0,	-endOff_In,	unID,	endOff_In,	2		:	unID = unID + 1
+
+					add2	0,	-endOff_In
+						circle2	0,	0,	0.01
+						circle2	0,	0,	0.02
+					del 1
+				del 1
+			del 1
+
+		pen	penStr
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"guideAddStg":	!	Guide Line(L형 추가 스트링거 길이)
+!-----------------------------------------------------------------------------------------------
+	if	bGuide	then
+		pen	253
+		add2	-stgWdt,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2
+			hotspot2	0,			0,	unID,	addStgLth,	1+128	:	unID = unID + 1
+			hotspot2	1,			0,	unID,	addStgLth,	3		:	unID = unID + 1
+			hotspot2	-addStgLth,	0,	unID,	addStgLth,	2		:	unID = unID + 1
+
+			add2	-addStgLth,	0
+				circle2	0,	0,	0.01
+				circle2	0,	0,	0.02
+			del 1
+		del 1
+		pen	penStr
+	endif
+
+return

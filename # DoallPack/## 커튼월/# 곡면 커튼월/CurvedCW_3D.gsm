@@ -1,0 +1,4895 @@
+!===============================================================================================
+!	곡면 커튼월
+!===============================================================================================
+
+!	W.P
+hotspot	0,	0,	0
+
+!	Resolution
+resol	12
+
+!	멀리언 생성 방향
+if	iMlnDirect = MlnDirect_RightHand	then	muly	-1
+
+!	전체회전
+if	iDivision = Division_Length	then
+	if	iMlnDirect = MlnDirect_LeftHand	then
+		rotz	aRotate
+	endif
+	if	iMlnDirect = MlnDirect_RightHand	then
+		rotz	-aRotate
+	endif
+endif
+
+!	텍스트 정의
+define style	"fix"	stFontType,	textSize,	5,	0
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+!	커튼월 곡률 반경
+!-----------------------------------------------------------------------------------------------
+hotspot	0,		0,	0,	unID,	distWP,	1+128	:	unID = unID + 1
+hotspot	-1,		0,	0,	unID,	distWP,	3		:	unID = unID + 1
+hotspot	distWP,	0,	0,	unID,	distWP,	2		:	unID = unID + 1
+
+rotz	totalAngle
+	hotspot	0,		0,	0,	unID,	distWP,	1+128	:	unID = unID + 1
+	hotspot	-1,		0,	0,	unID,	distWP,	3		:	unID = unID + 1
+	hotspot	distWP,	0,	0,	unID,	distWP,	2		:	unID = unID + 1
+del 1
+
+!	커튼월 생성 각도
+!-----------------------------------------------------------------------------------------------
+if	iDivision = Division_Angle	then
+	if	iDirect = Direct_Out	then	_offsetX = 0.050
+	if	iDirect = Direct_In		then	_offsetX = -0.050
+
+	hotspot	(distWP + _offsetX),					0,										0,	unID,	totalAngle,	4+256	:	unID = unID + 1
+	hotspot	(distWP + _offsetX)*cos(totalAngle),	(distWP + _offsetX)*sin(totalAngle),	0,	unID,	totalAngle,	5		:	unID = unID + 1
+	hotspot	0,										0,										0,	unID,	totalAngle,	6		:	unID = unID + 1
+
+	if	not(bEqualAngle)	then
+		for	i = 1	to	nMln
+			hotspot	(distWP + _offsetX),					0,										0,	unID,	eachAngle[i],	4+128	:	unID = unID + 1
+			hotspot	(distWP + _offsetX)*cos(eachAngle[i]),	(distWP + _offsetX)*sin(eachAngle[i]),	0,	unID,	eachAngle[i],	5		:	unID = unID + 1
+			hotspot	0,										0,										0,	unID,	eachAngle[i],	6		:	unID = unID + 1
+		next	i
+	endif
+endif
+
+!	트랜섬 간격
+!-----------------------------------------------------------------------------------------------
+addx	distWP
+	for	i = 1	to	nTrs + 1
+		hotspot	0,	0,	0,			unID,	gapTrs[i],	1+128	:	unID = unID + 1
+		hotspot	0,	0,	-1,			unID,	gapTrs[i],	3		:	unID = unID + 1
+		hotspot	0,	0,	gapTrs[i],	unID,	gapTrs[i],	2		:	unID = unID + 1
+
+		addz	gapTrs[i]
+	next i
+
+	del nTrs + 1
+del 1
+
+rotz	totalAngle
+	addx	distWP
+		for	i = 1	to	nTrs + 1
+			hotspot	0,	0,	0,			unID,	gapTrs[i],	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	gapTrs[i],	3		:	unID = unID + 1
+			hotspot	0,	0,	gapTrs[i],	unID,	gapTrs[i],	2		:	unID = unID + 1
+
+			addz	gapTrs[i]
+		next i
+
+		del nTrs + 1
+	del 1
+del 1
+
+!===============================================================================================
+!	프레임
+!===============================================================================================
+
+!-----------------------------------------------------------------------------------------------
+!	수직프레임
+!-----------------------------------------------------------------------------------------------
+
+!	상/하부 프레임 On/Off에 따른 프레임 높이
+!-----------------------------------------------------------------------------------------------
+_offsetZ = 0
+_frameHgt = ZZYZX
+
+if	not(bCornerB)	then
+	_offsetZ = _offsetZ + frmWdtB
+	_frameHgt = _frameHgt - frmWdtB
+endif
+if	not(bCornerT)	then
+	_offsetZ = _offsetZ
+	_frameHgt = _frameHgt - frmWdtT
+endif
+
+!	수직프레임
+!-----------------------------------------------------------------------------------------------
+group	"vFrames_"
+	!	우측 프레임
+	addx	distWP
+		if	bCornerR	then
+			if	iCornerR = Corner_Boundary	then
+				_iFrame = Frame_Corner
+			endif
+			if	iCornerR = Corner_Mullion	then
+				_iFrame = Frame_Mullion
+			endif
+			if	iCornerR = Corner_Angled	then
+				_iFrame = Frame_Angled
+			endif
+
+			_frmWdt = frmWdtR
+			_gskWdt = gskWdtR
+			if	iDirect = Direct_Out	then
+				_aFrm = -aFrmR
+			else
+				_aFrm = aFrmR
+			endif
+
+			muly	-1
+				gosub	"vFrames"
+			del 1
+		endif
+	del 1
+
+	!	멀리언
+	_iFrame = Frame_Mullion
+	_frmWdt = mlnWdt
+	_gskWdt = mlnGskWdt
+	_aFrm = 0
+
+	if	mlnWdt > eps	then
+		for	i = 1	to	nMln
+			rotz	eachAngle[i]
+				addx	distWP
+					gosub	"vFrames"
+
+					if	bExMln[i]	then
+						addx	frmThk + gskThk
+							gosub	"exFrames"
+						del 1
+					endif
+				del 1
+			del 1
+		next	i
+	endif
+
+	!	좌측 프레임
+	rotz	totalAngle
+		addx	distWP
+			if	bCornerL	then
+				if	iCornerL = Corner_Boundary	then
+					_iFrame = Frame_Corner
+				endif
+				if	iCornerL = Corner_Mullion	then
+					_iFrame = Frame_Mullion
+				endif
+				if	iCornerL = Corner_Angled	then
+					_iFrame = Frame_Angled
+				endif
+
+				_frmWdt = frmWdtL
+				_gskWdt = gskWdtL
+				if	iDirect = Direct_Out	then
+					_aFrm = aFrmL
+				else
+					_aFrm = -aFrmL
+				endif
+
+				gosub	"vFrames"
+			endif
+		del 1
+	del 1
+endgroup
+
+placegroup	"vFrames_"
+
+!-----------------------------------------------------------------------------------------------
+!	수평프레임
+!-----------------------------------------------------------------------------------------------
+
+!	프레임 상태 변수
+!-----------------------------------------------------------------------------------------------
+status_Bottom = 1
+status_Transom = 2
+status_Top = 3
+
+!	수평프레임
+!-----------------------------------------------------------------------------------------------
+group	"hFrames_"
+	!	하부프레임
+	if	bCornerB	then
+		_frmWdt = frmWdtB
+		_status = status_Bottom
+
+		if	iCornerB = Corner_Boundary	then
+			_iFrame = Frame_Corner
+			_gskWdt = (frmWdtB + gskWdtB)/2
+		endif
+		if	iCornerB = Corner_Transom	then
+			_iFrame = Frame_Transom
+			_gskWdt = gskWdtB
+		endif
+
+		gosub	"hFrames"
+	endif
+
+	!	트랜섬
+	_iFrame = Frame_Transom
+	_frmWdt = trsWdt
+	_gskWdt = trsGskWdt
+	_status = status_Transom
+
+	if	trsWdt > eps	then
+		addz	-trsWdt/2
+			for	 i = 1	to	nTrs
+				addz	gapTrs[i]
+
+				gosub	"hFrames"
+
+				if	bExTrs[i]	then
+					gosub	"exFrames"
+				endif
+			next i
+
+			del nTrs
+		del 1
+	endif
+
+	!	상부프레임
+	if	bCornerT	then
+		_frmWdt = frmWdtT
+		_status = status_Top
+
+		if	iCornerT = Corner_Boundary	then
+			_iFrame = Frame_Corner
+			_gskWdt = (frmWdtT + gskWdtT)/2
+		endif
+		if	iCornerT = Corner_Transom	then
+			_iFrame = Frame_Transom
+			_gskWdt = gskWdtT
+		endif
+
+		addz	zzyzx
+			mulz	-1
+				gosub	"hFrames"
+			del 1
+		del 1
+	endif
+endgroup
+
+!	Sub hFrames
+!-----------------------------------------------------------------------------------------------
+group	"sub_hFrames_"
+	!	하부 프레임
+	if	bCornerB	then
+		_frmWdtH = frmWdtB
+		_status = status_Bottom
+
+		!	좌측 프레임
+		if	bCornerL & iCornerL = Corner_Angled	then
+			_frmWdtV = frmWdtL
+			_gskWdtV = gskWdtL
+			_aFrm = aFrmL
+
+			if	iCornerB = Corner_Boundary	then
+				_iFrame = Frame_Corner
+				_gskWdtH = (frmWdtB + gskWdtB)/2
+			endif
+			if	iCornerB = Corner_Transom	then
+				_iFrame = Frame_Transom
+				_gskWdtH = gskWdtB
+			endif
+
+			gosub	"sub_hFrames_L"
+		endif
+
+		!	우측 프레임
+		if	bCornerR & iCornerR = Corner_Angled	then
+			_frmWdtV = frmWdtR
+			_gskWdtV = gskWdtR
+			_aFrm = -aFrmR
+
+			if	iCornerB = Corner_Boundary	then
+				_iFrame = Frame_Corner
+				_gskWdtH = (frmWdtB + gskWdtB)/2
+			endif
+			if	iCornerB = Corner_Transom	then
+				_iFrame = Frame_Transom
+				_gskWdtH = gskWdtB
+			endif
+
+			gosub	"sub_hFrames_R"
+		endif
+	endif
+
+	!	트랜섬
+		!	좌측 프레임
+		if	bCornerL & iCornerL = Corner_Angled	then
+			_iFrame = Frame_Transom
+			_frmWdtH = trsWdt
+			_gskWdtH = trsGskWdt
+			_status = status_Transom
+			_aFrm = aFrmL
+
+			addz	-trsWdt/2
+				for	 i = 1	to	nTrs
+					addz	gapTrs[i]
+
+					gosub	"sub_hFrames_L"
+				next i
+
+				del nTrs
+			del 1
+		endif
+
+		!	우측 프레임
+		if	bCornerR & iCornerR = Corner_Angled	then
+			_iFrame = Frame_Transom
+			_frmWdtH = trsWdt
+			_gskWdtH = trsGskWdt
+			_status = status_Transom
+			_aFrm = -aFrmR
+
+			addz	-trsWdt/2
+				for	 i = 1	to	nTrs
+					addz	gapTrs[i]
+
+					gosub	"sub_hFrames_R"
+				next i
+
+				del nTrs
+			del 1
+		endif
+
+	!	상부프레임
+	if	bCornerT	then
+		_frmWdtH = frmWdtT
+		_status = status_Top
+
+		!	좌측 프레임
+		if	bCornerL & iCornerL = Corner_Angled	then
+			_frmWdtV = frmWdtL
+			_gskWdtV = gskWdtL
+			_aFrm = aFrmL
+
+			if	iCornerT = Corner_Boundary	then
+				_iFrame = Frame_Corner
+				_gskWdtH = (frmWdtT + gskWdtT)/2
+			endif
+			if	iCornerT = Corner_Transom	then
+				_iFrame = Frame_Transom
+				_gskWdtH = gskWdtT
+			endif
+
+			addz	zzyzx
+				mulz	-1
+					gosub	"sub_hFrames_L"
+				del 1
+			del 1
+		endif
+
+		!	우측 프레임
+		if	bCornerR & iCornerR = Corner_Angled	then
+			_frmWdtV = frmWdtR
+			_gskWdtV = gskWdtR
+			_aFrm = -aFrmR
+
+			if	iCornerT = Corner_Boundary	then
+				_iFrame = Frame_Corner
+				_gskWdtH = (frmWdtT + gskWdtT)/2
+			endif
+			if	iCornerT = Corner_Transom	then
+				_iFrame = Frame_Transom
+				_gskWdtH = gskWdtT
+			endif
+
+			addz	zzyzx
+				mulz	-1
+					gosub	"sub_hFrames_R"
+				del 1
+			del 1
+		endif
+	endif
+endgroup
+
+hFrames_Add = addgroup("hFrames_",	"sub_hFrames_")
+hFrames_Cut = subgroup(hFrames_Add,	"vFrames_")
+placegroup	hFrames_Cut
+
+
+!===============================================================================================
+!	패널
+!===============================================================================================
+!	패널 매트릭스
+!-----------------------------------------------------------------------------------------------
+group	"panels_"
+	for	i = 1	to	nMln + 1
+		for	j = 1	to	nTrs + 1
+
+			gosub	"calcHeight"
+
+			!	패널 위치
+			if	j = 1	then
+				addz	(frmWdtB + gskWdtB)/2
+			endif
+			if	j # 1	then
+				addz	trsGskWdt/2
+			endif
+
+				!	문
+				if	not(bDoor[i] & j = 1)	then
+					!	패널 유형
+					if	iPanelType[i][j] = Panel_Fix | iPanelType[i][j] = Panel_Project | \
+						iPanelType[i][j] = Panel_Spandrel | iPanelType[i][j] = Panel_Panel | \
+						iPanelType[i][j] = Panel_Smoke	then	gosub	"Window1"
+					if	iPanelType[i][j] = Panel_Fix2 | iPanelType[i][j] = Panel_Project2	then	gosub	"Window2"
+					!	경기도 신청사 프로젝트용
+					if	iPanelType[i][j] = Panel_Custom1	then	gosub	"Window2"
+					if	iPanelType[i][j] = Panel_Grill	then	gosub	"Grill"
+				endif
+
+			del 1
+
+			addz	gapTrs[j]
+		next	j
+
+		del nTrs + 1
+	next	i
+endgroup
+
+!	고정창(2) 프레임
+!-----------------------------------------------------------------------------------------------
+group	"fix2Frames_"
+	if	mlnWdt > eps	then
+		for	i = 1	to	nMln + 1
+			for	j = 1	to	nTrs + 1
+
+				gosub	"calcHeight"
+
+				!	패널 위치
+				if	j = 1	then
+					addz	(frmWdtB + gskWdtB)/2
+				endif
+				if	j # 1	then
+					addz	trsGskWdt/2
+				endif
+
+					!	문
+					if	not(bDoor[i] & j = 1)	then
+						!	패널 유형
+						if	iPanelType[i][j] = Panel_Fix2 | iPanelType[i][j] = Panel_Project2	then	gosub	"Window2_frame"
+
+						!	경기도 신청사 프로젝트용
+						if	iPanelType[i][j] = Panel_Custom1	then	gosub	"Window2_frame"
+					endif
+
+				del 1
+
+				addz	gapTrs[j]
+			next	j
+
+			del nTrs + 1
+		next	i
+	endif
+endgroup
+
+fix2Frames_Cut = subgroup("fix2Frames_",	"hFrames_")
+
+placegroup	fix2Frames_Cut
+
+!	Sub Panel
+!-----------------------------------------------------------------------------------------------
+group	"sub_panels_"
+	for	i = 1	to	nMln + 1
+		for	j = 1	to	nTrs + 1
+
+			gosub	"calcHeight"
+
+			!	패널 위치
+			if	j = 1	then
+				addz	(frmWdtB + gskWdtB)/2
+			endif
+			if	j # 1	then
+				addz	trsGskWdt/2
+			endif
+
+				!	문
+				if	not(bDoor[i] & j = 1)	then
+					!	패널 유형
+					if	iPanelType[i][j] = Panel_Project | \
+						iPanelType[i][j] = Panel_Spandrel | iPanelType[i][j] = Panel_Panel | \
+						iPanelType[i][j] = Panel_Smoke | iPanelType[i][j] = Panel_Fix | \
+						iPanelType[i][j] = Panel_Fix2 | iPanelType[i][j] = Panel_Project2	then	gosub	"sub_Window1"
+				endif
+
+			del 1
+
+			addz	gapTrs[j]
+		next	j
+
+		del nTrs + 1
+	next	i
+endgroup
+
+panels_Add1 = addgroup("panels_",	"sub_panels_")
+panels_Cut1 = subgroup(panels_Add1,	"fix2Frames_")
+panels_Cut2 = subgroup(panels_Cut1,	"vFrames_")
+panels_Cut3 = subgroup(panels_Cut2,	"hFrames_")
+placegroup	panels_Cut3
+
+!	방충망
+!-----------------------------------------------------------------------------------------------
+
+!	방충망 프레임
+group	"scrFrame_"
+	for	i = 1	to	nMln + 1
+		for	j = 1	to	nTrs + 1
+
+			gosub	"calcHeight"
+
+			!	패널 위치
+			if	j = 1	then
+				addz	(frmWdtB + gskWdtB)/2
+			endif
+			if	j # 1	then
+				addz	trsGskWdt/2
+			endif
+
+				!	문
+				if	not(bDoor[i] & j = 1)	then
+					!	방충망
+					if	bScreen[i][j]	then	gosub	"scrFrame"
+				endif
+
+			del 1
+
+			addz	gapTrs[j]
+		next	j
+
+		del nTrs + 1
+	next	i
+endgroup
+
+!	 방충망 프레임(Sub)
+group	"sub_scrFrame_"
+	for	i = 1	to	nMln + 1
+		for	j = 1	to	nTrs + 1
+
+			_scrThk = 0.050
+
+			gosub	"calcHeight"
+
+			if	iDirect = Direct_Out	then
+				_radSubScr_In = frmThk - _scrThk
+				_radSubScr_Out = frmThk
+			endif
+			if	iDirect = Direct_In		then
+				_radSubScr_In = -(frmThk - _scrThk)
+				_radSubScr_Out = -frmThk
+			endif
+
+			!	패널 위치
+			if	j = 1	then
+				addz	frmWdtB
+			endif
+			if	j # 1	then
+				addz	trsWdt/2
+			endif
+
+			if	not(bDoor[i] & j = 1)	then
+				if	GLOB_VIEW_TYPE = 3	then
+					if	bScreen[1][j]	then
+						if	iCornerL = Frame_Angled	then
+							put	_radSubScr_In,	0,													15,
+								_radSubScr_In,	_radSubScr_In*tan(aFrmL),							15,
+								_radSubScr_Out,	_radSubScr_Out*tan(aFrmL) - (frmWdtL/2)/cos(aFrmL),	15,
+								_radSubScr_Out,	0,													15
+
+							rotz	totalAngle
+								addx	distWP
+									prism_	nsp/3,	_scrHeight,	get(nsp)
+								del 1
+							del 1
+						endif
+					endif
+
+					if	bScreen[nMln + 1][j]	then
+						if	iCornerR = Frame_Angled	then
+							put	_radSubScr_In,	0,														15,
+								_radSubScr_In,	_radSubScr_In*tan(-aFrmR),								15,
+								_radSubScr_Out,	_radSubScr_Out*tan(-aFrmR) - (frmWdtR/2)/cos(-aFrmR),	15,
+								_radSubScr_Out,	0,														15
+
+							muly	-1
+								addx	distWP
+									prism_	nsp/3,	_scrHeight,	get(nsp)
+								del 1
+							del 1
+						endif
+					endif
+				endif
+			endif
+
+			del 1
+
+			addz	gapTrs[j]
+		next	j
+
+		del nTrs + 1
+	next	i
+endgroup
+
+!	개구부(방충망 프레임)
+group	"scrOpening_"
+	for	i = 1	to	nMln + 1
+		for	j = 1	to	nTrs + 1
+
+			gosub	"calcHeight"
+
+			!	패널 위치
+			if	j = 1	then
+				addz	(frmWdtB + gskWdtB)/2
+			endif
+			if	j # 1	then
+				addz	trsGskWdt/2
+			endif
+
+				!	문
+				if	not(bDoor[i] & j = 1)	then
+					!	방충망
+					if	bScreen[i][j]	then	gosub	"scrOpening"
+				endif
+
+			del 1
+
+			addz	gapTrs[j]
+		next	j
+
+		del nTrs + 1
+	next	i
+endgroup
+
+!	방충망
+group	"scrScreen_"
+	for	i = 1	to	nMln + 1
+		for	j = 1	to	nTrs + 1
+
+			gosub	"calcHeight"
+
+			!	패널 위치
+			if	j = 1	then
+				addz	(frmWdtB + gskWdtB)/2
+			endif
+			if	j # 1	then
+				addz	trsGskWdt/2
+			endif
+
+				!	문
+				if	not(bDoor[i] & j = 1)	then
+					!	방충망
+					if	bScreen[i][j]	then	gosub	"scrScreen"
+				endif
+
+			del 1
+
+			addz	gapTrs[j]
+		next	j
+
+		del nTrs + 1
+	next	i
+endgroup
+
+!	프레임 배치
+scrFrame_1 = addgroup("scrFrame_",	"sub_scrFrame_")
+scrFrame_2 = subgroup(scrFrame_1,	"vFrames_")
+scrFrame_3 = subgroup(scrFrame_2,	"scrOpening_")
+placegroup	scrFrame_3
+
+!	망 배치
+scrScreen_1 = subgroup("scrScreen_",	"vFrames_")
+scrScreen_2 = subgroup(scrScreen_1,	scrFrame_3)
+placegroup	scrScreen_2
+
+
+!===============================================================================================
+!	문
+!===============================================================================================
+group	"doorBase"
+	for	i = 1	to	nMln + 1
+		if	bDoor[i]	then
+
+			!	변수 정의
+			!-----------------------------------------------------------------------------------------------
+			if	nMln < eps	then
+				_frameWdt_SP = frmWdtL
+				_frameWdt_EP = frmWdtR
+				_innerAngle = totalAngle
+			else
+				!	프레임
+				if	i = 1	then
+					_frameWdt_SP = frmWdtL
+					_frameWdt_EP = mlnWdt
+				endif
+
+				if	i # 1 & i # (nMln + 1)	then
+					_frameWdt_SP = mlnWdt
+					_frameWdt_EP = mlnWdt
+				endif
+
+				if	i = (nMln + 1)	then
+					_frameWdt_SP = mlnWdt
+					_frameWdt_EP = frmWdtR
+				endif
+
+				!	내부 각도
+				if	i = 1	then
+					_innerAngle = eachAngle[i]
+					_hotspotAngle = 0
+				else
+					_innerAngle = eachAngle[i] - eachAngle[i - 1]
+					_hotspotAngle = eachAngle[i - 1]
+				endif
+			endif
+			_subAngle = 90 - (180 - _innerAngle)/2
+			_aInner = _innerAngle/2
+
+			_iDoorType = iMatrix_Type[i][1]
+			_iOpenDirect = iMatrix_Type[i][2]
+			_iFrameType = iMatrix_Type[i][3]
+			_iSymbol = iMatrix_Type[i][4]
+
+			_doorWdt = Matrix_Length[i][1]
+			_doorHgt = Matrix_Length[i][2]
+			_doorThk = Matrix_Length[i][3]
+			_doorLct = Matrix_Length[i][4]
+			_fixWdtL = Matrix_Length[i][5]
+			_fixWdtR = Matrix_Length[i][6]
+
+			_frameT = Matrix_Frame[i][1]
+			_frameB = Matrix_Frame[i][2]
+			_frameL = Matrix_Frame[i][3]
+			_frameR = Matrix_Frame[i][4]
+
+			_glassHgt = _doorHgt - (_frameB + _frameT)
+
+			!	Fixed Glass(Frame)
+			!-----------------------------------------------------------------------------------------------
+			pen			penFrm3D
+			sect_fill	fillFrm,	backPenFrm,	fillPenFrm,	penFrmSct
+			material	matFrm
+
+				!	커튼월 생성 방향
+				if	iDirect = Direct_Out	then
+					_distWP = distWP + frmThk + gskThk
+					_mul = 1
+				endif
+
+				if	iDirect = Direct_In	then
+					_distWP = distWP - frmThk - gskThk
+					_mul = -1
+				endif
+
+				!	Vertical Frame
+				_transX = 0
+				_rDist_SP = frmThk + gskThk - (_doorLct + (_frameWdt_SP/2)*tan(_aInner)*_mul)
+				_rDist_EP = frmThk + gskThk - (_doorLct + (_frameWdt_EP/2)*tan(_aInner)*_mul)
+				if	_fixWdtL > eps	then
+					_doorWdt = _doorWdt - (_fixWdtL + mlnWdt/2) + ((_frameWdt_SP/2)/cos(_aInner) + _rDist_SP*sin(_aInner)*_mul)
+					_transX = (_fixWdtL + mlnWdt/2) - ((_frameWdt_SP/2)/cos(_aInner) + _rDist_SP*sin(_aInner)*_mul)
+				endif
+				if	_fixWdtR > eps	then
+					_doorWdt = _doorWdt - (_fixWdtR + mlnWdt/2) + ((_frameWdt_EP/2)/cos(_aInner) + _rDist_EP*sin(_aInner)*_mul)
+				endif
+
+					!	Left
+					if	_fixWdtL > eps	then
+						rotz	_hotspotAngle
+							addx	_distWP
+								rotz	_aInner
+									mulx	_mul
+										addy	_fixWdtL
+											!	Main
+											gosub	"coorMainVFrame"
+
+											prism_	nsp/3,	_doorHgt,	get(nsp)
+
+											!	Gasket
+											gosub	"coorGskVFrame"
+
+											prism_	nsp/3,	_doorHgt + (trsWdt - trsGskWdt)/2,	get(nsp)
+
+										del 1
+									del 1
+								del 1
+							del 1
+						del 1
+					endif
+
+					!	Right
+					if	_fixWdtR > eps	then
+						rotz	_hotspotAngle
+							addx	_distWP
+								rotz	_aInner
+									mulx	_mul
+										addy	distMln[i] - _fixWdtR
+											!	Main
+											gosub	"coorMainVFrame"
+
+											prism_	nsp/3,	_doorHgt,	get(nsp)
+
+											!	Gasket
+											gosub	"coorGskVFrame"
+
+											prism_	nsp/3,	_doorHgt + (trsWdt - trsGskWdt)/2,	get(nsp)
+										del 1
+									del 1
+								del 1
+							del 1
+						del 1
+					endif
+
+				!	Bottom Frame
+					!	Left
+					if	_fixWdtL > eps	then
+						rotz	_hotspotAngle
+							addx	_distWp
+								rotz	_aInner
+									mulx	_mul
+										!	Cut
+										addy	_fixWdtL
+											gosub	"fixedCut"
+										del 1
+
+										!	Frame
+										_fixWdt = _fixWdtL
+										gosub	"BFrame"
+
+										cutend
+										cutend
+									del 1
+								del 1
+							del 1
+						del 1
+					endif
+
+					!	Right
+					if	_fixWdtR > eps	then
+						rotz	_hotspotAngle
+							addx	_distWp
+								rotz	_aInner
+									mulx	_mul
+										addy	distMln[i]
+											!	Cut
+											addy	-_fixWdtR
+												gosub	"fixedCut"
+											del 1
+
+											!	Frame
+											muly	-1
+												_fixWdt = _fixWdtR
+												gosub	"BFrame"
+											del 1
+										del 1
+
+										cutend
+										cutend
+									del 1
+								del 1
+							del 1
+						del 1
+					endif
+
+			!	Fixed Glass(Glass)
+			!-----------------------------------------------------------------------------------------------
+
+			!	Height of Glass
+			_fixHgt = gapTrs[1] - (frmWdtB + gskWdtB)/2
+			if	nTrs < eps	then
+				_fixHgt = _fixHgt - (frmWdtT + gskWdtT)/2
+			else
+				_fixHgt = _fixHgt - mlnGskWdt/2
+			endif
+			
+			!	Glass
+				!	Left
+				if	_fixWdtL > eps	then
+						rotz	_hotspotAngle
+							addx	_distWp
+								rotz	_aInner
+									mulx	_mul
+										!	Cut
+										addy	_fixWdtL
+											gosub	"fixedCut"
+										del 1
+
+										!	Glass
+										pen			penGls3D
+										sect_fill	fillGls,	backPenGls,	fillPenGls,	penGlsSct
+										material	matGls
+
+										put	-(gskThk - offsetGls - glsThk)*cos(_aInner),	(gskThk - offsetGls - glsThk)*sin(_aInner)*_mul,	15,
+											-(gskThk - offsetGls - glsThk)*cos(_aInner),	_fixWdtL,											15,
+											-(gskThk - offsetGls)*cos(_aInner),				_fixWdtL,											15,
+											-(gskThk - offsetGls)*cos(_aInner),				gskThk - offsetGls*sin(_aInner)*_mul,				15
+
+										addz	(frmWdtB + gskWdtB)/2
+											prism_	nsp/3,	_fixHgt,	get(nsp)
+										del 1
+
+										!	Text
+										style		"fix"
+										pen			penText
+										material	matText
+
+										if	bText & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
+											addy	_fixWdtL/2
+												addz	(frmWdtB + gskWdtB)/2 + _fixHgt/2
+													rotz	90
+														rotx	90
+															if	bMirror			then	mulx	-1
+															if	not(bMirror)	then	mulx	1
+																text	-eps,	0,	"F"
+
+																addz	-gskThk*cos(_aInner)
+																	text	-eps,	0,	"F"
+																del 1
+															del 1
+														del 1
+													del 1
+												del 1
+											del 1
+										endif
+
+										cutend
+										cutend
+									del 1
+								del 1
+							del 1
+						del 1
+				endif
+
+				!	Right
+				if	_fixWdtR > eps	then
+					rotz	_hotspotAngle
+						addx	_distWp
+							rotz	_aInner
+								mulx	_mul
+									addy	distMln[i]
+										!	Cut
+										addy	-_fixWdtR
+											gosub	"fixedCut"
+										del 1
+
+										!	Glass
+										pen			penGls3D
+										sect_fill	fillGls,	backPenGls,	fillPenGls,	penGlsSct
+										material	matGls
+
+										muly	-1
+											put	-(gskThk - offsetGls - glsThk)*cos(_aInner),	(gskThk - offsetGls - glsThk)*sin(_aInner)*_mul,	15,
+												-(gskThk - offsetGls - glsThk)*cos(_aInner),	_fixWdtR,											15,
+												-(gskThk - offsetGls)*cos(_aInner),				_fixWdtR,											15,
+												-(gskThk - offsetGls)*cos(_aInner),				gskThk - offsetGls*sin(_aInner)*_mul,				15
+
+											addz	(frmWdtB + gskWdtB)/2
+												prism_	nsp/3,	_fixHgt,	get(nsp)
+											del 1
+										del 1
+
+										!	Text
+										style		"fix"
+										pen			penText
+										material	matText
+
+										if	bText & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
+											addy	-_fixWdtR/2
+												addz	(frmWdtB + gskWdtB)/2 + _fixHgt/2
+													rotz	90
+														rotx	90
+															if	bMirror			then	mulx	-1
+															if	not(bMirror)	then	mulx	1
+																text	-eps,	0,	"F"
+
+																addz	-gskThk*cos(_aInner)
+																	text	-eps,	0,	"F"
+																del 1
+															del 1
+														del 1
+													del 1
+												del 1
+											del 1
+										endif
+									del 1
+
+									cutend
+									cutend
+								del 1
+							del 1
+						del 1
+					del 1
+				endif
+
+			!	Door Frame
+			!-----------------------------------------------------------------------------------------------
+			pen			penFrm3D
+			sect_fill	fillFrm,	backPenFrm,	fillPenFrm,	penFrmSct
+			material	matFrm
+
+			rotz	_hotspotAngle
+				!	커튼월 생성 방향 : 외부
+				if	iDirect = Direct_Out	then
+					add	distWP + _doorLct,	_frameWdt_SP/2,	0
+						rotz	_subAngle + 90
+							addx	_transX
+								gosub	"doorFrame"
+							del 1
+						del 1
+					del 1
+				endif
+
+				!	커튼월 생성 방향 : 내부
+				if	iDirect = Direct_In	then
+					add	distWP - _doorLct,	_frameWdt_SP/2,	0
+						rotz	_subAngle + 90
+							addx	_transX
+								gosub	"doorFrame"
+							del 1
+						del 1
+					del 1
+				endif
+			del 1
+
+			!	Door Glass
+			!-----------------------------------------------------------------------------------------------
+			pen			penGls3D
+			sect_fill	fillGls,	backPenGls,	fillPenGls,	penGlsSct
+			material	matGls
+
+			rotz	_hotspotAngle
+				!	커튼월 생성 방향 : 외부
+				if	iDirect = Direct_Out	then
+					add	distWP + _doorLct,	_frameWdt_SP/2,	0
+						rotz	_subAngle + 90
+							addx	_transX
+								gosub	"doorGlass"
+							del 1
+						del 1
+					del 1
+				endif
+
+				!	커튼월 생성 방향 : 내부
+				if	iDirect = Direct_In	then
+					add	distWP - _doorLct,	_frameWdt_SP/2,	0
+						rotz	_subAngle + 90
+							addx	_transX
+								gosub	"doorGlass"
+							del 1
+						del 1
+					del 1
+				endif
+			del 1
+
+			!	Open Line
+			!-----------------------------------------------------------------------------------------------
+			pen	penOpn
+
+			if	GLOB_VIEW_TYPE # 4	then
+				rotz	_hotspotAngle
+					!	커튼월 생성 방향 : 외부
+					if	iDirect = Direct_Out	then
+						add	distWP + _doorLct,	_frameWdt_SP/2,	0
+							rotz	_subAngle + 90
+								addx	_transX
+									gosub	"doorOpenLine"
+								del 1
+							del 1
+						del 1
+					endif
+
+					!	커튼월 생성 방향 : 내부
+					if	iDirect = Direct_In	then
+						add	distWP - _doorLct,	_frameWdt_SP/2,	0
+							rotz	_subAngle + 90
+								addx	_transX
+									gosub	"doorOpenLine"
+								del 1
+							del 1
+						del 1
+					endif
+				del 1
+			endif
+		endif
+	next	i
+endgroup
+
+pen	penFrm3D
+door_Cut1 = subgroup("doorBase",	"vFrames_")
+door_Cut2 = subgroup(door_Cut1,		"hFrames_")
+
+placegroup	door_Cut2
+
+!===============================================================================================
+!	창호입면도
+!===============================================================================================
+if	_iWinElev = WinElev_On & (GLOB_VIEW_TYPE = 4 or GLOB_VIEW_TYPE = 5)	then
+! if	_iWinElev = WinElev_On	then
+	if	iDirect = Direct_Out	then
+		_elevLct = distWP + frmThk + gskThk
+		_dElev2D = dElev2D
+	endif
+	if	iDirect = Direct_In		then
+		_elevLct = distWP - (frmThk + gskThk)
+		_dElev2D = -dElev2D
+		aFrmR = -aFrmR
+		aFrmL = -aFrmL
+	endif
+
+	!	Elevation Length
+	_elevLth = 0
+	if	nMln < eps	then
+		_elevLth = distMln[1]
+	else
+		for	i =	1	to	nMln + 1
+			_elevLth = _elevLth + distMln[i]
+		next	i
+	endif
+	_yPosStart = _elevLth*(aElev2D/totalAngle)
+	_yPosEnd = _elevLth - _yPosStart
+
+	_elevThk = eps
+
+	!	Elevation
+	!-----------------------------------------------------------------------------------------------
+	rotz	aElev2D
+		addx	_elevLct + _dElev2D
+			addy	-_yPosStart
+				roty	-90
+
+					!	Frame
+					group	"winElevFrames_"
+						material	matFrm
+						pen			penFrm3D
+
+						!	우측 프레임
+						if	bCornerR	then
+							if	iCornerR = Corner_Boundary	then
+								put	_offsetZ,				-frmWdtR/2,	15,
+									_offsetZ,				gskWdtR/2,	15,
+									_offsetZ + _frameHgt,	gskWdtR/2,	15,
+									_offsetZ + _frameHgt,	-frmWdtR/2,	15
+
+								_trsSP = gskWdtR/2
+							endif
+
+							if	iCornerR = Corner_Mullion	then
+								put	_offsetZ,				-gskWdtR/2,	15,
+									_offsetZ,				gskWdtR/2,	15,
+									_offsetZ + _frameHgt,	gskWdtR/2,	15,
+									_offsetZ + _frameHgt,	-gskWdtR/2,	15
+
+								_trsSP = gskWdtR/2
+							endif
+
+							if	iCornerR = Corner_Angled	then
+								put	_offsetZ,				-gskWdtR/2 + (frmThk + gskThk)*tan(aFrmR),	15,
+									_offsetZ,				gskWdtR/2 + (frmThk + gskThk)*tan(aFrmR),	15,
+									_offsetZ + _frameHgt,	gskWdtR/2 + (frmThk + gskThk)*tan(aFrmR),	15,
+									_offsetZ + _frameHgt,	-gskWdtR/2 + (frmThk + gskThk)*tan(aFrmR),	15
+
+								_trsSP = gskWdtR/2 + (frmThk + gskThk)*tan(aFrmR)
+							endif
+
+							prism_	nsp/3,	_elevThk,	get(nsp)
+						endif
+
+						if	iCornerR = Corner_Boundary	then	_trsSP = gskWdtR/2
+						if	iCornerR = Corner_Mullion	then	_trsSP = gskWdtR/2
+						if	iCornerR = Corner_Angled	then	_trsSP = gskWdtR/2 + (frmThk + gskThk)*tan(aFrmR)
+
+						!	멀리언
+						if	not(nMln < eps)	then
+							for	i = 1	to	nMln
+								addy	distMln[i]
+
+								if	iMlnType = Mln_Type1	then
+									put	_offsetZ,				-mlnGskWdt/2,	15,
+										_offsetZ,				mlnGskWdt/2,	15,
+										_offsetZ + _frameHgt,	mlnGskWdt/2,	15,
+										_offsetZ + _frameHgt,	-mlnGskWdt/2,	15
+
+									_trsMP = mlnGskWdt/2
+								endif
+
+								if	iMlnType = Mln_Type2	then
+									put	_offsetZ,				-mlnWdt/2,	15,
+										_offsetZ,				mlnWdt/2,	15,
+										_offsetZ + _frameHgt,	mlnWdt/2,	15,
+										_offsetZ + _frameHgt,	-mlnWdt/2,	15
+
+									_trsMP = mlnWdt/2
+								endif
+
+								prism_	nsp/3,	_elevThk,	get(nsp)
+							next	i
+
+							del	nMln
+						endif
+
+						!	좌측 프레임
+						addy	_elevLth
+							if	bCornerL	then
+								if	iCornerL = Corner_Boundary	then
+									put	_offsetZ,				-gskWdtL/2,	15,
+										_offsetZ,				frmWdtL/2,	15,
+										_offsetZ + _frameHgt,	frmWdtL/2,	15,
+										_offsetZ + _frameHgt,	-gskWdtL/2,	15
+
+									_trsEP = gskWdtL/2
+								endif
+
+								if	iCornerL = Corner_Mullion	then
+									put	_offsetZ,				-gskWdtL/2,	15,
+										_offsetZ,				gskWdtL/2,	15,
+										_offsetZ + _frameHgt,	gskWdtL/2,	15,
+										_offsetZ + _frameHgt,	-gskWdtL/2,	15
+
+									_trsEP = gskWdtL/2
+								endif
+
+								if	iCornerL = Corner_Angled	then
+									put	_offsetZ,				-gskWdtL/2 + (frmThk + gskThk)*tan(aFrmL),	15,
+										_offsetZ,				gskWdtL/2 + (frmThk + gskThk)*tan(aFrmL),	15,
+										_offsetZ + _frameHgt,	gskWdtL/2 + (frmThk + gskThk)*tan(aFrmL),	15,
+										_offsetZ + _frameHgt,	-gskWdtL/2 + (frmThk + gskThk)*tan(aFrmL),	15
+
+									_trsEP = gskWdtL/2 - (frmThk + gskThk)*tan(aFrmL)
+								endif
+
+								prism_	nsp/3,	_elevThk,	get(nsp)
+							endif
+						del 1
+
+							if	iCornerL = Corner_Boundary	then	_trsEP = gskWdtL/2
+							if	iCornerL = Corner_Mullion	then	_trsEP = gskWdtL/2
+							if	iCornerL = Corner_Angled	then	_trsEP = gskWdtL/2 - (frmThk + gskThk)*tan(aFrmL)
+
+						!	하부 프레임
+						if	bCornerB	then
+							for	i = 1	to	nMln + 1
+								if	not(bDoor[i])	then
+									if	nMln < eps	then
+										if	iCornerB = Corner_Boundary	then
+											put	0,						_trsSP,					15,
+												(frmWdtB + gskWdtB)/2,	_trsSP,					15,
+												(frmWdtB + gskWdtB)/2,	distMln[i] - _trsEP,	15,
+												0,						distMln[i] - _trsEP,	15
+										endif
+
+										if	iCornerB = Corner_Transom	then
+											put	(frmWdtB - gskWdtB)/2,	_trsSP,					15,
+												(frmWdtB + gskWdtB)/2,	_trsSP,					15,
+												(frmWdtB + gskWdtB)/2,	distMln[i] - _trsEP,	15,
+												(frmWdtB - gskWdtB)/2,	distMln[i] - _trsEP,	15
+										endif
+									else
+										if	i = 1	then
+											if	iCornerB = Corner_Boundary	then
+												put	0,						_trsSP,					15,
+													(frmWdtB + gskWdtB)/2,	_trsSP,					15,
+													(frmWdtB + gskWdtB)/2,	distMln[i] - _trsMP,	15,
+													0,						distMln[i] - _trsMP,	15
+											endif
+
+											if	iCornerB = Corner_Transom	then
+												put	(frmWdtB - gskWdtB)/2,	_trsSP,					15,
+													(frmWdtB + gskWdtB)/2,	_trsSP,					15,
+													(frmWdtB + gskWdtB)/2,	distMln[i] - _trsMP,	15,
+													(frmWdtB - gskWdtB)/2,	distMln[i] - _trsMP,	15
+											endif
+										endif
+
+										if	i # 1 & i # (nMln + 1)	then
+											if	iCornerB = Corner_Boundary	then
+												put	0,						_trsMP,					15,
+													(frmWdtB + gskWdtB)/2,	_trsMP,					15,
+													(frmWdtB + gskWdtB)/2,	distMln[i] - _trsMP,	15,
+													0,						distMln[i] - _trsMP,	15
+											endif
+
+											if	iCornerB = Corner_Transom	then
+												put	(frmWdtB - gskWdtB)/2,	_trsMP,					15,
+													(frmWdtB + gskWdtB)/2,	_trsMP,					15,
+													(frmWdtB + gskWdtB)/2,	distMln[i] - _trsMP,	15,
+													(frmWdtB - gskWdtB)/2,	distMln[i] - _trsMP,	15
+											endif
+										endif
+
+										if	i = (nMln + 1)	then
+											if	iCornerB = Corner_Boundary	then
+												put	0,						_trsMP,					15,
+													(frmWdtB + gskWdtB)/2,	_trsMP,					15,
+													(frmWdtB + gskWdtB)/2,	distMln[i] - _trsEP,	15,
+													0,						distMln[i] - _trsEP,	15
+											endif
+
+											if	iCornerB = Corner_Transom	then
+												put	(frmWdtB - gskWdtB)/2,	_trsMP,					15,
+													(frmWdtB + gskWdtB)/2,	_trsMP,					15,
+													(frmWdtB + gskWdtB)/2,	distMln[i] - _trsEP,	15,
+													(frmWdtB - gskWdtB)/2,	distMln[i] - _trsEP,	15
+											endif
+										endif
+									endif
+
+									prism_	nsp/3,	_elevThk,	get(nsp)
+								endif
+
+								addy	distMln[i]
+							next	i
+
+							del nMln + 1
+						endif
+
+						!	트랜섬
+						if	not(nTrs < eps)	then
+							for	j = 1	to	nTrs
+								addx	gapTrs[j]
+
+								for	i = 1	to	nMln + 1
+									if	nMln < eps	then
+										if	iTrsType = Trs_Type1	then
+											put	trsGskWdt/2,	_trsSP,					15,
+												-trsGskWdt/2,	_trsSP,					15,
+												-trsGskWdt/2,	distMln[i] - _trsEP,	15,
+												trsGskWdt/2,	distMln[i] - _trsEP,	15
+										endif
+
+										if	iTrsType = Trs_Type2	then
+											put	trsWdt/2,	_trsSP,					15,
+												-trsWdt/2,	_trsSP,					15,
+												-trsWdt/2,	distMln[i] - _trsEP,	15,
+												trsWdt/2,	distMln[i] - _trsEP,	15
+										endif
+									else
+										if	i = 1	then
+											if	iTrsType = Trs_Type1	then
+												put	trsGskWdt/2,	_trsSP,					15,
+													-trsGskWdt/2,	_trsSP,					15,
+													-trsGskWdt/2,	distMln[i] - _trsMP,	15,
+													trsGskWdt/2,	distMln[i] - _trsMP,	15
+											endif
+
+											if	iTrsType = Trs_Type2	then
+												put	trsWdt/2,	_trsSP,					15,
+													-trsWdt/2,	_trsSP,					15,
+													-trsWdt/2,	distMln[i] - _trsMP,	15,
+													trsWdt/2,	distMln[i] - _trsMP,	15
+											endif
+										endif
+
+										if	i # 1 & i # (nMln + 1)	then
+											if	iTrsType = Trs_Type1	then
+												put	trsGskWdt/2,	_trsMP,					15,
+													-trsGskWdt/2,	_trsMP,					15,
+													-trsGskWdt/2,	distMln[i] - _trsMP,	15,
+													trsGskWdt/2,	distMln[i] - _trsMP,	15
+											endif
+
+											if	iTrsType = Trs_Type2	then
+												put	trsWdt/2,	_trsMP,					15,
+													-trsWdt/2,	_trsMP,					15,
+													-trsWdt/2,	distMln[i] - _trsMP,	15,
+													trsWdt/2,	distMln[i] - _trsMP,	15
+											endif
+										endif
+
+										if	i = (nMln + 1)	then
+											if	iTrsType = Trs_Type1	then
+												put	trsGskWdt/2,	_trsMP,					15,
+													-trsGskWdt/2,	_trsMP,					15,
+													-trsGskWdt/2,	distMln[i] - _trsEP,	15,
+													trsGskWdt/2,	distMln[i] - _trsEP,	15
+											endif
+
+											if	iTrsType = Trs_Type2	then
+												put	trsWdt/2,	_trsMP,					15,
+													-trsWdt/2,	_trsMP,					15,
+													-trsWdt/2,	distMln[i] - _trsEP,	15,
+													trsWdt/2,	distMln[i] - _trsEP,	15
+											endif
+										endif
+									endif
+
+									prism_	nsp/3,	_elevThk,	get(nsp)
+
+									addy	distMln[i]
+								next	i
+
+								del nMln + 1
+							next	j
+
+							del nTrs
+						endif
+
+						!	상부 프레임
+						addx	_offsetz + _frameHgt
+							mulx	-1
+								if	bCornerT	then
+									for	i = 1	to	nMln + 1
+										if	nMln < eps	then
+											if	iCornerT = Corner_Boundary	then
+												put	0,						_trsSP,					15,
+													(frmWdtT + gskWdtT)/2,	_trsSP,					15,
+													(frmWdtT + gskWdtT)/2,	distMln[i] - _trsEP,	15,
+													0,						distMln[i] - _trsEP,	15
+											endif
+
+											if	iCornerT = Corner_Transom	then
+												put	(frmWdtT - gskWdtT)/2,	_trsSP,					15,
+													(frmWdtT + gskWdtT)/2,	_trsSP,					15,
+													(frmWdtT + gskWdtT)/2,	distMln[i] - _trsEP,	15,
+													(frmWdtT - gskWdtT)/2,	distMln[i] - _trsEP,	15
+											endif
+										else
+											if	i = 1	then
+												if	iCornerT = Corner_Boundary	then
+													put	0,						_trsSP,					15,
+														(frmWdtT + gskWdtT)/2,	_trsSP,					15,
+														(frmWdtT + gskWdtT)/2,	distMln[i] - _trsMP,	15,
+														0,						distMln[i] - _trsMP,	15
+												endif
+
+												if	iCornerT = Corner_Transom	then
+													put	(frmWdtT - gskWdtT)/2,	_trsSP,					15,
+														(frmWdtT + gskWdtT)/2,	_trsSP,					15,
+														(frmWdtT + gskWdtT)/2,	distMln[i] - _trsMP,	15,
+														(frmWdtT - gskWdtT)/2,	distMln[i] - _trsMP,	15
+												endif
+											endif
+
+											if	i # 1 & i # (nMln + 1)	then
+												if	iCornerT = Corner_Boundary	then
+													put	0,						_trsMP,					15,
+														(frmWdtT + gskWdtT)/2,	_trsMP,					15,
+														(frmWdtT + gskWdtT)/2,	distMln[i] - _trsMP,	15,
+														0,						distMln[i] - _trsMP,	15
+												endif
+
+												if	iCornerT = Corner_Transom	then
+													put	(frmWdtT - gskWdtT)/2,	_trsMP,					15,
+														(frmWdtT + gskWdtT)/2,	_trsMP,					15,
+														(frmWdtT + gskWdtT)/2,	distMln[i] - _trsMP,	15,
+														(frmWdtT - gskWdtT)/2,	distMln[i] - _trsMP,	15
+												endif
+											endif
+
+											if	i = (nMln + 1)	then
+												if	iCornerT = Corner_Boundary	then
+													put	0,						_trsMP,					15,
+														(frmWdtT + gskWdtT)/2,	_trsMP,					15,
+														(frmWdtT + gskWdtT)/2,	distMln[i] - _trsEP,	15,
+														0,						distMln[i] - _trsEP,	15
+												endif
+
+												if	iCornerT = Corner_Transom	then
+													put	(frmWdtT - gskWdtT)/2,	_trsMP,					15,
+														(frmWdtT + gskWdtT)/2,	_trsMP,					15,
+														(frmWdtT + gskWdtT)/2,	distMln[i] - _trsEP,	15,
+														(frmWdtT - gskWdtT)/2,	distMln[i] - _trsEP,	15
+												endif
+											endif
+										endif
+
+										prism_	nsp/3,	_elevThk,	get(nsp)
+
+										addy	distMln[i]
+									next	i
+
+									del nMln + 1
+								endif
+							del 1
+						del 1
+					endgroup
+
+					placegroup	"winElevFrames_"
+
+					!	창호
+					group	"winElevPanels_"
+						for	j = 1	to	nTrs + 1
+
+							for	i = 1	to	nMln + 1
+
+								!	변수 정의
+								_winSP = (frmWdtB + gskWdtB)/2
+								_winEP = (frmWdtT + gskWdtT)/2
+								if	iTrsType = Trs_Type1	then	_winMP = trsGskWdt/2
+								if	iTrsType = Trs_Type2	then	_winMP = trsWdt/2
+								_doorSP = 0
+
+								_exWinSP = 0
+								_exWinEP = 0
+								if	not(bCornerB) & j = 1	then
+									_exWinSP = (frmWdtB - gskWdtB)/2
+									_doorSP = frmWdtB
+								endif
+								if	not(bCornerT) & j = (nTrs + 1)	then
+									_exWinEP = (frmWdtT - gskWdtT)/2
+								endif
+
+								!	좌표 추출
+								gosub	"calcElevWin_"
+
+								!	창호
+								if	not(j = 1 & bDoor[i])	then
+									!	유리
+									if	iPanelType[i][j] = Panel_Fix | iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke | \
+										iPanelType[i][j] = Panel_Spandrel | iPanelType[i][j] = Panel_Panel	then
+										model	solid
+
+										if	iPanelType[i][j] = Panel_Fix | iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+											material	matGls
+											pen			penGls3D
+										endif
+										if	iPanelType[i][j] = Panel_Spandrel	then
+											material	matSpdGls
+											pen			penIns3D
+										endif
+										if	iPanelType[i][j] = Panel_Panel	then
+											material	matPnl
+											pen			penGls3D
+										endif
+
+										put	_xPosWin1,	_yPosWin1,	1,
+											_xPosWin2,	_yPosWin2,	1,
+											_xPosWin3,	_yPosWin3,	1,
+											_xPosWin4,	_yPosWin4,	1
+
+										poly_	nsp/3,	get(nsp)
+
+										!	text : F
+										if	bText	then
+											if	(iPanelType[i][j] = Panel_Fix | iPanelType[i][j] = Panel_Panel) 	then
+												addx	(_xPosWin1 + _xPosWin2)/2
+													addy	(_yPosWin1 + _yPosWin4)/2
+														rotz	-90
+															if	iDirect = Direct_Out	then	mulx	-1
+															if	iDirect = Direct_In		then	mulx	1
+
+															style		"fix"
+															pen			penText
+															material	matText
+
+															text	eps,	0,	"F"
+
+															del 1
+														del 1
+													del 1
+												del 1
+											endif
+										endif
+									endif
+
+									!	고정창/프로젝트창(2)
+									if	iPanelType[i][j] = Panel_Fix2 | iPanelType[i][j] = Panel_Project2 | iPanelType[i][j] = Panel_Custom1	then
+										model	solid
+
+										!	변수
+										_gap = 0
+										if	iMlnType = Mln_Type1	then	_gap = mlnGskWdt
+										if	iMlnType = Mln_Type2	then	_gap = mlnWdt
+
+										!	유리
+										pen			penGls3D
+										material	matGls
+										put	_xPosWin1,	_yPosWin1,							0,
+											_xPosWin2,	_yPosWin2,							0,
+											_xPosWin2,	(_yPosWin2 + _yPosWin3)/2 - _gap/2,	0,
+											_xPosWin1,	(_yPosWin2 + _yPosWin3)/2 - _gap/2,	0
+
+										poly_	nsp/3,	get(nsp)
+
+										put	_xPosWin4,	(_yPosWin2 + _yPosWin3)/2 + _gap/2,	0,
+											_xPosWin3,	(_yPosWin2 + _yPosWin3)/2 + _gap/2,	0,
+											_xPosWin3,	_yPosWin3,							0,
+											_xPosWin4,	_yPosWin4,							0
+
+										poly_	nsp/3,	get(nsp)
+
+										!	프레임
+										pen			penFrm3D
+										material	matFrm
+										put	_xPosWin1,	(_yPosWin2 + _yPosWin3)/2 - _gap/2,	1,
+											_xPosWin2,	(_yPosWni2 + _yPosWin3)/2 - _gap/2,	1,
+											_xPosWin3,	(_yPosWin2 + _yPosWin3)/2 + _gap/2,	1,
+											_xPosWin4,	(_yPosWin2 + _yPosWin3)/2 + _gap/2,	1
+
+										poly_	nsp/3,	get(nsp)
+
+										!	text : F
+										if	iPanelType[i][j] = Panel_Fix2 & bText	then
+											addx	(_xPosWin1 + _xPosWin2)/2
+												addy	(_yPosWin1 + _yPosWin4)/4
+													rotz	-90
+														if	iDirect = Direct_Out	then	mulx	-1
+														if	iDirect = Direct_In		then	mulx	1
+
+														style		"fix"
+														pen			penText
+														material	matText
+
+														text	eps,	0,	"F"
+
+														del 1
+													del 1
+
+													addy	(_yPosWin1 + _yPosWin4)/2
+														rotz	-90
+															if	iDirect = Direct_Out	then	mulx	-1
+															if	iDirect = Direct_In		then	mulx	1
+
+															style		"fix"
+															pen			penText
+															material	matText
+
+															text	eps,	0,	"F"
+
+															del 1
+														del 1
+													del 1
+												del 1
+											del 1
+										endif
+									endif
+
+									!	열림 표현
+									if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke | iPanelType[i][j] = Panel_Project2 | iPanelType[i][j] = Panel_Custom1	then
+										model	wire
+
+										pen		penOpn
+
+										!	경기도 신청사 프로젝트용
+										if	iPanelType[i][j] = Panel_Custom1	then
+											put	_xPosWin1,					(_yPosWin2 + _yPosWin3)/2 - _gap/2,	1,
+												(_xPosWin1 + _xPosWin2)/2,	_yPosWin1,							1,
+												_xPosWin2,					(_yPosWin2 + _yPosWin3)/2 - _gap/2,	0
+
+											poly_	nsp/3,	get(nsp)
+
+											addx	(_xPosWin1 + _xPosWin2)/2
+												addy	(_yPosWin1 + _yPosWin4)/4
+													rotz	-90
+														if	iDirect = Direct_Out	then	mulx	-1
+														if	iDirect = Direct_In		then	mulx	1
+
+														style		"fix"
+														pen			penText
+														material	matText
+
+														model	solid
+														text	eps,	0,	"전"
+
+														model	wire
+														circle	textSize/1000
+														model	solid
+
+														del 1
+													del 1
+												del 1
+											del 1
+										else
+
+											if	iHinge[i][j] = Hinge_Top | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_TopRight	then
+												if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+													put	_xPosWin1,	_yPosWin1,					1,
+														_xPosWin2,	(_yPosWin1 + _yPosWin4)/2,	1,
+														_xPosWin1,	_yPosWin4,					0
+												endif
+
+												if	iPanelType[i][j] = Panel_Project2	then
+													put	_xPosWin1,	_yPosWin1,												1,
+														_xPosWin2,	(_yPosWin1 + (_yPosWin2 + _yPosWin3)/2 - _gap/2)/2,		1,
+														_xPosWin1,	(_yPosWin2 + _yPosWin3)/2 - _gap/2,						0,
+														_xPosWin4,	(_yPosWin2 + _yPosWin3)/2 + _gap/2,						1,
+														_xPosWin3,	(_yPosWin4 + (_yPosWin2 + _yPosWin3)/2 + _gap/2)/2,		1,
+														_xPosWin4,	_yPosWin4,												0
+												endif
+
+												poly_	nsp/3,	get(nsp)
+											endif
+
+											if	iHinge[i][j] = Hinge_Bottom | iHinge[i][j] = Hinge_BottomLeft | iHinge[i][j] = Hinge_BottomRight	then
+												if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+													put	_xPosWin2,	_yPosWin1,					1,
+														_xPosWin1,	(_yPosWin1 + _yPosWin4)/2,	1,
+														_xPosWin2,	_yPosWin4,					0
+												endif
+
+												if	iPanelType[i][j] = Panel_Project2	then
+													put	_xPosWin2,	_yPosWin1,												1,
+														_xPosWin1,	(_yPosWin1 + (_yPosWin2 + _yPosWin3)/2 - _gap/2)/2,		1,
+														_xPosWin2,	(_yPosWin2 + _yPosWin3)/2 - _gap/2,						0,
+														_xPosWin3,	(_yPosWin2 + _yPosWin3)/2 + _gap/2,						1,
+														_xPosWin4,	(_yPosWin4 + (_yPosWin2 + _yPosWin3)/2 + _gap/2)/2,		1,
+														_xPosWin3,	_yPosWin4,												0
+												endif
+
+												poly_	nsp/3,	get(nsp)
+											endif
+
+											if	iHinge[i][j] = Hinge_Left | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_BottomLeft	then
+												if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+													put	_xPosWin1,					_yPosWin4,	1,
+														(_xPosWin1 + _xPosWin2)/2,	_yPosWin1,	1,
+														_xPosWin2,					_yPosWin4,	0
+												endif
+												
+												if	iPanelType[i][j] = Panel_Project2	then
+													put	_xPosWin1,					(_yPosWin2 + _yPosWin3)/2 - _gap/2,	1,
+														(_xPosWin1 + _xPosWin2)/2,	_yPosWin1,							1,
+														_xPosWin2,					(_yPosWin2 + _yPosWin3)/2 - _gap/2,	0,
+														_xPosWin4,					_yPosWin4,							1,
+														(_xPosWin3 + _xPosWin4)/2,	(_yPosWin2 + _yPosWin3)/2 + _gap/2,	1,
+														_xPosWin3,					_yPosWin3,							0
+												endif
+
+												poly_	nsp/3,	get(nsp)
+											endif
+
+											if	iHinge[i][j] = Hinge_Right | iHinge[i][j] = Hinge_TopRight | iHinge[i][j] = Hinge_BottomRight	then
+												if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+													put	_xPosWin1,					_yPosWin1,	1,
+														(_xPosWin1 + _xPosWin2)/2,	_yPosWin4,	1,
+														_xPosWin2,					_yPosWin1,	0
+												endif
+
+												if	iPanelType[i][j] = Panel_Project2	then
+													put	_xPosWin1,					_yPosWin1,							1,
+														(_xPosWin1 + _xPosWin2)/2,	(_yPosWin2 + _yPosWin3)/2 - _gap/2,	1,
+														_xPosWin2,					_yPosWin2,							0,
+														_xPosWin4,					(_yPosWin2 + _yPosWin3)/2 + _gap/2,	1,
+														(_xPosWin3 + _xPosWin4)/2,	_yPosWin4,							1,
+														_xPosWin3,					(_yPosWin2 + _yPosWin3)/2 + _gap/2,	0
+												endif
+												
+
+												poly_	nsp/3,	get(nsp)
+											endif
+
+										endif
+
+										!	text : 배
+										if	iPanelType[i][j] = Panel_Smoke & bSmokeText	then
+											addx	(_xPosWin1 + _xPosWin2)/2
+												addy	(_yPosWin1 + _yPosWin4)/2
+													rotz	-90
+														if	iDirect = Direct_Out	then	mulx	-1
+														if	iDirect = Direct_In		then	mulx	1
+
+														style		"fix"
+														pen			penText
+														material	matText
+
+														model	solid
+														text	eps,	0,	"배"
+
+														model	wire
+														circle	textSize/1000
+														model	solid
+
+														del 1
+													del 1
+												del 1
+											del 1
+										endif
+									endif
+
+									!	패널 유형 : 비어있음
+									if	iPanelType[i][j] = Panel_Empty	then
+										model	solid
+
+										!	프레임
+										pen	penFrm3D
+
+										lin_	_xPosWin1,	_offGrl1,	0,
+												_xPosWin2,	_offGrl1,	0
+
+										lin_	_xPosWin3,	distMln[i] - _offGrl3,	0,
+												_xPosWin4,	distMln[i] - _offGrl3,	0
+
+										lin_	_offGrl4,	_offGrl1,				0,
+												_offGrl4,	distMln[i] - _offGrl3,	0
+
+										lin_	gapTrs[j] - _offGrl2,	_offGrl1,				0,
+												gapTrs[j] - _offGrl2,	distMln[i] - _offGrl3,	0
+
+									endif
+
+									!	패널 유형 : 그릴
+									if	iPanelType[i][j] = Panel_Grill	then
+										model	solid
+
+										!	프레임
+										pen	penFrm3D
+
+										lin_	_xPosWin1,	_offGrl1,	0,
+												_xPosWin2,	_offGrl1,	0
+
+										lin_	_xPosWin3,	distMln[i] - _offGrl3,	0,
+												_xPosWin4,	distMln[i] - _offGrl3,	0
+
+										lin_	_offGrl4,	_offGrl1,				0,
+												_offGrl4,	distMln[i] - _offGrl3,	0
+
+										lin_	gapTrs[j] - _offGrl2,	_offGrl1,				0,
+												gapTrs[j] - _offGrl2,	distMln[i] - _offGrl3,	0
+
+										!	그릴
+										pen	penGrl3D
+
+										_nGrl = int((gapTrs[j] - (_offGrl2 + _offGrl4))/gapGrl)
+										_rmnGrl = (gapTrs[j] - (_offGrl2 + _offGrl4)) - gapGrl*_nGrl
+
+										addx	_offGrl4
+											addx	(gapGrl + _rmnGrl)/2
+												for	g = 1	to	_nGrl
+													lin_	0,	_offGrl1,				0,
+															0,	distMln[i] - _offGrl3,	0
+
+													addx	gapGrl
+												next	g
+
+												del _nGrl
+											del 1
+										del 1
+									endif
+								else
+									!	문
+									model	solid
+
+										!	변수
+										_iDoorType = iMatrix_Type[i][1]
+										_iOpenDirect = iMatrix_Type[i][2]
+										_iFrameType = iMatrix_Type[i][3]
+
+										_doorWdt = Matrix_Length[i][1]
+										_fixWdtL = Matrix_Length[i][5]
+										_fixWdtR = Matrix_Length[i][6]
+
+										_frameT = Matrix_Frame[i][1]
+										_frameB = Matrix_Frame[i][2]
+										_frameL = Matrix_Frame[i][3]
+										_frameR = Matrix_Frame[i][4]
+
+										if	iMlnType = Mln_Type1	then	_fixFrmWdt = mlnGskWdt
+										if	iMlnType = Mln_Type2	then	_fixFrmWdt = mlnWdt
+
+									!	프레임
+									material	matFrm
+									pen			penFrm3D
+
+										!	L
+										if	_fixWdtL < eps	then
+											lin_	_doorSP,	0,			0,
+													_doorSP,	_offGrl1,	0
+											lin_	_doorSP,	_offGrl1,	0,
+													_xPosWin2,	_offGrl1,	0
+										endif
+
+										!	R
+										if	_fixWdtR < eps	then
+											lin_	_doorSP,	distMln[i],				0,
+													_doorSP,	distMln[i] - _offGrl3,	0
+											lin_	_doorSP,	distMln[i] - _offGrl3,	0,
+													_xPosWin2,	distMln[i] - _offGrl3,	0
+										endif
+
+										!	T
+										if	_fixWdtL > eps	then
+											_yPos1 = _fixWdtL + _fixFrmWdt/2
+										else
+											_yPos1 = _offGrl1
+										endif
+
+										if	_fixWdtR > eps	then
+											_yPos2 = distMln[i] - (_fixWdtR + _fixFrmWdt/2)
+										else
+											_yPos2 = distMln[i] - _offGrl3
+										endif
+										lin_	gapTrs[j] - _offGrl2,	_yPos1,	0,
+												gapTrs[j] - _offGrl2,	_yPos2,	0
+
+									!	Fixed Glass(Frame)
+									material	matFrm
+									pen			penFrm3D
+
+										!	Parameters
+										
+
+										!	Vertical Frame
+											!	Left
+											if	_fixWdtL > eps	then
+												addy	_fixWdtL
+													model	solid
+													put	0,			-_fixFrmWdt/2,	1,
+														_xPosWin2,	-_fixFrmWdt/2,	1,
+														_xPosWin2,	_fixFrmWdt/2,	1,
+														0,			_fixFrmWdt/2,	1
+
+													poly_	nsp/3,	get(nsp)
+
+													lin_	0,	0,	0,	0,	mlnWdt/2,	0
+												del 1
+											endif
+
+											!	Right
+											if	_fixWdtR > eps	then
+												addy	distMln[i] - _fixWdtR
+													model	solid
+													put	0,			-_fixFrmWdt/2,	1,
+														_xPosWin2,	-_fixFrmWdt/2,	1,
+														_xPosWin2,	_fixFrmWdt/2,	1,
+														0,			_fixFrmWdt/2,	1
+
+													poly_	nsp/3,	get(nsp)
+
+													lin_	0,	0,	0,	0,	-mlnWdt/2,	0
+												del 1
+											endif
+
+										!	Bottom Frame
+											!	Left
+											if	_fixWdtL > eps	then
+												if	iCornerB = Corner_Boundary	then
+													put	0,			_yPosWin1,					1,
+														_xPosWin1,	_yPosWin1,					1,
+														_xPosWin1,	_fixWdtL - _fixFrmWdt/2,	1,
+														0,			_fixWdtL - _fixFrmWdt/2,	1
+												endif
+
+												if	iCornerB = Corner_Transom	then
+													put	(frmWdtB - gskWdtB)/2,	_yPosWin1,					1,
+														_xPosWin1,				_yPosWin1,					1,
+														_xPosWin1,				_fixWdtL - _fixFrmWdt/2,	1,
+														(frmWdtB - gskWdtB)/2,	_fixWdtL - _fixFrmWdt/2,	1
+												endif
+
+												poly_	nsp/3,	get(nsp)
+											endif
+
+											!	Right
+											if	_fixWdtR > eps	then
+												if	iCornerB = Corner_Boundary	then
+													put	0,			_yPosWin1,					1,
+														_xPosWin1,	_yPosWin1,					1,
+														_xPosWin1,	_fixWdtR - _fixFrmWdt/2,	1,
+														0,			_fixWdtR - _fixFrmWdt/2,	1
+												endif
+
+												if	iCornerB = Corner_Transom	then
+													put	(frmWdtB - gskWdtB)/2,	_yPosWin1,					1,
+														_xPosWin1,				_yPosWin1,					1,
+														_xPosWin1,				_fixWdtR - _fixFrmWdt/2,	1,
+														(frmWdtB - gskWdtB)/2,	_fixWdtR - _fixFrmWdt/2,	1
+												endif
+
+												addy	distMln[i]
+													muly	-1
+														poly_	nsp/3,	get(nsp)
+													del 1
+												del 1
+											endif
+
+									!	Fixed Glass(Glass)
+										!	Left
+										if	_fixWdtL > eps	then
+											!	Glass
+											pen			penGls3D
+											material	matGls
+
+											put	_xPosWin1,	_yPosWin1,					1,
+												_xPosWin2,	_yPosWin1,					1,
+												_xPosWin2,	_fixWdtL - _fixFrmWdt/2,	1,
+												_xPosWin1,	_fixWdtL - _fixFrmWdt/2,	1
+
+											poly_	nsp/3,	get(nsp)
+
+											!	Text
+											if	bText	then
+												addx	(_xPosWin1 + _xPosWin2)/2
+													addy	_fixWdtL/2
+														rotz	-90
+															if	iDirect = Direct_Out	then	mulx	-1
+															if	iDirect = Direct_In		then	mulx	1
+
+															style		"fix"
+															pen			penText
+															material	matText
+
+															text	eps,	0,	"F"
+
+															del 1
+														del 1
+													del 1
+												del 1
+											endif
+										endif
+
+										!	Right
+										if	_fixWdtL > eps	then
+											addy	distMln[i]
+												muly	-1
+													!	Glass
+													pen			penGls3D
+													material	matGls
+
+													put	_xPosWin4,	_yPosWin1,					1,
+														_xPosWin3,	_yPosWin1,					1,
+														_xPosWin3,	_fixWdtR - _fixFrmWdt/2,	1,
+														_xPosWin4,	_fixWdtR - _fixFrmWdt/2,	1
+
+													poly_	nsp/3,	get(nsp)
+
+													!	Text
+													if	bText	then
+														addx	(_xPosWin1 + _xPosWin2)/2
+															addy	_fixWdtR/2
+																muly	-1
+																	rotz	-90
+																		if	iDirect = Direct_Out	then	mulx	-1
+																		if	iDirect = Direct_In		then	mulx	1
+
+																		style		"fix"
+																		pen			penText
+																		material	matText
+
+																		text	eps,	0,	"F"
+
+																		del 1
+																	del 1
+																del 1
+															del 1
+														del 1
+													endif
+
+												del 1
+											del 1
+										endif
+
+									!	문 유형 : 기본형(1Panel)
+									if	_iDoorType = DoorType_1panel	then
+										!	문 열림 방향 : 왼쪽
+										if	_iOpenDirect = OpenDirect_Left	then
+											pen	penOpn
+
+											lin_	0,										distMln[i] - (_fixWdtR + mlnWdt/2),	0,
+													(_xPosWin1 + _xPosWin2 - _offGrl2)/2,	_fixWdtL + mlnWdt/2,				0
+
+											lin_	(_xPosWin1 + _xPosWin2 - _offGrl2)/2,	_fixWdtL + mlnWdt/2,				0,
+													gapTrs[j] - _offGrl2,					distMln[i] - (_fixWdtR + mlnWdt/2),	0
+										endif
+
+										!	문 열림 방향 : 오른쪽
+										if	_iOpenDirect = OpenDirect_Right	then
+											pen	penOpn
+
+											lin_	0,										_fixWdtL + mlnWdt/2,				0,
+													(_xPosWin1 + _xPosWin2 - _offGrl2)/2,	distMln[i] - (_fixWdtR + mlnWdt/2),	0
+
+											lin_	(_xPosWin1 + _xPosWin2 - _offGrl2)/2,	distMln[i] - (_fixWdtR + mlnWdt/2),	0,
+													gapTrs[j] - _offGrl2,					_fixWdtL + mlnWdt/2,				0
+										endif
+
+										!	문 프레임 유형 : 상/하
+										material	matFrm
+										pen			penFrm3D
+
+										if	_iFrameType = FrameType_1 | _iFrameType = FrameType_2	then
+											put	0,			_fixWdtL + mlnWdt/2,				1,
+												_frameB,	_fixWdtL + mlnWdt/2,				1,
+												_frameB,	distMln[i] - (_fixWdtR + mlnWdt/2),	1,
+												0,			distMln[i] - (_fixWdtR + mlnWdt/2),	1
+
+											poly_	nsp/3,	get(nsp)
+
+											addx	gapTrs[j] - _offGrl2
+												put	0,			_fixWdtL + mlnWdt/2,				1,
+													-_frameT,	_fixWdtL + mlnWdt/2,				1,
+													-_frameT,	distMln[i] - (_fixWdtR + mlnWdt/2),	1,
+													0,			distMln[i] - (_fixWdtR + mlnWdt/2),	1
+
+												poly_	nsp/3,	get(nsp)
+											del 1
+										endif
+
+										!	문 프레임 유형 : 상/하/좌/우
+										material	matFrm
+										pen			penFrm3D
+
+										if	_iFrameType = FrameType_2	then
+											put	_frameB,						_fixWdtL + mlnWdt/2,			1,
+												gapTrs[j] - _offGrl2 - _frameT,	_fixWdtL + mlnWdt/2,			1,
+												gapTrs[j] - _offGrl2 - _frameT,	_fixWdtL + mlnWdt/2 + _frameL,	1,
+												_frameB,						_fixWdtL + mlnWdt/2 + _frameL,	1
+
+											poly_	nsp/3,	get(nsp)
+
+											addy	distMln[i]
+												put	_frameB,						-(_fixWdtR + mlnWdt/2),				1,
+													gapTrs[j] - _offGrl2 - _frameT,	-(_fixWdtR + mlnWdt/2),				1,
+													gapTrs[j] - _offGrl2 - _frameT,	-(_fixWdtR + mlnWdt/2 + _frameR),	1,
+													_frameB,						-(_fixWdtR + mlnWdt/2 + _frameR),	1
+
+												poly_	nsp/3,	get(nsp)
+											del 1
+										endif
+									endif
+
+									!	문 유형 : 양문형(2Panel)
+									if	_iDoorType = DoorType_2panel	then
+										!	중심점
+										_offsetC = (_fixWdtL - _fixWdtR)/2
+
+										!	문 열림 방향
+										pen	penOpn
+
+										lin_	0,										distMln[i]/2 + _offsetC,	0,
+												(_xPosWin1 + _xPosWin2 - _offGrl2)/2,	_fixWdtL + mlnWdt/2,		0
+
+										lin_	(_xPosWin1 + _xPosWin2 - _offGrl2)/2,	_fixWdtL + mlnWdt/2,		0,
+												gapTrs[j] - _offGrl2,					distMln[i]/2 + _offsetC,	0
+
+										lin_	0,										distMln[i]/2 + _offsetC,			0,
+												(_xPosWin1 + _xPosWin2 - _offGrl2)/2,	distMln[i] - (_fixWdtR + mlnWdt/2),	0
+
+										lin_	(_xPosWin1 + _xPosWin2 - _offGrl2)/2,	distMln[i] - (_fixWdtR + mlnWdt/2),	0,
+												gapTrs[j] - _offGrl2,					distMln[i]/2 + _offsetC,			0
+
+										!	문 프레임 유형 : 상/하
+										material	matFrm
+										pen			penFrm3D
+
+										if	_iFrameType = FrameType_1 | _iFrameType = FrameType_2	then
+											!	하부 프레임
+											put	0,			_fixWdtL + mlnWdt/2,		1,
+												_frameB,	_fixWdtL + mlnWdt/2,		1,
+												_frameB,	distMln[i]/2 + _offsetC,	1,
+												0,			distMln[i]/2 + _offsetC,	1
+
+											poly_	nsp/3,	get(nsp)
+
+											put	0,			distMln[i]/2 + _offsetC,			1,
+												_frameB,	distMln[i]/2 + _offsetC,			1,
+												_frameB,	distMln[i] - (_fixWdtR + mlnWdt/2),	1,
+												0,			distMln[i] - (_fixWdtR + mlnWdt/2),	1
+
+											poly_	nsp/3,	get(nsp)
+
+											!	상부 프레임
+											addx	gapTrs[j] - _offGrl2
+												put	0,			_fixWdtL + mlnWdt/2,		1,
+													-_frameT,	_fixWdtL + mlnWdt/2,		1,
+													-_frameT,	distMln[i]/2 + _offsetC,	1,
+													0,			distMln[i]/2 + _offsetC,	1
+
+												poly_	nsp/3,	get(nsp)
+
+												put	0,			distMln[i]/2 + _offsetC,			1,
+													-_frameT,	distMln[i]/2 + _offsetC,			1,
+													-_frameT,	distMln[i] - (_fixWdtR + mlnWdt/2),	1,
+													0,			distMln[i] - (_fixWdtR + mlnWdt/2),	1
+
+												poly_	nsp/3,	get(nsp)
+											del 1
+										endif
+
+										!	문 프레임 유형 : 상/하/좌/우
+										material	matFrm
+										pen			penFrm3D
+
+										if	_iFrameType = FrameType_2	then
+											!	좌측문 프레임
+											put	_frameB,						_fixWdtL + mlnWdt/2,			1,
+												gapTrs[j] - _offGrl2 - _frameT,	_fixWdtL + mlnWdt/2,			1,
+												gapTrs[j] - _offGrl2 - _frameT,	_fixWdtL + mlnWdt/2 + _frameL,	1,
+												_frameB,						_fixWdtL + mlnWdt/2 + _frameL,	1
+
+											poly_	nsp/3,	get(nsp)
+
+											addy	distMln[i]/2 + _offsetC
+												put	_frameB,						0,			1,
+													gapTrs[j] - _offGrl2 - _frameT,	0,			1,
+													gapTrs[j] - _offGrl2 - _frameT,	-_frameR,	1,
+													_frameB,						-_frameR,	1
+
+												poly_	nsp/3,	get(nsp)
+											del 1
+
+											!	우측문 프레임
+											addy	distMln[i]/2 + _offsetC
+												put	_frameB,						0,			1,
+													gapTrs[j] - _offGrl2 - _frameT,	0,			1,
+													gapTrs[j] - _offGrl2 - _frameT,	_frameL,	1,
+													_frameB,						_frameL,	1
+
+												poly_	nsp/3,	get(nsp)
+											del 1
+
+											addy	distMln[i]
+												put	_frameB,						-(_fixWdtR + mlnWdt/2),				1,
+													gapTrs[j] - _offGrl2 - _frameT,	-(_fixWdtR + mlnWdt/2),				1,
+													gapTrs[j] - _offGrl2 - _frameT,	-(_fixWdtR + mlnWdt/2 + _frameR),	1,
+													_frameB,						-(_fixWdtR + mlnWdt/2 + _frameR),	1
+
+												poly_	nsp/3,	get(nsp)
+											del 1
+										endif
+									endif
+								endif
+
+								addy	distMln[i]
+							next	i
+
+							del nMln + 1
+
+							addx	gapTrs[j]
+						next	j
+
+						del nTrs + 1
+					endgroup
+
+					placegroup	"winElevPanels_"
+				del 1
+			del 1
+		del 1
+	del 1
+endif
+
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+
+!===============================================================================================
+!	Sub-Routine
+!===============================================================================================
+!	Vertical Frame
+!-----------------------------------------------------------------------------------------------
+"vFrames":
+!-----------------------------------------------------------------------------------------------
+pen			penFrm3D
+sect_fill	fillFrm,	backPenFrm,	fillPenFrm,	penFrmSct
+material	matFrm
+
+
+if	iDirect = Direct_Out	then	mulx	1
+if	iDirect = Direct_In		then	mulx	-1
+
+_transX = 0
+_transY = 0
+
+	hotspot	0,					0,	_offsetZ
+	hotspot	frmThk,				0,	_offsetZ
+	hotspot	frmThk + gskThk,	0,	_offsetZ
+
+	hotspot	0,					0,	_offsetZ + _frameHgt
+	hotspot	frmThk,				0,	_offsetZ + _frameHgt
+	hotspot	frmThk + gskThk,	0,	_offsetZ + _frameHgt
+
+	if	_iFrame = Frame_Corner	then
+		put	-_frmWdt/2,	0,					15,
+			-_frmWdt/2,	frmThk + gskThk,	15,
+			_gskWdt/2,	frmThk + gskThk,	15,
+			_gskWdt/2,	frmThk,				15,
+			_frmWdt/2,	frmThk,				15,
+			_frmWdt/2,	0,					15
+	endif
+
+	if	_iFrame = Frame_Mullion	then
+		if	iMlnType = Mln_Type1	then
+			put	-_frmWdt/2,	0,					15,
+				-_frmWdt/2,	frmThk,				15,
+				-_gskWdt/2,	frmThk,				15,
+				-_gskWdt/2,	frmThk + gskThk,	15,
+				_gskWdt/2,	frmThk + gskThk,	15,
+				_gskWdt/2,	frmThk,				15,
+				_frmWdt/2,	frmThk,				15,
+				_frmWdt/2,	0,					15
+		endif
+		if	iMlnType = Mln_Type2	then
+			put	-_frmWdt/2,	0,							15,
+				-_frmWdt/2,	frmThk,						15,
+				-_gskWdt/2,	frmThk,						15,
+				-_gskWdt/2,	frmThk + gskThk - capThk,	15,
+				-_frmWdt/2,	frmThk + gskThk - capThk,	15,
+				-_frmWdt/2,	frmThk + gskThk,			15,
+				_frmWdt/2,	frmThk + gskThk,			15,
+				_frmWdt/2,	frmThk + gskThk - capThk,	15,
+				_gskWdt/2,	frmThk + gskThk - capThk,	15,
+				_gskWdt/2,	frmThk,						15,
+				_frmWdt/2,	frmThk,						15,
+				_frmWdt/2,	0,							15
+		endif
+	endif
+
+	if	_iFrame = Frame_Angled	then
+		dim	_frmPoint[][]
+		dim	_xPosTrans[],	_yPosTrans[]
+
+		!	Point
+			!	Point1
+			_frmPoint[1][1] = -_frmWdt/2
+			_frmPoint[1][2] = 0
+
+			!	Point2
+			_frmPoint[2][1] = -_frmWdt/2
+			_frmPoint[2][2] = frmThk/cos(_aFrm)
+
+			!	Point3
+			_frmPoint[3][1] = -_gskWdt/2
+			_frmPoint[3][2] = frmThk/cos(_aFrm)
+
+			!	Point4
+			_frmPoint[4][1] = -_gskWdt/2
+			_frmPoint[4][2] = (frmThk + gskThk)/cos(_aFrm) + (_frmWdt - _gskWdt)/2*tan(_aFrm)
+
+			!	Point5
+			_frmPoint[5][1] = _gskWdt/2
+			_frmPoint[5][2] = (frmThk + gskThk)/cos(_aFrm) + (_frmWdt - _gskWdt)/2*tan(_aFrm)
+
+			!	Point6
+			_frmPoint[6][1] = _gskWdt/2
+			_frmPoint[6][2] = frmThk/cos(_aFrm)
+
+			!	Point7
+			_frmPoint[7][1] = _frmWdt/2
+			_frmPoint[7][2] = frmThk/cos(_aFrm)
+
+			!	Point8
+			_frmPoint[8][1] = _frmWdt/2
+			_frmPoint[8][2] = 0
+
+		!	좌표이동값
+		_refer = _frmWdt/2*tan(_aFrm)
+		_transX = _refer*cos(_aFrm)
+		_transY = _refer*sin(_aFrm)
+
+		for	i = 1	to	8
+			_xPosTrans[i] = (_frmPoint[i][1])*cos(_aFrm) - (_frmPoint[i][2])*sin(_aFrm)
+			_yPosTrans[i] = (_frmPoint[i][1])*sin(_aFrm) + (_frmPoint[i][2])*cos(_aFrm)
+
+			put	_xPosTrans[i],	_yPosTrans[i],	15
+		next	i
+	endif
+
+	add	-_transX,	-_transY,	0
+		rotz	-90
+			addz	_offsetZ
+				prism_	nsp/3,	_frameHgt,	get(nsp)
+			del 1
+		del 1
+	del 1
+del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+!	Horizonal Frame
+!-----------------------------------------------------------------------------------------------
+"hFrames":
+!-----------------------------------------------------------------------------------------------
+pen			penFrm3D
+sect_fill	fillFrm,	backPenFrm,	fillPenFrm,	penFrmSct
+material	matFrm
+
+!	커튼월 생성 방향에 따른 변수 정의
+_rad_1st = distWP
+if	iDirect = Direct_Out	then
+	_rad_2nd = distWP + frmThk
+	if	_iFrame = Frame_Corner	then
+		_rad_3rd = distWP + frmThk + gskThk
+	endif
+	if	_iFrame = Frame_Transom	then
+		if	iTrsType = Trs_Type1	then
+			_rad_3rd = distWP + frmThk + gskThk
+		endif
+		if	iTrsType = Trs_Type2	then
+			_rad_3rd = distWP + frmThk + gskThk - capThk
+			_rad_4th = distWP + frmThk + gskThk
+		endif
+	endif
+endif
+if	iDirect = Direct_In		then
+	_rad_2nd = distWP - frmThk
+	if	_iFrame = Frame_Corner	then
+		_rad_3rd = distWP - frmThk - gskThk
+	endif
+	if	_iFrame = Frame_Transom	then
+		if	iTrsType = Trs_Type1	then
+			_rad_3rd = distWP - frmThk - gskThk
+		endif
+		if	iTrsType = Trs_Type2	then
+			_rad_3rd = distWP - frmThk - gskThk + capThk
+			_rad_4th = distWP - frmThk - gskThk
+		endif
+	endif
+endif
+
+
+!	프레임
+if	nMln < eps	then
+	if	not(_status = status_Bottom & bDoor[1])	then
+		put	_rad_1st,					0,							15,
+			_rad_1st*cos(totalAngle),	_rad_1st*sin(totalAngle),	15,
+			_rad_2nd*cos(totalAngle),	_rad_2nd*sin(totalAngle),	15,
+			_rad_2nd,					0,							15
+
+			prism_	nsp/3,	_frmWdt,	get(nsp)
+	endif
+else
+	for	j = 1	to	nMln + 1
+		if	not(_status = status_Bottom & bDoor[j])	then
+			if	j = 1	then
+				put	_rad_1st,					0,							15,
+					_rad_1st*cos(eachAngle[j]),	_rad_1st*sin(eachAngle[j]),	15,
+					_rad_2nd*cos(eachAngle[j]),	_rad_2nd*sin(eachAngle[j]),	15,
+					_rad_2nd,					0,							15
+			endif
+			if	j # 1 & j # nMln + 1	then
+				put	_rad_1st*cos(eachAngle[j - 1]),	_rad_1st*sin(eachAngle[j - 1]),	15,
+					_rad_1st*cos(eachAngle[j]),		_rad_1st*sin(eachAngle[j]),		15,
+					_rad_2nd*cos(eachAngle[j]),		_rad_2nd*sin(eachAngle[j]),		15,
+					_rad_2nd*cos(eachAngle[j - 1]),	_rad_2nd*sin(eachAngle[j - 1]),	15
+			endif
+			if	j = nMln + 1	then
+				put	_rad_1st*cos(eachAngle[j - 1]),	_rad_1st*sin(eachAngle[j - 1]),	15,
+					_rad_1st*cos(totalAngle),		_rad_1st*sin(totalAngle),		15,
+					_rad_2nd*cos(totalAngle),		_rad_2nd*sin(totalAngle),		15,
+					_rad_2nd*cos(eachAngle[j - 1]),	_rad_2nd*sin(eachAngle[j - 1]),	15
+			endif
+
+			prism_	nsp/3,	_frmWdt,	get(nsp)
+		endif
+	next	j
+endif
+
+!	개스킷
+if	_iFrame = Frame_Transom	then	addz	(_frmWdt - _gskWdt)/2
+	if	nMln < eps	then
+		if	not(_status = status_Bottom & bDoor[1])	then
+			put	_rad_2nd,					0,							15,
+				_rad_2nd*cos(totalAngle),	_rad_2nd*sin(totalAngle),	15,
+				_rad_3rd*cos(totalAngle),	_rad_3rd*sin(totalAngle),	15,
+				_rad_3rd,					0,							15
+
+			prism_	nsp/3,	_gskWdt,	get(nsp)
+		endif
+	else
+		for	j = 1	to	nMln + 1
+			if	not(_status = status_Bottom & bDoor[j])	then
+				if	j = 1	then
+					put	_rad_2nd,					0,							15,
+						_rad_2nd*cos(eachAngle[j]),	_rad_2nd*sin(eachAngle[j]),	15,
+						_rad_3rd*cos(eachAngle[j]),	_rad_3rd*sin(eachAngle[j]),	15,
+						_rad_3rd,					0,							15
+				endif
+				if	j # 1 & j # nMln + 1	then
+					put	_rad_2nd*cos(eachAngle[j - 1]),	_rad_2nd*sin(eachAngle[j - 1]),	15,
+						_rad_2nd*cos(eachAngle[j]),		_rad_2nd*sin(eachAngle[j]),		15,
+						_rad_3rd*cos(eachAngle[j]),		_rad_3rd*sin(eachAngle[j]),		15,
+						_rad_3rd*cos(eachAngle[j - 1]),	_rad_3rd*sin(eachAngle[j - 1]),	15
+				endif
+				if	j = nMln + 1	then
+					put	_rad_2nd*cos(eachAngle[j - 1]),	_rad_2nd*sin(eachAngle[j - 1]),	15,
+						_rad_2nd*cos(totalAngle),		_rad_2nd*sin(totalAngle),		15,
+						_rad_3rd*cos(totalAngle),		_rad_3rd*sin(totalAngle),		15,
+						_rad_3rd*cos(eachAngle[j - 1]),	_rad_3rd*sin(eachAngle[j - 1]),	15
+				endif
+
+				prism_	nsp/3,	_gskWdt,	get(nsp)
+			endif
+		next	j
+	endif
+if	_iFrame = Frame_Transom	then	del 1
+
+!	캡_Type2
+if	_iFrame = Frame_Transom & iTrsType = Trs_Type2	then
+	if	nMln < eps	then
+		if	not(_status = status_Bottom & bDoor[1])	then
+			put	_rad_3rd,					0,							15,
+				_rad_3rd*cos(totalAngle),	_rad_3rd*sin(totalAngle),	15,
+				_rad_4th*cos(totalAngle),	_rad_4th*sin(totalAngle),	15,
+				_rad_4th,					0,							15
+
+			prism_	nsp/3,	_frmWdt,	get(nsp)
+		endif
+	else
+		for	j = 1	to	nMln + 1
+			if	not(_status = status_Bottom & bDoor[j])	then
+				if	j = 1	then
+					put	_rad_3rd,					0,							15,
+						_rad_3rd*cos(eachAngle[j]),	_rad_3rd*sin(eachAngle[j]),	15,
+						_rad_4th*cos(eachAngle[j]),	_rad_4th*sin(eachAngle[j]),	15,
+						_rad_4th,					0,							15
+				endif
+				if	j # 1 & j # nMln + 1	then
+					put	_rad_3rd*cos(eachAngle[j - 1]),	_rad_3rd*sin(eachAngle[j - 1]),	15,
+						_rad_3rd*cos(eachAngle[j]),		_rad_3rd*sin(eachAngle[j]),		15,
+						_rad_4th*cos(eachAngle[j]),		_rad_4th*sin(eachAngle[j]),		15,
+						_rad_4th*cos(eachAngle[j - 1]),	_rad_4th*sin(eachAngle[j - 1]),	15
+				endif
+				if	j = nMln + 1	then
+					put	_rad_3rd*cos(eachAngle[j - 1]),	_rad_3rd*sin(eachAngle[j - 1]),	15,
+						_rad_3rd*cos(totalAngle),		_rad_3rd*sin(totalAngle),		15,
+						_rad_4th*cos(totalAngle),		_rad_4th*sin(totalAngle),		15,
+						_rad_4th*cos(eachAngle[j - 1]),	_rad_4th*sin(eachAngle[j - 1]),	15
+				endif
+
+				prism_	nsp/3,	_frmWdt,	get(nsp)
+			endif
+		next	j
+	endif
+endif
+
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+!	Sub	Frame Left/Right
+!-----------------------------------------------------------------------------------------------
+
+!	Sub Frame Left
+!-----------------------------------------------------------------------------------------------
+"sub_hFrames_L":
+!-----------------------------------------------------------------------------------------------
+pen			penFrm3D
+sect_fill	fillFrm,	backPenFrm,	fillPenFrm,	penFrmSct
+material	matFrm
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radSub_1st= frmThk
+	if	_iFrame = Frame_Corner	then
+		_radSub_2nd = frmThk + gskThk
+	endif
+	if	_iFrame = Frame_Transom	then
+		if	iTrsType = Trs_Type1	then
+			_radSub_2nd = frmThk + gskThk
+		endif
+		if	iTrsType = Trs_Type2	then
+			_radSub_2nd = frmThk + gskThk - capThk
+			_radSub_3rd = frmThk + gskThk
+		endif
+	endif
+
+	_radSubEX_1st = frmThk + gskThk
+	_radSubEX_2nd = frmThk + gskThk + exTrsThk
+endif
+if	iDirect = Direct_In		then
+	_radSub_1st = -frmThk
+	if	_iFrame = Frame_Corner	then
+		_radSub_2nd = -(frmThk + gskThk)
+	endif
+	if	_iFrame = Frame_Transom	then
+		if	iTrsType = Trs_Type1	then
+			_radSub_2nd = -(frmThk + gskThk)
+		endif
+		if	iTrsType = Trs_Type2	then
+			_radSub_2nd = -(frmThk + gskThk - capThk)
+			_radSub_3rd = -(frmThk + gskThk)
+		endif
+	endif
+
+	_radSubEX_1st = -(frmThk + gskThk)
+	_radSubEX_2nd = -(frmThk + gskThk + exTrsThk)
+endif
+
+!	프레임
+_referDist = (_frmWdtV/2)/cos(_aFrm)
+_referDist_s = _referDist*sin(_aFrm)
+
+if	not(_status = status_Bottom & bDoor[1]) & not(abs(_aFrm) < eps)	then
+	put	0,				0,										15,
+		_radSub_1st,	0,										15,
+		_radSub_1st,	_radSub_1st*tan(_aFrm) - _referDist,	15
+
+	rotz	totalAngle
+		addx	distWP
+			prism_	nsp/3,	_frmWdtH,	get(nsp)
+		del 1
+	del 1
+endif
+
+!	개스킷
+if	_iFrame = Frame_Transom	then	addz	(_frmWdtH - _gskWdtH)/2
+	if	not(_status = status_Bottom & bDoor[1]) & not(abs(_aFrm) < eps)	then
+		put	_radSub_1st,							0,													15,
+			_radSub_1st,							_radSub_1st*tan(_aFrm) - _referDist,				15,
+			_radSub_1st - _referDist_s*cos(_aFrm),	_radSub_1st*tan(_aFrm) - _referDist_s*sin(_aFrm),	15,
+			_radSub_2nd,							_radSub_2nd*tan(_aFrm) - (_gskWdtV/2)/cos(_aFrm),	15,
+			_radSub_2nd,							0,													15
+
+		rotz	totalAngle
+			addx	distWP
+				prism_	nsp/3,	_gskWdtH,	get(nsp)
+			del 1
+		del 1
+	endif
+if	_iFrame = Frame_Transom	then	del 1
+
+!	캡(Type2)
+if	_iFrame = Frame_Transom & iTrsType = Trs_Type2	then
+	if	not(_status = status_Bottom & bDoor[1]) & not(abs(_aFrm) < eps)	then
+		put	_radSub_2nd,	0,													15,
+			_radSub_2nd,	_radSub_2nd*tan(_aFrm),								15,
+			_radSub_3rd,	_radSub_3rd*tan(_aFrm) - (_gskWdtV/2)/cos(_aFrm),	15,
+			_radSub_3rd,	0,													15
+
+		rotz	totalAngle
+			addx	distWP
+				prism_	nsp/3,	_frmWdtH,	get(nsp)
+			del 1
+		del 1
+	endif
+endif
+
+!	수평프레임 캡
+if	_status = status_Transom & bExTrs[i] & not(abs(_aFrm) < eps)	then
+	put	_radSubEX_1st,	0,							15,
+		_radSubEX_1st,	_radSubEX_1st*tan(_aFrm),	15,
+		_radSubEX_2nd,	_radSubEX_2nd*tan(_aFrm),	15,
+		_radSubEX_2nd,	0,							15
+
+	rotz	totalAngle
+		addx	distWP
+			prism_	nsp/3,	_frmWdtH,	get(nsp)
+		del 1
+	del 1
+endif
+
+
+return
+
+
+!	Sub Frame Right
+!-----------------------------------------------------------------------------------------------
+"sub_hFrames_R":
+!-----------------------------------------------------------------------------------------------
+pen			penFrm3D
+sect_fill	fillFrm,	backPenFrm,	fillPenFrm,	penFrmSct
+material	matFrm
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radSub_1st= frmThk
+	if	_iFrame = Frame_Corner	then
+		_radSub_2nd = frmThk + gskThk
+	endif
+	if	_iFrame = Frame_Transom	then
+		if	iTrsType = Trs_Type1	then
+			_radSub_2nd = frmThk + gskThk
+		endif
+		if	iTrsType = Trs_Type2	then
+			_radSub_2nd = frmThk + gskThk - capThk
+			_radSub_3rd = frmThk + gskThk
+		endif
+	endif
+
+	_radSubEX_1st = frmThk + gskThk
+	_radSubEX_2nd = frmThk + gskThk + exTrsThk
+endif
+if	iDirect = Direct_In		then
+	_radSub_1st = -frmThk
+	if	_iFrame = Frame_Corner	then
+		_radSub_2nd = -(frmThk + gskThk)
+	endif
+	if	_iFrame = Frame_Transom	then
+		if	iTrsType = Trs_Type1	then
+			_radSub_2nd = -(frmThk + gskThk)
+		endif
+		if	iTrsType = Trs_Type2	then
+			_radSub_2nd = -(frmThk + gskThk - capThk)
+			_radSub_3rd = -(frmThk + gskThk)
+		endif
+	endif
+
+	_radSubEX_1st = -(frmThk + gskThk)
+	_radSubEX_2nd = -(frmThk + gskThk + exTrsThk)
+endif
+
+!	프레임
+_referDist = (_frmWdtV/2)/cos(_aFrm)
+_referDist_s = _referDist*sin(_aFrm)
+
+if	not(_status = status_Bottom & bDoor[1]) & not(abs(_aFrm) < eps)	then
+	put	0,				0,										15,
+		_radSub_1st,	0,										15,
+		_radSub_1st,	_radSub_1st*tan(_aFrm) - _referDist,	15
+
+	muly	-1
+		addx	distWP
+			prism_	nsp/3,	_frmWdtH,	get(nsp)
+		del 1
+	del 1
+endif
+
+!	개스킷
+if	_iFrame = Frame_Transom	then	addz	(_frmWdtH - _gskWdtH)/2
+	if	not(_status = status_Bottom & bDoor[1]) & not(abs(_aFrm) < eps)	then
+		put	_radSub_1st,							0,													15,
+			_radSub_1st,							_radSub_1st*tan(_aFrm) - _referDist,				15,
+			_radSub_1st - _referDist_s*cos(_aFrm),	_radSub_1st*tan(_aFrm) - _referDist_s*sin(_aFrm),	15,
+			_radSub_2nd,							_radSub_2nd*tan(_aFrm) - (_gskWdtV/2)/cos(_aFrm),	15,
+			_radSub_2nd,							0,													15
+
+		muly	-1
+			addx	distWP
+				prism_	nsp/3,	_gskWdtH,	get(nsp)
+			del 1
+		del 1
+	endif
+if	_iFrame = Frame_Transom	then	del 1
+
+!	캡(Type2)
+if	_iFrame = Frame_Transom & iTrsType = Trs_Type2	then
+	if	not(_status = status_Bottom & bDoor[1]) & not(abs(_aFrm) < eps)	then
+		put	_radSub_2nd,	0,													15,
+			_radSub_2nd,	_radSub_2nd*tan(_aFrm),								15,
+			_radSub_3rd,	_radSub_3rd*tan(_aFrm) - (_gskWdtV/2)/cos(_aFrm),	15,
+			_radSub_3rd,	0,													15
+
+		muly	-1
+			addx	distWP
+				prism_	nsp/3,	_frmWdtH,	get(nsp)
+			del 1
+		del 1
+	endif
+endif
+
+!	수평프레임 캡
+if	_status = status_Transom & bExTrs[i] & not(abs(_aFrm) < eps)	then
+	put	_radSubEX_1st,	0,							15,
+		_radSubEX_1st,	_radSubEX_1st*tan(_aFrm),	15,
+		_radSubEX_2nd,	_radSubEX_2nd*tan(_aFrm),	15,
+		_radSubEX_2nd,	0,							15
+
+	muly	-1
+		addx	distWP
+			prism_	nsp/3,	_frmWdtH,	get(nsp)
+		del 1
+	del 1
+endif
+
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+!	Extrude	Frame
+!-----------------------------------------------------------------------------------------------
+"exFrames":
+!-----------------------------------------------------------------------------------------------
+pen			penFrm3D
+sect_fill	fillFrm,	backPenFrm,	fillPenFrm,	penFrmSct
+material	matFrm
+
+!	돌출 멀리언 
+if	_iFrame = Frame_Mullion	then
+	if	iDirect = Direct_Out	then	mulx	1
+	if	iDirect = Direct_In		then	mulx	-1
+
+		put	-_frmWdt/2,	0,			15,
+			-_frmWdt/2,	exMlnThk,	15,
+			_frmWdt/2,	exMlnThk,	15,
+			_frmWdt/2,	0,			15
+
+		rotz	-90
+			addz	_offsetZ
+				prism_	nsp/3,	_frameHgt,	get(nsp)
+			del 1
+		del 1
+	del 1
+endif
+
+!	돌출 트랜섬
+if	_iFrame = Frame_Transom	then
+	!	커튼월 생성 방향에 따른 변수 정의
+	if	iDirect = Direct_Out	then
+		_radEx_1st = distWP + frmThk + gskThk
+		_radEx_2nd = distWP + frmThk + gskThk + exTrsThk
+	endif
+	if	iDirect = Direct_In		then
+		_radEx_1st = distWP - frmThk - gskThk
+		_radEx_2nd = distWP - frmThk - gskThk - exTrsThk
+	endif
+
+	if	nMln < eps	then
+		put	_radEx_1st,					0,							15,
+			_radEx_1st*cos(totalAngle),	_radEx_1st*sin(totalAngle),	15,
+			_radEx_2nd*cos(totalAngle),	_radEx_2nd*sin(totalAngle),	15,
+			_radEx_2nd,					0,							15
+
+		prism_	nsp/3,	_frmWdt,	get(nsp)
+	else
+		for	j = 1	to	nMln + 1
+			if	j = 1	then
+				put	_radEx_1st,						0,								15,
+					_radEx_1st*cos(eachAngle[j]),	_radEx_1st*sin(eachAngle[j]),	15,
+					_radEx_2nd*cos(eachAngle[j]),	_radEx_2nd*sin(eachAngle[j]),	15,
+					_radEx_2nd,						0,								15
+			endif
+			if	j # 1 & j # nMln + 1	then
+				put	_radEx_1st*cos(eachAngle[j - 1]),	_radEx_1st*sin(eachAngle[j - 1]),	15,
+					_radEx_1st*cos(eachAngle[j]),		_radEx_1st*sin(eachAngle[j]),		15,
+					_radEx_2nd*cos(eachAngle[j]),		_radEx_2nd*sin(eachAngle[j]),		15,
+					_radEx_2nd*cos(eachAngle[j - 1]),	_radEx_2nd*sin(eachAngle[j - 1]),	15
+			endif
+			if	j = nMln + 1	then
+				put	_radEx_1st*cos(eachAngle[j - 1]),	_radEx_1st*sin(eachAngle[j - 1]),	15,
+					_radEx_1st*cos(totalAngle),			_radEx_1st*sin(totalAngle),			15,
+					_radEx_2nd*cos(totalAngle),			_radEx_2nd*sin(totalAngle),			15,
+					_radEx_2nd*cos(eachAngle[j - 1]),	_radEx_2nd*sin(eachAngle[j - 1]),	15
+			endif
+
+			prism_	nsp/3,	_frmWdt,	get(nsp)
+		next	j
+	endif
+endif
+
+
+return
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	패널 높이 계산
+!-----------------------------------------------------------------------------------------------
+"calcHeight":
+!-----------------------------------------------------------------------------------------------
+if	nTrs < eps	then
+	_windowHeight = zzyzx - (frmWdtB + gskWdtB)/2 - (frmWdtT + gskWdtT)/2
+else
+	if	j = 1	then
+		_windowHeight = gapTrs[j] - (frmWdtB + gskWdtB)/2 - trsGskWdt/2
+	endif
+	if	j # 1 & j # nTrs + 1	then
+		_windowHeight = gapTrs[j] - trsGskWdt
+	endif
+	if	j = nTrs + 1	then
+		_windowHeight = gapTrs[j] - (frmWdtT + gskWdtT)/2 - trsGskWdt/2
+	endif
+endif
+
+if	nTrs < eps	then
+	_insHeight = zzyzx - frmWdtB - frmWdtT
+else
+	if	j = 1	then
+		_insHeight = gapTrs[j] - frmWdtB - trsWdt/2
+	endif
+	if	j # 1 & j # nTrs + 1	then
+		_insHeight = gapTrs[j] - trsWdt
+	endif
+	if	j = nTrs + 1	then
+		_insHeight = gapTrs[j] - frmWdtT - trsWdt/2
+	endif
+endif
+
+_scrHeight = _insHeight
+_mFrmHeight = _insHeight
+_sFrmHeight = _windowHeight
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+!	Window_1
+!-----------------------------------------------------------------------------------------------
+"Window1":
+!-----------------------------------------------------------------------------------------------
+pen			penGls3D
+sect_fill	fillGls,	backPenGls,	fillPenGls,	penGlsSct
+material	matGls
+if	iPanelType[i][j] = Panel_Spandrel	then	material	matSpdGls
+if	iPanelType[i][j] = Panel_Panel		then	material	matPnl
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radWindow_In = distWP + frmThk + offsetGls
+	_radWindow_Out = distWP + frmThk + offsetGls + glsThk
+endif
+if	iDirect = Direct_In		then
+	_radWindow_In = distWP - frmThk - offsetGls
+	_radWindow_Out = distWP - frmThk - offsetGls - glsThk
+endif
+
+!	단면 열림 표현을 위한 좌표 이동
+nTrans = 0
+if	GLOB_VIEW_TYPE = 4	then
+	if	nMln < eps	then
+		addx	(_radWindow_Out + _radWindow_Out*cos(totalAngle))/2	:	nTrans = nTrans + 1
+		addy	_radWindow_Out*sin(totalAngle)/2	:	nTrans = nTrans + 1
+	else
+		if	i = 1	then
+			addx	(_radWindow_Out + _radWindow_Out*cos(eachAngle[i]))/2	:	nTrans = nTrans + 1
+			addy	_radWindow_Out*sin(eachAngle[i])/2	:	nTrans = nTrans + 1
+		endif
+		if	i # 1 & i # nMln + 1	then
+			addx	(_radWindow_Out*cos(eachAngle[i - 1]) + _radWindow_Out*cos(eachAngle[i]))/2	:	nTrans = nTrans + 1
+			addy	(_radWindow_Out*sin(eachAngle[i]) + _radWindow_Out*sin(eachAngle[i - 1]))/2	:	nTrans = nTrans + 1
+		endif
+		if	i = nMln + 1	then
+			addx	(_radWindow_Out*cos(eachAngle[i - 1]) + _radWindow_Out*cos(totalAngle))/2	:	nTrans = nTrans + 1
+			addy	(_radWindow_Out*sin(totalAngle) + _radWindow_Out*sin(eachAngle[i - 1]))/2	:	nTrans = nTrans + 1
+		endif
+	endif
+	if	iHinge[i][j] = Hinge_Top | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_TopRight	then
+		addz	_windowHeight	:	nTrans = nTrans + 1
+	endif
+
+	if	i = 1	then	rotz	eachAngle[i]/2 + 90	:	nTrans = nTrans + 1
+	if	i # 1	then	rotz	(eachAngle[i - 1] + eachAngle[i])/2 + 90	:	nTrans = nTrans + 1
+
+	if	iPanelType[i][j] = Panel_Project	then
+		if	iHinge[i][j] = Hinge_Top | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_TopRight	then
+			if	iDirect = Direct_Out	then
+				rotx	-openAngle		:	nTrans = nTrans + 1
+			else
+				rotx	openAngle		:	nTrans = nTrans + 1
+			endif
+		endif
+		if	iHinge[i][j] = Hinge_Bottom | iHinge[i][j] = Hinge_BottomLeft | iHinge[i][j] = Hinge_BottomRight	then
+			if	iDirect = Direct_Out	then
+				rotx	openAngle		:	nTrans = nTrans + 1
+			else
+				rotx	-openAngle		:	nTrans = nTrans + 1
+			endif
+		endif
+	endif
+
+
+	if	i = 1	then	rotz	-(eachAngle[i]/2 + 90)	:	nTrans = nTrans + 1
+	if	i # 1	then	rotz	-((eachAngle[i - 1] + eachAngle[i])/2 + 90)	:	nTrans = nTrans + 1
+
+	if	nMln < eps	then
+		addx	-(_radWindow_Out + _radWindow_Out*cos(totalAngle))/2	:	nTrans = nTrans + 1
+		addy	-_radWindow_Out*sin(totalAngle)/2	:	nTrans = nTrans + 1
+	else
+		if	i = 1	then
+			addx	-(_radWindow_Out + _radWindow_Out*cos(eachAngle[i]))/2	:	nTrans = nTrans + 1
+			addy	-_radWindow_Out*sin(eachAngle[i])/2	:	nTrans = nTrans + 1
+		endif
+		if	i # 1 & i # nMln + 1	then
+			addx	-(_radWindow_Out*cos(eachAngle[i - 1]) + _radWindow_Out*cos(eachAngle[i]))/2	:	nTrans = nTrans + 1
+			addy	-(_radWindow_Out*sin(eachAngle[i]) + _radWindow_Out*sin(eachAngle[i - 1]))/2	:	nTrans = nTrans + 1
+		endif
+		if	i = nMln + 1	then
+			addx	-(_radWindow_Out*cos(eachAngle[i - 1]) + _radWindow_Out*cos(totalAngle))/2	:	nTrans = nTrans + 1
+			addy	-(_radWindow_Out*sin(totalAngle) + _radWindow_Out*sin(eachAngle[i - 1]))/2	:	nTrans = nTrans + 1
+		endif
+	endif
+	if	iHinge[i][j] = Hinge_Top | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_TopRight	then
+		addz	-_windowHeight	:	nTrans = nTrans + 1
+	endif
+endif
+
+	!	유리
+	if	nMln < eps	then
+		put	_radWindow_In,					0,								15,
+			_radWindow_In*cos(totalAngle),	_radWindow_In*sin(totalAngle),	15,
+			_radWindow_Out*cos(totalAngle),	_radWindow_Out*sin(totalAngle),	15,
+			_radWindow_Out,					0,								15
+
+		prism_	nsp/3,	_windowHeight,	get(nsp)
+	else
+		if	i = 1	then
+			put	_radWindow_In,						0,									15,
+				_radWindow_In*cos(eachAngle[i]),	_radWindow_In*sin(eachAngle[i]),	15,
+				_radWindow_Out*cos(eachAngle[i]),	_radWindow_Out*sin(eachAngle[i]),	15,
+				_radWindow_Out,						0,									15
+		endif
+		if	i # 1 & i # nMln + 1	then
+			put	_radWindow_In*cos(eachAngle[i - 1]),	_radWindow_In*sin(eachAngle[i - 1]),	15,
+				_radWindow_In*cos(eachAngle[i]),		_radWindow_In*sin(eachAngle[i]),		15,
+				_radWindow_Out*cos(eachAngle[i]),		_radWindow_Out*sin(eachAngle[i]),		15,
+				_radWindow_Out*cos(eachAngle[i - 1]),	_radWindow_Out*sin(eachAngle[i - 1]),	15
+		endif
+		if	i = nMln + 1	then
+			put	_radWindow_In*cos(eachAngle[i - 1]),	_radWindow_In*sin(eachAngle[i - 1]),	15,
+				_radWindow_In*cos(totalAngle),			_radWindow_In*sin(totalAngle),			15,
+				_radWindow_Out*cos(totalAngle),			_radWindow_Out*sin(totalAngle),			15,
+				_radWindow_Out*cos(eachAngle[i - 1]),	_radWindow_Out*sin(eachAngle[i - 1]),	15
+		endif
+
+		prism_	nsp/3,	_windowHeight,	get(nsp)
+	endif
+
+!	단면 열림 표현을 위한 좌표 이동
+if	GLOB_VIEW_TYPE = 4	then
+	nFirst = j + 1
+
+	del nTrans,	nFirst
+endif
+
+_textLct = 0.5
+if	iPanelType[i][j] = Panel_Fix | iPanelType[i][j] = Panel_Panel	then	gosub	"textFix"
+if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then	gosub	"openLine"
+if	iPanelType[i][j] = Panel_Smoke	then	gosub	"textSmoke"
+if	iPanelType[i][j] = Panel_Spandrel	then	gosub	"insulation"
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+!	Window_2
+!-----------------------------------------------------------------------------------------------
+"Window2":
+!-----------------------------------------------------------------------------------------------
+	!	커튼월 생성 방향에 따른 변수 정의
+	if	iDirect = Direct_Out	then
+		_radWindow_In = distWP + frmThk + offsetGls
+		_radWindow_Out = distWP + frmThk + offsetGls + glsThk
+	endif
+	if	iDirect = Direct_In		then
+		_radWindow_In = distWP - frmThk - offsetGls
+		_radWindow_Out = distWP - frmThk - offsetGls - glsThk
+	endif
+
+	!	유리
+	pen			penGls3D
+	sect_fill	fillGls,	backPenGls,	fillPenGls,	penGlsSct
+	material	matGls
+
+	if	nMln < eps	then
+		put	_radWindow_In,					0,								15,
+			_radWindow_In*cos(totalAngle),	_radWindow_In*sin(totalAngle),	15,
+			_radWindow_Out*cos(totalAngle),	_radWindow_Out*sin(totalAngle),	15,
+			_radWindow_Out,					0,								15
+
+		prism_	nsp/3,	_windowHeight,	get(nsp)
+	else
+		if	i = 1	then
+			put	_radWindow_In,						0,									15,
+				_radWindow_In*cos(eachAngle[i]),	_radWindow_In*sin(eachAngle[i]),	15,
+				_radWindow_Out*cos(eachAngle[i]),	_radWindow_Out*sin(eachAngle[i]),	15,
+				_radWindow_Out,						0,									15
+		endif
+		if	i # 1 & i # nMln + 1	then
+			put	_radWindow_In*cos(eachAngle[i - 1]),	_radWindow_In*sin(eachAngle[i - 1]),	15,
+				_radWindow_In*cos(eachAngle[i]),		_radWindow_In*sin(eachAngle[i]),		15,
+				_radWindow_Out*cos(eachAngle[i]),		_radWindow_Out*sin(eachAngle[i]),		15,
+				_radWindow_Out*cos(eachAngle[i - 1]),	_radWindow_Out*sin(eachAngle[i - 1]),	15
+		endif
+		if	i = nMln + 1	then
+			put	_radWindow_In*cos(eachAngle[i - 1]),	_radWindow_In*sin(eachAngle[i - 1]),	15,
+				_radWindow_In*cos(totalAngle),			_radWindow_In*sin(totalAngle),			15,
+				_radWindow_Out*cos(totalAngle),			_radWindow_Out*sin(totalAngle),			15,
+				_radWindow_Out*cos(eachAngle[i - 1]),	_radWindow_Out*sin(eachAngle[i - 1]),	15
+		endif
+
+		prism_	nsp/3,	_windowHeight,	get(nsp)
+	endif
+
+	!	오픈라인/텍스트
+	if	iPanelType[i][j] = Panel_Fix2 	then
+		_textLct = 0.25
+		gosub	"textFix"
+
+		_textLct = 0.75
+		gosub	"textFix"
+	endif
+	
+	if	iPanelType[i][j] = Panel_Project2	then
+		gosub	"openLine"
+	endif
+
+	!	경기도 신청사 프로젝트용
+	if	iPanelType[i][j] = Panel_Custom1	then
+		gosub	"openLine"
+
+		_textLct = 0.25
+		gosub	"textFix"
+	endif
+return
+
+!-----------------------------------------------------------------------------------------------
+"Window2_frame":
+!-----------------------------------------------------------------------------------------------
+	!	커튼월 생성 방향에 따른 변수 정의
+	if	iDirect = Direct_Out	then
+		_frmThk = frmThk
+		_gskThk = gskThk
+		_capThk = capThk
+	endif
+	if	iDirect = Direct_In		then
+		_frmThk = -frmThk
+		_gskThk = -gskThk
+		_capThk = -capThk
+	endif
+
+	!	프레임
+	pen			penFrm3D
+	sect_fill	fillFrm,	backPenFrm,	fillPenFrm,	penFrmSct
+	material	matFrm
+
+	if	nMln < eps	then
+		_transX = (distWP + distWP*cos(totalAngle))/2
+		_transY = (distWP*sin(totalAngle))/2
+		_aRot = totalAngle/2
+		_aInner = totalAngle/2
+	else
+		if	i = 1	then
+			_transX = (distWP + distWP*cos(eachAngle[i]))/2
+			_transY = (distWP*sin(eachAngle[i]))/2
+			_aRot = eachAngle[i]/2
+			_aInner = eachAngle[i]/2
+		endif
+		if	i # 1	then
+			_transX = (distWP*cos(eachAngle[i - 1]) + distWP*cos(eachAngle[i]))/2
+			_transY = (distWP*sin(eachAngle[i - 1]) + distWP*sin(eachAngle[i]))/2
+			_aRot = (eachAngle[i] + eachAngle[i - 1])/2
+			_aInner = (eachAngle[i] - eachAngle[i - 1])/2
+		endif
+	endif
+	if	j = 1	then
+		_transZ = frmWdtB - (frmWdtB + gskWdtB)/2
+	endif
+	if	j # 1	then
+		_transZ = trsWdt/2 - trsGskWdt/2
+	endif
+
+	add	_transX,	_transY,	_transZ
+		rotz	_aRot
+			!	Main
+			put	0,						-mlnWdt/2,	15,
+				0,						mlnWdt/2,	15,
+				_frmThk*cos(_aInner),	mlnWdt/2,	15,
+				_frmThk*cos(_aInner),	-mlnWdt/2,	15
+
+			prism_	nsp/3,	_mFrmHeight,	get(nsp)
+
+			!	Sub
+			if	iMlnType = Mln_Type1	then
+				put	0,						-mlnGskWdt/2,	15,
+					0,						mlnGskWdt/2,	15,
+					_gskThk*cos(_aInner),	mlnGskWdt/2,	15,
+					_gskThk*cos(_aInner),	-mlnGskWdt/2,	15
+			endif
+			if	iMlnType = Mln_Type2	then
+				put	0,									-mlnGskWdt/2,	15,
+					0,									mlnGskWdt/2,	15,
+					(_gskThk - _capThk)*cos(_aInner),	mlnGskWdt/2,	15,
+					(_gskThk - _capThk)*cos(_aInner),	mlnWdt/2,		15,
+					_gskThk*cos(_aInner),				mlnWdt/2,		15,
+					_gskThk*cos(_aInner),				-mlnWdt/2,		15,
+					(_gskThk - _capThk)*cos(_aInner),	-mlnWdt/2,		15,
+					(_gskThk - _capThk)*cos(_aInner),	-mlnGskWdt/2,	15
+			endif
+
+			add	_frmThk*cos(_aInner),	0,	-_transZ
+				prism_	nsp/3,	_sFrmHeight,	get(nsp)
+			del 1
+		del 1
+	del 1
+return
+
+
+!-----------------------------------------------------------------------------------------------
+!	Sub Window_1
+!-----------------------------------------------------------------------------------------------
+"sub_Window1":
+!-----------------------------------------------------------------------------------------------
+pen			penGls3D
+sect_fill	fillGls,	backPenGls,	fillPenGls,	penGlsSct
+material	matGls
+if	iPanelType[i][j] = Panel_Spandrel	then	material	matSpdGls
+if	iPanelType[i][j] = Panel_Panel		then	material	matPnl
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radSubWin_In = frmThk + offsetGls
+	_radSubWin_Out = frmThk + offsetGls + glsThk
+endif
+if	iDirect = Direct_In		then
+	_radSubWin_In = -(frmThk + offsetGls)
+	_radSubWin_Out = -(frmThk + offsetGls + glsThk)
+endif
+
+!	좌측
+if	i = nMln + 1	then
+	if	iCornerL = Corner_Angled & not(abs(aFrmL) < eps)	then
+		put	_radSubWin_In,	0,							15,
+			_radSubWin_In,	_radSubWin_In*tan(aFrmL),	15,
+			_radSubWin_Out,	_radSubWin_Out*tan(aFrmL),	15,
+			_radSubWin_Out,	0,							15
+
+		rotz	totalAngle
+			addx	distWP
+				prism_	nsp/3,	_windowHeight,	get(nsp)
+			del 1
+		del 1
+	endif
+endif
+
+!	우측
+if	i = 1	then
+	if	iCornerR = Corner_Angled & not(abs(aFrmR) < eps)	then
+		put	_radSubWin_In,	0,							15,
+			_radSubWin_In,	_radSubWin_In*tan(-aFrmR),	15,
+			_radSubWin_Out,	_radSubWin_Out*tan(-aFrmR),	15,
+			_radSubWin_Out,	0,							15
+
+		muly	-1
+			addx	distWP
+				prism_	nsp/3,	_windowHeight,	get(nsp)
+			del 1
+		del 1
+	endif
+endif
+
+if	iPanelType[i][j] = Panel_Spandrel	then	gosub	"sub_insulation"
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+!	텍스트
+!-----------------------------------------------------------------------------------------------
+"textFix":	!	고정창
+!-----------------------------------------------------------------------------------------------
+! if	bText	then
+if	bText & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
+	style		"fix"
+	pen			penText
+	material	matText
+
+	if	iDirect = Direct_Out	then	_mul = 1
+	if	iDirect = Direct_In		then	_mul = -1
+
+	if	nMln < eps	then
+		addx	_radWindow_In + (_radWindow_In*cos(totalAngle) - _radWindow_In)*_textLct
+		addy	_radWindow_In*sin(totalAngle)*_textLct
+	else
+		if	i = 1	then
+			addx	_radWindow_In + (_radWindow_In*cos(eachAngle[i]) - _radWindow_In)*_textLct
+			addy	_radWindow_In*sin(eachAngle[i])*_textLct
+		endif
+		if	i # 1	then
+			addx	_radWindow_In*cos(eachAngle[i - 1]) + (_radWindow_In*cos(eachAngle[i]) - _radWindow_In*cos(eachAngle[i - 1]))*_textLct
+			addy	_radWindow_In*sin(eachAngle[i - 1]) + (_radWindow_In*sin(eachAngle[i]) - _radWindow_In*sin(eachAngle[i - 1]))*_textLct
+		endif
+	endif
+
+		_stFix = "F"
+		_bCircle = 0
+
+		!	경기도 신청사 프로젝트용
+		if	iPanelType[i][j] = Panel_Custom1	then
+			_stFix = "전"
+			_bCircle = 1
+		endif
+
+		addz	_windowHeight/2
+			rotx	90
+				if	i = 1	then	roty	eachAngle[i]/2 + 90
+				if	i # 1	then	roty	(eachAngle[i - 1] + eachAngle[i])/2 + 90
+					if	bMirror			then	mulx	-1
+					if	not(bMirror)	then	mulx	1
+						text	-eps*_mul,	0,	_stFix
+
+						if	_bCircle	then
+							model	wire
+							circle	textSize/1000
+							model	solid
+						endif
+					del 1
+
+					if	iDirect = Direct_Out	then	addz	glsThk
+					if	iDirect = Direct_In		then	addz	-glsThk
+						if	bMirror			then	mulx	-1
+						if	not(bMirror)	then	mulx	1
+							text	eps*_mul,	0,	_stFix
+
+							if	_bCircle	then
+								model	wire
+								circle	textSize/1000
+								model	solid
+							endif
+						del 1
+					del 1
+				del 1
+			del 1
+		del 1
+
+	del 2
+endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"textSmoke":	!	 배연창
+!-----------------------------------------------------------------------------------------------\
+! if	bSmokeText	then
+if	bSmokeText & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
+	style		"fix"
+	pen			penText
+	material	matText
+
+	if	iDirect = Direct_Out	then	_mul = 1
+	if	iDirect = Direct_In		then	_mul = -1
+
+	if	nMln < eps	then
+		addx	(_radWindow_In + _radWindow_In*cos(totalAngle))/2
+		addy	_radWindow_In*sin(totalAngle)/2
+	else
+		if	i = 1	then
+			addx	(_radWindow_In + _radWindow_In*cos(eachAngle[i]))/2
+			addy	_radWindow_In*sin(eachAngle[i])/2
+		endif
+		if	i # 1 & i # nMln + 1	then
+			addx	(_radWindow_In*cos(eachAngle[i - 1]) + _radWindow_In*cos(eachAngle[i]))/2
+			addy	(_radWindow_In*sin(eachAngle[i]) + _radWindow_In*sin(eachAngle[i - 1]))/2
+		endif
+		if	i = nMln + 1	then
+			addx	(_radWindow_In*cos(eachAngle[i - 1]) + _radWindow_In*cos(totalAngle))/2
+			addy	(_radWindow_In*sin(totalAngle) + _radWindow_In*sin(eachAngle[i - 1]))/2
+		endif
+	endif
+
+		addz	_windowHeight/2
+			rotx	90
+				if	i = 1	then	roty	eachAngle[i]/2 + 90
+				if	i # 1	then	roty	(eachAngle[i - 1] + eachAngle[i])/2 + 90
+					if	bMirror			then	mulx	-1
+					if	not(bMirror)	then	mulx	1
+						model	solid
+						text	-eps*_mul,	0,	"배"
+
+						model	wire
+						circle	textSize/1000
+						model	solid
+					del 1
+
+					if	iDirect = Direct_Out	then	addz	glsThk
+					if	iDirect = Direct_In		then	addz	-glsThk
+						if	bMirror			then	mulx	-1
+						if	not(bMirror)	then	mulx	1
+							model	solid
+							text	eps*_mul,	0,	"배"
+
+							model	wire
+							circle	textSize/1000
+							model	solid
+						del 1
+					del 1
+				del 1
+			del 1
+		del 1
+
+	del 2
+endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+!	프로젝트창 열림 표현
+!-----------------------------------------------------------------------------------------------
+"openLine":
+!-----------------------------------------------------------------------------------------------
+pen	penOpen
+
+!	각도
+_rotAngle = (totalAngle/(nMln + 1))/2
+
+if	nMln < eps	then
+	_x1 = _radWindow_In - gskWdtR/2*tan(_rotAngle)
+	_y1 = gskWdtR/2*cos(_rotAngle)
+	_x2 = _radWindow_In*cos(totalAngle) + gskWdtL/2*tan(_rotAngle)
+	_y2 = _radWindow_In*sin(totalAngle) - gskWdtL/2
+
+	_x3 = _radWindow_Out - gskWdtR/2*tan(_rotAngle)
+	_y3 = gskWdtR/2*cos(_rotAngle)
+	_x4 = _radWindow_Out*cos(totalAngle) + gskWdtL/2*tan(_rotAngle)
+	_y4 = _radWindow_Out*sin(totalAngle) - gskWdtL/2
+else
+	if	i = 1	then
+		_slashMln = (mlnGskWdt/2)/cos(_rotAngle)
+		_slashRight = (gskWdtR/2)/cos(_rotAngle)
+		_halfAngle = (eachAngle[i])/2
+
+		_x1 = _radWindow_In - _slashRight*sin(_halfAngle)
+		_y1 = _slashRight*cos(_halfAngle)
+		_x2 = _radWindow_In*cos(eachAngle[i]) + _slashMln*sin(_halfAngle)
+		_y2 = _radWindow_In*sin(eachAngle[i]) - _slashMln*cos(_halfAngle)
+
+		_x3 = _radWindow_Out - _slashRight*sin(_halfAngle)
+		_y3 = _slashRight*cos(_halfAngle)
+		_x4 = _radWindow_Out*cos(eachAngle[i]) + _slashMln*sin(_halfAngle)
+		_y4 = _radWindow_Out*sin(eachAngle[i]) - _slashMln*cos(_halfAngle)
+	endif
+	if	i # 1 & i # nMln + 1	then
+		_slashMln = (mlnGskWdt/2)/cos(_rotAngle)
+		_halfAngle = (eachAngle[i - 1] + eachAngle[i])/2
+
+		_x1 = _radWindow_In*cos(eachAngle[i - 1]) - _slashMln*sin(_halfAngle)
+		_y1 = _radWindow_In*sin(eachAngle[i - 1]) + _slashMln*cos(_halfAngle)
+		_x2 = _radWindow_In*cos(eachAngle[i]) + _slashMln*sin(_halfAngle)
+		_y2 = _radWindow_In*sin(eachAngle[i]) - _slashMln*cos(_halfAngle)
+
+		_x3 = _radWindow_Out*cos(eachAngle[i - 1]) - _slashMln*sin(_halfAngle)
+		_y3 = _radWindow_Out*sin(eachAngle[i - 1]) + _slashMln*cos(_halfAngle)
+		_x4 = _radWindow_Out*cos(eachAngle[i]) + _slashMln*sin(_halfAngle)
+		_y4 = _radWindow_Out*sin(eachAngle[i]) - _slashMln*cos(_halfAngle)
+	endif
+	if	i = nMln + 1	then
+		_slashMln = (mlnGskWdt/2)/cos(_rotAngle)
+		_slashLeft = (gskWdtL/2)/cos(_rotAngle)
+		_halfAngle = (eachAngle[i - 1] + eachAngle[i])/2
+
+		_x1 = _radWindow_In*cos(eachAngle[i - 1]) - _slashMln*sin(_halfAngle)
+		_y1 = _radWindow_In*sin(eachAngle[i - 1]) + _slashMln*cos(_halfAngle)
+		_x2 = _radWindow_In*cos(totalAngle) + _slashLeft*sin(_halfAngle)
+		_y2 = _radWindow_In*sin(totalAngle) - _slashLeft*cos(_halfAngle)
+
+		_x3 = _radWindow_Out*cos(eachAngle[i - 1]) - _slashMln*sin(_halfAngle)
+		_y3 = _radWindow_Out*sin(eachAngle[i - 1]) + _slashMln*cos(_halfAngle)
+		_x4 = _radWindow_Out*cos(totalAngle) + _slashLeft*sin(_halfAngle)
+		_y4 = _radWindow_Out*sin(totalAngle) - _slashLeft*cos(_halfAngle)
+	endif
+endif
+
+if	GLOB_VIEW_TYPE # 4	then
+	!	경기도 신청사 프로젝트용
+	if	iPanelType[i][j] = Panel_Custom1	then
+		lin_	_x1,													_y1,													_windowHeight/2,
+				_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
+		lin_	_x1,													_y1,													_windowHeight/2,
+				_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+
+		lin_	_x3,													_y3,													_windowHeight/2,
+				_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
+		lin_	_x3,													_y3,													_windowHeight/2,
+				_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+	endif
+
+
+	if	iHinge[i][j] = Hinge_Top | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_TopRight	then
+		if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+			lin_	_x1,			_y1,			0,
+					(_x1+_x2)/2,	(_y1+_y2)/2,	_windowHeight
+			lin_	(_x1+_x2)/2,	(_y1+_y2)/2,	_windowHeight,
+					_x2,			_y2,			0
+
+			lin_	_x3,			_y3,			0,
+					(_x3+_x4)/2,	(_y3+_y4)/2,	_windowHeight
+			lin_	(_x3+_x4)/2,	(_y3+_y4)/2,	_windowHeight,
+					_x4,			_y4,			0
+		endif
+		if	iPanelType[i][j] = Panel_Project2	then
+			lin_	_x1,													_y1,													0,
+					_x1 + (_x2 - _x1)/4,									_y1 + (_y2 - _y1)/4,									_windowHeight
+			lin_	_x1 + (_x2 - _x1)/4,									_y1 + (_y2 - _y1)/4,									_windowHeight,
+					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
+
+			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	0,
+					_x1 + (_x2 - _x1)*3/4,									_y1 + (_y2 - _y1)*3/4,									_windowHeight
+			lin_	_x1 + (_x2 - _x1)*3/4,									_y1 + (_y2 - _y1)*3/4,									_windowHeight,
+					_x2,													_y2,													0
+
+			lin_	_x3,													_y3,													0,
+					_x3 + (_x4 - _x3)/4,									_y3 + (_y4 - _y3)/4,									_windowHeight
+			lin_	_x3 + (_x4 - _x3)/4,									_y3 + (_y4 - _y3)/4,									_windowHeight,
+					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
+
+			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	0,
+					_x3 + (_x4 - _x3)*3/4,									_y3 + (_y4 - _y3)*3/4,									_windowHeight
+			lin_	_x3 + (_x4 - _x3)*3/4,									_y3 + (_y4 - _y3)*3/4,									_windowHeight,
+					_x4,													_y4,													0
+		endif
+	endif
+	if	iHinge[i][j] = Hinge_Bottom | iHinge[i][j] = Hinge_BottomLeft | iHinge[i][j] = Hinge_BottomRight	then
+		if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+			lin_	_x1,			_y1,			_windowHeight,
+					(_x1+_x2)/2,	(_y1+_y2)/2,	0
+			lin_	(_x1+_x2)/2,	(_y1+_y2)/2,	0,
+					_x2,			_y2,			_windowHeight
+
+			lin_	_x3,			_y3,			_windowHeight,
+					(_x3+_x4)/2,	(_y3+_y4)/2,	0
+			lin_	(_x3+_x4)/2,	(_y3+_y4)/2,	0,
+					_x4,			_y4,			_windowHeight
+		endif
+		if	iPanelType[i][j] = Panel_Project2	then
+			lin_	_x1,													_y1,													_windowHeight,
+					_x1 + (_x2 - _x1)/4,									_y1 + (_y2 - _y1)/4,									0
+			lin_	_x1 + (_x2 - _x1)/4,									_y1 + (_y2 - _y1)/4,									0,
+					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+
+			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight,
+					_x1 + (_x2 - _x1)*3/4,									_y1 + (_y2 - _y1)*3/4,									0
+			lin_	_x1 + (_x2 - _x1)*3/4,									_y1 + (_y2 - _y1)*3/4,									0,
+					_x2,													_y2,													_windowHeight
+
+			lin_	_x3,													_y3,													_windowHeight,
+					_x3 + (_x4 - _x3)/4,									_y3 + (_y4 - _y3)/4,									0
+			lin_	_x3 + (_x4 - _x3)/4,									_y3 + (_y4 - _y3)/4,									0,
+					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+
+			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight,
+					_x3 + (_x4 - _x3)*3/4,									_y3 + (_y4 - _y3)*3/4,									0
+			lin_	_x3 + (_x4 - _x3)*3/4,									_y3 + (_y4 - _y3)*3/4,									0,
+					_x4,													_y4,													_windowHeight
+		endif
+	endif
+	if	iHinge[i][j] = Hinge_Left | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_BottomLeft	then
+		if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+			lin_	_x2,	_y2,	0,
+					_x1,	_y1,	_windowHeight/2
+			lin_	_x1,	_y1,	_windowHeight/2,
+					_x2,	_y2,	_windowHeight
+
+			lin_	_x4,	_y4,	0,
+					_x3,	_y3,	_windowHeight/2
+			lin_	_x3,	_y3,	_windowHeight/2,
+					_x4,	_y4,	_windowHeight
+		endif
+		if	iPanelType[i][j] = Panel_Project2	then
+			lin_	_x1,													_y1,													_windowHeight/2,
+					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
+			lin_	_x1,													_y1,													_windowHeight/2,
+					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+
+			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2,
+					_x2,													_y2,													0
+			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2,
+					_x2,													_y2,													_windowHeight
+
+			lin_	_x3,													_y3,													_windowHeight/2,
+					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
+			lin_	_x3,													_y3,													_windowHeight/2,
+					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+
+			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2,
+					_x4,													_y4,													0
+			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2,
+					_x4,													_y4,													_windowHeight
+		endif
+	endif
+	if	iHinge[i][j] = Hinge_Right | iHinge[i][j] = Hinge_TopRight | iHinge[i][j] = Hinge_BottomRight	then
+		if	iPanelType[i][j] = Panel_Project	then
+			lin_	_x1,	_y1,	0,
+					_x2,	_y2,	_windowHeight/2
+			lin_	_x2,	_y2,	_windowHeight/2,
+					_x1,	_y1,	_windowHeight
+
+			lin_	_x3,	_y3,	0,
+					_x4,	_y4,	_windowHeight/2
+			lin_	_x4,	_y4,	_windowHeight/2,
+					_x3,	_y3,	_windowHeight
+		endif
+		if	iPanelType[i][j] = Panel_Project2	then
+			lin_	_x1,													_y1,													0,
+					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2
+			lin_	_x1,													_y1,													_windowHeight,
+					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2
+
+			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	0,
+					_x2,													_y2,													_windowHeight/2
+			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight,
+					_x2,													_y2,													_windowHeight/2
+
+			lin_	_x3,													_y3,													0,
+					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2
+			lin_	_x3,													_y3,													_windowHeight,
+					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2
+
+			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	0,
+					_x4,													_y4,													_windowHeight/2
+			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight,
+					_x4,													_y4,													_windowHeight/2
+		endif
+	endif
+endif
+
+
+return
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	스팬드럴창 단열재 표현
+!-----------------------------------------------------------------------------------------------
+"insulation":
+!-----------------------------------------------------------------------------------------------
+pen			penIns3D
+sect_fill	fillIns,	backPenIns,	fillPenIns,	penInsSct
+material	matIns
+
+!	커튼월 생성 방향에 따른 변수 정의
+_radIns_In = distWP
+if	iDirect = Direct_Out	then
+	_radIns_Out = distWP + insThk
+	_mul = 1
+endif
+if	iDirect = Direct_In		then
+	_radIns_Out = distWP - insThk
+	_mul = -1
+endif
+
+!	Z축 이동
+if	j = 1	then
+	addz	(frmWdtB - gskWdtB)/2
+endif
+if	j # 1	then
+	addz	(trsWdt - trsGskWdt)/2
+endif
+
+	!	단열재 모델링
+	if	nMln < eps	then
+		put	_radIns_In,						0,								15,
+			_radIns_In*cos(totalAngle),		_radIns_In*sin(totalAngle),		15,
+			_radIns_Out*cos(totalAngle),	_radIns_Out*sin(totalAngle),	15,
+			_radIns_Out,					0,								15
+
+		prism_	nsp/3,	_insHeight,	get(nsp)
+	else
+		if	i = 1	then
+			put	_radIns_In,						0,								15,
+				_radIns_In*cos(eachAngle[i]),	_radIns_In*sin(eachAngle[i]),	15,
+				_radIns_Out*cos(eachAngle[i]),	_radIns_Out*sin(eachAngle[i]),	15,
+				_radIns_Out,					0,								15
+		endif
+		if	i # 1 & i # nMln + 1	then
+			put	_radIns_In*cos(eachAngle[i - 1]),	_radIns_In*sin(eachAngle[i - 1]),	15,
+				_radIns_In*cos(eachAngle[i]),		_radIns_In*sin(eachAngle[i]),		15,
+				_radIns_Out*cos(eachAngle[i]),		_radIns_Out*sin(eachAngle[i]),		15,
+				_radIns_Out*cos(eachAngle[i - 1]),	_radIns_Out*sin(eachAngle[i - 1]),	15
+		endif
+		if	i = nMln + 1	then
+			put	_radIns_In*cos(eachAngle[i - 1]),	_radIns_In*sin(eachAngle[i - 1]),	15,
+				_radIns_In*cos(totalAngle),			_radIns_In*sin(totalAngle),			15,
+				_radIns_Out*cos(totalAngle),		_radIns_Out*sin(totalAngle),		15,
+				_radIns_Out*cos(eachAngle[i - 1]),	_radIns_Out*sin(eachAngle[i - 1]),	15
+		endif
+
+		prism_	nsp/3,	_insHeight,	get(nsp)
+	endif
+
+	!	단열재 해치 표현
+	sect_fill	fillIns,	backPenIns,	fillPenIns,	penInsHatch
+
+	moduleWdt = (insThk*cos(eachAngle[1]/2) - eps*2)/2
+	moduleUnit = moduleWdt/2
+	moduleInt = int(_insHeight/moduleWdt)
+	moduleRemain = _insHeight MOD moduleWdt
+	moduleNum = moduleInt
+	if	moduleRemain > eps	then	moduleNum = moduleNum + 1
+
+	!	프레임 사이 거리 계산
+	_radDist = distWP
+	gosub	"calcDistF"
+
+	if	GLOB_VIEW_TYPE = 4	then
+		!	Cutplane
+		addz	_insHeight
+			cutplane
+		del 1
+
+			!	해치
+			if	i = 1	then
+				rotz	0
+				_aRot = eachAngle[1]/2
+			else
+				rotz	eachAngle[i - 1]
+				_aRot = (eachAngle[i] - eachAngle[i - 1])/2
+			endif
+			
+
+				addx	distWP
+					roty	-90
+						rotx	-90 + _aRot
+
+							!	해치 모듈
+							for	m = 1	to	moduleNum
+								put	0,				0,				15,
+									0,				moduleUnit,		900,
+									0,				90,				4000+15,
+									moduleUnit,		moduleUnit,		15,
+									0,				moduleUnit*3,	15,
+									moduleUnit,		moduleUnit*3,	900,
+									0,				-180,			4000+15,
+									moduleUnit*2,	moduleUnit*3,	15,
+									moduleUnit,		moduleUnit,		15,
+									moduleUnit*2,	moduleUnit,		900,
+									0,				90,				4000+15
+
+								muly	_mul
+									addy	eps
+										extrude	nsp/3,	0,	0,	_distF,	0,	get(nsp)
+									del 1
+								del 1
+
+									addx	moduleWdt
+							next	m
+
+							del moduleNum
+
+						del 1
+					del 1
+				del 1
+
+			del 1
+
+		cutend
+		!	Cutplane
+	endif
+
+
+del 1
+
+
+return
+
+
+!	Sub Insulation
+!-----------------------------------------------------------------------------------------------
+"sub_insulation":
+!-----------------------------------------------------------------------------------------------
+pen			penIns3D
+sect_fill	fillIns,	backPenIns,	fillPenIns,	penInsSct
+material	matIns
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radSubIns = insThk
+endif
+if	iDirect = Direct_In		then
+	_radSubIns = -insThk
+endif
+
+!	Z축 이동
+if	j = 1	then
+	addz	(frmWdtB - gskWdtB)/2
+endif
+if	j # 1	then
+	addz	(trsWdt - trsGskWdt)/2
+endif
+
+!	좌측
+if	i = nMln + 1	then
+	if	iCornerL = Corner_Angled & not(abs(aFrmL) < eps)	then
+		put	0,			0,						15,
+			_radSubIns,	0,						15,
+			_radSubIns,	_radSubIns*tan(aFrmL),	15
+
+		rotz	totalAngle
+			addx	distWP
+				prism_	nsp/3,	_windowHeight,	get(nsp)
+			del 1
+		del 1
+	endif
+endif
+
+!	우측
+if	i = 1	then
+	if	iCornerR = Corner_Angled & not(abs(aFrmR) < eps)	then
+		put	0,			0,						15,
+			_radSubIns,	0,						15,
+			_radSubIns,	_radSubIns*tan(-aFrmR),	15
+
+		muly	-1
+			addx	distWP
+				prism_	nsp/3,	_windowHeight,	get(nsp)
+			del 1
+		del 1
+	endif
+endif
+
+del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+!	프레임 사이 거리 계산
+!-----------------------------------------------------------------------------------------------
+"calcDistF":
+!-----------------------------------------------------------------------------------------------
+if	nMln < eps	then
+	_distX = abs(_radDist - _radDist*cos(totalAngle))
+	_distY = abs(_radDist*sin(totalAngle))
+else
+	if	i = 1	then
+		_distX = abs(_radDist - _radDist*cos(eachAngle[i]))
+		_distY = abs(_radDist*sin(eachAngle[i]))
+	endif
+	if	i # 1 & i # nMln + 1	then
+		_distX = abs(_radDist*cos(eachAngle[i - 1]) - _radDist*cos(eachAngle[i]))
+		_distY = abs(_radDist*sin(eachAngle[i - 1]) - _radDist*sin(eachAngle[i]))
+	endif
+	if	i = nMln + 1	then
+		_distX = abs(_radDist*cos(eachAngle[i - 1]) - _radDist*cos(totalAngle))
+		_distY = abs(_radDist*sin(eachAngle[i - 1]) - _radDist*sin(totalAngle))
+	endif
+endif
+
+_distF = sqr(_distX^2 + _distY^2)
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+!	Grill
+!-----------------------------------------------------------------------------------------------
+"Grill":
+!-----------------------------------------------------------------------------------------------
+pen			penGrl3D
+sect_fill	fillGrl,	backPenGrl,	fillPenGrl,	penGrlSct
+material	matGrl
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radGrl = distWP + frmThk - gapGrl/2
+endif
+if	iDirect = Direct_In		then
+	_radGrl = distWP - frmThk + gapGrl/2
+endif
+
+!	그릴창
+grlInt = int(_insHeight/gapGrl)
+grlRemain = _insHeight MOD gapGrl
+
+!	프레임 사이 거리 계산
+_radDist = _radGrl
+gosub	"calcDistF"
+
+!	Z축 이동
+if	j = 1	then
+	addz	(frmWdtB - gskWdtB)/2
+endif
+if	j # 1	then
+	addz	(trsWdt - trsGskWdt)/2
+endif
+
+	!	그릴 원점으로 이동
+	if	i = 1	then	rotz	0
+	if	i # 1	then	rotz	eachAngle[i - 1]
+		addx	_radGrl
+			if	i = 1	then	rotz	eachAngle[i]/2
+			if	i # 1	then	rotz	(eachAngle[i] - eachAngle[i - 1])/2
+
+				!	그릴 날개
+				rotx	-90
+					addy	-(gapGrl + grlRemain)/2
+						for	m = 1	to	grlInt
+							if	GLOB_VIEW_TYPE = 5	then
+								lin_	0,	0,	0,
+										0,	0,	_distF
+							else
+								rotz	-grlAng
+									put	-grlThk/2,	gapGrl/2,	15,
+										-grlThk/2,	-gapGrl/2,	15,
+										grlThk/2,	-gapGrl/2,	15,
+										grlThk/2,	gapGrl/2,	15,
+										-grlThk/2,	gapGrl/2,	15
+
+									prism_	nsp/3,	_distF,	get(nsp)
+								del 1
+							endif
+
+							addy	-gapGrl
+						next	m
+
+						del grlInt
+					del 1
+				del 1
+
+				!	그릴 틈 막음
+				rotx	-90
+					rotz	90
+
+						if	not(grlRemain < eps)	then
+							if	GLOB_VIEW_TYPE = 5	then
+							else
+								put	0,				grlThk/2,	15,
+									-grlRemain/2,	grlThk/2,	15,
+									-grlRemain/2,	-grlThk/2,	15,
+									0,				-grlThk/2,	15,
+									0,				grlThk/2,	15
+
+								prism_	nsp/3,	_distF,	use(nsp)
+
+								addx	-(gapGrl*grlInt + grlRemain/2)
+									prism_	nsp/3,	_distF,	get(nsp)
+								del 1
+							endif
+						endif
+
+					del 1
+				del 1
+
+			del 1
+		del 1
+	del 1
+del 1
+
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"scrFrame":	!	프레임
+!-----------------------------------------------------------------------------------------------
+
+!	방충망 너비/두께
+_scrWdt = 0.050
+_scrThk = 0.050
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radScreen_In = distWP + frmThk - _scrThk
+	_radScreen_Out = distWP + frmThk
+endif
+if	iDirect = Direct_In		then
+	_radScreen_In = distWP - frmThk + _scrThk
+	_radScreen_Out = distWP - frmThk
+endif
+
+!	Z축 이동
+if	j = 1	then
+	addz	(frmWdtB - gskWdtB)/2
+endif
+if	j # 1	then
+	addz	(trsWdt - trsGskWdt)/2
+endif
+
+	!	프레임
+	if	GLOB_VIEW_TYPE = 3	then
+		material	matFrm
+
+		if	nMln < eps	then
+			put	_radScreen_In,					0,								15,
+				_radScreen_In*cos(totalAngle),	_radScreen_In*sin(totalAngle),	15,
+				_radScreen_Out*cos(totalAngle),	_radScreen_Out*sin(totalAngle),	15,
+				_radScreen_Out,					0,								15
+
+			prism_	nsp/3,	_scrHeight,	get(nsp)
+		else
+			if	i = 1	then
+				put	_radScreen_In,						0,									15,
+					_radScreen_In*cos(eachAngle[i]),	_radScreen_In*sin(eachAngle[i]),	15,
+					_radScreen_Out*cos(eachAngle[i]),	_radScreen_Out*sin(eachAngle[i]),	15,
+					_radScreen_Out,						0,									15
+			endif
+			if	i # 1 & i # nMln + 1	then
+				put	_radScreen_In*cos(eachAngle[i - 1]),	_radScreen_In*sin(eachAngle[i - 1]),	15,
+					_radScreen_In*cos(eachAngle[i]),		_radScreen_In*sin(eachAngle[i]),		15,
+					_radScreen_Out*cos(eachAngle[i]),		_radScreen_Out*sin(eachAngle[i]),		15,
+					_radScreen_Out*cos(eachAngle[i - 1]),	_radScreen_Out*sin(eachAngle[i - 1]),	15
+			endif
+			if	i = nMln + 1	then
+				put	_radScreen_In*cos(eachAngle[i - 1]),	_radScreen_In*sin(eachAngle[i - 1]),	15,
+					_radScreen_In*cos(totalAngle),			_radScreen_In*sin(totalAngle),			15,
+					_radScreen_Out*cos(totalAngle),			_radScreen_Out*sin(totalAngle),			15,
+					_radScreen_Out*cos(eachAngle[i - 1]),	_radScreen_Out*sin(eachAngle[i - 1]),	15
+			endif
+
+			prism_	nsp/3,	_scrHeight,	get(nsp)
+		endif
+	endif
+
+del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"scrOpening":	!	개구부
+!-----------------------------------------------------------------------------------------------
+
+!	방충망 너비/두께
+_scrWdt = 0.050
+_scrThk = 0.050
+_opnHeight = _scrHeight - _scrWdt*2
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radOpening_In = distWP + frmThk - _scrThk
+	_radOpening_Out = distWP + frmThk
+endif
+if	iDirect = Direct_In		then
+	_radOpening_In = distWP - frmThk + _scrThk
+	_radOpening_Out = distWP - frmThk
+endif
+
+!	내부 각도
+if	nMln < eps	then
+	_frameWdt_SP = frmWdtL
+	_frameWdt_EP = frmWdtR
+	_innerAngle = totalAngle
+	_subAngle = 0
+else
+	!	프레임
+	if	i = 1	then
+		_frameWdt_SP = frmWdtL
+		_frameWdt_EP = mlnWdt
+	endif
+
+	if	i # 1 & i # (nMln + 1)	then
+		_frameWdt_SP = mlnWdt
+		_frameWdt_EP = mlnWdt
+	endif
+
+	if	i = (nMln + 1)	then
+		_frameWdt_SP = mlnWdt
+		_frameWdt_EP = frmWdtR
+	endif
+
+	!	내부 각도
+	if	i = 1	then
+		_innerAngle = eachAngle[i]
+		_subAngle = 0
+	else
+		_innerAngle = eachAngle[i] - eachAngle[i - 1]
+		_subAngle = eachAngle[i - 1]
+	endif
+endif
+
+_opnPos_SP = _frameWdt_SP/2/cos(_innerAngle/2) + _scrWdt
+_opnPos_EP = _frameWdt_EP/2/cos(_innerAngle/2) + _scrWdt
+_angle = (180 - _innerAngle)/2 - _subAngle
+
+!	Offset값
+_xOff_SP = _opnPos_SP*cos(_angle)
+_yOff_SP = _opnPos_SP*sin(_angle)
+
+_xOff_EP = _opnPos_EP*cos(_angle)
+_yOff_EP = _opnPos_EP*sin(_angle)
+
+!	Z축 이동
+if	j = 1	then
+	addz	(frmWdtB - gskWdtB)/2 + _scrWdt
+endif
+if	j # 1	then
+	addz	(trsWdt - trsGskWdt)/2 + _scrWdt
+endif
+
+	!	개구부
+	if	GLOB_VIEW_TYPE = 3	then
+		material	matFrm
+
+		if	nMln < eps	then
+			put	_radScreen_In - _xOff_SP,					_yOff_SP,								15,
+				_radScreen_In*cos(totalAngle) + _xOff_EP,	_radScreen_In*sin(totalAngle) - _yOff_EP,	15,
+				_radScreen_Out*cos(totalAngle) + _xOff_EP,	_radScreen_Out*sin(totalAngle) - _yOff_EP,	15,
+				_radScreen_Out - _xOff_SP,					_yOff_SP,								15
+
+			prism_	nsp/3,	_opnHeight,	get(nsp)
+		else
+			if	i = 1	then
+				put	_radScreen_In - _xOff_SP,						_yOff_SP,										15,
+					_radScreen_In*cos(eachAngle[i]) + _xOff_EP,		_radScreen_In*sin(eachAngle[i]) - _yOff_EP,		15,
+					_radScreen_Out*cos(eachAngle[i]) + _xOff_EP,	_radScreen_Out*sin(eachAngle[i]) - _yOff_EP,	15,
+					_radScreen_Out - _xOff_SP,						_yOff_SP,										15
+			endif
+			if	i # 1 & i # nMln + 1	then
+				put	_radScreen_In*cos(eachAngle[i - 1]) - _xOff_SP,		_radScreen_In*sin(eachAngle[i - 1]) + _yOff_SP,		15,
+					_radScreen_In*cos(eachAngle[i]) + _xOff_EP,			_radScreen_In*sin(eachAngle[i]) - _yOff_EP,			15,
+					_radScreen_Out*cos(eachAngle[i]) + _xOff_EP,		_radScreen_Out*sin(eachAngle[i]) - _yOff_EP,		15,
+					_radScreen_Out*cos(eachAngle[i - 1]) - _xOff_SP,	_radScreen_Out*sin(eachAngle[i - 1]) + _yOff_SP,	15
+			endif
+			if	i = nMln + 1	then
+				put	_radScreen_In*cos(eachAngle[i - 1]) - _xOff_SP,		_radScreen_In*sin(eachAngle[i - 1]) + _yOff_SP,		15,
+					_radScreen_In*cos(totalAngle) + _xOff_EP,			_radScreen_In*sin(totalAngle) - _yOff_EP,			15,
+					_radScreen_Out*cos(totalAngle) + _xOff_EP,			_radScreen_Out*sin(totalAngle) - _yOff_EP,			15,
+					_radScreen_Out*cos(eachAngle[i - 1]) - _xOff_SP,	_radScreen_Out*sin(eachAngle[i - 1]) + _yOff_SP,	15
+			endif
+
+			prism_	nsp/3,	_opnHeight,	get(nsp)
+		endif
+	endif
+
+del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"scrScreen":	!	방충망
+!-----------------------------------------------------------------------------------------------
+
+!	방충망 너비/두께
+_scrWdt = 0.050
+_scrThk = 0.050
+
+!	커튼월 생성 방향에 따른 변수 정의
+if	iDirect = Direct_Out	then
+	_radScreen_In = distWP + frmThk - (_scrThk - eps)/2
+	_radScreen_Out = distWP + frmThk - (_scrThk + eps)/2
+	_radLine = distWP + frmThk - _scrThk/2
+endif
+if	iDirect = Direct_In		then
+	_radScreen_In = distWP - frmThk + (_scrThk - eps)/2
+	_radScreen_Out = distWP - frmThk + (_scrThk + eps)/2
+	_radLine = distWP - frmThk + _scrThk/2
+endif
+
+!	Z축 이동
+if	j = 1	then
+	addz	(frmWdtB - gskWdtB)/2
+endif
+if	j # 1	then
+	addz	(trsWdt - trsGskWdt)/2
+endif
+
+	!	방충망
+	if	GLOB_VIEW_TYPE = 3	then
+		material	matScr
+
+		if	nMln < eps	then
+			put	_radScreen_In,					0,								15,
+				_radScreen_In*cos(totalAngle),	_radScreen_In*sin(totalAngle),	15,
+				_radScreen_Out*cos(totalAngle),	_radScreen_Out*sin(totalAngle),	15,
+				_radScreen_Out,					0,								15
+
+			prism_	nsp/3,	_scrHeight,	get(nsp)
+		else
+			if	i = 1	then
+				put	_radScreen_In,						0,									15,
+					_radScreen_In*cos(eachAngle[i]),	_radScreen_In*sin(eachAngle[i]),	15,
+					_radScreen_Out*cos(eachAngle[i]),	_radScreen_Out*sin(eachAngle[i]),	15,
+					_radScreen_Out,						0,									15
+			endif
+			if	i # 1 & i # nMln + 1	then
+				put	_radScreen_In*cos(eachAngle[i - 1]),	_radScreen_In*sin(eachAngle[i - 1]),	15,
+					_radScreen_In*cos(eachAngle[i]),		_radScreen_In*sin(eachAngle[i]),		15,
+					_radScreen_Out*cos(eachAngle[i]),		_radScreen_Out*sin(eachAngle[i]),		15,
+					_radScreen_Out*cos(eachAngle[i - 1]),	_radScreen_Out*sin(eachAngle[i - 1]),	15
+			endif
+			if	i = nMln + 1	then
+				put	_radScreen_In*cos(eachAngle[i - 1]),	_radScreen_In*sin(eachAngle[i - 1]),	15,
+					_radScreen_In*cos(totalAngle),			_radScreen_In*sin(totalAngle),			15,
+					_radScreen_Out*cos(totalAngle),			_radScreen_Out*sin(totalAngle),			15,
+					_radScreen_Out*cos(eachAngle[i - 1]),	_radScreen_Out*sin(eachAngle[i - 1]),	15
+			endif
+
+			prism_	nsp/3,	_scrHeight,	get(nsp)
+		endif
+	endif
+
+	!	단면 라인
+	if	GLOB_VIEW_TYPE = 4	then
+		sect_fill	65,	0,	0,	penScrSct
+
+		if	nMln < eps	then
+			put	_radLine,					0,							0,
+				_radLine*cos(totalAngle),	_radLine*sin(totalAngle),	0,
+				_radLine*cos(totalAngle),	_radLine*sin(totalAngle),	_scrHeight,
+				_radLine,					0,							_scrHeight
+
+			plane	nsp/3,	get(nsp)
+		else
+			if	i = 1	then
+				put	_radLine,					0,							0,
+					_radLine*cos(eachAngle[i]),	_radLine*sin(eachAngle[i]),	0,
+					_radLine*cos(eachAngle[i]),	_radLine*sin(eachAngle[i]),	_scrHeight,
+					_radLine,					0,							_scrHeight
+			endif
+			if	i # 1 & i # nMln + 1	then
+				put	_radLine*cos(eachAngle[i - 1]),	_radLine*sin(eachAngle[i - 1]),	0,
+					_radLine*cos(eachAngle[i]),		_radLine*sin(eachAngle[i]),		0,
+					_radLine*cos(eachAngle[i]),		_radLine*sin(eachAngle[i]),		_scrHeight,
+					_radLine*cos(eachAngle[i - 1]),	_radLine*sin(eachAngle[i - 1]),	_scrHeight
+			endif
+			if	i = nMln + 1	then
+				put	_radLine*cos(eachAngle[i - 1]),	_radLine*sin(eachAngle[i - 1]),	0,
+					_radLine*cos(totalAngle),			_radLine*sin(totalAngle),	0,
+					_radLine*cos(totalAngle),			_radLine*sin(totalAngle),	_scrHeight,
+					_radLine*cos(eachAngle[i - 1]),	_radLine*sin(eachAngle[i - 1]),	_scrHeight
+			endif
+
+			plane	nsp/3,	get(nsp)
+		endif	
+
+	endif
+
+
+del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"doorFrame":	!	Door Frame
+!-----------------------------------------------------------------------------------------------
+
+!	유형 : 기본형(1panel)
+if	_iDoorType = DoorType_1panel	then
+	!	프레임 유형 : 상/하
+	if	_iFrameType = FrameType_1 | _iFrameType = FrameType_2	then
+		put	0,			_doorThk/2,		15,
+			_doorWdt,	_doorThk/2,		15,
+			_doorWdt,	-_doorThk/2,	15,
+			0,			-_doorThk/2,	15
+
+		!	하부
+		prism_	nsp/3,	_frameB,	use(nsp)
+
+		!	상부
+		addz	_doorHgt
+			mulz	-1
+				prism_	nsp/3,	_frameT,	get(nsp)
+			del 1
+		del 1
+	endif
+
+	!	프레임 유형 : 상/하/좌/우
+	if	_iFrameType = FrameType_2	then
+		!	좌측
+		put	0,			_doorThk/2,		15,
+			_frameL,	_doorThk/2,		15,
+			_frameL,	-_doorThk/2,	15,
+			0,			-_doorThk/2,	15
+
+		addz	_frameB
+			prism_	nsp/3,	_doorHgt - (_frameB + _frameT),	get(nsp)
+		del 1
+
+		!	우측
+		put	0,			_doorThk/2,		15,
+			_frameR,	_doorThk/2,		15,
+			_frameR,	-_doorThk/2,	15,
+			0,			-_doorThk/2,	15
+
+		addx	_doorWdt
+			mulx	-1
+				addz	_frameB
+					prism_	nsp/3,	_doorHgt - (_frameB + _frameT),	get(nsp)
+				del 1
+			del 1
+		del 1
+	endif
+endif
+
+!	유형 : 양문형(2panel)
+if	_iDoorType = DoorType_2panel	then
+	!	프레임 유형 : 상/하
+	if	_iFrameType = FrameType_1 | _iFrameType = FrameType_2	then
+		put	0,			_doorThk/2,		15,
+			_doorWdt/2,	_doorThk/2,		15,
+			_doorWdt/2,	-_doorThk/2,	15,
+			0,			-_doorThk/2,	15
+
+		!	하부
+		prism_	nsp/3,	_frameB,	use(nsp)
+
+		addx	_doorWdt
+			mulx	-1
+				prism_	nsp/3,	_frameB,	use(nsp)
+			del 1
+		del 1
+
+		!	상부
+		addz	_doorHgt
+			mulz	-1
+				prism_	nsp/3,	_frameT,	use(nsp)
+
+				addx	_doorWdt
+					mulx	-1
+						prism_	nsp/3,	_frameT,	get(nsp)
+					del 1
+				del 1
+			del 1
+		del 1
+	endif
+
+	!	프레임 유형 : 상/하/좌/우
+	if	_iFrameType = FrameType_2	then
+		!	좌측
+		put	0,			_doorThk/2,		15,
+			_frameL,	_doorThk/2,		15,
+			_frameL,	-_doorThk/2,	15,
+			0,			-_doorThk/2,	15
+
+		addz	_frameB
+			prism_	nsp/3,	_doorHgt - (_frameB + _frameT),	use(nsp)
+
+			addx	_doorWdt
+				mulx	-1
+					prism_	nsp/3,	_doorHgt - (_frameB + _frameT),	get(nsp)
+				del 1
+			del 1
+		del 1
+
+		!	우측
+		put	0,			_doorThk/2,		15,
+			_frameR,	_doorThk/2,		15,
+			_frameR,	-_doorThk/2,	15,
+			0,			-_doorThk/2,	15
+
+		addx	_doorWdt/2
+			mulx	-1
+				addz	_frameB
+					prism_	nsp/3,	_doorHgt - (_frameB + _frameT),	use(nsp)
+
+					mulx	-1
+						prism_	nsp/3,	_doorHgt - (_frameB + _frameT),	get(nsp)
+					del 1
+				del 1
+			del 1
+		del 1
+	endif
+endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"doorGlass":	!	Door Glass
+!-----------------------------------------------------------------------------------------------
+
+!	유형 : 기본형(1panel)
+if	_iDoorType = DoorType_1panel	then
+	!	프레임 유형 : 상/하
+	if	_iFrameType = FrameType_1	then
+		put	0,			glsThk/2,	15,
+			_doorWdt,	glsThk/2,	15,
+			_doorWdt,	-glsThk/2,	15,
+			0,			-glsThk/2,	15
+
+		addz	_frameB
+			prism_	nsp/3,	_glassHgt,	get(nsp)
+		del 1
+	endif
+
+	!	프레임 유형 : 상/하/좌/우
+	if	_iFrameType = FrameType_2	then
+		!	좌측
+		put	0,								glsThk/2,	15,
+			_doorWdt - (_frameL + _frameR),	glsThk/2,	15,
+			_doorWdt - (_frameL + _frameR),	-glsThk/2,	15,
+			0,								-glsThk/2,	15
+
+		add	_frameL,	0,	_frameB
+			prism_	nsp/3,	_glassHgt,	get(nsp)
+		del 1
+	endif
+endif
+
+!	유형 : 양문형(2panel)
+if	_iDoorType = DoorType_2panel	then
+	!	프레임 유형 : 상/하
+	if	_iFrameType = FrameType_1	then
+		put	0,			glsThk/2,	15,
+			_doorWdt/2,	glsThk/2,	15,
+			_doorWdt/2,	-glsThk/2,	15,
+			0,			-glsThk/2,	15
+
+		addz	_frameB
+			prism_	nsp/3,	_glassHgt,	use(nsp)
+
+			addx	_doorWdt
+				mulx	-1
+					prism_	nsp/3,	_glassHgt,	get(nsp)
+				del 1
+			del 1
+		del 1
+	endif
+
+	!	프레임 유형 : 상/하/좌/우
+	if	_iFrameType = FrameType_2	then
+		!	좌측
+		put	0,									glsThk/2,	15,
+			_doorWdt/2 - (_frameL + _frameR),	glsThk/2,	15,
+			_doorWdt/2 - (_frameL + _frameR),	-glsThk/2,	15,
+			0,									-glsThk/2,	15
+
+		add	_frameL,	0,	_frameB
+			prism_	nsp/3,	_glassHgt,	use(nsp)
+
+			addx	_doorWdt - _frameL*2
+				mulx	-1
+					prism_	nsp/3,	_glassHgt,	get(nsp)
+				del 1
+			del 1
+		del 1
+	endif
+endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"doorOpenLine":	!	Door Glass
+!-----------------------------------------------------------------------------------------------
+
+!	유형 : 기본형(1panel)
+if	_iDoorType = DoorType_1panel	then
+	!	열림 방향 : 오른쪽
+	if	_iOpenDirect = OpenDirect_Right	then
+		addy	_doorThk/2
+			lin_	_doorWdt,	0,	0,			0,			0,	_doorHgt/2
+			lin_	0,			0,	_doorHgt/2,	_doorWdt,	0,	_doorHgt
+		del 1
+
+		addy	-_doorThk/2
+			lin_	_doorWdt,	0,	0,			0,			0,	_doorHgt/2
+			lin_	0,			0,	_doorHgt/2,	_doorWdt,	0,	_doorHgt
+		del 1
+	endif
+
+	!	열림 방향 : 왼쪽
+	if	_iOpenDirect = OpenDirect_Left	then
+		addy	_doorThk/2
+			lin_	0,			0,	0,			_doorWdt,	0,	_doorHgt/2
+			lin_	_doorWdt,	0,	_doorHgt/2,	0,			0,	_doorHgt
+		del 1
+
+		addy	-_doorThk/2
+			lin_	0,			0,	0,			_doorWdt,	0,	_doorHgt/2
+			lin_	_doorWdt,	0,	_doorHgt/2,	0,			0,	_doorHgt
+		del 1
+	endif
+endif
+
+!	유형 : 양문형(2panel)
+if	_iDoorType = DoorType_2panel	then
+	addy	_doorThk/2
+		lin_	_doorWdt/2,	0,	0,			0,			0,	_doorHgt/2
+		lin_	0,			0,	_doorHgt/2,	_doorWdt/2,	0,	_doorHgt
+
+		lin_	_doorWdt/2,	0,	0,			_doorWdt,	0,	_doorHgt/2
+		lin_	_doorWdt,	0,	_doorHgt/2,	_doorWdt/2,	0,	_doorHgt
+	del 1
+
+	addy	-_doorThk/2
+		lin_	_doorWdt/2,	0,	0,			0,			0,	_doorHgt/2
+		lin_	0,			0,	_doorHgt/2,	_doorWdt/2,	0,	_doorHgt
+
+		lin_	_doorWdt/2,	0,	0,			_doorWdt,	0,	_doorHgt/2
+		lin_	_doorWdt,	0,	_doorHgt/2,	_doorWdt/2,	0,	_doorHgt
+	del 1
+
+endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"coorMainVFrame":	!	Fixed Glass(Main vFrame Coordinates)
+!-----------------------------------------------------------------------------------------------
+	put	-gskThk*cos(_aInner),				mlnWdt/2,		15,
+		-(frmThk + gskThk)*cos(_aInner),	mlnWdt/2,		15,
+		-(frmThk + gskThk)*cos(_aInner),	-mlnWdt/2,		15,
+		-gskThk*cos(_aInner),				-mlnWdt/2,		15
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"coorGskVFrame":	!	Fixed Glass(Gasket vFrame Coordinates)
+!-----------------------------------------------------------------------------------------------
+	if	iMlnType = Mln_Type1	then
+		put	0,									mlnGskWdt/2,	15,
+			-gskThk*cos(_aInner),				mlnGskWdt/2,	15,
+			-gskThk*cos(_aInner),				-mlnGskWdt/2,	15,
+			0,									-mlnGskWdt/2,	15
+	endif
+	if	iMlnType = Mln_Type2	then
+		put	0,									mlnWdt/2,		15,
+			-capThk*cos(_aInner),				mlnWdt/2,		15,
+			-capThk*cos(_aInner),				mlnGskWdt/2,	15,
+			-gskThk*cos(_aInner),				mlnGskWdt/2,	15,
+			-gskThk*cos(_aInner),				-mlnGskWdt/2,	15,
+			-capThk*cos(_aInner),				-mlnGskWdt/2,	15,
+			-capThk*cos(_aInner),				-mlnWdt/2,		15,
+			0,									-mlnWdt/2,		15
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"fixedCut":	!	Fixed Glass(Cutpoly)
+!-----------------------------------------------------------------------------------------------
+	put	-gskThk*cos(_aInner),				mlnWdt/2,
+		-(frmThk + gskThk)*cos(_aInner),	mlnWdt/2,
+		-(frmThk + gskThk)*cos(_aInner),	-mlnWdt/2,
+		-gskThk*cos(_aInner),				-mlnWdt/2
+
+	cutpoly	nsp/2,	get(nsp)
+
+	if	iMlnType = Mln_Type1	then
+		put	0,						mlnGskWdt/2,
+			-gskThk*cos(_aInner),	mlnGskWdt/2,
+			-gskThk*cos(_aInner),	-mlnGskWdt/2,
+			0,						-mlnGskWdt/2
+	endif
+	if	iMlnType = Mln_Type2	then
+		put	0,						mlnWdt/2,
+			-capThk*cos(_aInner),	mlnWdt/2,
+			-capThk*cos(_aInner),	mlnGskWdt/2,
+			-gskThk*cos(_aInner),	mlnGskWdt/2,
+			-gskThk*cos(_aInner),	-mlnGskWdt/2,
+			-capThk*cos(_aInner),	-mlnGskWdt/2,
+			-capThk*cos(_aInner),	-mlnWdt/2,
+			0,						-mlnWdt/2
+	endif
+
+	cutpoly	nsp/2,	get(nsp)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"BFrame":	!	Fixed Glass(Bottom Frame)
+!-----------------------------------------------------------------------------------------------
+	!	Main
+	put	-gskThk*cos(_aInner),				gskThk*sin(_aInner)*_mul,				15,
+		-gskThk*cos(_aInner),				_fixWdt,								15,
+		-(frmThk + gskThk)*cos(_aInner),	_fixWdt,								15,
+		-(frmThk + gskThk)*cos(_aInner),	(frmThk + gskThk)*sin(_aInner)*_mul,	15
+
+	prism_	nsp/3,	frmWdtB,	get(nsp)
+
+	!	Gasket
+	if	iCornerB = Corner_Boundary	then
+		put	0,						0,							15,
+			0,						_fixWdt,					15,
+			-gskThk*cos(_aInner),	_fixWdt,					15,
+			-gskThk*cos(_aInner),	gskThk*sin(_aInner)*_mul,	15
+
+		prism_	nsp/3,	(frmWdtB + gskWdtB)/2,	get(nsp)
+	endif
+	if	iCornerB = Corner_Transom	then
+		if	iTrsType = Trs_Type1	then
+			put	0,						0,							15,
+				0,						_fixWdt,					15,
+				-gskThk*cos(_aInner),	_fixWdt,					15,
+				-gskThk*cos(_aInner),	gskThk*sin(_aInner)*_mul,	15
+
+			addz	(frmWdtB - gskWdtB)/2
+				prism_	nsp/3,	gskWdtB,	get(nsp)
+			del 1
+		endif
+
+		if	iTrsType = Trs_Type2	then
+			put	-capThk*cos(_aInner),	capThk*sin(_aInner)*_mul,	15,
+				-capThk*cos(_aInner),	_fixWdt,					15,
+				-gskThk*cos(_aInner),	_fixWdt,					15,
+				-gskThk*cos(_aInner),	gskThk*sin(_aInner)*_mul,	15
+
+			addz	(frmWdtB - gskWdtB)/2
+				prism_	nsp/3,	gskWdtB,	get(nsp)
+			del 1
+
+			put	0,						0,							15,
+				0,						_fixWdt,					15,
+				-capThk*cos(_aInner),	_fixWdt,					15,
+				-capThk*cos(_aInner),	capThk*sin(_aInner)*_mul,	15
+
+			prism_	nsp/3,	frmWdtB,	get(nsp)
+		endif
+	endif
+return
+
+!-----------------------------------------------------------------------------------------------
+"calcElevWin_":	!	winElev 좌표 추출
+!-----------------------------------------------------------------------------------------------
+	if	nMln < eps	then
+		if	nTrs < eps	then
+			_xPosWin1 = _winSP
+			_yPosWin1 = _trsSP
+
+			_xPosWin2 = gapTrs[j] - _winEP
+			_yPosWin2 = _trsSP
+
+			_xPosWin3 = gapTrs[j] - _winEP
+			_yPosWin3 = distMln[i] - _trsEP
+
+			_xPosWin4 = _winSP
+			_yPosWin4 = distMln[i] - _trsEP
+
+			_offGrl1 = frmWdtR/2
+			_offGrl2 = frmWdtT
+			_offGrl3 = frmWdtL/2
+			_offGrl4 = frmWdtB
+		else
+			if	j = 1	then
+				_xPosWin1 = _winSP
+				_yPosWin1 = _trsSP
+
+				_xPosWin2 = gapTrs[j] - _winMP
+				_yPosWin2 = _trsSP
+
+				_xPosWin3 = gapTrs[j] - _winMP
+				_yPosWin3 = distMln[i] - _trsEP
+
+				_xPosWin4 = _winSP
+				_yPosWin4 = distMln[i] - _trsEP
+
+				_offGrl1 = frmWdtR/2
+				_offGrl2 = trsWdt/2
+				_offGrl3 = frmWdtL/2
+				_offGrl4 = frmWdtB
+			endif
+			if	j # 1 & j # (nTrs + 1)	then
+				_xPosWin1 = _winMP
+				_yPosWin1 = _trsSP
+
+				_xPosWin2 = gapTrs[j] - _winMP
+				_yPosWin2 = _trsSP
+
+				_xPosWin3 = gapTrs[j] - _winMP
+				_yPosWin3 = distMln[i] - _trsEP
+
+				_xPosWin4 = _winMP
+				_yPosWin4 = distMln[i] - _trsEP
+
+				_offGrl1 = frmWdtR/2
+				_offGrl2 = trsWdt/2
+				_offGrl3 = frmWdtL/2
+				_offGrl4 = trsWdt/2
+			endif
+			if	j = (nTrs + 1)	then
+				_xPosWin1 = _winMP
+				_yPosWin1 = _trsSP
+
+				_xPosWin2 = gapTrs[j] - _winEP
+				_yPosWin2 = _trsSP
+
+				_xPosWin3 = gapTrs[j] - _winEP
+				_yPosWin3 = distMln[i] - _trsEP
+
+				_xPosWin4 = _winMP
+				_yPosWin4 = distMln[i] - _trsEP
+
+				_offGrl1 = frmWdtR/2
+				_offGrl2 = frmWdtT
+				_offGrl3 = frmWdtL/2
+				_offGrl4 = trsWdt/2
+			endif
+		endif
+
+		if	iCornerR = Corner_Angled	then	_offGrl1 = _offGrl1 + (frmThk + gskThk)*tan(aFrmR)
+		if	iCornerL = Corner_Angled	then	_offGrl3 = _offGrl3 - (frmThk + gskThk)*tan(aFrmL)
+	else
+		if	i = 1	then
+			if	nTrs < eps	then
+				_xPosWin1 = _winSP
+				_yPosWin1 = _trsSP
+
+				_xPosWin2 = gapTrs[j] - _winMP
+				_yPosWin2 = _trsSP
+
+				_xPosWin3 = gapTrs[j] - _winMP
+				_yPosWin3 = distMln[i] - _trsMP
+
+				_xPosWin4 = _winSP
+				_yPosWin4 = distMln[i] - _trsMP
+
+				_offGrl1 = frmWdtR/2
+				_offGrl2 = frmWdtT
+				_offGrl3 = mlnWdt/2
+				_offGrl4 = frmWdtB
+			else
+				if	j = 1	then
+					_xPosWin1 = _winSP
+					_yPosWin1 = _trsSP
+
+					_xPosWin2 = gapTrs[j] - _winMP
+					_yPosWin2 = _trsSP
+
+					_xPosWin3 = gapTrs[j] - _winMP
+					_yPosWin3 = distMln[i] - _trsMP
+
+					_xPosWin4 = _winSP
+					_yPosWin4 = distMln[i] - _trsMP
+
+					_offGrl1 = frmWdtR/2
+					_offGrl2 = trsWdt/2
+					_offGrl3 = mlnWdt/2
+					_offGrl4 = frmWdtB
+				endif
+				if	j # 1 & j # (nTrs + 1)	then
+					_xPosWin1 = _winMP
+					_yPosWin1 = _trsSP
+
+					_xPosWin2 = gapTrs[j] - _winMP
+					_yPosWin2 = _trsSP
+
+					_xPosWin3 = gapTrs[j] - _winMP
+					_yPosWin3 = distMln[i] - _trsMP
+
+					_xPosWin4 = _winMP
+					_yPosWin4 = distMln[i] - _trsMP
+
+					_offGrl1 = frmWdtR/2
+					_offGrl2 = trsWdt/2
+					_offGrl3 = mlnWdt/2
+					_offGrl4 = trsWdt/2
+				endif
+				if	j = (nTrs + 1)	then
+					_xPosWin1 = _winMP
+					_yPosWin1 = _trsSP
+
+					_xPosWin2 = gapTrs[j] - _winEP
+					_yPosWin2 = _trsSP
+
+					_xPosWin3 = gapTrs[j] - _winEP
+					_yPosWin3 = distMln[i] - _trsMP
+
+					_xPosWin4 = _winMP
+					_yPosWin4 = distMln[i] - _trsMP
+
+					_offGrl1 = frmWdtR/2
+					_offGrl2 = frmWdtT
+					_offGrl3 = mlnWdt/2
+					_offGrl4 = trsWdt/2
+				endif
+			endif
+
+			if	iCornerR = Corner_Angled	then	_offGrl1 = _offGrl1 + (frmThk + gskThk)*tan(aFrmR)
+		endif
+		if	i # 1 & i # (nMln +1)	then
+			if	nTrs < eps	then
+				_xPosWin1 = _winSP
+				_yPosWin1 = _trsMP
+
+				_xPosWin2 = gapTrs[j] - _winMP
+				_yPosWin2 = _trsMP
+
+				_xPosWin3 = gapTrs[j] - _winMP
+				_yPosWin3 = distMln[i] - _trsMP
+
+				_xPosWin4 = _winSP
+				_yPosWin4 = distMln[i] - _trsMP
+
+				_offGrl1 = mlnWdt/2
+				_offGrl2 = frmWdtT
+				_offGrl3 = mlnWdt/2
+				_offGrl4 = frmWdtB
+			else
+				if	j = 1	then
+					_xPosWin1 = _winSP
+					_yPosWin1 = _trsMP
+
+					_xPosWin2 = gapTrs[j] - _winMP
+					_yPosWin2 = _trsMP
+
+					_xPosWin3 = gapTrs[j] - _winMP
+					_yPosWin3 = distMln[i] - _trsMP
+
+					_xPosWin4 = _winSP
+					_yPosWin4 = distMln[i] - _trsMP
+
+					_offGrl1 = mlnWdt/2
+					_offGrl2 = trsWdt/2
+					_offGrl3 = mlnWdt/2
+					_offGrl4 = frmWdtB
+				endif
+				if	j # 1 & j # (nTrs + 1)	then
+					_xPosWin1 = _winMP
+					_yPosWin1 = _trsMP
+
+					_xPosWin2 = gapTrs[j] - _winMP
+					_yPosWin2 = _trsMP
+
+					_xPosWin3 = gapTrs[j] - _winMP
+					_yPosWin3 = distMln[i] - _trsMP
+
+					_xPosWin4 = _winMP
+					_yPosWin4 = distMln[i] - _trsMP
+
+					_offGrl1 = mlnWdt/2
+					_offGrl2 = trsWdt/2
+					_offGrl3 = mlnWdt/2
+					_offGrl4 = trsWdt/2
+				endif
+				if	j = (nTrs + 1)	then
+					_xPosWin1 = _winMP
+					_yPosWin1 = _trsMP
+
+					_xPosWin2 = gapTrs[j] - _winEP
+					_yPosWin2 = _trsMP
+
+					_xPosWin3 = gapTrs[j] - _winEP
+					_yPosWin3 = distMln[i] - _trsMP
+
+					_xPosWin4 = _winMP
+					_yPosWin4 = distMln[i] - _trsMP
+
+					_offGrl1 = mlnWdt/2
+					_offGrl2 = frmWdtT
+					_offGrl3 = mlnWdt/2
+					_offGrl4 = trsWdt/2
+				endif
+			endif
+		endif
+		if	i = (nMln + 1)	then
+			if	nTrs < eps	then
+				_xPosWin1 = _winSP
+				_yPosWin1 = _trsMP
+
+				_xPosWin2 = gapTrs[j] - _winMP
+				_yPosWin2 = _trsMP
+
+				_xPosWin3 = gapTrs[j] - _winMP
+				_yPosWin3 = distMln[i] - _trsEP
+
+				_xPosWin4 = _winSP
+				_yPosWin4 = distMln[i] - _trsEP
+
+				_offGrl1 = mlnWdt/2
+				_offGrl2 = frmWdtT
+				_offGrl3 = frmWdtL/2
+				_offGrl4 = frmWdtB
+			else
+				if	j = 1	then
+					_xPosWin1 = _winSP
+					_yPosWin1 = _trsMP
+
+					_xPosWin2 = gapTrs[j] - _winMP
+					_yPosWin2 = _trsMP
+
+					_xPosWin3 = gapTrs[j] - _winMP
+					_yPosWin3 = distMln[i] - _trsEP
+
+					_xPosWin4 = _winSP
+					_yPosWin4 = distMln[i] - _trsEP
+
+					_offGrl1 = mlnWdt/2
+					_offGrl2 = trsWdt/2
+					_offGrl3 = frmWdtL/2
+					_offGrl4 = frmWdtB
+				endif
+				if	j # 1 & j # (nTrs + 1)	then
+					_xPosWin1 = _winMP
+					_yPosWin1 = _trsMP
+
+					_xPosWin2 = gapTrs[j] - _winMP
+					_yPosWin2 = _trsMP
+
+					_xPosWin3 = gapTrs[j] - _winMP
+					_yPosWin3 = distMln[i] - _trsEP
+
+					_xPosWin4 = _winMP
+					_yPosWin4 = distMln[i] - _trsEP
+
+					_offGrl1 = mlnWdt/2
+					_offGrl2 = trsWdt/2
+					_offGrl3 = frmWdtL/2
+					_offGrl4 = trsWdt/2
+				endif
+				if	j = (nTrs + 1)	then
+					_xPosWin1 = _winMP
+					_yPosWin1 = _trsMP
+
+					_xPosWin2 = gapTrs[j] - _winEP
+					_yPosWin2 = _trsMP
+
+					_xPosWin3 = gapTrs[j] - _winEP
+					_yPosWin3 = distMln[i] - _trsEP
+
+					_xPosWin4 = _winMP
+					_yPosWin4 = distMln[i] - _trsEP
+
+					_offGrl1 = mlnWdt/2
+					_offGrl2 = frmWdtT
+					_offGrl3 = frmWdtL/2
+					_offGrl4 = trsWdt/2
+				endif
+			endif
+
+			if	iCornerL = Corner_Angled	then	_offGrl3 = _offGrl3 - (frmThk + gskThk)*tan(aFrmL)
+		endif
+	endif
+
+return

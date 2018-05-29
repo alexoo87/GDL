@@ -1,0 +1,2111 @@
+
+!======================================================================================================
+!	Window Maker 20
+!======================================================================================================
+!   DATE : 2017/3/29 WED
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+
+!----------------------------------------------------------------------------------------------
+!  General
+!----------------------------------------------------------------------------------------------
+
+	!	Frame
+	!------------------------------------------------------------------------------------------------------
+	!	Insert Frame Size Type (iFrameSize_insert Index)
+	values{2}	"iFrameEdge",
+				FRAME_EDGE_45DEGREE, "Window Frame",
+				FRAME_EDGE_90DEGREE, "C/W Frame"	
+
+	if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+		values{2}	"iFrameSize_insert",
+					FRAMESIZE_INSERT_OUT_INSIDE, "Out/Inside Frame",
+					FRAMESIZE_INSERT_CUSTOM, "Custom Frame"
+	endif
+	if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+		values{2}	"iFrameSize_insert",
+					FRAMESIZE_INSERT_VERT_HORI, "Vertical/Horizontal Frame",
+					FRAMESIZE_INSERT_CUSTOM, "Custom Frame"
+	endif
+
+
+	!	2D Representation
+	!------------------------------------------------------------------------------------------------------
+	!	2D Detail Index (iDetail_2D)
+	values{2}	"iDetail_2D",
+				DETAIL_2D_MVO, "by MVO",
+				DETAIL_2D_SIMPLE, "Simple",
+				DETAIL_2D_MIDDLE, "Middle",
+				DETAIL_2D_DETAIL, "Detail",
+				DETAIL_2D_OFF, "Off"
+
+
+	!	Opening
+	!------------------------------------------------------------------------------------------------------
+	parameters	iOpening_window_index = iOpening_window_index
+	parameters	iOpening_door_index = iOpening_door_index
+
+	values	"iOpening_Direct"  1,2
+
+	!	Dimension
+	!------------------------------------------------------------------------------------------------------
+	dim         stFont_types[]
+	n = REQUEST ("FONTNAMES_LIST", "", stFont_types)
+	values      "stFont_type"      	stFont_types
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Test Script 
+!----------------------------------------------------------------------------------------------
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Carculation 
+!----------------------------------------------------------------------------------------------
+if	bEdit	then
+	
+	!	Main
+	!------------------------------------------------------------------------------------------------------	
+ 	 	!	Check Insert A,B 
+ 	 	!------------------------------------------------------------------------------------------------------	
+ 		bSetSize_width = 0
+ 		bSetSize_height = 0
+
+ 	 	if	abs(mTotalWidth-A) > EPS	then
+ 	 		bSetSize_width = 1
+ 	 	endif
+ 	 	if	abs(mTotalHeight-B) > EPS	then
+ 	 		bSetSize_height = 1
+ 	 	endif
+
+
+ 	 	!	Sync with A,B
+ 	 	!------------------------------------------------------------------------------------------------------	
+			!	when Change Frame Type 
+	 	 	!------------------------------------------------------------------------------------------------------	
+	 	 	if	iFrameEdge <> iFrameEdge_temp	then
+		 	 	if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+		 	 		parameters	A = mLayoutWidth + mFrameWidth_insert_out
+		 	 		parameters	B = mLayoutHeight + mFrameWidth_insert_out
+		 	 	endif
+		 	 	if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+			 	 	parameters	A = mLayoutWidth + mFrameWidth_insert_vert_out
+			 	 	parameters	B = mLayoutHeight + mFrameWidth_insert_hori_out
+		 	 	endif
+		 	 	parameters	iFrameEdge_temp = iFrameEdge
+	 	 	endif
+
+
+	 	 	!	When Insert Frame Size 
+	 	 	!------------------------------------------------------------------------------------------------------	
+	 	 	if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+		 	 	if	abs(mFrameWidth_insert_out - mFrameWidth_insert_out_tmp) > EPS		then	
+		 	 		parameters	A = mLayoutWidth + mFrameWidth_insert_out
+		 	 		parameters	B = mLayoutHeight + mFrameWidth_insert_out
+		 	 	endif
+		 	 	parameters	mFrameWidth_insert_out_tmp = mFrameWidth_insert_out
+	 	 	endif
+	 	 	if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+		 	 	if	abs(mFrameWidth_insert_vert_out - mFrameWidth_insert_vert_out_tmp) > EPS	then	parameters	A = mLayoutWidth + mFrameWidth_insert_vert_out
+		 	 	if	abs(mFrameWidth_insert_hori_out_tmp - mFrameWidth_insert_hori_out) > EPS	then	parameters	B = mLayoutHeight + mFrameWidth_insert_hori_out
+		 	 		
+		 	 	parameters	mFrameWidth_insert_vert_out_tmp = mFrameWidth_insert_vert_out,
+		 	 				mFrameWidth_insert_hori_out_tmp = mFrameWidth_insert_hori_out
+	 	 	endif
+	 	 
+
+			!	when Change Dimension
+	 	 	!------------------------------------------------------------------------------------------------------	
+	 	 	!	when move to hotspot (outFrame)
+			if	GLOB_MODPAR_NAME = "mDim_outFrame_hori" | GLOB_MODPAR_NAME = "mDim_outFrame_vert"	then
+
+				if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+					if	not(bSetSize_width)   & GLOB_MODPAR_NAME = "mDim_outFrame_hori" 	then	parameters	A = mDim_outFrame_hori[1] + mFrameWidth_insert_out
+					if	not(bSetSize_height)  & GLOB_MODPAR_NAME = "mDim_outFrame_vert"		then	parameters	B = mDim_outFrame_vert[1] + mFrameWidth_insert_out
+				endif
+				if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+					if	not(bSetSize_width)	  & GLOB_MODPAR_NAME = "mDim_outFrame_hori" 	then	parameters	A = mDim_outFrame_hori[1] + mFrameWidth_insert_vert_out
+					if	not(bSetSize_height)  & GLOB_MODPAR_NAME = "mDim_outFrame_vert" 	then	parameters	B = mDim_outFrame_vert[1] + mFrameWidth_insert_hori_out		
+				endif	
+				
+			endif
+
+
+	 	 	!	when move to hotspot (inFrame lastpoint)
+			if	GLOB_MODPAR_NAME = "mDim_inFrame_hori" | GLOB_MODPAR_NAME = "mDim_inFrame_vert"	then
+
+				!	Find Index & Switch
+				iDim_type = DIM_HORI
+				iDim_inFrame_hori_lastidx = 0
+				bDim_inFrame_hori_set = 0
+				gosub	"Dim_inside_set_lastpoint_switch"
+
+				iDim_type = DIM_VERT
+				iDim_inFrame_vert_lastidx = 0
+				bDim_inFrame_vert_set = 0
+				gosub	"Dim_inside_set_lastpoint_switch"
+
+				!	Length Calculation (for lastpoint)
+				mDim_inFrame_hori_total = 0
+				mDim_inFrame_vert_total = 0
+				if	bDim_inFrame_hori_set	then
+					for i = 1	to	iDim_inFrame_hori_lastidx
+						mDim_inFrame_hori_total = mDim_inFrame_hori_total + mDim_inFrame_hori[i]
+					next i
+				endif
+				if	bDim_inFrame_vert_set	then
+					for i = 1	to	iDim_inFrame_vert_lastidx
+						mDim_inFrame_vert_total = mDim_inFrame_vert_total + mDim_inFrame_vert[i]
+					next i
+				endif
+
+				if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+					if	not(bSetSize_width)   & bDim_inFrame_hori_set 						then	parameters	A = mDim_inFrame_hori_total + mFrameWidth_insert_out
+					if	not(bSetSize_height)  & bDim_inFrame_vert_set						then	parameters	B = mDim_inFrame_vert_total + mFrameWidth_insert_out
+				endif
+				if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+					if	not(bSetSize_width)   & bDim_inFrame_hori_set  						then	parameters	A = mDim_inFrame_hori_total + mFrameWidth_insert_vert_out
+					if	not(bSetSize_height)  & bDim_inFrame_vert_set						then	parameters	B = mDim_inFrame_vert_total + mFrameWidth_insert_hori_out			
+				endif	
+
+			endif
+			
+
+			!	when Change Frame Position  	 
+	 	 	!------------------------------------------------------------------------------------------------------	
+	 	 	if	GLOB_MODPAR_NAME = "mLayout_outFrame_pos"	then
+				if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+					!	Width
+					if	not(bSetSize_width)  	then	
+					 	POS = POS_X
+					 	aAng = 270
+					 	gosub	"Main_totalsize_range_max"
+					 	parameters	A = mMax + mFrameWidth_insert_out
+				 	endif
+
+			 		!	Height
+					if	not(bSetSize_height) 	 then
+				 		POS = POS_Y
+			 			aAng = 0
+			 	 		gosub	"Main_totalsize_range_max"	
+						parameters	B = mMax + mFrameWidth_insert_out
+					endif
+				endif
+				if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+					!	Width
+					if	not(bSetSize_width)	  	then	
+					 	POS = POS_X
+				 		aAng = 270
+				 		gosub	"Main_totalsize_range_max"
+						parameters	A = mMax + mFrameWidth_insert_vert_out
+					endif
+
+			 		!	Height
+					if	not(bSetSize_height)  	then	
+			 			POS = POS_Y
+			 			aAng = 0
+			 		 	gosub	"Main_totalsize_range_max"
+						parameters	B = mMax + mFrameWidth_insert_hori_out
+					endif
+				endif	
+			endif
+
+
+ 	 	!	Insert Total Size
+ 	 	!------------------------------------------------------------------------------------------------------	
+		parameters	mTotalWidth = A,
+					mTotalHeight = B
+
+
+ 	 	!	Total Size Minimun Range
+ 	 	!------------------------------------------------------------------------------------------------------	
+	 	!	Width
+	 	POS = POS_X
+	 	aAng = 270
+	 	gosub	"Main_totalsize_range_min"
+		mTotalWidth_min = mMin
+		parameters	mTotalWidth_min = mTotalWidth_min
+
+ 		!	Height
+ 		POS = POS_Y
+ 		aAng = 0
+ 	 	gosub	"Main_totalsize_range_min"
+		mTotalHeight_min = mMin
+		parameters	mTotalHeight_min = mTotalHeight_min
+
+
+
+	!	Layout 
+	!------------------------------------------------------------------------------------------------------
+		!	Hide Hotspot (when DoorType)  >>>> 작업중
+		!------------------------------------------------------------------------------------------------------
+		gosub	"Layout_door_hotspot_hide"
+		gosub	"Layout_hotspot_hide"
+		parameters	bLayout_hotspot = bLayout_hotspot
+
+
+
+
+
+	!	Dimension (Set Position)
+	!------------------------------------------------------------------------------------------------------
+		!	Set Size
+ 		!------------------------------------------------------------------------------------------------------
+	 		!	OutSide Frame
+	 		!------------------------------------------------------------------------------------------------------
+ 			if	GLOB_MODPAR_NAME = "mDim_outFrame_hori" | GLOB_MODPAR_NAME = "mDim_outFrame_vert" | GLOB_MODPAR_NAME = "mDim_inFrame_hori" | GLOB_MODPAR_NAME = "mDim_inFrame_vert"			then			
+				dim	iDim_outFrame_index_set[]
+
+		 	 	!	OutSide Frame - Define Range
+		 	 	!------------------------------------------------------------------------------------------------------		 	 	
+		 	 	!	기능이 무의미함. 만약 범위를 설정할 경우 범위정의부터 재구상 필요 
+		 	 ! 	if	bSetSize_width	then
+		 	 ! 		mA_max = max(mTotalWidth_min, A)
+					! if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+					! 	mDim_outFrame_hori[1] = mA_max - mFrameWidth_insert_out
+					! endif
+					! if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+					! 	mDim_outFrame_hori[1] = mA_max - mFrameWidth_insert_vert_out
+					! endif		 	 		
+		 	 ! 		parameters	mDim_outFrame_hori[1] = mDim_outFrame_hori[1]
+		 	 ! 	endif
+		 	 ! 	if	bSetSize_height	then
+		 	 ! 		mB_max = max(mTotalHeight_min, B)
+					! if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+					! 	mDim_outFrame_vert[1] = mB_max - mFrameWidth_insert_out
+					! endif
+					! if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+					! 	mDim_outFrame_vert[1] = mB_max - mFrameWidth_insert_hori_out
+					! endif		 	 		
+		 	 ! 		parameters	mDim_outFrame_vert[1] = mDim_outFrame_vert[1]
+		 	 ! 	endif
+
+
+		 	 	!	OutSide Frame - Horizontal 
+		 	 	!------------------------------------------------------------------------------------------------------
+		 	 	if	mTotalWidth_min > EPS	then
+			 	 	if	mDim_outFrame_hori[1] >= mTotalWidth_min	then
+			 	 		!	그대로 작동
+			 	 	else
+			 	 		!	최소값을 넘어갈 경우 최소값까지만 입력되도록 로직 생성
+			 	 		mDim_outFrame_hori[1] = mTotalWidth_min
+			 	 		parameters	mDim_outFrame_hori[1] = mTotalWidth_min
+			 	 	endif
+		 	 	endif
+
+				iDim_type = DIM_HORI	
+
+		 	 	bDim_inFrame_hori_set = 0
+		 	 	gosub	"Dim_inside_set_lastpoint_switch"
+
+	 	 		if	GLOB_MODPAR_NAME = "mDim_outFrame_hori" | bSetSize_width | bDim_inFrame_hori_set	then			 	 	
+			 	 	gosub	"Dim_outside_set_length_calc"
+		 	 	endif
+
+
+	 	  		!	OutSide Frame - Vertical
+		 	 	!------------------------------------------------------------------------------------------------------
+		 	 	if	mTotalHeight_min > EPS	then
+			 	 	if	mDim_outFrame_vert[1] >= mTotalHeight_min	then
+			 	 		!	그대로 작동
+			 	 	else
+			 	 		!	최소값을 넘어갈 경우 최소값까지만 입력되도록 로직 생성
+			 	 		mDim_outFrame_vert[1] = mTotalHeight_min
+			 	 		parameters	mDim_outFrame_vert[1] = mTotalHeight_min
+			 	 	endif
+		 	 	endif
+
+				iDim_type = DIM_VERT
+
+		 	 	bDim_inFrame_vert_set = 0
+		 	 	gosub	"Dim_inside_set_lastpoint_switch"
+
+	 	 		if	GLOB_MODPAR_NAME = "mDim_outFrame_vert" | bSetSize_height | bDim_inFrame_vert_set	then			 	 		
+			 	 	gosub	"Dim_outside_set_length_calc"
+			 	endif
+
+			endif
+
+
+	 		!	InSide Frame
+	 		!------------------------------------------------------------------------------------------------------
+ 			if	GLOB_MODPAR_NAME = "mDim_inFrame_hori"		or	GLOB_MODPAR_NAME = "mDim_inFrame_vert"		then
+
+ 				dim	iDim_inFrame_index_set[]
+
+		 	 	!	InSide Frame - Horizontal 
+		 	 	!------------------------------------------------------------------------------------------------------
+ 	 	 		if	GLOB_MODPAR_NAME = "mDim_inFrame_hori"		then
+		 	 		idx = iDim_inFrame_hori_lastidx
+			 	 	if	abs(mDim_inFrame_hori_temp[idx] - mDim_inFrame_hori[idx]) < EPS	then
+			 	 		!	그대로 작동
+			 	 	else
+			 	 		!	최소값을 넘어갈 경우 최소값까지만 입력되도록 로직 생성
+			 	 		mDimL = 0
+			 	 		for i = 1	to	idx-1
+			 	 			mDimL = mDimL + mDim_inFrame_hori[i]
+			 	 		next i
+						mDimL_sub = mTotalWidth_min - mDimL			 	 		
+			 	 		if	mDim_inFrame_hori[idx] < mDimL_sub	then
+				 	 		mDim_inFrame_hori[idx] = mDimL_sub
+				 	 		parameters	mDim_inFrame_hori[idx] = mDimL_sub
+			 	 		endif
+
+			 	 	endif
+
+			 	 	iDim_type = DIM_HORI	
+			 	 	gosub	"Dim_inside_set_length_calc"
+		 	 	endif
+
+
+	 	  		!	InSide Frame - Vertical
+		 	 	!------------------------------------------------------------------------------------------------------
+	 	 		if	GLOB_MODPAR_NAME = "mDim_inFrame_vert"		then
+		 	 		idx = iDim_inFrame_vert_lastidx
+			 	 	if	abs(mDim_inFrame_vert_temp[idx] - mDim_inFrame_vert[idx]) < EPS	then
+			 	 		!	그대로 작동
+			 	 	else
+			 	 		!	최소값을 넘어갈 경우 최소값까지만 입력되도록 로직 생성
+			 	 		mDimL = 0
+			 	 		for i = 1	to	idx-1
+			 	 			mDimL = mDimL + mDim_inFrame_vert[i]
+			 	 		next i
+						mDimL_sub = mTotalHeight_min - mDimL			 	 		
+			 	 		if	mDim_inFrame_vert[idx] < mDimL_sub	then
+				 	 		mDim_inFrame_vert[idx] = mDimL_sub
+				 	 		parameters	mDim_inFrame_vert[idx] = mDimL_sub
+			 	 		endif
+			 	 	endif
+
+			 	 	iDim_type = DIM_VERT	
+			 	 	gosub	"Dim_inside_set_length_calc"
+			 	endif
+
+		 	 endif
+
+
+
+	!	Layout 
+	!------------------------------------------------------------------------------------------------------	
+		!	Batch Layout
+		!------------------------------------------------------------------------------------------------------		
+		call	"Window Maker(Layout) 20"	parameters	all
+
+		!	Batch Divider
+		!------------------------------------------------------------------------------------------------------		
+		call	"Window Maker(Divider) 20"	parameters	all
+
+
+		!	Layout Number Caculation
+		!------------------------------------------------------------------------------------------------------	
+		parameters	iLayout_outFrame_num = iLayout_outFrame_num
+
+
+		!	Fix Outside Frame Layout Position to Origin Point (2017-05-09 추가)
+		!------------------------------------------------------------------------------------------------------		
+		!	최소 하나의 외곽 레이아웃은 원점에 위치시 시킨다.
+		if	GLOB_MODPAR_NAME = "mLayout_outFrame_pos"	then
+
+			!	레이아웃 하나라도 0에 없을 경우 bOutFrame_Positioning=1
+			bOutFrame_Positioning_vert = 1
+			bOutFrame_Positioning_hori = 1
+			for i = 1	to	iLayout_outFrame_num
+				!	수직 레이아웃 
+				if	aLayout_outFrame_angle[i] > EPS-90 and aLayout_outFrame_angle[i] < EPS+90  	then
+					if	mLayout_outFrame_pos[i][POS_X] < EPS then
+						bOutFrame_Positioning_vert = 0
+					endif
+				endif
+				!	수평 레이아웃
+				if	aLayout_outFrame_angle[i] > EPS-180 and aLayout_outFrame_angle[i] < EPS+180  	then
+					if	mLayout_outFrame_pos[i][POS_Y] < EPS then
+						bOutFrame_Positioning_hori = 0
+					endif
+				endif
+			next i
+
+			!	레이아웃이 하나라도 0에 없을 경우 작동. 마지막 움직인 값을 0으로 강제 지정
+			if	bOutFrame_Positioning_vert | bOutFrame_Positioning_hori	then
+
+				if	bOutFrame_Positioning_vert	then	POS = POS_X
+				if	bOutFrame_Positioning_hori	then	POS = POS_Y	
+
+				for i = 1	to	iLayout_outFrame_num
+					mLayout_outFrame_pos[i][POS] = mLayout_outFrame_pos_temp[i][POS] 
+				next i
+				parameters	mLayout_outFrame_pos = mLayout_outFrame_pos
+
+				! !	마지막에 변경된 값 찾기
+				! for i = 1	to	iLayout_outFrame_num
+				! 	if  abs(mLayout_outFrame_pos_temp[i][POS]-mLayout_outFrame_pos[i][POS]) > EPS then
+				! 		idx = i
+				! 		bNext
+				! 	endif
+				! next i
+
+				! mLayout_outFrame_pos[idx][POS] = 0
+				! parameters	mLayout_outFrame_pos[idx][POS] = mLayout_outFrame_pos[idx][POS]
+			endif
+		endif
+
+		!	임시값 입력
+		parameters	mLayout_outFrame_pos_temp = mLayout_outFrame_pos
+
+
+
+	!	Frame
+	!------------------------------------------------------------------------------------------------------
+		!	OutFrame Length Carculation
+		!------------------------------------------------------------------------------------------------------
+		gosub	"Frame_outFrame_length_calc"
+
+
+		!	OutFrame Length Carculation
+		!------------------------------------------------------------------------------------------------------
+		if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+			gosub	"Frame_inFrame_length_calc"
+		endif
+
+
+		!	Frame Size(Width/Depth) Insert
+		!------------------------------------------------------------------------------------------------------
+		W = 1
+		D = 2
+
+			!	Window Frame Type
+			!------------------------------------------------------------------------------------------------------
+			if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+
+		 		!	OutSide
+		 		if	iFrameSize_insert = FRAMESIZE_INSERT_OUT_INSIDE	then
+			 		for i = 1	to	iLayout_outFrame_num
+			 			mFrame_size_outframe[i][W] = mFrameWidth_insert_out
+						mFrame_size_outframe[i][D] = mFrameDepth_insert_out	 			
+			 		next i
+		 		endif
+
+		 		!	InSide
+		 		if	iFrameSize_insert = FRAMESIZE_INSERT_OUT_INSIDE	then
+			 		for i = 1	to	iLayout_inFrame_num
+			 			mFrame_size_inframe[i][W] = mFrameWidth_insert_in
+						mFrame_size_inframe[i][D] = mFrameDepth_insert_in	 			
+			 		next i
+		 		endif
+
+			endif
+
+
+			!	C/W Frame Type 
+			!------------------------------------------------------------------------------------------------------
+			if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+
+		 		!	Vertical
+		 		if	iFrameSize_insert = FRAMESIZE_INSERT_VERT_HORI	then
+			 		for i = 1	to	iLayout_outFrame_num
+			 			if	(aLayout_outFrame_angle[i] > 90-EPS	and	aLayout_outFrame_angle[i] < 90+EPS)	or	(aLayout_outFrame_angle[i] > 270-EPS	and	aLayout_outFrame_angle[i] < 270+EPS)	then
+				 			mFrame_size_outframe[i][W] = mFrameWidth_insert_vert_out
+							mFrame_size_outframe[i][D] = mFrameDepth_insert_vert_out			
+			 			endif 			
+			 		next i
+			 		for i = 1	to	iLayout_inFrame_num
+			 			if	(aLayout_inFrame_angle[i] > 90-EPS	and	aLayout_inFrame_angle[i] < 90+EPS)	or	(aLayout_inFrame_angle[i] > 270-EPS	and	aLayout_inFrame_angle[i] < 270+EPS)	then
+				 			mFrame_size_inframe[i][W] = mFrameWidth_insert_vert_in
+							mFrame_size_inframe[i][D] = mFrameDepth_insert_vert_in	 			
+						endif
+			 		next i			 		
+		 		endif
+
+		 		!	Horizontal
+		 		if	iFrameSize_insert = FRAMESIZE_INSERT_VERT_HORI	then
+			 		for i = 1	to	iLayout_outFrame_num
+			 			if	(aLayout_outFrame_angle[i] > 0-EPS	and	aLayout_outFrame_angle[i] < 0+EPS)	or	(aLayout_outFrame_angle[i] > 180-EPS	and	aLayout_outFrame_angle[i] < 180+EPS)	then
+				 			mFrame_size_outframe[i][W] = mFrameWidth_insert_hori_out
+							mFrame_size_outframe[i][D] = mFrameDepth_insert_hori_out			
+			 			endif 			
+			 		next i
+			 		for i = 1	to	iLayout_inFrame_num
+			 			if	(aLayout_inFrame_angle[i] > 0-EPS	and	aLayout_inFrame_angle[i] < 0+EPS)	or	(aLayout_inFrame_angle[i] > 180-EPS	and	aLayout_inFrame_angle[i] < 180+EPS)	then
+				 			mFrame_size_inframe[i][W] = mFrameWidth_insert_hori_in
+							mFrame_size_inframe[i][D] = mFrameDepth_insert_hori_in		
+						endif
+			 		next i	
+		 		endif
+
+			endif
+
+
+			!	Insert Value 
+			!------------------------------------------------------------------------------------------------------
+		 	parameters	mFrame_size_outframe = mFrame_size_outframe,
+		 				mFrame_size_inframe = mFrame_size_inframe
+
+
+
+		!	Find Outside Frame Index
+		!------------------------------------------------------------------------------------------------------		
+		!	프레임 길이가 있는 인덱스 찾기
+		dim	iLayout_outFrame_idx[]
+		n = 1
+		for i = 1	to	iLayout_outFrame_num
+			if	mFrame_outFrame_length[i] > EPS	then
+				iLayout_outFrame_idx[n] = i
+				n = n+1
+			endif
+		next i
+		iLayout_outFrame_num_real = n-1
+		parameters	iLayout_outFrame_num_real = iLayout_outFrame_num_real
+
+
+
+!		!	Outside Frame Show/Hide Logic
+!		!------------------------------------------------------------------------------------------------------		
+!		!	Outframe Show/Hide
+!		gosub	"Frame_outside_show_hide"
+!		parameters	bFrame_outside_hide_temp = bFrame_outside_hide
+
+
+		!	OutFrame Move Range Define  
+		!------------------------------------------------------------------------------------------------------
+		if	GLOB_MODPAR_NAME = "mLayout_outFrame_pos"	then
+			gosub	"Frame_outside_move_range_with_inframe"
+		endif
+
+
+
+
+
+	!	Opening
+	!------------------------------------------------------------------------------------------------------
+		!	Reveal Insert Length
+		!------------------------------------------------------------------------------------------------------	
+		if	iFrameEdge = FRAME_EDGE_45DEGREE	then	parameters	mOpening_posy_reveal = mFrameDepth_insert_out
+		if	iFrameEdge = FRAME_EDGE_90DEGREE	then	parameters	mOpening_posy_reveal = mFrameDepth_insert_vert_out
+
+
+
+	!	Dimension (Get Length)
+	!------------------------------------------------------------------------------------------------------
+		!	Get Size
+ 		!------------------------------------------------------------------------------------------------------
+	 		!	OutSide Frame
+	 		!------------------------------------------------------------------------------------------------------
+ 			if	bCalculation	or	GLOB_MODPAR_NAME = "mLayout_outFrame_pos"	then
+				
+				!	"Dim_outside_get_length_calc" 서브루틴에서 사용 
+				! dim	mDim_outFrame_1[]
+				! dim	mDim_outFrame_1_temp[]
+				! dim	mDim_outFrame_2[]
+				! dim	mDim_outFrame_2_temp[]
+				! dim	mDim_outFrame_total[]		 				 		
+				! dim	mDim_outFrame_total_temp[]	
+
+
+		 	 	!	OutSide Frame - Horizontal 
+		 	 	!------------------------------------------------------------------------------------------------------
+		 	 	iDim_type = DIM_HORI	
+		 	 	gosub	"Dim_outside_get_length_calc_new"
+
+
+	 	  		!	OutSide Frame - Vertical
+		 	 	!------------------------------------------------------------------------------------------------------
+		 	 	iDim_type = DIM_VERT	
+		 	 	gosub	"Dim_outside_get_length_calc_new"
+
+
+		 	 endif
+
+
+	 		!	InSide Frame
+	 		!------------------------------------------------------------------------------------------------------
+	 		if	iLayout_inFrame_num > 0	then
+	 			if	bCalculation	or	GLOB_MODPAR_NAME = "mLayout_inFrame_pos"	then
+
+					dim	mDim_inFrame_1[]
+					dim	mDim_inFrame_1_temp[]
+					dim	mDim_inFrame_total[]		 				 		
+
+		 	  		!	InSide Frame - Vertical
+			 	 	!------------------------------------------------------------------------------------------------------
+			 	 	iDim_type = DIM_VERT	
+			 	 	gosub	"Dim_inside_get_length_calc"
+
+			 	 	!	InSide Frame - Horizontal 
+			 	 	!------------------------------------------------------------------------------------------------------
+			 	 	iDim_type = DIM_HORI	
+			 	 	gosub	"Dim_inside_get_length_calc"
+
+
+			 	 endif
+		 	endif
+
+
+		!	Insert Length Temp Value
+ 		!------------------------------------------------------------------------------------------------------
+		parameters	mDim_outFrame_hori_temp = mDim_outFrame_hori
+		parameters	mDim_outFrame_vert_temp = mDim_outFrame_vert
+		parameters	mDim_inFrame_hori_temp = mDim_inFrame_hori
+		parameters	mDim_inFrame_vert_temp = mDim_inFrame_vert
+
+
+
+	!	Surfarce
+	!------------------------------------------------------------------------------------------------------
+	parameters	gs_sash_mat = gs_frame_mat,
+				gs_leaf_mat = gs_frame_mat
+
+
+	!	Window Sizes
+	!------------------------------------------------------------------------------------------------------
+	parameters	ac_wallhole_width = mTotalWidth,
+				ac_wallhole_height = mTotalHeight,
+				ac_unit_width = mTotalWidth,
+				ac_unit_height = mTotalHeight,
+				ac_reveal_width = mTotalWidth,
+				ac_reveal_height = mTotalHeight
+
+
+	!	Wall Hole
+	!------------------------------------------------------------------------------------------------------
+	gosub	"Wallhole_find_point"
+	parameters	iWallhole_idx_num = iWallhole_idx_num
+	parameters	iWallhole_idx = iWallhole_idx
+
+
+	!	Status
+	!------------------------------------------------------------------------------------------------------
+	parameters	aSymbol_rotangle = aSymbol_rotangle,
+				stSymbol_orientation = stSymbol_orientation,
+				iSymbol_reveal_side = iSymbol_reveal_side,
+				iSymbol_mirrored = iSymbol_mirrored
+
+	!	Find Rectangle Window
+	!------------------------------------------------------------------------------------------------------
+	gosub	"find_Rectangle"
+
+endif							!	End Calculation
+
+
+
+	!	Sill / Board
+	!------------------------------------------------------------------------------------------------------
+	!	bBoardSill 비활성화시 Parameter/Interface 만 반영
+	if	not(bBoardSill)	then
+		call	"Window Maker(SB)"	parameters	all	iDWDet2D = _iDWDet2D,
+													gs_board_inside = 0,
+													gs_sill_outside = 0
+		parameters	gs_board_inside = 0,
+					gs_sill_outside = 0
+		lock	"gs_board_inside", "gs_sill_outside"
+	endif
+
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Range / Lock / Hide Parameters
+!----------------------------------------------------------------------------------------------
+
+	!	Range Parameters
+	!------------------------------------------------------------------------------------------------------
+	!	Total Size
+	if	mTotalWidth_min > EPS	then
+		values	"mTotalWidth"	range	[mTotalWidth_min, ]
+		values	"A"				range	[mTotalWidth_min, ]
+	endif
+	if	mTotalHeight_min > EPS	then
+		values	"mTotalHeight"	range	[mTotalHeight_min, ]
+		values	"B"				range	[mTotalHeight_min, ]
+	endif
+
+	!	Dimesion Length 
+	values	"mDim_outFrame_hori"	range	[0, ]
+	values	"mDim_inFrame_hori"		range	[0, ]
+	values	"mDim_outFrame_vert"	range	[0, ]
+	values	"mDim_inFrame_vert"		range	[0, ]
+
+	!	Opening Number
+	values	"iOpening_num"	range	[1,	100]
+
+
+	!	Lock Parameters
+	!------------------------------------------------------------------------------------------------------
+	lock	"A", "B"
+	lock	"mTotalWidth", "mTotalHeight", "mTotalWidth_min", "mTotalHeight_min"
+	if	not(gs_sill_outside) & not(gs_board_inside)	then		lock	"gs_sill_oversize"
+	! lock	"bEdit"
+
+
+	!	Hide Parameters
+	!------------------------------------------------------------------------------------------------------
+	! if	not(bEdit)	then
+	! 	hideparameter	"tLayout", "tFrame", "tOpening", "tDimension"
+	! endif
+
+	if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+		hideparameter	"mFrameWidth_insert_vert_out", "mFrameDepth_insert_vert_out", "mFrameWidth_insert_hori_out", "mFrameDepth_insert_hori_out",
+						"mFrameWidth_insert_vert_in", "mFrameDepth_insert_vert_in", "mFrameWidth_insert_hori_in", "mFrameDepth_insert_hori_in"
+	endif
+	if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+		hideparameter	"mFrameWidth_insert_out", "mFrameDepth_insert_out", "mFrameWidth_insert_in", "mFrameDepth_insert_in"
+	endif
+
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Main Subroutine
+!----------------------------------------------------------------------------------------------
+
+!	프레임 전체사이즈의 최대값 탐색
+"Main_totalsize_range_max" :
+
+ 	mMax = 0
+ 	iLayout_num = 0
+ 	for i = 1	to	iLayout_outFrame_num
+ 		if	aLayout_outFrame_angle[i] > aAng-EPS & aLayout_outFrame_angle[i] < aAng+EPS	then
+ 			if	mMax = 0	then
+ 				mMax = mLayout_outFrame_pos[i][POS]
+ 				iLayout_num = 1
+ 			else
+ 				mMax = max(mMax, mLayout_outFrame_pos[i][POS])
+ 				iLayout_num = iLayout_num + 1
+			endif
+ 		endif
+	next i
+
+return
+
+
+!	프레임 전체사이즈의 최소값 탐색
+"Main_totalsize_range_min" :
+
+ 	mMin = 0		 	
+ 	for i = 1	to	iLayout_inFrame_num
+		if	i = 1	then
+			mMin = mLayout_inFrame_pos[i][POS]
+		else
+			mMin = max(mMin, mLayout_inFrame_pos[i][POS])
+		endif
+ 	next i
+
+ 	if	mMin > EPS	then
+		if	iFrameEdge = FRAME_EDGE_45DEGREE	then	mMin = mMin + mFrameWidth_insert_out + mFrameWidth_insert_in
+		if	iFrameEdge = FRAME_EDGE_90DEGREE	then	
+			if	POS = POS_X	 then	mMin = mMin + mFrameWidth_insert_vert_out + mFrameWidth_insert_vert_in
+			if	POS = POS_Y	 then	mMin = mMin + mFrameWidth_insert_hori_out + mFrameWidth_insert_hori_in
+		endif
+ 	endif
+
+return
+
+
+
+!----------------------------------------------------------------------------------------------
+!	Layout Subroutine
+!----------------------------------------------------------------------------------------------
+
+"Layout_door_hotspot_hide"	:
+
+	for i = 1	to	iLayout_outFrame_num
+
+		bLayout_hotspot[i] = 1
+		if	mLayout_outFrame_length[i] > EPS	then
+			if	(aLayout_outFrame_angle[i] > 180-EPS) & (aLayout_outFrame_angle[i] < 180+EPS) 	then
+				if	mLayout_outFrame_pos[i][POS_Y] < EPS	then
+
+					!	1. 끝단부 위치 확인
+					mEnd_posx = mLayout_outFrame_pos[i][POS_X] - mLayout_outFrame_length[i]
+					mEnd_posy = mLayout_outFrame_pos[i][POS_Y]
+
+					!	2. 위치와 동일한 도어 확인
+					bHotspot_hide = 0
+					for r = 1	to	iOpening_num
+						if	(abs(mOpening_pos[r][POS_X] - mEnd_posx) < EPS) & (abs(mOpening_pos[r][POS_Y] - mEnd_posy) < EPS)	then
+							if	iOpening_type[r][OPENING_WINDOW_DOOR] = OPENING_DOOR	then
+								bHotspot_hide = 1
+							endif
+						endif
+					next r
+
+					!	3. 오프닝이 도어타입일 경우에 핫스팟을 숨김
+					if	bHotspot_hide	then
+						bLayout_hotspot[i] = 0
+					endif
+
+				endif
+			endif
+		endif
+
+
+	next i
+
+return
+
+
+
+"Layout_hotspot_hide"	:
+
+	for	i = 1	to	iLayout_outFrame_num
+		if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+			if	mFrameWidth_insert_out # mFrameWidth_insert_in	then
+				bLayout_hotspot[i] = 0
+			endif
+		endif
+		if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+			if	(mFrameWidth_insert_vert_out # mFrameWidth_insert_vert_in) | (mFrameWidth_insert_hori_out # mFrameWidth_insert_hori_in)	then
+				bLayout_hotspot[i] = 0
+			endif
+		endif
+	next i
+
+
+
+return
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Frame Subroutine
+!----------------------------------------------------------------------------------------------
+
+
+"Frame_outFrame_length_calc"	:
+
+	for i = 1	to	iLayout_outFrame_num
+
+		if	i = 1	then
+			ptNow = i
+			ptPre = iLayout_outFrame_num
+			ptNext = i+1
+		endif				
+		if	i >= 2	and	i <	iLayout_outFrame_num then
+			ptNow = i
+			ptPre = i-1
+			ptNext = i+1
+		endif
+		if	i = iLayout_outFrame_num then
+			ptNow = i
+			ptPre = i-1
+			ptNext = 1
+		endif
+
+		!	인덱스 간의 거리 입력
+		mFrameL_sub = sqr((mLayout_outFrame_pos[ptNow][POS_X]-mLayout_outFrame_pos[ptNext][POS_X])^2 \
+						+ (mLayout_outFrame_pos[ptNow][POS_Y]-mLayout_outFrame_pos[ptNext][POS_Y])^2)
+		mFrameAng_sub = aLayout_outFrame_angle[ptNow] 
+
+
+		!	각도가 같으나 분절되어 있는 구간일 경우 하나의 프레임으로 표현
+		if	mFrameL_sub > EPS		then
+			if	iFrameEdge = FRAME_EDGE_45DEGREE	or	\
+				(iFrameEdge = FRAME_EDGE_90DEGREE	and		(mFrameAng_sub > 90-EPS	and	mFrameAng_sub < 90+EPS)	or	(mFrameAng_sub > 270-EPS	and	mFrameAng_sub < 270+EPS))	then
+				if	mLayout_outFrame_length[ptNext]	< EPS	then
+					iFrame_index = i
+					iFrame_index_fin = 0
+					for r = iFrame_index	to	iLayout_outFrame_num	step 2
+						if	r <	iLayout_outFrame_num	then
+							ptNow_r = r
+							ptNext_r = r+1
+						endif									
+						if	r = iLayout_outFrame_num then
+							ptNow_r = iLayout_outFrame_num
+							ptNext_r = 1						
+						endif
+						if	mLayout_outFrame_length[ptNext_r] > EPS			then
+							iFrame_index_fin = ptNext_r
+							r = iLayout_outFrame_num						!	loop end
+						endif
+					next r
+
+					!	프레임 길이 변경
+					mFrameL_sub = sqr((mLayout_outFrame_pos[iFrame_index][POS_X]-mLayout_outFrame_pos[iFrame_index_fin][POS_X])^2 \
+									+ (mLayout_outFrame_pos[iFrame_index][POS_Y]-mLayout_outFrame_pos[iFrame_index_fin][POS_Y])^2)
+							
+					!	넘어간 인덱스에 대해서 길이 입력
+					if	iFrame_index_fin <> 1 then
+						for r = iFrame_index+1	to	iFrame_index_fin-1
+							mFrame_outFrame_length[r] = 0
+						next r
+					else
+						for r = iFrame_index+1	to	iLayout_outFrame_num
+							mFrame_outFrame_length[r] = 0
+						next r
+					endif
+
+					!	묶인 구간까지 인덱스만큼 넘어가기
+					if	iFrame_index_fin <> 1 then
+						i = iFrame_index_fin-1
+					else
+						i = iLayout_outFrame_num
+					endif							
+				endif
+			endif
+		endif
+
+		!	프레임 길이 입력
+		mFrame_outFrame_length[ptNow] = mFrameL_sub
+
+	next	i
+
+	parameters	mFrame_outFrame_length = mFrame_outFrame_length
+
+return
+
+
+
+"Frame_inFrame_length_calc"	:
+
+	!	계산한 인덱스는 1을 입력하여 중복연산 하지 않도록
+	dim	bLayout_inFrame_calc[]
+
+	!	initialize
+	for i = 1	to	iLayout_inFrame_num
+		mFrame_inFrame_length[i] = 0
+		bLayout_inFrame_calc[i] = 0
+	next i
+
+	!	내부 프레임 길이 계산은 90도 커튼월 타입에서만 연산 
+	dim	iLayout_inFrame_idx[]
+
+
+
+	for i = 1	to	iLayout_inFrame_num
+
+		idx_now = i
+		mFrameL_sub = 0
+
+		if	bLayout_inFrame_calc[idx_now] = 0	then
+			
+			!	수직 프레임의 경우에 프레임 길이 재연산
+			if	aLayout_inFrame_angle[idx_now] > 90-EPS	and		aLayout_inFrame_angle[idx_now] < 90+EPS	then
+				
+				!	동일한 선상에 있는 Divider 찾기
+				iArr = 1
+				for n = 1	to	iLayout_inFrame_num
+					if	aLayout_inFrame_angle[n] > 90-EPS	and		aLayout_inFrame_angle[n] < 90+EPS	then
+						if	abs(mLayout_inFrame_pos[idx_now][POS_X]-mLayout_inFrame_pos[n][POS_X]) < EPS 	then
+							if	bLayout_inFrame_calc[n] = 0	then
+								iLayout_inFrame_idx[iArr] = n
+								iArr = iArr+1
+							endif	
+						endif
+					endif
+				next n
+				iLayout_inFrame_idx_num = iArr-1
+
+
+
+				!	Y축 값에 따른 오름차순 정렬
+				dim	iLayout_inFrame_idx_temp[]
+				for n = 1	to	iLayout_inFrame_idx_num
+					iLayout_inFrame_idx_temp[n] = iLayout_inFrame_idx[n]
+				next n
+				for r = 1	to	iLayout_inFrame_idx_num
+					idx_min = 0
+					bInsert_firstValue = 1
+					for n = 1	to	iLayout_inFrame_idx_num
+						idx = iLayout_inFrame_idx_temp[n]
+						if	idx <> 0	then
+							if	bInsert_firstValue	then
+								mMin_posY = mLayout_inFrame_pos[idx][POS_Y]
+								bInsert_firstValue = 0
+								idx_min = n
+							else
+								if	mMin_posY-mLayout_inFrame_pos[idx][POS_Y] > EPS	then
+									idx_min = n
+								endif
+								mMin_posY = min(mMin_posY, mLayout_inFrame_pos[idx][POS_Y])
+							endif
+						endif
+					next n
+					iLayout_inFrame_idx[r] = iLayout_inFrame_idx_temp[idx_min]
+					iLayout_inFrame_idx_temp[idx_min] = 0
+				next r
+
+
+
+
+				!	서로 연결되는 인덱스만 남김 
+				iLayout_inFrame_idx_num_temp = 1
+				for n = 1	to	iLayout_inFrame_idx_num-1
+					idx = iLayout_inFrame_idx[n]
+					idx_next = iLayout_inFrame_idx[n+1]
+					if	abs(((mLayout_inFrame_pos[idx][POS_Y]+mLayout_inFrame_length[idx]) - mLayout_inFrame_pos[idx_next][POS_Y])) < EPS	then
+						iLayout_inFrame_idx_num_temp = n+1
+					else
+						n = iLayout_inFrame_idx_num-1			!	Loop End
+					endif
+				next n
+				iLayout_inFrame_idx_num = iLayout_inFrame_idx_num_temp
+
+
+
+
+				!	(동일한 선상에 있는 경우) 프레임이 2개 이상일때만 실행
+				if	iLayout_inFrame_idx_num >= 2	then
+
+					!	프레임 위치 최소값 찾기(mMin)
+					idx_min = iLayout_inFrame_idx[1] 
+					mMin = mLayout_inFrame_pos[idx][POS_Y]
+
+					!	프레임의 총 길이 (mFrameL_sub)
+					for n = 1	to	iLayout_inFrame_idx_num
+						idx = iLayout_inFrame_idx[n] 
+						mFrameL_sub = mFrameL_sub + mLayout_inFrame_length[idx]
+						bLayout_inFrame_calc[idx] = 1
+					next n
+
+					! 	프레임 길이 입력		
+					mFrame_inFrame_length[idx_min] = mFrameL_sub 	
+
+					!	기타 프레임 길이 입력
+					for n = 1	to	iLayout_inFrame_idx_num
+						!	첫번째 프레임을 제외한 나머지 프레임만 길이를 0으로 입력 
+						if	n <> 1	then
+							idx = iLayout_inFrame_idx[n] 
+							mFrame_inFrame_length[idx] = 0 	
+						endif
+					next n
+
+				else	
+					! 	(동일한 선상에 없는 경우) 원래값 그대로 적용
+					mFrameL_sub = mLayout_inFrame_length[idx_now]
+					bLayout_inFrame_calc[idx_now] = 1
+
+					! 	프레임 길이 입력		
+					mFrame_inFrame_length[idx_now] = mFrameL_sub 							
+				endif
+
+				!	Index Array initialize
+				for n = 1	to	vardim1(iLayout_inFrame_idx)
+					iLayout_inFrame_idx[n] = 0
+				next n
+			else
+				!	수평 프레임의 경우에 동일하게 입력
+				mFrameL_sub = mLayout_inFrame_length[idx_now]
+				bLayout_inFrame_calc[idx_now] = 1
+
+				! 	프레임 길이 입력		
+				mFrame_inFrame_length[idx_now] = mFrameL_sub 				
+			endif
+
+
+
+
+
+		endif
+
+		bLayout_inFrame_calc[idx_now] = 1
+
+	next	i
+
+	parameters	mFrame_inFrame_length = mFrame_inFrame_length
+
+return
+
+
+
+"Frame_outside_show_hide"	:
+
+	iFrame_show_hide_change_index = 0
+	bFrame_show_hide_calc = 0
+
+	!	'bFrame_outside_hide' 변수에 값 변화 유무 찾기 / 작동한 해당 인덱스 찾기
+	n = 1
+	for i = 1	to	iLayout_outFrame_num
+	  	if	bFrame_outside_hide[i] <> bFrame_outside_hide_temp[i]	then
+	  		bFrame_show_hide_calc = 1
+	  		iFrame_show_hide_change_index = i
+	  		i = iLayout_outFrame_num
+	  	endif
+  	next i  
+
+  	!	위 조건 만족시 로직 실행
+  	if	bFrame_show_hide_calc	then
+
+		idx = iFrame_show_hide_change_index
+
+		!	1. 해당 인덱스 상태 확인
+		bHide_status = bFrame_outside_hide[idx]
+
+		!	2. 현재 프레임 길이 확인
+		mFrameL_now = mFrame_outFrame_length[idx]
+
+		!	3. 전/후 프레임 길이에 따른 On/Off 연산
+		idx_start = 0
+		idx_end = 0
+
+			!	3-1. 해당 프레임의 첫번째 인덱스 찾기
+			if	mFrameL_now > EPS | idx = 1	then
+				idx_start = idx
+			else
+				for n = 1	to	idx-1
+					idx_sub = idx-n
+ 					if	mFrame_outFrame_length[idx_sub] > EPS	then
+ 						idx_start = idx_sub
+ 						n = idx-1
+					endif
+				next n
+			endif
+
+			!	3-2. 해당 프레임의 마지막 인덱스 찾기
+			for n = idx_start+1	to	iLayout_outFrame_num
+				if	mFrame_outFrame_length[n] > EPS	then
+					idx_end = n-1
+					n = iLayout_outFrame_num
+				endif
+			next n
+
+			!	3-3. 해당 구간 인덱스 불린 값을 동일한 상태로 변경 
+			if	idx_start > EPS & idx_end > EPS	then
+				for n = idx_start	to	idx_end
+					bFrame_outside_hide[n] = bHide_status
+				next n
+			endif
+
+
+ 		!	변경된 값 입력
+ 		parameters	bFrame_outside_hide = bFrame_outside_hide
+
+  	endif
+
+return
+
+
+"Frame_outside_move_range_with_inframe"	:
+
+	for i = 1	to	iLayout_outFrame_num
+		idx_out = i
+		if	mLayout_outFrame_length[idx_out] > EPS	then
+			if	abs(mLayout_outFrame_pos[idx_out][POS_X]-mLayout_outFrame_pos_temp[idx_out][POS_X]) > EPS | abs(mLayout_outFrame_pos[idx_out][POS_Y]-mLayout_outFrame_pos_temp[idx_out][POS_Y]) > EPS 	then
+				
+				!	90도 일때
+				if	abs(mLayout_outFrame_pos[idx_out][POS_X]-mLayout_outFrame_pos_temp[idx_out][POS_X]) > EPS	then
+					if	(aLayout_outFrame_angle[idx_out] > 90-EPS) & (aLayout_outFrame_angle[idx_out] < 90+EPS)	then
+						mLayout_outFrame_pos_start_posx = mLayout_outFrame_pos[idx_out][POS_X]	
+						mLayout_outFrame_pos_start_posy = mLayout_outFrame_pos[idx_out][POS_Y]
+						mLayout_outFrame_pos_end_posx = mLayout_outFrame_pos[idx_out][POS_X]	
+						mLayout_outFrame_pos_end_posy = mLayout_outFrame_pos[idx_out][POS_Y] + mLayout_outFrame_length[idx_out]	
+						mRange = 0
+						for n = 1	to	iLayout_inFrame_num
+							idx_in = n
+							mLayout_inFrame_pos_start_posx = mLayout_inFrame_pos[idx_in][POS_X]	
+							mLayout_inFrame_pos_start_posy = mLayout_inFrame_pos[idx_in][POS_Y]
+							mLayout_inFrame_pos_end_posx = mLayout_inFrame_pos[idx_in][POS_X] 		
+							mLayout_inFrame_pos_end_posy = mLayout_inFrame_pos[idx_in][POS_Y] + mLayout_inFrame_length[idx_in]
+
+							if	(aLayout_inFrame_angle[idx_in] > 90-EPS) & (aLayout_inFrame_angle[idx_in] < 90+EPS)	then
+								if	abs(mLayout_outFrame_pos_start_posy - mLayout_inFrame_pos_start_posy) < EPS | abs(mLayout_outFrame_pos_end_posy - mLayout_inFrame_pos_end_posy) < EPS 	then
+									if	mRange = 0	then
+										mRange = mLayout_inFrame_pos[idx_in][POS_X]
+									else
+										mRange = min(mLayout_inFrame_pos[idx_in][POS_X], mRange)
+									endif
+								endif
+							endif
+						next n
+
+						mMin = mFrame_size_outframe[idx_out][1]/2 + mFrame_size_inframe[idx_in][1]/2
+						if	mLayout_outFrame_pos[idx_out][POS_X] > mRange-mMin-EPS	then
+							mLayout_outFrame_pos[idx_out][POS_X] = mRange-mMin
+							parameters	mLayout_outFrame_pos[idx_out][POS_X] = mLayout_outFrame_pos[idx_out][POS_X]		
+						endif
+					endif					
+				endif
+
+				!	0도 일때
+				if	abs(mLayout_outFrame_pos[idx_out][POS_Y]-mLayout_outFrame_pos_temp[idx_out][POS_Y]) > EPS 	then
+					if	(aLayout_outFrame_angle[idx_out] > 0-EPS) & (aLayout_outFrame_angle[idx_out] < 0+EPS)	then
+						mLayout_outFrame_pos_start_posx = mLayout_outFrame_pos[idx_out][POS_X]	
+						mLayout_outFrame_pos_start_posy = mLayout_outFrame_pos[idx_out][POS_Y]
+						mLayout_outFrame_pos_end_posx = mLayout_outFrame_pos[idx_out][POS_X] + mLayout_outFrame_length[idx_out]		
+						mLayout_outFrame_pos_end_posy = mLayout_outFrame_pos[idx_out][POS_Y]
+						mRange = 0					
+						for n = 1	to	iLayout_inFrame_num
+							idx_in = n
+							mLayout_inFrame_pos_start_posx = mLayout_inFrame_pos[idx_in][POS_X]	
+							mLayout_inFrame_pos_start_posy = mLayout_inFrame_pos[idx_in][POS_Y]
+							mLayout_inFrame_pos_end_posx = mLayout_inFrame_pos[idx_in][POS_X] + mLayout_inFrame_length[idx_in]		
+							mLayout_inFrame_pos_end_posy = mLayout_inFrame_pos[idx_in][POS_Y] 
+
+							if	(aLayout_inFrame_angle[idx_in] > 0-EPS) & (aLayout_inFrame_angle[idx_in] < 0+EPS)	then
+								if	abs(mLayout_outFrame_pos_start_posx - mLayout_inFrame_pos_start_posx) < EPS | abs(mLayout_outFrame_pos_end_posx - mLayout_inFrame_pos_end_posx) < EPS	then
+									if	n = 1	then
+										mRange = mLayout_inFrame_pos[n][POS_Y]
+									else
+										mRange = max(mLayout_inFrame_pos[n][POS_Y], mRange)
+									endif
+								endif
+							endif
+						next n
+
+						mMin = mFrame_size_outframe[idx_out][1]/2 + mFrame_size_inframe[idx_in][1]/2
+						if	mLayout_outFrame_pos[idx_out][POS_Y] < mRange+mMin+EPS	then
+							mLayout_outFrame_pos[idx_out][POS_Y] = mRange+mMin
+							parameters	mLayout_outFrame_pos[idx_out][POS_Y] = mLayout_outFrame_pos[idx_out][POS_Y]
+						endif
+					endif
+				endif
+
+				!	270도 일때
+				if	abs(mLayout_outFrame_pos[idx_out][POS_X]-mLayout_outFrame_pos_temp[idx_out][POS_X]) > EPS	then				
+					if	(aLayout_outFrame_angle[idx_out] > 270-EPS) & (aLayout_outFrame_angle[idx_out] < 270+EPS)	then
+						mLayout_outFrame_pos_start_posx = mLayout_outFrame_pos[idx_out][POS_X]	
+						mLayout_outFrame_pos_start_posy = mLayout_outFrame_pos[idx_out][POS_Y]
+						mLayout_outFrame_pos_end_posx = mLayout_outFrame_pos[idx_out][POS_X] 	
+						mLayout_outFrame_pos_end_posy = mLayout_outFrame_pos[idx_out][POS_Y] - mLayout_outFrame_length[idx_out]	
+						mRange = 0										
+						for n = 1	to	iLayout_inFrame_num
+							idx_in = n
+							mLayout_inFrame_pos_start_posx = mLayout_inFrame_pos[idx_in][POS_X]	
+							mLayout_inFrame_pos_start_posy = mLayout_inFrame_pos[idx_in][POS_Y]
+							mLayout_inFrame_pos_end_posx = mLayout_inFrame_pos[idx_in][POS_X] 
+							mLayout_inFrame_pos_end_posy = mLayout_inFrame_pos[idx_in][POS_Y] + mLayout_inFrame_length[idx_in]	
+
+							if	(aLayout_inFrame_angle[idx_in] > 90-EPS) & (aLayout_inFrame_angle[idx_in] < 90+EPS)	then
+								if	abs(mLayout_outFrame_pos_start_posy - mLayout_inFrame_pos_end_posy) < EPS | abs(mLayout_outFrame_pos_end_posy - mLayout_inFrame_pos_start_posy) < EPS	then
+									if	mRange = 0	then
+										mRange = mLayout_inFrame_pos[idx_in][POS_X]
+									else
+										mRange = max(mLayout_inFrame_pos[idx_in][POS_X], mRange)
+									endif
+								endif
+							endif
+						next n
+
+						mMin = mFrame_size_outframe[idx_out][1]/2 + mFrame_size_inframe[idx_in][1]/2					
+						if	mLayout_outFrame_pos[idx_out][POS_X] < mRange+mMin+EPS	then
+							mLayout_outFrame_pos[idx_out][POS_X] = mRange+mMin
+							parameters	mLayout_outFrame_pos[idx_out][POS_X] = mLayout_outFrame_pos[idx_out][POS_X]
+						endif
+					endif
+				endif
+
+				!	180도 일때
+				if	abs(mLayout_outFrame_pos[idx_out][POS_Y]-mLayout_outFrame_pos_temp[idx_out][POS_Y]) > EPS 	then				
+					if	(aLayout_outFrame_angle[idx_out] > 180-EPS) & (aLayout_outFrame_angle[idx_out] < 180+EPS)	then
+						mLayout_outFrame_pos_start_posx = mLayout_outFrame_pos[idx_out][POS_X]	
+						mLayout_outFrame_pos_start_posy = mLayout_outFrame_pos[idx_out][POS_Y]
+						mLayout_outFrame_pos_end_posx = mLayout_outFrame_pos[idx_out][POS_X] - mLayout_outFrame_length[idx_out]			
+						mLayout_outFrame_pos_end_posy = mLayout_outFrame_pos[idx_out][POS_Y] 
+						mRange = 0											
+						for n = 1	to	iLayout_inFrame_num
+							idx_in = n
+							mLayout_inFrame_pos_start_posx = mLayout_inFrame_pos[idx_in][POS_X]	
+							mLayout_inFrame_pos_start_posy = mLayout_inFrame_pos[idx_in][POS_Y]
+							mLayout_inFrame_pos_end_posx = mLayout_inFrame_pos[idx_in][POS_X] + mLayout_inFrame_length[idx_in]	 
+							mLayout_inFrame_pos_end_posy = mLayout_inFrame_pos[idx_in][POS_Y]
+
+							if	(aLayout_inFrame_angle[idx_in] > 0-EPS) & (aLayout_inFrame_angle[idx_in] < 0+EPS)	then
+								if	abs(mLayout_outFrame_pos_start_posx - mLayout_inFrame_pos_end_posx) < EPS | abs(mLayout_outFrame_pos_end_posx - mLayout_inFrame_pos_start_posx) < EPS	then
+									if	mRange = 0	then
+										mRange = mLayout_inFrame_pos[idx_in][POS_Y]
+									else
+										mRange = min(mLayout_inFrame_pos[idx_in][POS_Y], mRange)
+									endif
+								endif
+							endif
+						next n
+
+						mMin = mFrame_size_outframe[idx_out][1]/2 + mFrame_size_inframe[idx_in][1]/2						
+						if	mLayout_outFrame_pos[idx_out][POS_Y] > mRange-mMin-EPS	then
+							mLayout_outFrame_pos[idx_out][POS_Y] = mRange-mMin
+							parameters	mLayout_outFrame_pos[idx_out][POS_Y] = mLayout_outFrame_pos[idx_out][POS_Y]
+						endif
+					endif
+				endif
+			endif
+		endif
+	next i	
+
+return
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Dimension Subroutine
+!----------------------------------------------------------------------------------------------
+
+
+"Dim_outside_get_length_calc"	:
+
+
+
+	! !	Length Calculation
+	! n = 1
+	! m = 1
+	! for i = 1	to	iLayout_outFrame_num_real
+	! 	idx = iLayout_outFrame_idx[i]
+
+	! 	!	Horizontal	
+	! 	if	iDim_type = DIM_HORI	then
+	! 		!	0 Degree
+	! 		if	aLayout_outFrame_angle[idx] < EPS		then
+	! 			mDim_outFrame_1[n] = mLayout_outFrame_pos[idx][POS_X] + mFrame_outFrame_length[idx]
+	! 			n = n+1
+	! 		endif
+	! 		!	180 Degree			
+	! 		if	aLayout_outFrame_angle[idx] > 180-EPS	and		aLayout_outFrame_angle[idx] < 180+EPS	then
+	! 			mDim_outFrame_2[m] = mLayout_outFrame_pos[idx][POS_X] 
+	! 			m = m+1
+	! 		endif			
+	! 	endif
+
+	! 	!	Vertical	
+	! 	if	iDim_type = DIM_VERT	then
+	! 		!	90 Degree
+	! 		if	aLayout_outFrame_angle[idx] > 90-EPS	and		aLayout_outFrame_angle[idx] < 90+EPS		then
+	! 			mDim_outFrame_1[n] = mLayout_outFrame_pos[idx][POS_Y] + mFrame_outFrame_length[idx]
+	! 			n = n+1
+	! 		endif
+	! 		!	270 Degree			
+	! 		if	aLayout_outFrame_angle[idx] > 270-EPS	and		aLayout_outFrame_angle[idx] < 270+EPS	then
+	! 			mDim_outFrame_2[m] = mLayout_outFrame_pos[idx][POS_Y] 
+	! 			m = m+1
+	! 		endif			
+	! 	endif
+
+	! next i
+	! iDim_outFrame_1 = n-1
+	! iDim_outFrame_2 = m-1
+
+
+
+
+	! !	Sequence Value(mDim_outFrame_1, mDim_outFrame_2)
+	! !	(mDim_outFrame_1)
+	! for i = 1	to	iDim_outFrame_1
+	! 	mDim_outFrame_1_temp[i] = mDim_outFrame_1[i]
+	! next i
+	! for n = 1	to	iDim_outFrame_1
+	! 	for i = 1	to	iDim_outFrame_1
+	! 		if	mDim_outFrame_1_temp[i] > EPS	then
+	! 			if	i = 1	then
+	! 				mDim_min = mDim_outFrame_1_temp[1]
+	! 			else
+	! 				if	mDim_min < EPS	then
+	! 					mDim_min = mDim_outFrame_1_temp[i]
+	! 				else
+	! 					mDim_min = min(mDim_min, mDim_outFrame_1_temp[i])
+	! 				endif
+	! 			endif
+	! 		endif
+	! 	next i
+	! 	mDim_outFrame_1[n] = mDim_min
+	! 	for i = 1	to	iDim_outFrame_1
+	! 		if	abs(mDim_min - mDim_outFrame_1_temp[i]) < EPS	then
+	! 			mDim_outFrame_1_temp[i] = 0
+	! 			mDim_min = 0
+	! 		endif
+	! 	next i		
+	! next n
+
+	! !	(mDim_outFrame_2)
+	! for i = 1	to	iDim_outFrame_2
+	! 	mDim_outFrame_2_temp[i] = mDim_outFrame_2[i]
+	! next i
+	! for n = 1	to	iDim_outFrame_2
+	! 	for i = 1	to	iDim_outFrame_2
+	! 		if	mDim_outFrame_2_temp[i] > EPS	then
+	! 			if	i = 1	then
+	! 				mDim_min = mDim_outFrame_2_temp[1]
+	! 			else
+	! 				if	mDim_min < EPS	then
+	! 					mDim_min = mDim_outFrame_2_temp[i]
+	! 				else
+	! 					mDim_min = min(mDim_min, mDim_outFrame_2_temp[i])
+	! 				endif
+	! 			endif
+	! 		endif
+	! 	next i
+	! 	mDim_outFrame_2[n] = mDim_min
+	! 	for i = 1	to	iDim_outFrame_2
+	! 		if	abs(mDim_min - mDim_outFrame_2_temp[i]) < EPS	then
+	! 			mDim_outFrame_2_temp[i] = 0
+	! 			mDim_min = 0
+	! 		endif
+	! 	next i		
+	! next n
+
+
+
+
+	! !	Combine 0 & 180
+	! idx1 = 1
+	! idx2 = 1
+	! for i = 1	to	iDim_arrayMax
+	! 	if	i = 1	then
+	! 		if	abs(mDim_outFrame_1[idx1] - mDim_outFrame_2[idx2]) < EPS then
+	! 			mDim_outFrame_total_temp[i] = mDim_outFrame_1[idx1]
+	! 			idx1 = idx1+1
+	! 			idx2 = idx2+1
+	! 		else
+	!  			if	mDim_outFrame_1[idx1]-mDim_outFrame_2[idx2] > EPS 	then
+	!  				mDim_outFrame_total_temp[i] = mDim_outFrame_2[idx2]
+	!  				idx2 = idx2+1
+	!  			else
+	!  				mDim_outFrame_total_temp[i] = mDim_outFrame_1[idx1]
+	!  				idx1 = idx1+1
+	! 			endif
+	! 		endif	 
+	! 	else
+	! 		if	abs(mDim_outFrame_1[idx1] - mDim_outFrame_2[idx2]) < EPS	then
+	! 			mDim_outFrame_total_temp[i] = mDim_outFrame_1[idx1]
+	! 			idx1 = idx1+1
+	! 			idx2 = idx2+1
+	! 		else
+	!  			if	mDim_outFrame_1[idx1]-mDim_outFrame_2[idx2] > EPS	then
+	!  				mDim_outFrame_total_temp[i] = mDim_outFrame_2[idx2]
+	!  				idx2 = idx2+1
+	!  			else
+	!  				mDim_outFrame_total_temp[i] = mDim_outFrame_1[idx1]
+	!  				idx1 = idx1+1
+	! 			endif
+	! 		endif	
+	! 	endif
+	! 	if	iDim_type = DIM_HORI	and		abs(mDim_outFrame_total_temp[i]-mLayoutWidth) < EPS		then		
+	! 		iDim_outFrame_total_temp = i
+	! 		i = iDim_arrayMax
+	! 	endif
+	! 	if	i <= vardim1(mDim_outFrame_total_temp)	then
+	! 		if	iDim_type = DIM_VERT	and		abs(mDim_outFrame_total_temp[i]-mLayoutHeight) < EPS	then	
+	! 			iDim_outFrame_total_temp = i	
+	! 			i = iDim_arrayMax		
+	! 		endif
+	! 	endif
+
+	! next i
+
+
+
+	! !	Substration
+	! for i = 1	to	iDim_outFrame_total_temp
+	! 	if	mDim_outFrame_total_temp[i] > EPS	then
+	! 		if	i = 1	then
+	! 			mDim_outFrame_total[i] = mDim_outFrame_total_temp[i]
+	! 		else
+	! 			mDim_outFrame_total[i] = mDim_outFrame_total_temp[i] - mDim_outFrame_total_temp[i-1]
+	! 		endif
+	! 	else
+	! 		mDim_outFrame_total[i] = 0
+	! 	endif
+	! next i
+	! iDim_outFrame_total = i-1
+
+
+
+	! !	Insert Length
+	! if	iDim_type = DIM_HORI	then
+	! 	for i = 1	to	iDim_arrayMax
+	! 		if	i <= iDim_outFrame_total	then
+	! 			mDim_outFrame_hori[i] = mDim_outFrame_total[i]
+	! 		else
+	! 			mDim_outFrame_hori[i] = 0
+	! 		endif
+	! 	next i
+	! 	parameters	mDim_outFrame_hori = mDim_outFrame_hori
+	! endif
+	! if	iDim_type = DIM_VERT	then
+	! 	for i = 1	to	iDim_arrayMax
+	! 		if	i <= iDim_outFrame_total	then
+	! 			mDim_outFrame_vert[i] = mDim_outFrame_total[i]
+	! 		else
+	! 			mDim_outFrame_vert[i] = 0
+	! 		endif
+	! 	next i
+	! 	parameters	mDim_outFrame_vert = mDim_outFrame_vert
+	! endif
+
+
+
+	! !	initialize
+	! for i = 1	to	vardim1(mDim_outFrame_1)
+	! 	mDim_outFrame_1[i] = 0
+	! next i
+	! for i = 1	to	vardim1(mDim_outFrame_2)
+	! 	mDim_outFrame_2[i] = 0
+	! next i
+	! for i = 1	to	vardim1(mDim_outFrame_total)
+	! 	mDim_outFrame_total[i] = 0
+	! next i
+	! for i = 1	to	vardim1(mDim_outFrame_total_temp)
+	! 	mDim_outFrame_total_temp[i] = 0
+	! next i
+
+
+
+return
+
+! 전체 외곽 치수만 표현하는 로직으로 변경
+"Dim_outside_get_length_calc_new"	:
+	
+	!	Insert Length
+	if	iDim_type = DIM_HORI	then
+		for i = 1	to	iDim_arrayMax
+			if	i = 1	then
+				if	GLOB_MODPAR_NAME <> "mDim_inFrame_hori"  	then
+					mDim_outFrame_hori[1] = mLayoutWidth
+				else
+					mDim_inFrame_totalL = 0
+					for r = 1	to	iDim_arrayMax
+						mDim_inFrame_totalL = mDim_inFrame_totalL + mDim_inFrame_hori[r]
+					next r
+					mDim_outFrame_hori[1] = mDim_inFrame_totalL
+				endif
+			else
+				mDim_outFrame_hori[i] = 0
+			endif
+		next i
+		parameters	mDim_outFrame_hori = mDim_outFrame_hori
+	endif
+	if	iDim_type = DIM_VERT	then
+		for i = 1	to	iDim_arrayMax
+			if	i = 1	then
+				if	GLOB_MODPAR_NAME <> "mDim_inFrame_vert"  	then				
+					mDim_outFrame_vert[i] = mLayoutHeight
+				else
+					mDim_inFrame_totalL = 0
+					for r = 1	to	iDim_arrayMax
+						mDim_inFrame_totalL = mDim_inFrame_totalL + mDim_inFrame_vert[r]
+					next r
+					mDim_outFrame_vert[1] = mDim_inFrame_totalL
+				endif
+			else
+				mDim_outFrame_vert[i] = 0
+			endif
+		next i
+		parameters	mDim_outFrame_vert = mDim_outFrame_vert
+	endif
+
+return
+
+
+"Dim_inside_get_length_calc"	:
+
+	!	Length Calculation
+	n = 1
+	for i = 1	to	iLayout_inFrame_num
+		idx = i
+
+		!	Horizontal	
+		if	iDim_type = DIM_HORI	then
+			!	90 Degree
+			if	aLayout_inFrame_angle[idx] > 90-EPS	and		aLayout_inFrame_angle[idx] < 90+EPS		then
+				if	n = 1	then
+					mDim_inFrame_1[n] = mLayout_inFrame_pos[idx][POS_X]
+					n = n+1
+				else
+					bInsert = 1
+					for r = 1	to	n-1
+						!	위치가 다른 치수값만 받음
+						if	abs(mLayout_inFrame_pos[idx][POS_X] - mDim_inFrame_1[r]) < EPS	then
+							bInsert = 0
+						endif
+					next r
+					if	bInsert		then
+						mDim_inFrame_1[n] = mLayout_inFrame_pos[idx][POS_X]
+						n = n+1
+					endif
+				endif
+			endif
+		endif
+
+		!	Vertical	
+		if	iDim_type = DIM_VERT	then
+			!	0 Degree
+			if	aLayout_inFrame_angle[idx] > 0-EPS	and		aLayout_inFrame_angle[idx] < 0+EPS		then
+				if	n = 1	then
+					mDim_inFrame_1[n] = mLayout_inFrame_pos[idx][POS_Y]
+					n = n+1
+				else
+					bInsert = 1
+					for r = 1	to	n-1
+						!	위치가 다른 치수값만 받음
+						if	abs(mLayout_inFrame_pos[idx][POS_Y] - mDim_inFrame_1[r]) < EPS	then
+							bInsert = 0
+						endif
+					next r
+					if	bInsert		then
+						mDim_inFrame_1[n] = mLayout_inFrame_pos[idx][POS_Y]
+						n = n+1
+					endif
+				endif
+			endif	
+		endif
+
+	next i
+	iDim_inFrame_1 = n-1
+
+
+
+
+	!	Sequence Value(mDim_inFrame_1)
+	if	iDim_inFrame_1 > EPS	then
+		for i = 1	to	iDim_inFrame_1
+			mDim_inFrame_1_temp[i] = mDim_inFrame_1[i]
+		next i
+		for n = 1	to	iDim_inFrame_1
+			for i = 1	to	iDim_inFrame_1
+				if	mDim_inFrame_1_temp[i] > EPS	then
+					if	i = 1	then
+						mDim_min = mDim_inFrame_1_temp[1]
+					else
+						if	mDim_min < EPS	then
+							mDim_min = mDim_inFrame_1_temp[i]
+						else
+							mDim_min = min(mDim_min, mDim_inFrame_1_temp[i])
+						endif
+					endif
+				endif
+			next i
+			mDim_inFrame_1[n] = mDim_min
+			for i = 1	to	iDim_inFrame_1
+				if	abs(mDim_min - mDim_inFrame_1_temp[i]) < EPS	then
+					mDim_inFrame_1_temp[i] = 0
+					mDim_min = 0
+				endif
+			next i		
+		next n
+	endif
+
+
+
+	!	Insert Max Size
+	if	iDim_inFrame_1 > EPS	then	
+		n = iDim_inFrame_1
+		if	iDim_type = DIM_HORI	then
+			if	(mLayoutWidth - mDim_inFrame_1[n]) > EPS	then
+				if	GLOB_MODPAR_NAME <> "mDim_inFrame_hori" 	then
+					mDim_inFrame_1[n+1] = mLayoutWidth			
+				else
+					mDim_inFrame_1[n+1] = mDim_inFrame_1[n] + mDim_inFrame_hori[n+1]
+				endif
+				iDim_inFrame_1 = n+1
+			endif	
+		endif
+		if	iDim_type = DIM_VERT	then	
+			if	(mLayoutHeight - mDim_inFrame_1[n]) > EPS	then
+				if	GLOB_MODPAR_NAME <> "mDim_inFrame_vert" 	then				
+					mDim_inFrame_1[n+1] = mLayoutHeight
+				else
+					mDim_inFrame_1[n+1] = mDim_inFrame_1[n] + mDim_inFrame_vert[n+1]
+				endif
+				iDim_inFrame_1 = n+1
+			endif
+		endif	
+	endif
+
+
+
+
+	!	Substration
+	if	iDim_inFrame_1 > EPS	then		
+		for i = 1	to	iDim_inFrame_1
+			if	mDim_inFrame_1[i] > EPS	then
+				if	i = 1	then
+					mDim_inFrame_total[i] = mDim_inFrame_1[i]
+				else
+					mDim_inFrame_total[i] = mDim_inFrame_1[i] - mDim_inFrame_1[i-1]
+				endif
+			else
+				mDim_inFrame_total[i] = 0
+			endif
+		next i
+		iDim_inFrame_total = i-1
+	else
+		if	iDim_type = DIM_HORI	then		
+			mDim_inFrame_total[1] = mLayoutWidth
+			iDim_inFrame_total = 1
+		endif
+		if	iDim_type = DIM_VERT	then		
+			mDim_inFrame_total[1] = mLayoutHeight
+			iDim_inFrame_total = 1
+		endif		
+	endif
+
+
+
+	!	Insert Length
+	if	iDim_type = DIM_HORI	then
+		for i = 1	to	iDim_arrayMax
+			if	i <= iDim_inFrame_total	then
+				mDim_inFrame_hori[i] = mDim_inFrame_total[i]
+			else
+				mDim_inFrame_hori[i] = 0
+			endif
+		next i
+		parameters	mDim_inFrame_hori = mDim_inFrame_hori
+	endif
+	if	iDim_type = DIM_VERT	then
+		for i = 1	to	iDim_arrayMax
+			if	i <= iDim_inFrame_total	then
+				mDim_inFrame_vert[i] = mDim_inFrame_total[i]
+			else
+				mDim_inFrame_vert[i] = 0
+			endif
+		next i
+		parameters	mDim_inFrame_vert = mDim_inFrame_vert
+	endif
+
+
+
+	!	initialize
+	for i = 1	to	vardim1(mDim_inFrame_1)
+		mDim_inFrame_1[i] = 0
+	next i
+	for i = 1	to	vardim1(mDim_inFrame_total)
+		mDim_inFrame_total[i] = 0
+	next i
+
+
+
+
+return
+
+
+
+"Dim_outside_set_length_calc"	:
+
+	iDim = 1							!	외곽 치수는 무조건 한단계만 표현 
+
+
+
+	if	iDim <> 0	then
+
+
+
+		!	Position Calculation (mDim_pos)
+		mDim_pos_pre = 0
+		mDim_pos_now = 0
+		if	iDim_type = DIM_HORI		then
+			if	not(bDim_inFrame_hori_set)	then
+				for i = 1	to	iDim
+					mDim_pos_pre = mDim_pos_pre + mDim_outFrame_hori_temp[i]
+					mDim_pos_now = mDim_pos_now + mDim_outFrame_hori[i]
+				next i				
+			else
+				for i = 1	to	iDim_arrayMax
+					mDim_pos_pre = mDim_pos_pre + mDim_inFrame_hori_temp[i]
+					mDim_pos_now = mDim_pos_now + mDim_inFrame_hori[i]
+				next i
+			endif
+		endif
+		if	iDim_type = DIM_VERT		then
+			if	not(bDim_inFrame_vert_set)	then
+				for i = 1	to	iDim				
+					mDim_pos_pre = mDim_pos_pre + mDim_outFrame_vert_temp[i]
+					mDim_pos_now = mDim_pos_now + mDim_outFrame_vert[i]
+				next i		
+			else
+				for i = 1	to	iDim_arrayMax
+					mDim_pos_pre = mDim_pos_pre + mDim_inFrame_vert_temp[i]
+					mDim_pos_now = mDim_pos_now + mDim_inFrame_vert[i]
+				next i	
+			endif				
+		endif	
+
+
+
+		!	Find Same Position Outside Layout 
+		r = 1
+		for i = 1	to	iLayout_outFrame_num
+			if	iDim_type = DIM_HORI		then
+				if	abs(mLayout_outFrame_pos[i][POS_X]-mDim_pos_pre) < EPS	then
+					iDim_outFrame_index_set[r] = i
+					r = r+1
+				endif
+			endif
+			if	iDim_type = DIM_VERT		then
+				if	abs(mLayout_outFrame_pos[i][POS_Y] - mDim_pos_pre) < EPS	then
+					iDim_outFrame_index_set[r] = i
+					r = r+1
+				endif
+			endif				
+		next i
+		iDim_outFrame_index_set_num = r-1
+
+
+
+		!	Insert Position Value
+		if	iDim_type = DIM_HORI	then		
+			for i = 1	to	iDim_outFrame_index_set_num
+				idx = iDim_outFrame_index_set[i]
+				mLayout_outFrame_pos[idx][POS_X] = mDim_pos_now
+				parameters	mLayout_outFrame_pos[idx][POS_X] = mLayout_outFrame_pos[idx][POS_X]
+			next i
+		endif
+		if	iDim_type = DIM_VERT	then	
+			for i = 1	to	iDim_outFrame_index_set_num
+				idx = iDim_outFrame_index_set[i]
+				mLayout_outFrame_pos[idx][POS_Y] = mDim_pos_now
+				parameters	mLayout_outFrame_pos[idx][POS_Y] = mLayout_outFrame_pos[idx][POS_Y]
+			next i
+		endif		
+
+
+	endif
+
+return
+
+
+
+"Dim_inside_set_length_calc"	:
+
+
+
+	!	Find Change Dimension Position Index (iDim)
+	iDim = 0
+	for i = 1	to	iLayout_inFrame_num
+		if	iDim_type = DIM_HORI		then
+			if	abs(mDim_inFrame_hori[i]-mDim_inFrame_hori_temp[i]) > EPS	then
+				iDim = i		
+			endif
+		endif
+		if	iDim_type = DIM_VERT		then
+			if	abs(mDim_inFrame_vert[i]-mDim_inFrame_vert_temp[i]) > EPS	then
+				iDim = i		
+			endif
+		endif
+	next i
+
+
+
+	if	iDim <> 0	then
+
+		!	Substration Length
+		if	abs(iDim-iLayout_inFrame_num) > EPS	then
+			if	iDim_type = DIM_HORI		then
+				mSubL = mDim_inFrame_hori[iDim] - mDim_inFrame_hori_temp[iDim]
+				mDim_inFrame_hori[iDim+1] = mDim_inFrame_hori[iDim+1] - mSubL
+				parameters	mDim_inFrame_hori[iDim+1] = mDim_inFrame_hori[iDim+1]
+			endif
+			if	iDim_type = DIM_VERT		then
+				mSubL = mDim_inFrame_vert[iDim] - mDim_inFrame_vert_temp[iDim]
+				mDim_inFrame_vert[iDim+1] = mDim_inFrame_vert[iDim+1] - mSubL
+				parameters	mDim_inFrame_vert[iDim+1] = mDim_inFrame_vert[iDim+1]
+			endif			
+		else
+			!	NONE
+		endif
+
+
+
+		!	Position Calculation (mDim_pos)
+		mDim_pos_pre = 0
+		mDim_pos_now = 0
+		for i = 1	to	iDim
+			if	iDim_type = DIM_HORI		then
+				mDim_pos_pre = mDim_pos_pre + mDim_inFrame_hori_temp[i]
+				mDim_pos_now = mDim_pos_now + mDim_inFrame_hori[i]
+			endif
+			if	iDim_type = DIM_VERT		then
+				mDim_pos_pre = mDim_pos_pre + mDim_inFrame_vert_temp[i]
+				mDim_pos_now = mDim_pos_now + mDim_inFrame_vert[i]
+			endif			
+		next i
+
+
+
+		!	Find Same Position Outside Layout 
+		r = 1
+		for i = 1	to	iLayout_inFrame_num
+			if	mLayout_inFrame_length[i] > EPS	then
+				if	iDim_type = DIM_HORI		then
+					if	(aLayout_inFrame_angle[i] > 90-EPS	and	aLayout_inFrame_angle[i] < 90+EPS)	then
+						if	abs(mLayout_inFrame_pos[i][POS_X]-mDim_pos_pre) < EPS	then
+							iDim_inFrame_index_set[r] = i
+							r = r+1
+						endif
+					endif
+				endif
+				if	iDim_type = DIM_VERT		then
+					if	(aLayout_inFrame_angle[i] > 0-EPS	and	aLayout_inFrame_angle[i] < 0+EPS)		then
+						if	abs(mLayout_inFrame_pos[i][POS_Y] - mDim_pos_pre) < EPS	then
+							iDim_inFrame_index_set[r] = i
+							r = r+1
+						endif
+					endif
+				endif				
+			endif
+		next i
+		iDim_inFrame_index_set_num = r-1
+
+
+
+		!	Insert Position Value
+		for i = 1	to	iDim_inFrame_index_set_num
+			idx = iDim_inFrame_index_set[i]
+			if	iDim_type = DIM_HORI	then
+				mLayout_inFrame_pos[idx][POS_X] = mDim_pos_now
+				parameters	mLayout_inFrame_pos[idx][POS_X] = mLayout_inFrame_pos[idx][POS_X]
+			endif
+			if	iDim_type = DIM_VERT	then
+				mLayout_inFrame_pos[idx][POS_Y] = mDim_pos_now
+				parameters	mLayout_inFrame_pos[idx][POS_Y] = mLayout_inFrame_pos[idx][POS_Y]
+			endif
+		next i
+
+	endif
+
+return
+
+
+
+"Dim_inside_set_lastpoint_switch"	:
+
+	if	iDim_type = DIM_HORI	then
+	 	if	GLOB_MODPAR_NAME = "mDim_inFrame_hori" 	then
+
+	 		!	Find InFrame Dimension Last Index (iDim_inFrame_hori_lastidx)
+	 		idx_tmp = 0
+	 		for i = 1	to	iDim_arrayMax
+	 			if	mDim_inFrame_hori[i] < EPS	then
+	 				idx_tmp = i-1
+	 				iDim_inFrame_hori_lastidx = idx_tmp
+	 				i = iDim_arrayMax
+				endif
+	 		next i
+
+	 		!	InFrame Dimension Set Switch (bDim_inFrame_hori_set)
+		 	if	idx_tmp > EPS	then
+			 	if	abs(mDim_inFrame_hori[idx_tmp]-mDim_inFrame_hori_temp[idx_tmp]) > EPS	then
+			 		bDim_inFrame_hori_set = 1
+		 		endif
+	 		endif	
+
+		endif
+	endif
+
+	if	iDim_type = DIM_VERT	then
+	 	if	GLOB_MODPAR_NAME = "mDim_inFrame_vert"	then
+
+	 		!	Find InFrame Dimension Last Index (iDim_inFrame_vert_lastidx)
+	 		idx_tmp = 0
+	 		for i = 1	to	iDim_arrayMax
+	 			if	mDim_inFrame_vert[i] < EPS	then
+	 				idx_tmp = i-1
+	 				iDim_inFrame_vert_lastidx = idx_tmp
+	 				i = iDim_arrayMax
+				endif
+	 		next i
+
+	 		!	InFrame Dimension Set Switch (bDim_inFrame_vert_set)
+		 	if	idx_tmp > EPS	then
+			 	if	abs(mDim_inFrame_vert[idx_tmp]-mDim_inFrame_vert_temp[idx_tmp]) > EPS	then
+			 		bDim_inFrame_vert_set = 1
+		 		endif
+	 		endif	
+
+		endif
+	endif
+
+return
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Wall Hole Subroutine
+!----------------------------------------------------------------------------------------------
+
+
+"Wallhole_find_point"	:
+
+	!	Find Wallhole point
+	num = 1
+	for n = 1	to	iLayout_outFrame_num_real
+
+		!	이전/다음 인덱스 찾기
+		if	n = 1	then
+			ptNow = iLayout_outFrame_idx[1]
+			ptPre = iLayout_outFrame_idx[iLayout_outFrame_num_real]
+			ptNext = iLayout_outFrame_idx[2]
+		endif
+		if	n > 1	and	 n < iLayout_outFrame_num_real	then
+			ptNow = iLayout_outFrame_idx[n]
+			ptPre = iLayout_outFrame_idx[n-1]
+			ptNext = iLayout_outFrame_idx[n+1]
+		endif
+		if	n = iLayout_outFrame_num_real	then
+			ptNow = iLayout_outFrame_idx[iLayout_outFrame_num_real]
+			ptPre = iLayout_outFrame_idx[iLayout_outFrame_num_real-1]
+			ptNext = iLayout_outFrame_idx[1]
+		endif					
+
+		!	Horizontal
+		if	abs(aLayout_outFrame_angle[ptPre] - aLayout_outFrame_angle[ptNow]) > EPS	then
+			iWallhole_idx[num] = ptNow
+			num = num + 1
+		endif
+
+	next n
+
+	iWallhole_idx_num = num-1
+
+	for n = iWallhole_idx_num+1	to	vardim1(iWallhole_idx)
+		iWallhole_idx[n] = 0
+	next n
+
+return
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Find Rectangle Subroutine
+!----------------------------------------------------------------------------------------------
+"find_Rectangle"	:
+
+	dim	_iFindIndex[]
+	_numIndex = 1
+	_iCount = 0
+
+	!	Find Index
+	for	i = 1	to	iLayout_outFrame_num
+		if	mFrame_outFrame_length[i] > eps	then
+			_iFindIndex[_numIndex] = i
+			_numIndex = _numIndex + 1
+		endif
+	next i
+
+	_numIndex = _numIndex - 1
+
+	!	Count number of different angle
+	for	i = 1	to	_numIndex
+		if	i # _numIndex	then
+			idxNow = _iFindIndex[i]
+			idxNext = _iFindIndex[i+1]
+		endif
+		if	i = _numIndex	then
+			idxNow = _iFindIndex[_numIndex]
+			idxNext = _iFindIndex[1]
+		endif
+
+		if	abs(aLayout_outFrame_angle[idxNow] - aLayout_outFrame_angle[idxNext]) > eps	then
+			_iCount = _iCount + 1
+		endif
+	next i
+
+	!	if number of different angle is 4, this is rectangle window
+	if	_iCount = 4	then
+		_bRect = 1
+	else
+		_bRect = 0
+	endif
+
+	parameters	bRect = _bRect,
+				iFindIndex = _iFindIndex
+
+
+return

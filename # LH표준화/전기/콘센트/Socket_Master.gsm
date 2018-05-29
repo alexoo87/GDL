@@ -1,0 +1,61 @@
+!===============================================================================================
+!	콘센트 21
+!===============================================================================================
+
+!===============================================================================================
+!	License Locking Source
+
+call	"macroL"	parameters	all	returned_parameters	keyValue
+
+if	not(keyValue)	then
+	hideparameter	all
+	lock			all
+endif
+
+!	License Locking Source
+!===============================================================================================
+
+eps = 0.0001
+unID = 100
+
+
+!	콘센트 유형
+!-----------------------------------------------------------------------------------------------
+SOCKET_MOUNTED = 1
+SOCKET_PROJECTED = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stSocketType[]
+		stSocketType[1] = "매입형"
+		stSocketType[2] = "돌출형"
+endif
+
+!	콘센트 유형
+!-----------------------------------------------------------------------------------------------
+SOCKET_CONTENT_ELEC = 1
+SOCKET_CONTENT_ELEC_SHUTDOWN = 2
+SOCKET_CONTENT_LAN = 3
+SOCKET_CONTENT_LAN_MOSAIC = 4
+SOCKET_CONTENT_PHONE = 5
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stSocketContent[]
+		stSocketContent[1] = "220V"
+		stSocketContent[2] = "220V(대기전력차단)"
+		stSocketContent[3] = "랜선 포트"
+		stSocketContent[4] = "랜선 포트(모자이크형)"
+		stSocketContent[5] = "전화 포트"
+endif
+
+!	평면 표기
+!-----------------------------------------------------------------------------------------------
+PLANVIEW_KOR = 1
+PLANVIEW_ARCHICAD = 2
+PLANVIEW_MVO = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stPlanView[] 
+		stPlanView[PLANVIEW_KOR] = "KOR"
+		stPlanView[PLANVIEW_ARCHICAD] = "INT"
+		stPlanView[PLANVIEW_MVO] = "by MVO"
+endif

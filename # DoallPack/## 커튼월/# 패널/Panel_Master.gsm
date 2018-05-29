@@ -1,0 +1,176 @@
+!===============================================================================================
+!	패널
+!===============================================================================================
+eps = 0.0001
+unID = 100
+
+!	커튼월 생성 방향
+!-----------------------------------------------------------------------------------------------
+Tilt_Angle = 1
+Tilt_Length = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stMethod_Tilt[]
+		stMethod_Tilt[1] = "각도"
+		stMethod_Tilt[2] = "길이"
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display Options
+!-----------------------------------------------------------------------------------------------
+dim stDisplayOptions[5]
+	stDisplayOptions[1] = `Projected`
+	stDisplayOptions[2] = `Projected with Overhead`
+	stDisplayOptions[3] = `Symbolic View`
+	stDisplayOptions[4] = `OutLines Only`
+	stDisplayOptions[5] = `Overhead All`
+
+dim stProjectionTypes[3]
+	stProjectionTypes[1] = `To Floor Plan Range`
+	stProjectionTypes[2] = `Absolute Display Limit`
+	stProjectionTypes[3] = `Entire Element`
+
+if AC_symb_display_option = 0 then
+	if gs_symb_display_option = stDisplayOptions[1] then AC_symb_display_option = 1	! Projected
+	if gs_symb_display_option = stDisplayOptions[2] then AC_symb_display_option = 2	! Projected with Overhead
+	if gs_symb_display_option = stDisplayOptions[3] then AC_symb_display_option = 3	! Symbolic View
+	if gs_symb_display_option = stDisplayOptions[4] then AC_symb_display_option = 4	! OutLines Only
+	if gs_symb_display_option = stDisplayOptions[5] then AC_symb_display_option = 5	! Overhead All
+
+	hideparameter "AC_symb_display_option"
+else
+	hideparameter "gs_symb_display_option"
+endif
+
+if AC_symb_show_projection_to = 0 then
+	if gs_symb_show_projection_to = stProjectionTypes[1] then AC_symb_show_projection_to = 1	! To Floor Plan Range
+	if gs_symb_show_projection_to = stProjectionTypes[2] then AC_symb_show_projection_to = 2	! Absolute Display Limit
+	if gs_symb_show_projection_to = stProjectionTypes[3] then AC_symb_show_projection_to = 3	! Entire Element
+
+	hideparameter "AC_symb_show_projection_to"
+else
+	hideparameter "gs_symb_show_projection_to"
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	창호입면도
+!-----------------------------------------------------------------------------------------------
+WinElev_ON = 1
+WinElev_OFF = 2
+WinElev_MVO = 3
+
+	if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3	then
+		dim	stWinElev[]
+			stWinElev[1] = "ON"
+			stWinElev[2] = "OFF"
+			stWinElev[3] = "by MVO"
+	endif
+
+_iWinElev = iWinElev
+
+if	iWinElev = WinElev_MVO	then
+	_reqWinElevMVO = 0
+	_bSuccess = LIBRARYGLOBAL ("cwMVO",	"iWinElevMVO",	_reqWinElevMVO)
+	if	_bSuccess	then
+		if	_reqWinElevMVO = WinElev_ON	then
+			_iWinElev = WinElev_ON
+		endif
+		if	_reqWinElevMVO = WinElev_OFF	then
+			_iWinElev = WinElev_OFF
+		endif
+	else
+		print	"Error. There isn't the MVO Library"
+	endif
+else
+	if	iWinElev = WinElev_ON	then
+		_iWinElev = WinElev_ON
+	endif
+	if	iWinElev = WinElev_OFF	then
+		_iWinElev = WinElev_OFF
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	내부 계산
+!-----------------------------------------------------------------------------------------------
+
+	!	유리패널 좌표
+	!-----------------------------------------------------------------------------------------------
+		!	오프셋 비율
+		_ratioBL = OffsetB/(pnlHgt + addHgtL)
+		_ratioBR = OffsetB/(pnlHgt + addHgtR)
+		_ratioTL = (pnlHgt + addHgtL - OffsetT)/(pnlHgt + addHgtL)
+		_ratioTR = (pnlHgt + addHgtR - OffsetT)/(pnlHgt + addHgtR)
+
+		!	Offset
+		dim	_OffsetPoint[][]
+
+			!	Point1
+			_OffsetPoint[1][1] = (matrixPoint[2][1] - matrixPoint[1][1])*_ratioBL + OffsetL
+			_OffsetPoint[1][2] = matrixPoint[2][2]*_ratioBL
+			_OffsetPoint[1][3] = OffsetB
+
+			!	Point2
+			_OffsetPoint[2][1] = (matrixPoint[2][1] - matrixPoint[1][1])*_ratioTL + OffsetL
+			_OffsetPoint[2][2] = matrixPoint[2][2]*_ratioTL
+			_OffsetPoint[2][3] = pnlHgt + addHgtL - OffsetT
+
+			!	Point3
+			_OffsetPoint[3][1] = matrixPoint[4][1] - OffsetR + (matrixPoint[3][1] - matrixPoint[4][1])*_ratioTR
+			_OffsetPoint[3][2] = matrixPoint[3][2]*_ratioTR
+			_OffsetPoint[3][3] = pnlHgt + addHgtR - OffsetT
+
+			!	Point4
+			_OffsetPoint[4][1] = matrixPoint[4][1] - OffsetR + (matrixPoint[3][1] - matrixPoint[4][1])*_ratioBR
+			_OffsetPoint[4][2] = matrixPoint[3][2]*_ratioBR
+			_OffsetPoint[4][3] = OffsetB
+
+			!	Center Point
+			_centerPoint = (_OffsetPoint[4][1] - _OffsetPoint[1][1])/2
+
+		!	Entire
+		_entireLth = 0
+		_entireLth = _entireLth - min(_OffsetPoint[1][1],	_OffsetPoint[2][1])
+		_entireLth = _entireLth + max(_OffsetPoint[3][1],	_OffsetPoint[4][1])
+		_entireDpt = max(_OffsetPoint[2][2] - _OffsetPoint[1][2],	_OffsetPoint[3][2] - _OffsetPoint[4][2])
+		_entireHgt = max(_OffsetPoint[2][3] - _OffsetPoint[1][3],	_OffsetPoint[3][3] - _OffsetPoint[4][3])
+
+		!	Sub Panel
+		_dummyLth1 = abs(_OffsetPoint[1][1] - _OffsetPoint[2][1])
+		_dummyLth2 = abs(_OffsetPoint[3][1] - _OffsetPoint[4][1])
+		_dummyLth = max(_dummyLth1,	_dummyLth2,	1)
+		_dummyHgt = _entireHgt
+
+
+	!	전개도 좌표
+	!-----------------------------------------------------------------------------------------------
+		!	전개도 두께
+		_elevThk = eps
+
+		!	각도 환산
+		if	iMethod_Tilt = Tilt_Angle	then
+			_aElev = aTilt
+		endif
+
+		if	iMethod_Tilt = Tilt_Length	then
+			_aElev = atn(lTilt/pnlHgt)
+		endif
+
+		!	Elevation Point
+		dim	_elevPoint[][]
+
+			!	Point1
+			_elevPoint[1][1] = _OffsetPoint[1][1]
+			_elevPoint[1][2] = _OffsetPoint[1][3]/cos(_aElev)
+
+			!	Point2
+			_elevPoint[2][1] = _OffsetPoint[2][1]
+			_elevPoint[2][2] = _OffsetPoint[2][3]/cos(_aElev)
+
+			!	Point3
+			_elevPoint[3][1] = _OffsetPoint[3][1]
+			_elevPoint[3][2] = _OffsetPoint[3][3]/cos(_aElev)
+
+			!	Point4
+			_elevPoint[4][1] = _OffsetPoint[4][1]
+			_elevPoint[4][2] = _OffsetPoint[4][3]/cos(_aElev)

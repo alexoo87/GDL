@@ -1,0 +1,1043 @@
+!-----------------------------------------------------------------------------------------------
+! 	공통 
+!-----------------------------------------------------------------------------------------------
+
+!	중심점
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+!	MVO별 스탬프 이동
+if	_stampType = STAMPTYPE_PLAN	then
+	hotspot2	0,				yStampPos_Plan,	unID,	xStampPos_Plan,	1+128	:	unID = unID + 1
+	hotspot2	-1,				yStampPos_Plan,	unID,	xStampPos_Plan,	3		:	unID = unID + 1
+	hotspot2	xStampPos_Plan,	yStampPos_Plan,	unID,	xStampPos_Plan,	2		:	unID = unID + 1
+
+	hotspot2	xStampPos_Plan,	0,				unID,	yStampPos_Plan,	1+128	:	unID = unID + 1
+	hotspot2	xStampPos_Plan,	-1,				unID,	yStampPos_Plan,	3		:	unID = unID + 1
+	hotspot2	xStampPos_Plan,	yStampPos_Plan,	unID,	yStampPos_Plan,	2		:	unID = unID + 1
+
+	add2	xStampPos_Plan,	yStampPos_Plan
+endif
+if	_stampType = STAMPTYPE_CEILING	then
+	hotspot2	0,				yStampPos_Ceil,	unID,	xStampPos_Ceil,	1+128	:	unID = unID + 1
+	hotspot2	-1,				yStampPos_Ceil,	unID,	xStampPos_Ceil,	3		:	unID = unID + 1
+	hotspot2	xStampPos_Ceil,	yStampPos_Ceil,	unID,	xStampPos_Ceil,	2		:	unID = unID + 1
+
+	hotspot2	xStampPos_Ceil,	0,				unID,	yStampPos_Ceil,	1+128	:	unID = unID + 1
+	hotspot2	xStampPos_Ceil,	-1,				unID,	yStampPos_Ceil,	3		:	unID = unID + 1
+	hotspot2	xStampPos_Ceil,	yStampPos_Ceil,	unID,	yStampPos_Ceil,	2		:	unID = unID + 1
+
+	add2	xStampPos_Ceil,	yStampPos_Ceil
+endif
+if	_stampType = STAMPTYPE_ETC	then
+	hotspot2	0,				yStampPos_Etc,	unID,	xStampPos_Etc,	1+128	:	unID = unID + 1
+	hotspot2	-1,				yStampPos_Etc,	unID,	xStampPos_Etc,	3		:	unID = unID + 1
+	hotspot2	xStampPos_Etc,	yStampPos_Etc,	unID,	xStampPos_Etc,	2		:	unID = unID + 1
+
+	hotspot2	xStampPos_Etc,	0,				unID,	yStampPos_Etc,	1+128	:	unID = unID + 1
+	hotspot2	xStampPos_Etc,	-1,				unID,	yStampPos_Etc,	3		:	unID = unID + 1
+	hotspot2	xStampPos_Etc,	yStampPos_Etc,	unID,	yStampPos_Etc,	2		:	unID = unID + 1
+
+	add2	xStampPos_Etc,	yStampPos_Etc
+endif
+
+!	스탬프 끄기
+if	bStampOff	then	end
+
+!	천정고 Off
+_bCeil = 0
+if	bCeil | bCeilHgt	then
+	_bCeil = 1
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+! 	텍스트 설정
+!-----------------------------------------------------------------------------------------------
+
+	! 	텍스트(평면도)
+	!-----------------------------------------------------------------------------------------------
+	!	실명(평면도)
+	dim	enterText[]
+	call		"Macro_EnterText"	parameters	all		insertText = ROOM_NAME,
+														enterTextSign = enterTextSign,
+														returned_parameters		enterText
+
+	textNumber = strlen(ROOM_NAME)													!	텍스트 수
+	textLineNumber = vardim1(enterText)												!	텍스트 라인 수
+
+	! 	글꼴 정의 (수정)
+	!-----------------------------------------------------------------------------------------------
+	textStyles = textBold + 2 * textItalic + 4 * textUnder
+	define style	"textStyle_name"		AC_TextFont_1,		nameTextSize,	8,	textStyles
+	define style	"textStyle_num"			AC_TextFont_1,		numTextSize,	8,	textStyles
+	define style	"textStyle_Ceiling"		AC_TextFont_1,		ceilTextSize,	8,	textStyles
+	define style	"textStyle_CeilType"	AC_TextFont_1,		ctTextSize,		8,	textStyles
+	define style	"textStyle_lev"			AC_TextFont_1,		levelTextSize,	8,	textStyles
+	define style	"textStyle_sublev"		AC_TextFont_1,		levelTextSize,	8,	textStyles
+	set style	"textStyle_name"
+	pen	textPen
+
+	!	글꼴 특성
+	!-----------------------------------------------------------------------------------------------
+		!	실명
+		r = request("Height_of_style",	"textStyle_name",	_textHgt,	_descent,	_leading)
+		_textHgt_name = _textHgt/1000*GLOB_SCALE
+		_textHalf_name = nameTextSize/2 + _descent + _leading
+		_textHalf_name = _textHalf_name/1000*GLOB_SCALE
+
+		!	실번호
+		r = request("Height_of_style",	"textStyle_num",	_textHgt,	_descent,	_leading)
+		_textHalf_num = numTextSize/2 + _descent + _leading
+		_textHalf_num = _textHalf_num/1000*GLOB_SCALE
+
+		!	천정고
+		r = request("Height_of_style",	"textStyle_Ceiling",	_textHgt,	_descent,	_leading)
+		_textHalf_ceiling = ceilTextSize/2 + _descent + _leading
+		_textHalf_ceiling = _textHalf_ceiling/1000*GLOB_SCALE
+
+		!	천정 유형
+		r = request("Height_of_style",	"textStyle_CeilType",	_textHgt,	_descent,	_leading)
+		_textHalf_ceilType = ctTextSize/2 + _descent + _leading
+		_textHalf_ceilType = _textHalf_ceilType/1000*GLOB_SCALE
+
+		!	F.L
+		r = request("Height_of_style",	"textStyle_lev",	_textHgt,	_descent,	_leading)
+		_textHalf_lev = levelTextSize/2 + _descent + _leading
+		_textHalf_lev = _textHalf_lev/1000*GLOB_SCALE
+
+		!	S.L
+		r = request("Height_of_style",	"textStyle_sublev",	_textHgt,	_descent,	_leading)
+		_textHalf_sublev = levelTextSize/2 + _descent + _leading
+		_textHalf_sublev = _textHalf_sublev/1000*GLOB_SCALE
+
+
+	!	텍스트_Paragraph
+	!-----------------------------------------------------------------------------------------------
+		!	실명
+		if	abs(textLineNumber - 1) < eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1]
+			endparagraph
+		endif
+
+		if	abs(textLineNumber - 2) < eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2]
+			endparagraph
+		endif
+
+		if	abs(textLineNumber - 3) < eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2] + "\n"
+				enterText[3]
+			endparagraph
+		endif
+
+		if	abs(textLineNumber - 4) < eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2] + "\n"
+				enterText[3] + "\n"
+				enterText[4]
+			endparagraph
+		endif
+
+		if	textLineNumber - 5 > -eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				"\n"
+				"\n"
+				"실명이 5줄 이상 넘어갈 수 없습니다."
+				"\n"
+				"\n"
+			endparagraph
+		endif
+
+		!	실번호
+		paragraph	"pg_NUM"	2,	0,	0,	0,	1
+			pen		textPen
+			style	"textStyle_num"
+			ROOM_NUMBER
+		endparagraph
+
+		!	천장 상세 번호
+		paragraph	"pg_CEIL_NUM"	2,	0,	0,	0,	1
+			pen		textPen
+			style	"textStyle_num"
+			ceil_num
+		endparagraph
+
+		!	천정고
+		if	not(bCeil)	then
+			ceilingText = ""
+		else
+			ceilingText = str("%.0m", ROOM_HEIGHT*1000)
+		endif
+
+		if	bCeilHgt	then	ceilingText = "CH:" + ceilingText
+		paragraph	"pg_CEILING"	2,	0,	0,	0,	1
+			pen		textPen
+			style	"textStyle_Ceiling"
+			ceilingText
+		endparagraph
+
+		!	천정타입
+		paragraph	"pg_CEIL_TYPE"	2,	0,	0,	0,	1
+			pen		textPen
+			style	"textStyle_CeilType"
+			ceil_type
+		endparagraph
+
+	!	텍스트_Textblock
+	!-----------------------------------------------------------------------------------------------
+		!	textblock 속성값 정의
+		blockWidth = 0
+		blockAnchor = 8
+		blockAngle = 0
+		blockFixedHeight = 1
+
+		!	실명
+		textblock	"tbName"	blockWidth, blockAnchor, blockAngle, nameWF, nameSCF, blockFixedHeight,
+								"pg_NAME"
+
+			r = request("TEXTBLOCK_INFO",	"tbName",	_tbNameWidth,	_tbNameHeight)
+
+			_tbNameWidth = _tbNameWidth/1000*GLOB_SCALE
+			_tbNameHeight = _tbNameHeight/1000*GLOB_SCALE
+
+		!	실번호
+		textblock	"tbNum"	blockWidth, blockAnchor, blockAngle, numWF, numSCF, blockFixedHeight,
+							"pg_NUM"
+
+			r = request("TEXTBLOCK_INFO",	"tbNum",	_tbNumWidth,	_tbNumHeight)
+
+			_tbNumWidth = _tbNumWidth/1000*GLOB_SCALE
+			_tbNumHeight = _tbNumHeight/1000*GLOB_SCALE
+
+		!	천장 상세 번호
+		textblock	"tbCeil"	blockWidth, blockAnchor, blockAngle, numWF, numSCF, blockFixedHeight,
+								"pg_CEIL_NUM"
+
+			r = request("TEXTBLOCK_INFO",	"tbCeil",	_tbDNumWidth,	_tbDNumHeight)
+
+			_tbDNumWidth = _tbDNumWidth/1000*GLOB_SCALE
+			_tbDNumHeight = _tbDNumHeight/1000*GLOB_SCALE
+
+		!	천정고
+		textblock	"tbCeiling"	blockWidth, blockAnchor, blockAngle, ceilWF, ceilSCF, blockFixedHeight,
+								"pg_CEILING"
+
+			r = request("TEXTBLOCK_INFO",	"tbCeiling",	_tbCeilWidth,	_tbCeilHeight)
+
+			_tbCeilWidth = _tbCeilWidth/1000*GLOB_SCALE
+			_tbCeilHeight = _tbCeilHeight/1000*GLOB_SCALE
+
+		!	천정타입
+		textblock	"tbCeilType"	blockWidth, blockAnchor, blockAngle, ctWF, ctSCF, blockFixedHeight,
+					"pg_CEIL_TYPE"
+
+			r = request("TEXTBLOCK_INFO",	"tbCeilType",	_tbTypeWidth,	_tbTypeHeight)
+
+			_tbTypeWidth = _tbTypeWidth/1000*GLOB_SCALE
+			_tbTypeHeight = _tbTypeHeight/1000*GLOB_SCALE
+
+!-----------------------------------------------------------------------------------------------
+! 	스탬프 크기
+!-----------------------------------------------------------------------------------------------
+
+	!	스탬프 자동 크기 ON
+	!-----------------------------------------------------------------------------------------------
+	if	bAutoSize	then
+		!	여백
+		spaceX = stampSpaceX
+		spaceY = stampSpaceY
+
+		!	실명
+		nameWidth = _tbNameWidth + spaceX
+		nameHeight = _tbNameHeight + spaceY
+
+		!	실번호
+		numWidth = _tbNumWidth + spaceX
+		numHeight = _tbNumHeight + spaceY
+
+		!	천장 상세 번호
+		DNumWidth = _tbDNumWidth + spaceX
+		DNumHeight = _tbDNumHeight + spaceY
+
+		!	천정고
+		ceilWidth = _tbCeilWidth + spaceX
+		ceilHeight = _tbCeilHeight + spaceY
+
+		!	천정 타입
+		typeWidth = _tbTypeWidth + spaceX
+		typeHeight = _tbTypeHeight + spaceY
+
+		!	영역 하부레벨 구분 표시(F/S)
+		bottomLvWidth = numHeight/2
+		bottomLvHeight = numHeight/2
+
+		!	영역 하부레벨 값 표시(Z +0)
+		subbottomLvWidth = numWidth - bottomLvWidth 
+		subbottomLvHeight = numHeight/2
+
+		!	스탬프 전체
+		if	_iContents = Contents_Name	then
+			totalStampWidth = nameWidth
+			totalStampHeight = nameHeight
+		endif
+
+		if	_iContents = Contents_NameNumH	then
+			totalStampWidth = nameWidth + numWidth
+			totalStampHeight = max(nameHeight,	numHeight)
+		endif
+
+		if	_iContents = Contents_NameNumV	then
+			totalStampWidth = max(nameWidth,	numWidth)
+			totalStampHeight = nameHeight + numHeight
+		endif
+
+		if	_iContents = Contents_NameNumFS	then
+			totalStampWidth = max(nameWidth,	numWidth*2)
+			totalStampHeight = nameHeight + numHeight
+			mulValue = 0.5
+			numWidth = totalStampWidth*mulValue
+		endif
+
+		if	_iContents = Contents_NameNumCH	then
+			totalStampWidth = max(nameWidth,	(numWidth + ceilWidth + 0.8))
+			totalStampHeight = nameHeight + max(numHeight,	ceilHeight)
+			mulValue = 0.4
+			numWidth = totalStampWidth*mulValue
+			ceilWidth = totalStampWidth*(1 - mulValue)
+		endif
+
+		if	_iContents = Contents_NameTypeCH	then
+			totalStampWidth = max(nameWidth,	(typeWidth + ceilWidth + 0.8))
+			totalStampHeight = nameHeight + max(typeHeight,	ceilHeight)
+			mulValue = 0.4
+			typeWidth = totalStampWidth*mulValue
+			ceilWidth = totalStampWidth*(1 - mulValue)
+		endif
+
+		if	_iContents = Contents_NameNumTypeCH	then
+			totalStampWidth = max((nameWidth + numWidth),	(typeWidth + ceilWidth))
+			totalStampHeight = max(nameHeight,	numHeight) + max(typeHeight,	ceilHeight)
+			mulValue = 0.4
+			numWidth = totalStampWidth*mulValue
+			typeWidth = totalStampWidth*mulValue
+			nameWidth = totalStampWidth*(1 - mulValue)
+			ceilWidth = totalStampWidth*(1 - mulValue)
+		endif
+	endif
+
+	!	스탬프 자동 크기 OFF
+	!-----------------------------------------------------------------------------------------------
+	if	not(bAutoSize)	then
+		stampCustomWidth = stampCustomWidth/1000*GLOB_SCALE
+		stampCustomHeight = stampCustomHeight/1000*GLOB_SCALE
+
+		!	실명
+		nameWidth = max(stampCustomWidth,	_tbNameWidth + 0.2)
+		nameHeight = (stampCustomHeight/2) + (stampCustomHeight/2)*(textLineNumber - 1)
+
+		!	실번호
+		numHeight = stampCustomHeight/2
+
+		!	천장 상세 번호
+		typeHeight = stampCustomHeight/2
+
+		!	천정고
+		ceilHeight = stampCustomHeight/2
+
+		!	천정 타입
+		typeHeight = stampCustomHeight/2
+
+		!	영역 하부레벨 구분 표시(F/S)
+		bottomLvWidth = numHeight/2
+		bottomLvHeight = numHeight/2
+
+		!	영역 하부레벨 값 표시(Z +0)
+		subbottomLvWidth = nameWidth/2 - bottomLvWidth 
+		subbottomLvHeight = numHeight/2
+
+		!	스탬프 전체
+		if	_iContents = Contents_Name	then
+			totalStampWidth = max(stampCustomWidth,	_tbNameWidth + 0.2)
+			totalStampHeight = stampCustomHeight + (stampCustomHeight/2)*(textLineNumber - 1)
+		endif
+
+		if	_iContents = Contents_NameNumH	then
+			totalStampWidth = max(stampCustomWidth,	stampCustomWidth*0.4 + _tbNameWidth + 0.2)
+			totalStampHeight = max(nameHeight,	numHeight)
+			mulValue = 0.4
+			numWidth = stampCustomWidth*mulValue
+			nameWidth = totalStampWidth - numWidth
+		endif
+
+		if	_iContents = Contents_NameNumV	then
+			totalStampWidth = max(stampCustomWidth,	_tbNameWidth + 0.2)
+			totalStampHeight = stampCustomHeight + (stampCustomHeight/2)*(textLineNumber - 1)
+		endif
+
+		if	_iContents = Contents_NameNumFS	then
+			totalStampWidth = max(stampCustomWidth,	_tbNameWidth + 0.2)
+			totalStampHeight = stampCustomHeight + (stampCustomHeight/2)*(textLineNumber - 1)
+			mulValue = 0.5
+			numWidth = totalStampWidth*mulValue
+		endif
+
+		if	_iContents = Contents_NameNumCH	then
+			totalStampWidth = max(stampCustomWidth,	_tbNameWidth + 0.2)
+			totalStampHeight = stampCustomHeight + (stampCustomHeight/2)*(textLineNumber - 1)
+			mulValue = 0.4
+			numWidth = totalStampWidth*mulValue
+			ceilWidth = totalStampWidth*(1 - mulValue)
+		endif
+
+		if	_iContents = Contents_NameTypeCH	then
+			totalStampWidth = max(stampCustomWidth,	_tbNameWidth + 0.2)
+			totalStampHeight = stampCustomHeight + (stampCustomHeight/2)*(textLineNumber - 1)
+			mulValue = 0.4
+			typeWidth = totalStampWidth*mulValue
+			ceilWidth = totalStampWidth*(1 - mulValue)
+		endif
+
+		if	_iContents = Contents_NameNumTypeCH	then
+			totalStampWidth = max(stampCustomWidth,	stampCustomWidth*0.4 + _tbNameWidth + 0.2)
+			totalStampHeight = stampCustomHeight + (stampCustomHeight/2)*(textLineNumber - 1)
+			mulValue = 0.4
+			numWidth = stampCustomWidth*mulValue
+			typeWidth = stampCustomWidth*mulValue
+			nameWidth = totalStampWidth - numWidth
+			ceilWidth = totalStampWidth - numWidth
+		endif
+	endif
+
+
+	!	(타입 변경시) 스탬프 사이즈 변경 폭 계산
+	!-----------------------------------------------------------------------------------------------
+	rSubStampWidth = stampSize[1] - totalStampWidth
+	rSubStampHeight = stampSize[2] - totalStampHeight
+
+	if	abs(rSubStampWidth) < eps	then
+		stampSize[1] = totalStampWidth
+		stampSize[2] = totalStampHeight
+	endif
+
+
+!-----------------------------------------------------------------------------------------------
+! 	2D 요소
+!-----------------------------------------------------------------------------------------------
+
+	! 	텍스트
+	!-----------------------------------------------------------------------------------------------
+	pen	textPen
+	
+	add2	-totalStampWidth/2,	-totalStampHeight/2
+		!	실명
+		if	_iContents = Contents_Name	then
+			!	실명
+			add2	totalStampWidth/2,	totalStampHeight/2 - (_textHgt_name/2)*(textLineNumber - 1)
+				gosub	"textName"
+			del 1
+		endif
+
+		!	실명 + 실번호(가로)
+		if	_iContents = Contents_NameNumH	then
+			!	실번호
+			add2	numWidth/2,	totalStampHeight/2
+				gosub	"textNum"
+			del 1
+
+			!	실명
+			add2	numWidth + nameWidth/2,	totalStampHeight/2 - (_textHgt_name/2)*(textLineNumber - 1)
+				gosub	"textName"
+			del 1
+		endif
+
+		!	실명 + 실번호(세로)
+		if	_iContents = Contents_NameNumV	then
+			!	실명
+			add2	totalStampWidth/2,	nameHeight/2 - (_textHgt_name/2)*(textLineNumber - 1)
+				gosub	"textName"
+			del 1
+
+			!	실번호
+			add2	totalStampWidth/2,	nameHeight + numHeight/2
+				gosub	"textNum"
+			del 1
+		endif
+
+		!	실명 + 실번호 + FL + SL
+		if	_iContents = Contents_NameNumFS	then
+			!	 실명
+			add2	totalStampWidth/2,	numHeight + nameHeight/2 - (_textHgt_name/2)*(textLineNumber - 1)
+				gosub	"textName"
+			del 1
+
+			!	실번호
+			add2	numWidth/2,	numHeight/2
+				gosub	"textNum"
+			del 1
+
+			!	FL, SL
+			bottomLv1 = (ROOM_BASELEV)*1000
+			bottomLv2 = (ROOM_BASELEV)*1000 - slab_thk
+
+			if	bottomLv1 > -eps and bottomLv1 < eps	then
+				subBottomLvText = "±" + str(bottomLv1, 1, 0)
+			endif
+			if	bottomLv1 > 0	then
+				subBottomLvText = "+" + str(bottomLv1, 1, 0)
+			endif
+			if	bottomLv1 < 0	then
+				subBottomLvText = str(bottomLv1, 1, 0)
+			endif
+
+			if	bottomLv2 > -eps and bottomLv2 < eps	then
+				subBottomLvText2 = "±" + str(bottomLv2, 1, 0)
+			endif
+			if	bottomLv2 > 0	then
+				subBottomLvText2 = "+" + str(bottomLv2, 1, 0)
+			endif
+			if	bottomLv2 < 0	then
+				subBottomLvText2 = str(bottomLv2, 1, 0)
+			endif
+
+			if	not(bHideText)	then
+				bottomLvText = "F"
+				bottomLvText2 = "S"
+
+				add2	numWidth + bottomLvWidth/2,	bottomLvHeight/2
+					set style	"textStyle_lev"
+					text2	0,	-_textHalf_lev,	bottomLvText2
+					add2	0,	bottomLvHeight
+						text2	0,	-_textHalf_lev,	bottomLvText
+					del 1
+				del 1
+
+				add2	numWidth + bottomLvWidth,	subBottomLvHeight/2
+					add2	subBottomLvWidth/2,	0
+						set style	"textStyle_sublev"
+						text2	0,	-_textHalf_sublev,	subBottomLvText2
+						add2	0,	subbottomLvHeight 
+							text2	0,	-_textHalf_sublev,	subBottomLvText
+						del 1
+					del 1
+				del 1
+			else
+				add2	numWidth,	subBottomLvHeight/2
+					add2	numWidth/2,	0
+						set style	"textStyle_sublev"
+						text2	0,	-_textHalf_sublev,	subBottomLvText2
+						add2	0,	subbottomLvHeight 
+							text2	0,	-_textHalf_sublev,	subBottomLvText
+						del 1
+					del 1
+				del 1	
+			endif
+		endif
+
+		!	천정고 CH 텍스트만 있을 때 위치
+		_transX = 0
+		if	not(bCeil) & bCeilHgt	then
+			_transX = -ceilWidth/5
+		endif
+
+		!	실명 + 실번호 + 천정고
+		if	_iContents = Contents_NameNumCH	then
+			_bottomHeight = max(numHeight,	ceilHeight)
+
+			!	 실명
+			add2	totalStampWidth/2,	_bottomHeight + nameHeight/2 - (_textHgt_name/2)*(textLineNumber - 1)
+				gosub	"textName"
+			del 1
+
+			! 	실번호
+			add2	numWidth/2,	_bottomHeight/2
+				gosub	"textNum"
+			del 1
+
+			! 	천장고
+			add2	numWidth + ceilWidth/2 + _transX,	_bottomHeight/2
+				gosub	"textCeiling"
+			del 1
+		endif
+
+		!	실명 + 천정타입 + 천정고
+		if	_iContents = Contents_NameTypeCH	then
+			_bottomHeight = max(typeHeight,	ceilHeight)
+
+			!	 실명
+			add2	totalStampWidth/2,	_bottomHeight + nameHeight/2 - (_textHgt_name/2)*(textLineNumber - 1)
+				gosub	"textName"
+			del 1
+
+			! 	천정타입
+			add2	typeWidth/2,	_bottomHeight/2
+				gosub	"textCeilType"
+			del 1
+
+			! 	천장고
+			add2	typeWidth + ceilWidth/2 + _transX,	_bottomHeight/2
+				gosub	"textCeiling"
+			del 1
+		endif
+
+		!	실명 + 실번호 + 천정타입 + 천정고
+		if	_iContents = Contents_NameNumTypeCH	then
+			_bottomHeight = max(typeHeight,	ceilHeight)
+
+			!	 실명
+			add2	numWidth + nameWidth/2,	_bottomHeight + nameHeight/2 - (_textHgt_name/2)*(textLineNumber - 1)
+				gosub	"textName"
+			del 1
+
+			!	실번호
+			add2	numWidth/2,	_bottomHeight + nameHeight/2
+				gosub	"textNum"
+			del 1
+
+			!	천정타입
+			add2	typeWidth/2,	_bottomHeight/2
+				richtext2	0,	-_textHalf_ceilType,	"tbCeilType"
+			del 1
+
+			! 	천장고
+			add2	typeWidth + ceilWidth/2 + _transX,	_bottomHeight/2
+				gosub	"textCeiling"
+			del 1
+		endif
+	del 1
+
+	! 	스탬프
+	!-----------------------------------------------------------------------------------------------
+	pen		stampPen
+	fill	stampFill
+
+	if	stampPen > eps	then
+
+		add2	-totalStampWidth/2,	-totalStampHeight/2
+			!	공통
+			rect2	0,	0,	totalStampWidth,	totalStampHeight
+
+			hotspot2	0,					0
+			hotspot2	0,					totalStampHeight
+			hotspot2	totalStampWidth,	totalStampHeight
+			hotspot2	totalStampWidth,	0
+
+			!	실명
+			if	_iContents = Contents_Name	then
+			endif
+
+			!	실명 + 실번호(가로)
+			if	_iContents = Contents_NameNumH	then
+				add2	numWidth,	0
+					line2	0,	0,	0,	totalStampHeight
+				del 1
+			endif
+
+			!	실명 + 실번호(세로)
+			if	_iContents = Contents_NameNumV	then
+				add2	0,	nameHeight
+					line2	0,	0,	totalStampWidth,	0
+				del 1
+			endif
+
+			!	실명 + 실번호 + FL + SL
+			if	_iContents = Contents_NameNumFS	then
+				add2	0,	numHeight
+					line2	0,	0,	totalStampWidth,	0
+				del 1
+
+				add2	numWidth,	0
+					line2	0,	0,	0,	numHeight
+				del 1
+
+				if	not(bHideText)	then
+					add2	numWidth + bottomLvWidth,	0
+						line2	0,	0,	0,	numHeight
+					del 1
+				endif
+
+				add2	numWidth,	numHeight/2
+					line2	0,	0,	numWidth,	0
+				del 1
+			endif
+
+			!	실명 + 실번호 + 천정고
+			if	_iContents = Contents_NameNumCH	then
+				_bottomHeight = max(numHeight,	ceilHeight)
+
+				add2	0,	_bottomHeight
+					line2	0,	0,	totalStampWidth,	0
+				del 1
+
+				add2	numWidth,	0
+					line2	0,	0,	0,	_bottomHeight
+				del 1
+
+				if	not(_bCeil)	then
+					add2	numWidth,	0
+						line2	0,	0,	ceilWidth,	_bottomHeight
+					del 1
+				endif
+			endif
+
+			!	실명 + 천정타입 + 천정고
+			if	_iContents = Contents_NameTypeCH	then
+				_bottomHeight = max(typeHeight,	ceilHeight)
+
+				add2	0,	_bottomHeight
+					line2	0,	0,	totalStampWidth,	0
+				del 1
+
+				add2	typeWidth,	0
+					line2	0,	0,	0,	_bottomHeight
+				del 1
+
+				if	not(_bCeil)	then
+					add2	typeWidth,	0
+						line2	0,	0,	ceilWidth,	_bottomHeight
+					del 1
+				endif
+			endif
+
+			!	실명 + 실번호 + 천정타입 + 천정고
+			if	_iContents = Contents_NameNumTypeCH	then
+				_bottomHeight = max(typeHeight,	ceilHeight)
+
+				add2	0,	_bottomHeight
+					line2	0,	0,	totalStampWidth,	0
+				del 1
+
+				add2	numWidth,	0
+					line2	0,	0,	0,	totalStampHeight
+				del 1
+
+				if	not(_bCeil)	then
+					add2	numWidth,	0
+						line2	0,	0,	ceilWidth,	_bottomHeight
+					del 1
+				endif
+			endif
+		del 1
+
+	endif
+
+
+	! 	지시선
+	!-----------------------------------------------------------------------------------------------
+	pen	leaderLinePen
+
+	if	_stampType = STAMPTYPE_PLAN	then
+		if	bLeader_Plan	then
+			if	iLeaderH_Plan = Leader_LEFT | iLeaderH_Plan = Leader_RIGHT	then
+				!	위치 이동
+				if	iLeaderV_Plan = Leader_Top		then	add2	0,	totalStampHeight/2
+				if	iLeaderV_Plan = Leader_Center	then	add2	0,	0
+				if	iLeaderV_Plan = Leader_Bottom	then	add2	0,	-totalStampHeight/2
+
+				if	iLeaderH_Plan = Leader_LEFT		then	mul2	-1,	1
+				if	iLeaderH_Plan = Leader_RIGHT	then	mul2	1,	1
+
+					add2	totalStampWidth/2,	0
+						!	Hotspot
+						hotspot2	0,					0,	unID,	subLineLth1_Plan,	1+128	:	unID = unID + 1
+						hotspot2	-1,					0,	unID,	subLineLth1_Plan,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Plan,	0,	unID,	subLineLth1_Plan,	2		:	unID = unID + 1
+
+						hotspot2	0,					-subLineLth2_Plan,	unID,	subLineLth1_Plan,	1+128	:	unID = unID + 1
+						hotspot2	-1,					-subLineLth2_Plan,	unID,	subLineLth1_Plan,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Plan,	-subLineLth2_Plan,	unID,	subLineLth1_Plan,	2		:	unID = unID + 1
+
+						hotspot2	subLineLth1_Plan,	0,					unID,	subLineLth2_Plan,	1+128	:	unID = unID + 1
+						hotspot2	subLineLth1_Plan,	1,					unID,	subLineLth2_Plan,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Plan,	-subLineLth2_Plan,	unID,	subLineLth2_Plan,	2		:	unID = unID + 1
+
+						!	Draw Line
+						_subLineLth1 = subLineLth1_Plan
+						_subLineLth2 = subLineLth2_Plan
+						gosub	"LeaderLineH"
+					del 1
+				del 1
+				del 1
+			else
+				!	위치 이동
+				if	iLeaderV_Plan = Leader_subLeft	then	add2	-totalStampWidth/2,	0
+				if	iLeaderV_Plan = Leader_Center	then	add2	0,					0
+				if	iLeaderV_Plan = Leader_subRight	then	add2	totalStampWidth/2,	0
+
+				if	iLeaderH_Plan = Leader_UP	then	mul2	1,	1
+				if	iLeaderH_Plan = Leader_DOWN	then	mul2	1,	-1
+
+					add2	0,	totalStampHeight/2
+						!	Hotspot
+						hotspot2	0,	0,					unID,	subLineLth1_Plan,	1+128	:	unID = unID + 1
+						hotspot2	0,	-1,					unID,	subLineLth1_Plan,	3		:	unID = unID + 1
+						hotspot2	0,	subLineLth1_Plan,	unID,	subLineLth1_Plan,	2		:	unID = unID + 1
+
+						hotspot2	subLineLth2_Plan,	0,					unID,	subLineLth1_Plan,	1+128	:	unID = unID + 1
+						hotspot2	subLineLth2_Plan,	-1,					unID,	subLineLth1_Plan,	3		:	unID = unID + 1
+						hotspot2	subLineLth2_Plan,	subLineLth1_Plan,	unID,	subLineLth1_Plan,	2		:	unID = unID + 1
+
+						hotspot2	0,					subLineLth1_Plan,	unID,	subLineLth2_Plan,	1+128	:	unID = unID + 1
+						hotspot2	-1,					subLineLth1_Plan,	unID,	subLineLth2_Plan,	3		:	unID = unID + 1
+						hotspot2	subLineLth2_Plan,	subLineLth1_Plan,	unID,	subLineLth2_Plan,	2		:	unID = unID + 1
+
+						!	Draw Line
+						_subLineLth1 = subLineLth1_Plan
+						_subLineLth2 = subLineLth2_Plan
+						gosub	"LeaderLineV"
+					del 1
+				del 1
+				del 1
+			endif
+		endif
+	endif
+
+	if	_stampType = STAMPTYPE_CEILING	then
+		if	bLeader_Ceil	then
+			if	iLeaderH_Ceil = Leader_LEFT | iLeaderH_Ceil = Leader_RIGHT	then
+				!	위치 이동
+				if	iLeaderV_Ceil = Leader_Top		then	add2	0,	totalStampHeight/2
+				if	iLeaderV_Ceil = Leader_Center	then	add2	0,	0
+				if	iLeaderV_Ceil = Leader_Bottom	then	add2	0,	-totalStampHeight/2
+
+				if	iLeaderH_Ceil = Leader_LEFT		then	mul2	-1,	1
+				if	iLeaderH_Ceil = Leader_RIGHT	then	mul2	1,	1
+
+					add2	totalStampWidth/2,	0
+						!	Hotspot
+						hotspot2	0,					0,	unID,	subLineLth1_Ceil,	1+128	:	unID = unID + 1
+						hotspot2	-1,					0,	unID,	subLineLth1_Ceil,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Ceil,	0,	unID,	subLineLth1_Ceil,	2		:	unID = unID + 1
+
+						hotspot2	0,					-subLineLth2_Ceil,	unID,	subLineLth1_Ceil,	1+128	:	unID = unID + 1
+						hotspot2	-1,					-subLineLth2_Ceil,	unID,	subLineLth1_Ceil,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Ceil,	-subLineLth2_Ceil,	unID,	subLineLth1_Ceil,	2		:	unID = unID + 1
+
+						hotspot2	subLineLth1_Ceil,	0,					unID,	subLineLth2_Ceil,	1+128	:	unID = unID + 1
+						hotspot2	subLineLth1_Ceil,	1,					unID,	subLineLth2_Ceil,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Ceil,	-subLineLth2_Ceil,	unID,	subLineLth2_Ceil,	2		:	unID = unID + 1
+
+						!	Draw Line
+						_subLineLth1 = subLineLth1_Ceil
+						_subLineLth2 = subLineLth2_Ceil
+						gosub	"LeaderLineH"
+					del 1
+				del 1
+				del 1
+			else
+				!	위치 이동
+				if	iLeaderV_Ceil = Leader_subLeft	then	add2	-totalStampWidth/2,	0
+				if	iLeaderV_Ceil = Leader_Center	then	add2	0,					0
+				if	iLeaderV_Ceil = Leader_subRight	then	add2	totalStampWidth/2,	0
+
+				if	iLeaderH_Ceil = Leader_UP	then	mul2	1,	1
+				if	iLeaderH_Ceil = Leader_DOWN	then	mul2	1,	-1
+
+					add2	0,	totalStampHeight/2
+						!	Hotspot
+						hotspot2	0,	0,					unID,	subLineLth1_Ceil,	1+128	:	unID = unID + 1
+						hotspot2	0,	-1,					unID,	subLineLth1_Ceil,	3		:	unID = unID + 1
+						hotspot2	0,	subLineLth1_Ceil,	unID,	subLineLth1_Ceil,	2		:	unID = unID + 1
+
+						hotspot2	subLineLth2_Ceil,	0,					unID,	subLineLth1_Ceil,	1+128	:	unID = unID + 1
+						hotspot2	subLineLth2_Ceil,	-1,					unID,	subLineLth1_Ceil,	3		:	unID = unID + 1
+						hotspot2	subLineLth2_Ceil,	subLineLth1_Ceil,	unID,	subLineLth1_Ceil,	2		:	unID = unID + 1
+
+						hotspot2	0,					subLineLth1_Ceil,	unID,	subLineLth2_Ceil,	1+128	:	unID = unID + 1
+						hotspot2	-1,					subLineLth1_Ceil,	unID,	subLineLth2_Ceil,	3		:	unID = unID + 1
+						hotspot2	subLineLth2_Ceil,	subLineLth1_Ceil,	unID,	subLineLth2_Ceil,	2		:	unID = unID + 1
+
+						!	Draw Line
+						_subLineLth1 = subLineLth1_Ceil
+						_subLineLth2 = subLineLth2_Ceil
+						gosub	"LeaderLineV"
+					del 1
+				del 1
+				del 1
+			endif
+		endif
+	endif
+
+	if	_stampType = STAMPTYPE_ETC	then
+		if	bLeader_Etc	then
+			if	iLeaderH_Etc = Leader_LEFT | iLeaderH_Etc = Leader_RIGHT	then
+				!	위치 이동
+				if	iLeaderV_Etc = Leader_Top		then	add2	0,	totalStampHeight/2
+				if	iLeaderV_Etc = Leader_Center	then	add2	0,	0
+				if	iLeaderV_Etc = Leader_Bottom	then	add2	0,	-totalStampHeight/2
+
+				if	iLeaderH_Etc = Leader_LEFT	then	mul2	-1,	1
+				if	iLeaderH_Etc = Leader_RIGHT	then	mul2	1,	1
+
+					add2	totalStampWidth/2,	0
+						!	Hotspot
+						hotspot2	0,					0,	unID,	subLineLth1_Etc,	1+128	:	unID = unID + 1
+						hotspot2	-1,					0,	unID,	subLineLth1_Etc,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Etc,	0,	unID,	subLineLth1_Etc,	2		:	unID = unID + 1
+
+						hotspot2	0,					-subLineLth2_Etc,	unID,	subLineLth1_Etc,	1+128	:	unID = unID + 1
+						hotspot2	-1,					-subLineLth2_Etc,	unID,	subLineLth1_Etc,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Etc,	-subLineLth2_Etc,	unID,	subLineLth1_Etc,	2		:	unID = unID + 1
+
+						hotspot2	subLineLth1_Etc,	0,					unID,	subLineLth2_Etc,	1+128	:	unID = unID + 1
+						hotspot2	subLineLth1_Etc,	1,					unID,	subLineLth2_Etc,	3		:	unID = unID + 1
+						hotspot2	subLineLth1_Etc,	-subLineLth2_Etc,	unID,	subLineLth2_Etc,	2		:	unID = unID + 1
+
+						!	Draw Line
+						_subLineLth1 = subLineLth1_Etc
+						_subLineLth2 = subLineLth2_Etc
+						gosub	"LeaderLineH"
+					del 1
+				del 1
+				del 1
+			else
+				!	위치 이동
+				if	iLeaderV_Etc = Leader_subLeft	then	add2	-totalStampWidth/2,	0
+				if	iLeaderV_Etc = Leader_Center	then	add2	0,					0
+				if	iLeaderV_Etc = Leader_subRight	then	add2	totalStampWidth/2,	0
+
+				if	iLeaderH_Etc = Leader_UP	then	mul2	1,	1
+				if	iLeaderH_Etc = Leader_DOWN	then	mul2	1,	-1
+
+					add2	0,	totalStampHeight/2
+						!	Hotspot
+						hotspot2	0,	0,					unID,	subLineLth1_Etc,	1+128	:	unID = unID + 1
+						hotspot2	0,	-1,					unID,	subLineLth1_Etc,	3		:	unID = unID + 1
+						hotspot2	0,	subLineLth1_Etc,	unID,	subLineLth1_Etc,	2		:	unID = unID + 1
+
+						hotspot2	subLineLth2_Etc,	0,					unID,	subLineLth1_Etc,	1+128	:	unID = unID + 1
+						hotspot2	subLineLth2_Etc,	-1,					unID,	subLineLth1_Etc,	3		:	unID = unID + 1
+						hotspot2	subLineLth2_Etc,	subLineLth1_Etc,	unID,	subLineLth1_Etc,	2		:	unID = unID + 1
+
+						hotspot2	0,					subLineLth1_Etc,	unID,	subLineLth2_Etc,	1+128	:	unID = unID + 1
+						hotspot2	-1,					subLineLth1_Etc,	unID,	subLineLth2_Etc,	3		:	unID = unID + 1
+						hotspot2	subLineLth2_Etc,	subLineLth1_Etc,	unID,	subLineLth2_Etc,	2		:	unID = unID + 1
+
+						!	Draw Line
+						_subLineLth1 = subLineLth1_Etc
+						_subLineLth2 = subLineLth2_Etc
+						gosub	"LeaderLineV"
+					del 1
+				del 1
+				del 1
+			endif
+		endif
+	endif
+end
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	Sub-routine
+!-----------------------------------------------------------------------------------------------
+
+!-----------------------------------------------------------------------------------------------
+"textName":
+!-----------------------------------------------------------------------------------------------
+	if	bTextName	then
+		richtext2	0,	-_textHalf_name,	"tbName"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"textNum":
+!-----------------------------------------------------------------------------------------------
+	if	bTextNum	then
+		richtext2	0,	-_textHalf_num,	"tbNum"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"textCeiling":
+!-----------------------------------------------------------------------------------------------
+	if	bTextCeil	then
+		richtext2	0,	-_textHalf_ceiling,	"tbCeiling"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"textCeilType":
+!-----------------------------------------------------------------------------------------------
+	if	bTextType	then
+		richtext2	0,	-_textHalf_ceilType,	"tbCeilType"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"LeaderLineH":
+!-----------------------------------------------------------------------------------------------
+	FillBgPen = 0
+	fill	CircleFill
+
+	!	보조선_1
+	!-----------------------------------------------------------------------------------------------
+	line2	0,	0,	_subLineLth1,	0
+
+	!	보조선_2
+	!-----------------------------------------------------------------------------------------------
+	add2	_subLineLth1,	0
+		line2	0,	0,	0,	-_subLineLth2
+	del 1
+
+	!	보조선_끝_원
+	!-----------------------------------------------------------------------------------------------	
+	add2	_subLineLth1,	-_subLineLth2
+		put	leaderLineCircle,	0,		1,
+			0,					0,		900,
+			leaderLineCircle,	180,	4000+1,
+			-leaderLineCircle,	0,		1,
+			0,					0,		900,
+			leaderLineCircle,	180,	4000+1
+
+		poly2_B	nsp/3,	1 + 2,	CircleFillPen,	FillBgPen,	get(nsp)
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"LeaderLineV":
+!-----------------------------------------------------------------------------------------------
+	FillBgPen = 0
+	fill	CircleFill
+
+	!	보조선_1
+	!-----------------------------------------------------------------------------------------------
+	line2	0,	0,	0,	_subLineLth1
+
+	!	보조선_2
+	!-----------------------------------------------------------------------------------------------
+	add2	0,	_subLineLth1
+		line2	0,	0,	_subLineLth2,	0
+	del 1
+
+	!	보조선_끝_원
+	!-----------------------------------------------------------------------------------------------	
+	add2	_subLineLth2,	_subLineLth1
+		put	leaderLineCircle,	0,		1,
+			0,					0,		900,
+			leaderLineCircle,	180,	4000+1,
+			-leaderLineCircle,	0,		1,
+			0,					0,		900,
+			leaderLineCircle,	180,	4000+1
+
+		poly2_B	nsp/3,	1 + 2,	CircleFillPen,	FillBgPen,	get(nsp)
+	del 1
+return

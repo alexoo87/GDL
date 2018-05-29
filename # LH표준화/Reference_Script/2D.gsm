@@ -1,0 +1,75 @@
+!	LH표준화 라이브러리 표현
+!-----------------------------------------------------------------------------------------------
+	!	MVO
+	if	iPlanView = PLANVIEW_MVO	then
+		success = LIBRARYGLOBAL("MEP_m_MVO.gsm",	"stFontType",	_stFontType)
+		success = LIBRARYGLOBAL("MEP_m_MVO.gsm",	"fontSize",		_fontSize)
+
+		if	success > eps	then
+			define style	"styFont_MVO"	_stFontType,	_fontSize,	7,	0
+			style	"styFont_MVO"
+
+			r = request("Height_of_style", "styFont_MVO",	_textHgt,	_descent, _leading)
+
+			adjustY = 0 + _descent + _leading
+			adjustY = adjustY/1000*GLOB_SCALE
+		endif
+
+		r = LIBRARYGLOBAL("MEP_m_MVO.gsm",	"iPlanview",	_iPlanview)
+
+		_iPlanview = _iPlanview
+	else
+		define style	"styFont_Local"	stFontType,	fontSize,	7,	0
+		style	"styFont_Local"
+
+		r = request("Height_of_style", "styFont_Local",	_textHgt,	_descent, _leading)
+
+		adjustY = 0 + _descent + _leading
+		adjustY = adjustY/1000*GLOB_SCALE
+
+		_iPlanview = iPlanview
+	endif
+
+	if	_iPlanview = PLANVIEW_KOR	then
+		!	Parameters
+		_rShape = 0.0015*GLOB_SCALE
+		_lineHgt = 0.0010*GLOB_SCALE
+
+		!	Text
+		pen	textPen
+
+		add2	_rShape*cos(40),	_rShape*sin(40) - adjustY
+			text2	0,	0,	"A"
+		del 1
+
+		!	Hotspot
+		hotspot2	0,	0
+		hotspot2	_rShape*cos(40),	_rShape*sin(40)
+		hotspot2	-_rShape*cos(40),	_rShape*sin(40)
+		hotspot2	0,	-_rShape
+
+		!	Symbol
+		pen		gs_cont_pen
+		fill	gs_fill_type
+
+		put	_rShape*cos(140),	_rShape*sin(140),	1,
+			0,					0,					900+1,
+			_rShape,			260,				4000+1
+
+		poly2_b	nsp/3,	1+2+4,	gs_fill_pen,	gs_back_pen,	get(nsp)
+	endif
+
+	if	_iPlanview = PLANVIEW_ARCHICAD	then
+		!	Hotspot
+		hotspot2	0,			0
+		hotspot2	0,			dBaseR
+		hotspot2	dBaseR,		0
+		hotspot2	0,			-dBaseR
+		hotspot2	-dBaseR,	0
+
+		!	Project
+		pen		gs_cont_pen
+		fill	gs_fill_type
+
+		project2{2}	3,	270,	3+32,	gs_back_pen,	0,	0,	0
+	endif

@@ -1,0 +1,615 @@
+!===============================================================================================
+!	코너 경사커튼월
+!===============================================================================================
+
+!	포인트 좌표
+!-----------------------------------------------------------------------------------------------
+!	Point1(원점 : 0, 0, 0)
+for	i = 1	to	3
+	parameters	matrixPoint[1][i] = 0
+next	i
+
+!	너비값 입력
+parameters	matrixPoint[4][1] = ctwWdt
+
+!	높이값 입력
+for	i = 1	to	4
+	if	i = 1 | i = 4	then
+		parameters	matrixPoint[i][3] = 0
+	endif
+	if	i = 2 | i = 3	then
+		parameters	matrixPoint[i][3] = ctwHgt
+	endif
+next	i
+
+!	포인트 y좌표
+_yPosL = -ctwHgt*tan(aTiltL)
+_yPosR = -ctwHgt*tan(aTiltR)
+
+for	i = 1	to	4
+	if	i = 1 | i = 4	then
+		parameters	matrixPoint[i][2] = 0
+	endif
+	if	i = 2 | i = 3	then
+		if	i = 2	then
+			parameters	matrixPoint[i][2] = _yPosL
+		else
+			parameters	matrixPoint[i][2] = _yPosR
+		endif
+	endif
+next	i
+
+!	Point2의 X좌표는 Point3의 X좌표를 넘어갈 수 없다
+if	matrixPoint[2][1] - matrixPoint[3][1] > eps	then
+	parameters	matrixPoint[2][1] = matrixPoint[3][1] - eps*100
+endif
+
+!	Point4의 X좌표는 Point1의 X좌표를 넘어갈 수 없다
+if	matrixPoint[1][1] - matrixPoint[4][1] > eps	then
+	parameters	matrixPoint[4][1] = matrixPoint[1][1] + eps*100
+endif
+
+!	커튼월
+!-----------------------------------------------------------------------------------------------
+values	"ctwHgt"	range	((frmWdtB + frmWdtT),	]
+values	"ctwWdt"	range	[0,	]
+! values	"ctwWdt"	range	((frmWdtL + frmWdtR),	]
+
+!	프레임 유형
+!-----------------------------------------------------------------------------------------------
+!	좌/우 프레임
+values{2}	"iFrmTypeL"	FrmType_Boundary,	stFrmType[FrmType_Boundary],
+						FrmType_Mullion,	stFrmType[FrmType_Mullion]
+
+values{2}	"iFrmTypeR"	FrmType_Boundary,	stFrmType[FrmType_Boundary],
+						FrmType_Mullion,	stFrmType[FrmType_Mullion]
+
+if	iFrmTypeL = FrmType_Boundary	then
+	lock			"aFrmL"
+	hideparameter	"aFrmL"
+
+	parameters	aFrmL = 0
+endif
+
+if	iFrmTypeR = FrmType_Boundary	then
+	lock			"aFrmR"
+	hideparameter	"aFrmR"
+
+	parameters	aFrmR = 0
+endif
+
+!	상/하 프레임
+values{2}	"iFrmTypeT"	FrmType_Boundary,	stFrmType[FrmType_Boundary],
+						FrmType_Transom,	stFrmType[FrmType_Transom]
+
+values{2}	"iFrmTypeB"	FrmType_Boundary,	stFrmType[FrmType_Boundary],
+						FrmType_Transom,	stFrmType[FrmType_Transom]
+
+
+!	프레임 너비
+values	"frmWdtL"	range	(0,	)
+values	"frmThkL"	range	(0,	)
+values	"gskWdtL"	range	(0,	frmWdtL]
+
+values	"frmWdtR"	range	(0,	)
+values	"frmThkR"	range	(0,	)
+values	"gskWdtR"	range	(0,	frmWdtR]
+
+values	"frmWdtB"	range	(0,	)
+values	"frmThkB"	range	(0,	)
+values	"gskWdtB"	range	(0,	frmWdtB]
+
+values	"frmWdtT"	range	(0,	)
+values	"frmThkT"	range	(0,	)
+values	"gskWdtT"	range	(0,	frmWdtT]
+
+values	"gskThk"	range	[0,	]
+
+values	"trsWdt"	range	(0,	)
+values	"trsThk"	range	(0,	)
+values	"trsGskWdt"	range	(0,	trsWdt]
+
+!	프레임 각도
+!-----------------------------------------------------------------------------------------------
+values	"aTiltL"	range	[-89,	89]
+values	"aTiltR"	range	[-89,	89]
+
+!	코너멀리언 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iCornerType"	CORNER_TYPE1,	stCornerType[CORNER_TYPE1],
+							CORNER_TYPE2,	stCornerType[CORNER_TYPE2]
+
+if	iCornerType < eps	then
+	parameters	iCornerType = CORNER_TYPE1
+endif
+
+!	멀리언/트랜섬 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMlnType"	Mln_Type1,	stMlnType[Mln_Type1],
+						Mln_Type2,	stMlnType[Mln_Type2]
+
+values{2}	"iTrsType"	Trs_Type1,	stTrsType[Trs_Type1],
+						Trs_Type2,	stTrsType[Trs_Type2]
+
+
+!	멀리언 각도
+!-----------------------------------------------------------------------------------------------
+values	"aFrmL"	range	[-80,	80]
+values	"aFrmR"	range	[-80,	80]
+
+!	트랜섬 개수
+!-----------------------------------------------------------------------------------------------
+_nMax = 9
+dim	_nTrs[]
+for	i = 0	to	_nMax
+	_nTrs[i + 1] = i
+next	i
+
+values	"nTrs"	_nTrs
+
+!	트랜섬 분할 높이
+!-----------------------------------------------------------------------------------------------
+if	nTrs < 1	then
+	parameters	bEqualGap = 1
+	lock			"bEqualGap", "trsGap"
+	hideparameter	"bEqualGap", "trsGap"
+
+	parameters	trsGap[1] = ctwHgt - (frmWdtB + frmWdtT)
+endif
+
+values	"trsGap"	range	[frmWdtB,	ctwHgt - frmWdtT]
+if	bEqualGap	then
+	lock			"trsGap"
+	hideparameter	"trsGap"
+
+	for	i = 1	to	nTrs + 1
+		_tempHgt = ctwHgt/(nTrs + 1)
+		parameters	trsGap[i] = _tempHgt*i
+	next	i
+else
+	if	nTrs > 2	then
+		if	trsGap[1] - trsGap[2] > eps	then
+			parameters	trsGap[1] = trsGap[2] - eps*100
+		endif
+		if	trsGap[2] - trsGap[3] > eps	then
+			parameters	trsGap[2] = trsGap[3] - eps*100
+		endif
+
+		if	nTrs > 3	then
+			if	trsGap[3] - trsGap[4] > eps	then
+				parameters	trsGap[3] = trsGap[4] - eps*100
+			endif
+
+			if	nTrs > 4	then
+				if	trsGap[4] - trsGap[5] > eps	then
+					parameters	trsGap[4] = trsGap[5] - eps*100
+				endif
+
+				if	nTrs > 5	then
+					if	trsGap[5] - trsGap[6] > eps	then
+						parameters	trsGap[5] = trsGap[6] - eps*100
+					endif
+
+					if	nTrs > 6	then
+						if	trsGap[6] - trsGap[7] > eps	then
+							parameters	trsGap[6] = trsGap[7] - eps*100
+						endif
+
+						if	nTrs > 7	then
+							if	trsGap[7] - trsGap[8] > eps	then
+								parameters	trsGap[7] = trsGap[8] - eps*100
+							endif
+
+							if	nTrs > 8	then
+								if	trsGap[8] - trsGap[9] > eps	then
+									parameters	trsGap[8] = trsGap[9] - eps*100
+								endif
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	endif
+endif
+
+!	단열재 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iInsType"	INS_TYPE_NONE,	stInsType[INS_TYPE_NONE],
+						INS_TYPE_1,		stInsType[INS_TYPE_1],
+						INS_TYPE_2,		stInsType[INS_TYPE_2],
+						INS_TYPE_3,		stInsType[INS_TYPE_3],
+						INS_TYPE_4,		stInsType[INS_TYPE_4]
+
+!	패널
+!-----------------------------------------------------------------------------------------------
+values	"pnlLct"	range	[0,	(gskThk - pnlThk)]
+values	"pnlThk"	range	(0,	gskThk)
+
+values	"insThk_1"	range	(0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
+values	"insThk_2"	range	(0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
+values	"insThk_3"	range	(0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
+values	"insThk_4"	range	(0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
+
+!	수평프레임 캡
+!-----------------------------------------------------------------------------------------------
+if	not(nTrs < eps)	then
+	_count = 0
+	for	i = 1	to	nTrs
+		if	bTrsCap[i]	then	_count = _count + 1
+	next	i
+
+	if	_count < eps	then
+		lock			"trsCapWdt", "trsCapThk"
+		hideparameter	"trsCapWdt", "trsCapThk"
+	endif
+else
+	lock			"bTrsCap", "trsCapWdt", "trsCapThk"
+	hideparameter	"trsCapWdt", "trsCapThk"
+endif
+
+
+!===============================================================================================
+!	2D Display Options
+!===============================================================================================
+values	"gs_symb_display_option"		stDisplayOptions
+values	"gs_symb_show_projection_to"	stProjectionTypes
+
+if	AC_symb_display_option = 3 | AC_symb_display_option = 5	then
+	hideparameter	"gs_use_3D_view_attributes"
+	lock			"gs_use_3D_view_attributes"
+endif
+
+if	gs_use_3D_view_attributes	then
+	hideparameter	"AC_uncut_pen"
+	lock			"AC_uncut_pen"
+endif
+
+if	not(AC_symb_display_option = 1 | AC_symb_display_option = 2 | AC_symb_display_option = 6)	then
+	hideparameter	"gs_sect_pen",
+					"gs_cut_fill_type",
+					"gs_cut_fill_fg",
+					"gs_cut_fill_bg"
+endif
+
+if	AC_symb_display_option = 3 | AC_symb_display_option = 4 | AC_symb_display_option = 5	then
+	hideparameter	"gs_symb_show_projection_to"
+	lock			"gs_symb_show_projection_to"
+endif
+
+if	AC_symb_display_option = 3 | AC_symb_display_option = 5	then
+	hideparameter	"AC_cut_linetype"
+	lock			"AC_cut_linetype"
+endif
+
+if	AC_symb_display_option = 1 | AC_symb_display_option = 3 | AC_symb_display_option = 4	then
+	hideparameter	"AC_overhead_linetype", "AC_overhead_pen"
+	lock			"AC_overhead_linetype", "AC_overhead_pen"
+endif
+
+if	AC_symb_display_option = 4	then
+	hideparameter	"AC_cut_linetype"
+	lock			"AC_cut_linetype"
+endif
+
+if	AC_symb_display_option = 5	then
+	hideparameter	"gs_fill_type", "gs_fill_pen", "gs_back_pen"
+	lock			"gs_fill_type", "gs_fill_pen", "gs_back_pen"
+endif
+
+values	"gs_symb_display_option"		stDisplayOptions
+values	"gs_symb_show_projection_to"	stProjectionTypes
+!===============================================================================================
+
+
+!-----------------------------------------------------------------------------------------------
+!	창호입면도
+!-----------------------------------------------------------------------------------------------
+values{2}	"iWinElev"	WinElev_On,		stWinElev[WinElev_On],
+						WinElev_Off,	stWinElev[WinElev_Off],
+						WinElev_MVO,	stWinElev[WinElev_MVO]
+
+if	_iWinElev = WinElev_Off	then
+	parameters	bGuideLine = 0
+	lock	"bGuideLine", "xPosGuide", "zPosGuide", "aGuide"
+endif
+
+if	not(bGuideLine)	then
+	lock	"yPosGuide"
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	면적 산출
+!-----------------------------------------------------------------------------------------------
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+	!	벡터 방향
+	_dxL = matrixPoint[2][1] - matrixPoint[1][1]
+	_dyL = matrixPoint[2][2] - matrixPoint[1][2]
+	_dzL = matrixPoint[2][3] - matrixPoint[1][3]
+
+	_dxR = matrixPoint[3][1] - matrixPoint[4][1]
+	_dyR = matrixPoint[3][2] - matrixPoint[4][2]
+	_dzR = matrixPoint[3][3] - matrixPoint[4][3]
+
+	!	가이드 포인트
+	dim	_guidePoint[][]
+
+		!	Point1
+		_guidePoint[1][1] = matrixPoint[1][1]
+		_guidePoint[1][2] = matrixPoint[1][3]/cos(aTiltL)
+
+		!	Point2
+		_guidePoint[2][1] = matrixPoint[2][1]
+		_guidePoint[2][2] = matrixPoint[2][3]/cos(aTiltL)
+
+		!	Point3
+		_guidePoint[3][1] = matrixPoint[3][1]
+		_guidePoint[3][2] = matrixPoint[3][3]/cos(aTiltR)
+
+		!	Point4
+		_guidePoint[4][1] = matrixPoint[4][1]
+		_guidePoint[4][2] = matrixPoint[4][3]/cos(aTiltR)
+
+	!	_bMlnTypeL1/_bMlnTypeL2
+	_bMlnTypeL1 = (iFrmTypeL = FrmType_Boundary) | (iFrmTypeL = FrmType_Mullion & iMlnType = Mln_Type1)
+	_bMlnTypeL2 = (iFrmTypeL = FrmType_Mullion & iMlnType = Mln_Type2)
+
+	!	_bMlnTypeR1/_bMlnTypeR2
+	_bMlnTypeR1 = (iFrmTypeR = FrmType_Boundary) | (iFrmTypeR = FrmType_Mullion & iMlnType = Mln_Type1)
+	_bMlnTypeR2 = (iFrmTypeR = FrmType_Mullion & iMlnType = Mln_Type2)
+
+	!	좌측프레임 좌표
+	dim	_xPosTransL[]
+
+	if	iFrmTypeL = FrmType_Boundary	then
+		_xPosTransL[1] = (frmWdtL + gskWdtL)/2
+		_xPosTransL[2] = (frmWdtL + gskWdtL)/2
+	endif
+
+	if	iFrmTypeL = FrmType_Mullion	then
+		!	Angle
+		_aFrmL = -aFrmL
+		_aSubL = 90 - _aFrmL
+
+		!	Position
+		_referLth = (gskWdtL/2)*tan(_aFrmL)
+		_xPosL_refer = _referLth*cos(_aSubL)
+		_yPosL_refer = _referLth*sin(_aSubL)
+
+		!	Point
+		dim	_frmPointL[][]
+
+			if	iCornerType = CORNER_TYPE1	then
+				if	iMlnType = Mln_Type1	then
+					!	Point1
+					_frmPointL[1][1] = gskWdtL/2
+					_frmPointL[1][2] = 0
+
+					!	Point2
+					_frmPointL[2][1] = gskWdtL/2
+					_frmPointL[2][2] = gskThk/cos(_aFrmL) + (frmWdtL - gskWdtL)/2*tan(_aFrmL)
+				endif
+
+				if	iMlnType = Mln_Type2	then
+					!	Point1
+					_frmPointL[1][1] = gskWdtL/2
+					_frmPointL[1][2] = 0
+
+					!	Point2
+					_frmPointL[2][1] = frmWdtL/2
+					_frmPointL[2][2] = ((frmWdtL - gskWdtL)/2)*tan(_aFrmL)
+				endif
+			endif
+
+			if	iCornerType = CORNER_TYPE2	then
+				if	iMlnType = Mln_Type1	then
+					!	Point1
+					_frmPointL[1][1] = gskWdtL/2
+					_frmPointL[1][2] = 0
+
+					!	Point2
+					_frmPointL[2][1] = gskWdtL/2
+					_frmPointL[2][2] = gskThk/cos(_aFrmL)
+				endif
+
+				if	iMlnType = Mln_Type2	then
+					!	Point1
+					_frmPointL[1][1] = gskWdtL/2
+					_frmPointL[1][2] = 0
+
+					!	Point2
+					_frmPointL[2][1] = frmWdtL/2
+					_frmPointL[2][2] = ((frmWdtL - gskWdtL)/2)*tan(_aFrmL)
+				endif
+			endif
+
+		!	Put	Values
+		for	i = 1	to	2
+			!	좌표 회전 / 좌표 이동
+			_xPosTransL[i] = (_frmPointL[i][1])*cos(aFrmL) - (_frmPointL[i][2])*sin(aFrmL) + _xPosL_refer
+		next	i
+	endif
+
+	!	우측프레임 좌표
+	dim	_xPosTransR[]
+
+	if	iFrmTypeR = FrmType_Boundary	then
+		_xPosTransR[1] = -(frmWdtR + gskWdtR)/2
+		_xPosTransR[2] = -(frmWdtR + gskWdtR)/2
+	endif
+
+	if	iFrmTypeR = FrmType_Mullion	then
+		!	Angle
+		_aFrmR = aFrmR
+		_aSubR = 90 - _aFrmR
+
+		!	Position
+		_referLth = (gskWdtR/2)*tan(_aFrmR)
+		_xPosR_refer = _referLth*cos(_aSubR)
+		_yPosR_refer = _referLth*sin(_aSubR)
+
+		!	Point
+		dim	_frmPointR[][]
+
+			if	iCornerType = CORNER_TYPE1	then
+				if	iMlnType = Mln_Type1	then
+					!	Point1
+					_frmPointR[1][1] = -gskWdtR/2
+					_frmPointR[1][2] = 0
+
+					!	Point2
+					_frmPointR[2][1] = -gskWdtR/2
+					_frmPointR[2][2] = gskThk/cos(_aFrmR) + (frmWdtR - gskWdtR)/2*tan(_aFrmR)
+				endif
+
+				if	iMlnType = Mln_Type2	then
+					!	Point1
+					_frmPointR[1][1] = -gskWdtR/2
+					_frmPointR[1][2] = 0
+
+					!	Point2
+					_frmPointR[2][1] = -frmWdtR/2
+					_frmPointR[2][2] = ((frmWdtR - gskWdtR)/2)*tan(_aFrmR)
+				endif
+			endif
+
+			if	iCornerType = CORNER_TYPE2	then
+				if	iMlnType = Mln_Type1	then
+					!	Point1
+					_frmPointR[1][1] = -gskWdtR/2
+					_frmPointR[1][2] = 0
+
+					!	Point2
+					_frmPointR[2][1] = -gskWdtR/2
+					_frmPointR[2][2] = gskThk/cos(_aFrmR)
+				endif
+
+				if	iMlnType = Mln_Type2	then
+					!	Point1
+					_frmPointR[1][1] = -gskWdtR/2
+					_frmPointR[1][2] = 0
+
+					!	Point2
+					_frmPointR[2][1] = -frmWdtR/2
+					_frmPointR[2][2] = ((frmWdtR - gskWdtR)/2)*tan(_aFrmR)
+				endif
+			endif
+
+		!	Put	Values
+		for	i = 1	to	2
+			!	좌표 회전 / 좌표 이동
+			_xPosTransR[i] = (_frmPointR[i][1])*cos(aFrmR) - (_frmPointR[i][2])*sin(aFrmR) - _xPosR_refer
+		next	i
+	endif
+
+	!	면적 변수
+	_glsArea = 0
+	_glsArea_Spd1 = 0
+	_glsArea_Spd2 = 0
+	_glsArea_Spd3 = 0
+	_glsArea_Spd4 = 0
+
+	_nCount = 0
+
+	!	창호 면적 계산
+	!-----------------------------------------------------------------------------------------------
+	dim	_elevPnl[][]
+
+	!	index
+	if	_bMlnTypeL1	then	_idxElevL = 1
+	if	_bMlnTypeL2	then	_idxElevL = 2
+
+	if	_bMlnTypeR1	then	_idxElevR = 1
+	if	_bMlnTypeR2	then	_idxElevR = 2
+
+	for	i = 1	to	(nTrs + 1)
+		!	변수 정의
+		_iInsType = iInsType[i]
+
+		!	Ratio
+		if	nTrs < eps	then
+			_elevRatio_pnlB = ((frmWdtB + gskWdtB)/2)/ctwHgt
+			_elevRatio_pnlT = (ctwHgt - (frmWdtT + gskWdtT)/2)/ctwHgt
+		else
+			if	i = 1	then
+				_elevRatio_pnlB = ((frmWdtB + gskWdtB)/2)/ctwHgt
+				_elevRatio_pnlT = (trsGap[i] - trsGskWdt/2)/ctwHgt
+			endif
+
+			if	i # 1 & i # (nTrs + 1)	then
+				_elevRatio_pnlB = (trsGap[i - 1] + trsGskWdt/2)/ctwHgt
+				_elevRatio_pnlT = (trsGap[i] - trsGskWdt/2)/ctwHgt
+			endif
+
+			if	i = (nTrs + 1)	then
+				_elevRatio_pnlB = (trsGap[i - 1] + trsGskWdt/2)/ctwHgt
+				_elevRatio_pnlT = (ctwHgt - (frmWdtT + gskWdtT)/2)/ctwHgt
+			endif
+		endif
+
+		!	Point1
+		_elevPnl[1][1] = _dxL*_elevRatio_pnlB + _xPosTransL[_idxElevL]
+		_elevPnl[1][2] = _guidePoint[2][2]*_elevRatio_pnlB
+
+		!	Point2
+		_elevPnl[2][1] = _dxL*_elevRatio_pnlT + _xPosTransL[_idxElevL]
+		_elevPnl[2][2] = _guidePoint[2][2]*_elevRatio_pnlT
+
+		!	Point3
+		_elevPnl[3][1] = _dxR*_elevRatio_pnlT + (_guidePoint[4][1] + _xPosTransR[_idxElevR])
+		_elevPnl[3][2] = _guidePoint[3][2]*_elevRatio_pnlT
+
+		!	Point4
+		_elevPnl[4][1] = _dxR*_elevRatio_pnlB + (_guidePoint[4][1] + _xPosTransR[_idxElevR])
+		_elevPnl[4][2] = _guidePoint[3][2]*_elevRatio_pnlB
+
+			!	삼각형(1,2,3)
+			_triArea_1 = 0
+
+			_xPosTri2 = (_elevPnl[2][1] - _elevPnl[1][1])
+			_yPosTri2 = (_elevPnl[2][2] - _elevPnl[1][2])
+
+			_xPosTri3 = (_elevPnl[3][1] - _elevPnl[1][1])
+			_yPosTri3 = (_elevPnl[3][2] - _elevPnl[1][2])
+
+			_triArea_1 = abs(_xPosTri2*_yPosTri3 - _yPosTri2*_xPosTri3)*0.5
+
+			!	삼각형(1,3,4)
+			_triArea_2 = 0
+
+			_xPosTri3 = (_elevPnl[3][1] - _elevPnl[1][1])
+			_yPosTri3 = (_elevPnl[3][2] - _elevPnl[1][2])
+
+			_xPosTri4 = (_elevPnl[4][1] - _elevPnl[1][1])
+			_yPosTri4 = (_elevPnl[4][2] - _elevPnl[1][2])
+
+			_triArea_2 = abs(_xPosTri3*_yPosTri4 - _yPosTri3*_xPosTri4)*0.5
+
+			!	합계
+			_triArea = (_triArea_1 + _triArea_2)
+
+		!	각 유형에 맞게 면적 더하기
+		_glsArea = _glsArea + _triArea*(_iInsType = INS_TYPE_NONE)
+		_glsArea_Spd1 = _glsArea_Spd1 + _triArea*(_iInsType = INS_TYPE_1)
+		_glsArea_Spd2 = _glsArea_Spd2 + _triArea*(_iInsType = INS_TYPE_2)
+		_glsArea_Spd3 = _glsArea_Spd3 + _triArea*(_iInsType = INS_TYPE_3)
+		_glsArea_Spd4 = _glsArea_Spd4 + _triArea*(_iInsType = INS_TYPE_4)
+	next	i
+
+	!	변수 입력
+	!-----------------------------------------------------------------------------------------------
+	parameters	glsArea = _glsArea,
+				glsArea_Spd1 = _glsArea_Spd1,
+				glsArea_Spd2 = _glsArea_Spd2,
+				glsArea_Spd3 = _glsArea_Spd3,
+				glsArea_Spd4 = _glsArea_Spd4
+
+	parameters	nCount = (nTrs + 1)
+
+	!	변수 잠금 및 숨기기
+	!-----------------------------------------------------------------------------------------------
+	lock	"glsArea", "glsArea_Spd1", "glsArea_Spd2", "glsArea_Spd3", "glsArea_Spd4"
+
+	hideparameter	"nCount"

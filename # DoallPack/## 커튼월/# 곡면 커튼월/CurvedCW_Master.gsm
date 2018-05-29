@@ -1,0 +1,262 @@
+!===============================================================================================
+!	곡면 커튼월
+!===============================================================================================
+unID = 100
+eps = 0.0001
+
+
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+!	프레임 유형
+!-----------------------------------------------------------------------------------------------
+Frame_Corner = 1
+Frame_Mullion = 2
+Frame_Transom = 3
+Frame_Angled = 4
+
+!	수평프레임
+!-----------------------------------------------------------------------------------------------
+hFrame_Bottom = 1
+hFrame_Normal = 2
+hFrame_Top = 3
+
+!	커튼월 생성 방향
+!-----------------------------------------------------------------------------------------------
+Direct_Out = 1
+Direct_In = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDirect[]
+		stDirect[1] = "외부"
+		stDirect[2] = "내부"
+endif
+
+!	분할 방법(각도/길이)
+!-----------------------------------------------------------------------------------------------
+Division_Angle = 1
+Division_Length = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDivision[]
+		stDivision[1] = "각도"
+		stDivision[2] = "길이"
+endif
+
+!	멀리언 생성 방향
+!-----------------------------------------------------------------------------------------------
+MlnDirect_LeftHand = 1
+MlnDirect_RightHand = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stMlnDirect[]
+		stMlnDirect[1] = "반시계방향"
+		stMlnDirect[2] = "시계방향"
+endif
+
+!	코너프레임 유형
+!-----------------------------------------------------------------------------------------------
+Corner_Boundary = 1
+Corner_Mullion = 2
+Corner_Transom = 3
+Corner_Angled = 4
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stCorner[]
+		stCorner[1] = "Boundary"
+		stCorner[2] = "Mullion"
+		stCorner[3] = "Transom"
+		stCorner[4] = "Corner"
+endif
+
+!	멀리언 유형
+!-----------------------------------------------------------------------------------------------
+Mln_Type1 = 1
+Mln_Type2 = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stMlnType[]
+		stMlnType[1] = "Type 1"
+		stMlnType[2] = "Type 2"
+endif
+
+!	트랜섬 유형
+!-----------------------------------------------------------------------------------------------
+Trs_Type1 = 1
+Trs_Type2 = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stTrsType[]
+		stTrsType[1] = "Type 1"
+		stTrsType[2] = "Type 2"
+endif
+
+!	패널 유형
+!-----------------------------------------------------------------------------------------------
+Panel_Fix = 1
+Panel_Project = 2
+Panel_Spandrel = 3
+Panel_Grill = 4
+Panel_Panel = 5
+Panel_Empty = 6
+Panel_Smoke = 7
+Panel_Fix2 = 8
+Panel_Project2 = 9
+Panel_Custom1 = 10
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stPanelType[]
+		stPanelType[1] = "고정창"
+		stPanelType[2] = "프로젝트창"
+		stPanelType[3] = "스팬드럴창"
+		stPanelType[4] = "그릴창"
+		stPanelType[5] = "패널창"
+		stPanelType[6] = "비어있음"
+		stPanelType[7] = "프로젝트창(배연)"
+		stPanelType[8] = "고정창(2)"
+		stPanelType[9] = "프로젝트창(2)"
+		stPanelType[10] = "경기도(1)"
+endif
+
+!	프로젝트창 힌지 위치
+!-----------------------------------------------------------------------------------------------
+Hinge_Top = 1
+Hinge_Bottom = 2
+Hinge_Left = 3
+Hinge_Right = 4
+Hinge_TopLeft = 5
+Hinge_TopRight = 6
+Hinge_BottomLeft = 7
+Hinge_BottomRight = 8
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stHinge[]
+		stHinge[1] = "상단"
+		stHinge[2] = "하단"
+		stHinge[3] = "좌측"
+		stHinge[4] = "우측"
+		stHinge[5] = "상단 + 좌측"
+		stHinge[6] = "상단 + 우측"
+		stHinge[7] = "하단 + 좌측"
+		stHinge[8] = "하단 + 우측"
+endif
+
+!	코너프레임 선택
+!-----------------------------------------------------------------------------------------------
+Corner_Left = 1
+Corner_Right = 2
+Corner_Top = 3
+Corner_Bottom = 4
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stSelectFrame[]
+		stSelectFrame[1] = "좌측"
+		stSelectFrame[2] = "우측"
+		stSelectFrame[3] = "상부"
+		stSelectFrame[4] = "하부"
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	문 관련
+!-----------------------------------------------------------------------------------------------
+
+	!	문 유형
+	!-----------------------------------------------------------------------------------------------
+	DoorType_1panel = 1
+	DoorType_2panel = 2
+
+	if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+		dim	stDoorType[]
+			stDoorType[1] = "기본형(1Panel)"
+			stDoorType[2] = "양문형(2Panel)"
+	endif
+
+	!	문 열림 방향
+	!-----------------------------------------------------------------------------------------------
+	OpenDirect_Left = 1
+	OpenDirect_Right = 2
+
+	if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+		dim	stOpenDirect[]
+			stOpenDirect[1] = "왼쪽"
+			stOpenDirect[2] = "오른쪽"
+	endif
+
+	!	프레임 유형
+	!-----------------------------------------------------------------------------------------------
+	FrameType_1 = 1
+	FrameType_2 = 2
+
+	if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+		dim	stFrameType[]
+			stFrameType[1] = "상/하"
+			stFrameType[2] = "상/하/좌/우"
+	endif
+
+	!	심볼 위치
+	!-----------------------------------------------------------------------------------------------
+	Symbol_Front = 1
+	Symbol_Back = 2
+	Symbol_All = 3
+
+	if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+		dim	stSymbol[]
+			stSymbol[1] = "전면"
+			stSymbol[2] = "후면"
+			stSymbol[3] = "모두"
+	endif
+
+!-----------------------------------------------------------------------------------------------
+!	창호입면도
+!-----------------------------------------------------------------------------------------------
+WinElev_On = 1
+WinElev_Off = 2
+WinElev_MVO = 3
+
+	if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+		dim	stWinElev[]
+			stWinElev[1] = "On"
+			stWinElev[2] = "Off"
+			stWinElev[3] = "by MVO"
+	endif
+
+_iWinElev = iWinElev
+
+if	iWinElev = WinElev_MVO	then
+	_reqWinElevMVO = 0
+	_bSuccess = LIBRARYGLOBAL ("cwMVO",	"iWinElevMVO",	_reqWinElevMVO)
+	if	_bSuccess	then
+		if	_reqWinElevMVO = WinElev_ON	then
+			_iWinElev = WinElev_ON
+		endif
+		if	_reqWinElevMVO = WinElev_OFF	then
+			_iWinElev = WinElev_OFF
+		endif
+	else
+		print	"Error. There isn't the MVO Library"
+	endif
+else
+	if	iWinElev = WinElev_ON	then
+		_iWinElev = WinElev_ON
+	endif
+	if	iWinElev = WinElev_OFF	then
+		_iWinElev = WinElev_OFF
+	endif
+endif
+
+
+
+!===============================================================================================
+!	공통 계산
+!===============================================================================================
+if	bEqualSize	then
+	frmWdtL = frmWdt
+	frmWdtR = frmWdt
+	frmWdtT = frmWdt
+	frmWdtB = frmWdt
+	gskWdtL = gskWdt
+	gskWdtR = gskWdt
+	gskWdtT = gskWdt
+	gskWdtB = gskWdt
+endif

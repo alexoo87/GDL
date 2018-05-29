@@ -1,0 +1,258 @@
+!===============================================================================================
+!	PC슬라브
+!===============================================================================================
+!	W.P
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+! project2	3,	270,	3
+
+!	슬라브
+!-----------------------------------------------------------------------------------------------
+pen		penCon
+fill	65
+
+	!	Draw Slab
+	drawindex	50
+	put	0,				0,				1,
+		0,				spanLth_Long,	1,
+		spanLth_Short,	spanLth_Long,	1,
+		spanLth_Short,	0,				1
+
+	poly2_b	nsp/3,	1+2+4,	0,	0,	use(nsp)
+
+	!	Hotline
+	for	h = 1	to	(nsp/3) - 2
+		hotline2	get(2) + (use(1) - get(1)),	use(2)
+	next	h
+		hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+	!	Hotspot
+	hotspot2	0,				spanLth_Long,	unID	:	unID = unID + 1
+	hotspot2	spanLth_Short,	spanLth_Long,	unID	:	unID = unID + 1
+	hotspot2	spanLth_Short,	0,				unID	:	unID = unID + 1
+
+	add2	spanLth_Short/2,	0
+		hotspot2	0,	0,				unID,	spanLth_Long,	1+256	:	unID = unID + 1
+		hotspot2	0,	-1,				unID,	spanLth_Long,	3		:	unID = unID + 1
+		hotspot2	0,	spanLth_Long,	unID,	spanLth_Long,	2		:	unID = unID + 1
+	del 1
+
+!	상부 라인(보류)
+! pen	penEtc
+
+! _xPosLine = 0.020
+
+! if	iRibType_L = RIB_UPPER	then
+! 	add2	_xPosLine,	0
+! 		line2	0,	0,	0,	spanLth_Long
+! 	del 1
+! endif
+
+! if	iRibType_R = RIB_UPPER	then
+! 	add2	spanLth_Short - _xPosLine,	0
+! 		line2	0,	0,	0,	spanLth_Long
+! 	del 1
+! endif
+
+!	단면 형상
+!-----------------------------------------------------------------------------------------------
+if	bDrawSect	then
+	!	변수 정의
+	_cutHgt = 0.020	!	3D와 동일하게 맞춤
+	_subWdt = 0.025
+	_bDrawRib = (nRib - 1 > eps)
+	_mulValue = 1
+	if	bMirrorSect	then	_mulValue = -1
+
+	!	Hotspot
+	add2	spanLth_Short/2,	0
+		hotspot2	0,	0,			unID,	sectLct,	1+128	:	unID = unID + 1
+		hotspot2	0,	-1,			unID,	sectLct,	3		:	unID = unID + 1
+		hotspot2	0,	sectLct,	unID,	sectLct,	2		:	unID = unID + 1
+	del 1
+
+	!	Draw Section Line
+	drawindex	10
+	pen	penSect
+	add2	0,	sectLct
+		mul2	1,	_mulValue
+
+			_nTrans = 0
+			!	좌측 끝단 리브 형상
+			if	iRibType_L = RIB_UPPER	then
+				put	_cutHgt,										0,					1,
+					0,												_cutHgt,			1,
+					0,												slabThk,			1,
+					(ribLth_L + addLth_L) - (ribWdt/2 + ribRad),	slabThk,			1,
+					(ribLth_L + addLth_L) - (ribWdt/2 + ribRad),	slabThk + ribRad,	900,
+					ribRad,											90,					4000+1,
+					(ribLth_L + addLth_L) - (ribWdt/2 - _subWdt),	slabThk + ribHgt,	1,
+					(ribLth_L + addLth_L),							slabThk + ribHgt,	0,
+					(ribLth_L + addLth_L),							0,					1
+
+				poly2_	nsp/3,	1+4,	get(nsp)
+
+				add2	ribLth_L + addLth_L,	0	:	_nTrans = _nTrans + 1
+			endif
+			if	iRibType_L = RIB_LOWER	then
+				put	halfWdt_L,							0,					1,
+					halfWdt_L - (offWdt_L - _cutHgt),	0,					1,
+					halfWdt_L - offWdt_L,				_cutHgt,			1,
+					halfWdt_L - offWdt_L,				slabThk + offHgt_L,	1,
+					0,									slabThk + offHgt_L,	1,
+					halfWdt_L/2,						slabThk + ribHgt,	1,
+					halfWdt_L,							slabThk + ribHgt,	0
+
+				poly2_	nsp/3,	1+4,	get(nsp)
+
+				add2	halfWdt_L,	0	:	_nTrans = _nTrans + 1
+			endif
+
+			!	사이 리브
+			if	_bDrawRib	then
+				for	i = 1	to	(nRib - 1)
+					put	0,								0,					0,
+						0,								slabThk + ribHgt,	1,
+						ribWdt/2 - _subWdt,				slabThk + ribHgt,	1,
+						ribWdt/2,						slabThk + ribRad,	1,
+						ribWdt/2 + ribRad,				slabThk + ribRad,	900,
+						ribRad,							90,					4000+1,
+						ribGap - (ribWdt/2 + ribRad),	slabThk,			1,
+						ribGap - (ribWdt/2 + ribRad),	slabThk + ribRad,	900,
+						ribRad,							90,					4000+1,
+						ribGap - (ribWdt/2 - _subWdt),	slabThk + ribHgt,	1,
+						ribGap,							slabThk + ribHgt,	0,
+						ribGap,							0,					1
+
+					poly2_	nsp/3,	1+4,	get(nsp)
+
+					add2	ribGap,	0	:	_nTrans = _nTrans + 1
+				next	i
+			endif
+
+			!	우측 끝단 리브 형상
+			if	iRibType_R = RIB_UPPER	then
+				put	0,								0,					0,
+					0,								slabThk + ribHgt,	1,
+					ribWdt/2 - _subWdt,				slabThk + ribHgt,	1,
+					ribWdt/2,						slabThk + ribRad,	1,
+					ribWdt/2 + ribRad,				slabThk + ribRad,	900,
+					ribRad,							90,					4000+1,
+					ribLth_R + addLth_R,			slabThk,			1,
+					ribLth_R + addLth_R,			_cutHgt,			1,
+					ribLth_R + addLth_R - _cutHgt,	0,					1
+
+				poly2_	nsp/3,	1+4,	get(nsp)
+			endif
+			if	iRibType_R = RIB_LOWER	then
+				put	0,					0,					0,
+					0,					slabThk + ribHgt,	1,
+					halfWdt_R/2,		slabThk + ribHgt,	1,
+					halfWdt_R,			slabThk + offHgt_R,	1,
+					offWdt_R,			slabThk + offHgt_R,	1,
+					offWdt_R,			_cutHgt,			1,
+					offWdt_R - _cutHgt,	0,					1
+
+				poly2_	nsp/3,	1+4,	get(nsp)
+			endif
+
+			del _nTrans
+
+		del 1
+	del 1
+
+	!	Show 3D Hotspot
+	if	bShowHotspot	then
+		add2	0,	sectLct
+			mul2	1,	_mulValue
+
+				add2	0,	slabThk
+					!	좌측 끝단 리브
+					if	iRibType_L = RIB_UPPER	then
+						hotspot2	0,			0,	unID,	addLth_L,	1+256	:	unID = unID + 1
+						hotspot2	-1,			0,	unID,	addLth_L,	3		:	unID = unID + 1
+						hotspot2	addLth_L,	0,	unID,	addLth_L,	2		:	unID = unID + 1
+
+						add2	addLth_L,	0
+							hotspot2	0,			0,	unID,	ribLth_L,	1+256	:	unID = unID + 1
+							hotspot2	-1,			0,	unID,	ribLth_L,	3		:	unID = unID + 1
+							hotspot2	ribLth_L,	0,	unID,	ribLth_L,	2		:	unID = unID + 1
+						del 1
+
+						add2	addLth_L + ribLth_L,	0
+					endif
+					if	iRibType_L = RIB_LOWER	then
+						add2	0,	-slabThk
+							hotspot2	0,			0,	unID,	halfWdt_L,	1+256	:	unID = unID + 1
+							hotspot2	-1,			0,	unID,	halfWdt_L,	3		:	unID = unID + 1
+							hotspot2	halfWdt_L,	0,	unID,	halfWdt_L,	2		:	unID = unID + 1
+						del 1
+
+						hotspot2	0,	0,			unID,	offHgt_L,	1	:	unID = unID + 1
+						hotspot2	0,	-1,			unID,	offHgt_L,	3	:	unID = unID + 1
+						hotspot2	0,	offHgt_L,	unID,	offHgt_L,	2	:	unID = unID + 1
+
+						add2	halfWdt_L,	offHgt_L
+							hotspot2	0,			0,	unID,	offWdt_L,	1+128	:	unID = unID + 1
+							hotspot2	1,			0,	unID,	offWdt_L,	3		:	unID = unID + 1
+							hotspot2	-offWdt_L,	0,	unID,	offWdt_L,	2		:	unID = unID + 1
+						del 1
+
+						add2	halfWdt_L,	0
+					endif
+						!	리브 사이 간격/리브 높이
+						hotspot2	0,		0,	unID,	ribGap,	1+128	:	unID = unID + 1
+						hotspot2	-1,		0,	unID,	ribGap,	3		:	unID = unID + 1
+						hotspot2	ribGap,	0,	unID,	ribGap,	2		:	unID = unID + 1
+
+						hotspot2	0,	0,		unID,	ribHgt,	1+128	:	unID = unID + 1
+						hotspot2	0,	-1,		unID,	ribHgt,	3		:	unID = unID + 1
+						hotspot2	0,	ribHgt,	unID,	ribHgt,	2		:	unID = unID + 1
+
+						!	슬라브 두께
+						add2	ribGap/2,	-slabThk
+							hotspot2	0,	0,			unID,	slabThk,	1+128	:	unID = unID + 1
+							hotspot2	0,	-1,			unID,	slabThk,	3		:	unID = unID + 1
+							hotspot2	0,	slabThk,	unID,	slabThk,	2		:	unID = unID + 1
+						del 1
+
+						!	우측 끝단 리브
+						add2	ribGap*(nRib - 1),	0
+							if	iRibType_R = RIB_UPPER	then
+								hotspot2	0,			0,	unID,	ribLth_R,	1+256	:	unID = unID + 1
+								hotspot2	-1,			0,	unID,	ribLth_R,	3		:	unID = unID + 1
+								hotspot2	ribLth_R,	0,	unID,	ribLth_R,	2		:	unID = unID + 1
+
+								add2	ribLth_R,	0
+									hotspot2	0,			0,	unID,	addLth_R,	1+128	:	unID = unID + 1
+									hotspot2	-1,			0,	unID,	addLth_R,	3		:	unID = unID + 1
+									hotspot2	addLth_R,	0,	unID,	addLth_R,	2		:	unID = unID + 1
+								del 1
+							endif
+							if	iRibType_R = RIB_LOWER	then
+								add2	0,	-slabThk
+									hotspot2	0,			0,	unID,	halfWdt_R,	1+256	:	unID = unID + 1
+									hotspot2	-1,			0,	unID,	halfWdt_R,	3		:	unID = unID + 1
+									hotspot2	halfWdt_R,	0,	unID,	halfWdt_R,	2		:	unID = unID + 1
+								del 1
+
+								add2	halfWdt_R,	0
+									hotspot2	0,	0,			unID,	offHgt_R,	1	:	unID = unID + 1
+									hotspot2	0,	-1,			unID,	offHgt_R,	3	:	unID = unID + 1
+									hotspot2	0,	offHgt_R,	unID,	offHgt_R,	2	:	unID = unID + 1
+								del 1
+
+								add2	0,	offHgt_L
+									hotspot2	0,			0,	unID,	offWdt_R,	1+128	:	unID = unID + 1
+									hotspot2	-1,			0,	unID,	offWdt_R,	3		:	unID = unID + 1
+									hotspot2	offWdt_R,	0,	unID,	offWdt_R,	2		:	unID = unID + 1
+								del 1
+							endif
+						del 1
+					del 1
+				del 1
+
+			del 1
+		del 1
+	endif
+endif

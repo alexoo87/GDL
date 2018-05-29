@@ -1,0 +1,171 @@
+!===============================================================================================
+!	철골계단
+!===============================================================================================
+
+!	계단 형상
+!-----------------------------------------------------------------------------------------------
+values{2}	"iStrShape"	STRSHAPE_I,	stStrShape[STRSHAPE_I],
+						STRSHAPE_L,	stStrShape[STRSHAPE_L],
+						STRSHAPE_U,	stStrShape[STRSHAPE_U]
+
+if	iStrShape = STRSHAPE_I	then
+	lock			"strWdt_2", "nStep_2", "stepHgt_2", "landDpt", "landLth_L", "landLth_R", "landLth_D", \
+					"strOff_1", "strOff_2", "strDist", "tLBeam", "endOff_Out", "endOff_In"
+	hideparameter	"strWdt_2", "nStep_2", "stepHgt_2", "landDpt", "landLth_L", "landLth_R", "landLth_D", \
+					"strOff_1", "strOff_2", "strDist", "tLBeam", "endOff_Out", "endOff_In"
+endif
+
+if	iStrShape = STRSHAPE_L	then
+	lock			"landLth_L", "landLth_R", "landLth_D", "strDist", "endOff_Out", "endOff_In"
+	hideparameter	"landLth_L", "landLth_R", "landLth_D", "strDist", "endOff_Out", "endOff_In"
+endif
+
+!	스트링거 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iStgType"	STRINGER_C,	stStringerType[STRINGER_C],
+						STRINGER_I,	stStringerType[STRINGER_I]
+
+if	iStgType = STRINGER_I	then
+	lock			"stgThk"
+	hideparameter	"stgThk"
+endif
+
+!	계단 높이 산정 방법
+!-----------------------------------------------------------------------------------------------
+values{2}	"iCalculation"	RISER_NUMBER,	stCalculation[RISER_NUMBER],
+							HEIGHT_NUMBER,	stCalculation[HEIGHT_NUMBER]
+
+if	iCalculation = RISER_NUMBER	then
+	lock	"strHgt"
+
+	if	iStrShape = STRSHAPE_I	then
+		_strHgt = stepHgt_1*(nStep_1 - 2) + stepHgt_S + stepHgt_E
+	else
+		_strHgt = stepHgt_1*(nStep_1 - 1) + stepHgt_S
+		_strHgt = _strHgt + stepHgt_2*(nStep_2 - 1) + stepHgt_E
+	endif
+
+	parameters	strHgt = _strHgt
+endif
+
+if	iCalculation = HEIGHT_NUMBER	then
+	lock	"stepHgt_1", "stepHgt_2"
+
+	if	iStrShape = STRSHAPE_I	then
+		_stepHgt = (strHgt - (stepHgt_S + stepHgt_E))/(nStep_1 - 2)
+	else
+		_stepHgt = (strHgt - (stepHgt_S + stepHgt_E))/(nStep_1 + nStep_2 - 2)
+	endif
+
+	parameters	stepHgt_1 = _stepHgt,
+				stepHgt_2 = _stepHgt
+endif
+
+!	계단 위치 자동 계산
+!-----------------------------------------------------------------------------------------------
+lock	"stepLct_1", "stepLct_2"
+
+_stepLct_1 = yPosStg_1*sin(_aStr_1) + zPosStg_1*cos(_aStr_1)
+_stepLct_2 = yPosStg_2*sin(_aStr_2) + zPosStg_2*cos(_aStr_2)
+
+parameters	stepLct_1 = _stepLct_1,
+			stepLct_2 = _stepLct_2
+
+!	계단 관련
+!-----------------------------------------------------------------------------------------------
+!	stepHgt_E의 최대값 & stepDpt_E 최소값
+if	iStrShape = STRSHAPE_I	then
+	_maxStepHgt_E = stepHgt_1
+	_minStepDpt_E = stgDpt*tan(_aCutStg_T1) - (_maxStepHgt_E - stepHgt_E)/tan(_aStr_1)
+else
+	_maxStepHgt_E = stepHgt_2
+	_minStepDpt_E = stgDpt*tan(_aCutStg_T2) - (_maxStepHgt_E - stepHgt_E)/tan(_aStr_2)
+endif
+
+values	"stepHgt_E"	range	(0,	_maxStepHgt_E]
+
+if	_minStepDpt_E < stepThk	then
+	_minStepDpt_E = stepThk
+endif
+
+values	"stepDpt_E"	range	[_minStepDpt_E,	]
+
+values	"stepHgt_1"	range	[stepThk,	]
+values	"stepHgt_2"	range	[stepThk,	]
+values	"stepHgt_S"	range	[stepThk,	]
+values	"stepDpt"	range	(0,	)
+
+values	"strDist"	range	[stgWdt*2,	]
+
+values	"nStep_1"	range	(0,	)
+values	"nStep_2"	range	(0,	)
+
+!	스트링거 관련
+!-----------------------------------------------------------------------------------------------
+!	distBase 최소값
+_minDistBase = stgDpt*tan(_aCutStg_B1)
+
+values	"distBase"	range	[_minDistBase,	]
+
+values	"stgWdt"	range	(0,	)
+values	"stgDpt"	range	(0,	)
+values	"stgThk"	range	(0,	)
+
+values	"addStgLth"	range	[0,	]
+
+values	"endOff_Out"	range	[0,	landDpt)
+values	"endOff_In"		range	[0,	landDpt)
+
+!	계단참 관련
+!-----------------------------------------------------------------------------------------------
+values	"strOff_1"	range	[stgWdt + stepThk,	]
+values	"strOff_2"	range	[stgWdt,	]
+
+values	"landDpt"	range	(0,	]
+values	"landLth_L"	range	[0,	]
+values	"landLth_R"	range	[0,	]
+values	"landLth_D"	range	[0,	]
+
+!	디딤판 관련
+!-----------------------------------------------------------------------------------------------
+values	"trdThk"	range	(0,	)
+values	"nosLth"	range	[0,	]
+values	"trdDpt_E"	range	(0,	)
+
+!	챌판 관련
+!-----------------------------------------------------------------------------------------------
+values	"rsrThk"	range	(0,	)
+
+!	2D표현
+!-----------------------------------------------------------------------------------------------
+values{2}	"iWrkFlr"	PLANVIEW_NONE,		stPlanView[PLANVIEW_NONE],
+						PLANVIEW_CUT,		stPlanView[PLANVIEW_CUT],
+						PLANVIEW_ENTIRE,	stPlanView[PLANVIEW_ENTIRE]
+
+values{2}	"iUprFlr"	PLANVIEW_NONE,		stPlanView[PLANVIEW_NONE],
+						PLANVIEW_CUT,		stPlanView[PLANVIEW_CUT],
+						PLANVIEW_ENTIRE,	stPlanView[PLANVIEW_ENTIRE]
+
+!	2D 표현 관련
+!-----------------------------------------------------------------------------------------------
+!	Break Line Location
+if	iStrShape = STRSHAPE_I	then
+	values	"wrkBrkLct"	range	[stepDpt,	stepDpt*(nStep_1 - 2) + stepDpt_E]
+	values	"uprBrkLct"	range	[stepDpt,	stepDpt*(nStep_1 - 2) + stepDpt_E]
+else
+	values	"wrkBrkLct"	range	[stepDpt,	stepDpt*(nStep_1 - 2)]
+	values	"uprBrkLct"	range	[stepDpt,	stepDpt*(nStep_1 - 2)]
+endif
+
+values	"textSize"	range	(0,	)
+
+!	구조 접합 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iAttach"	ATTACH_MOMENT,	stAttach[ATTACH_MOMENT],
+						ATTACH_PIN,		stAttach[ATTACH_PIN],
+						ATTACH_NONE,	stAttach[ATTACH_NONE]
+
+!	심볼 관련
+!-----------------------------------------------------------------------------------------------
+values	"symOff"	range	[0,	0.500]
+values	"symSize"	range	(0,	)

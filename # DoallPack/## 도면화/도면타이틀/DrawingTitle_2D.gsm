@@ -1,0 +1,338 @@
+
+!===================================================================================
+!	기본설정
+!===================================================================================
+unID = 100
+
+
+!	M -> mm
+!-----------------------------------------------------------------------------------
+Rd = Rd/1000
+RdOff = RdOff/1000
+TxtOff = TxtOff/1000
+
+
+!===================================================================================
+!	도면 / 타이틀 사이즈 추출
+!===================================================================================
+
+!	도면 사이즈
+!-----------------------------------------------------------------------------------
+	drawingWidth = abs(AC_DrawingRect[1] - AC_DrawingRect[3])
+	drawingHeight = abs(AC_DrawingRect[2] - AC_DrawingRect[4])
+
+
+!	타이틀 사이즈
+!-----------------------------------------------------------------------------------
+	!	도면명 텍스트 정의
+	!-----------------------------------------------------------------------------------
+	paragraph	"drwNamePrg"	1,	0,	0,	0,	1
+			pen		textPen
+			style	drwNsty
+			ac_drawingName
+	endparagraph
+
+	textblock	"drwN"	0,	7,	0,	1,	1,	0,	"drwNamePrg"
+
+	rr=request ("TEXTBLOCK_INFO", "drwN", drwNwdt, drwNhgt)				!	도면명 길이 / 높이 : drwNwdt / drwNhgt
+	rr=request	("Height_of_style",	"drwNsty",	drwNstyHgt)
+
+	titleWidth = Rd*2 + RdOff + drwNwdt + TxtOff								!	타이틀 너비
+
+
+!===================================================================================
+!	타이틀 기준 전체 이동(회전)
+!===================================================================================
+add2	(drawingWidth - titleWidth)/2,	-Rd*3
+
+rot2	labelAngle
+
+!===================================================================================
+!	2d hotspot
+!===================================================================================
+unID = 100
+
+!	도면외곽 핫스팟
+!-----------------------------------------------------------------------------------
+if	drawingWidth > titleWidth		then
+	add2	-(drawingWidth - titleWidth)/2,	0
+		hotspot2	0,	0
+		hotspot2	drawingWidth ,	0
+	del		1
+endif
+
+!	타이틀 핫스팟
+!-----------------------------------------------------------------------------------
+hotspot2	0,	0
+hotspot2	titleWidth/2,	0
+hotspot2	titleWidth,	0
+
+!===================================================================================
+!	2d hotline & hotarc
+!===================================================================================
+unID = 200
+
+add2	Rd,	0
+	hotarc2	0,	0,	Rd,	0,	360,	unID	:	unID=unID+1
+del 1
+
+
+!===================================================================================
+!	타이틀 그리기
+!===================================================================================
+
+!-----------------------------------------------------------------------------------
+!	도면명
+!-----------------------------------------------------------------------------------
+fill	65
+
+	if	iTitleType = Title_Type1	then
+		txtDrwPosY = 0
+	endif
+
+	if	iTitleType = Title_Type2	then
+		txtDrwPosY = 0
+	endif
+
+	richtext2	Rd*2 + RdOff,	txtDrwPosY,	"drwN"
+	
+	add2	Rd*2 + RdOff,	txtDrwPosY
+
+		put	0,			0,			0,
+			drwNwdt,	0,			0,
+			drwNwdt,	drwNhgt,	0,
+			0,			drwNhgt,	0,
+			0,			0,			0
+
+		poly2_B	nsp/3,	2,	0,	0,	get(nsp)
+
+	del 1
+
+
+!-----------------------------------------------------------------------------------
+!	스케일
+!-----------------------------------------------------------------------------------
+
+! Paragraph / Textblock
+!-----------------------------------------------------------------------------------
+	!	A3 Scale
+	!-----------------------------------------------------------------------------------
+		!	타입별 로컬변수 정의
+		!-----------------------------------------------------------------------------------
+			if	iTitleType = Title_Type1	then
+				!	스케일
+				txtScalePosY_A1 = txtSclSize*0.2/1000
+				ScaleNum_A3 = "1:"
+				ScaleNum_A1 = "1:"
+
+				ScaleTxt_A1 = "Scale A1: "	
+				if	A1OF = 0	then
+					txtScalePosY_A3 = txtSclSize*0.2/1000
+					ScaleTxt_A3 = "Scale A3: "
+				else
+					txtScalePosY_A3 = txtSclSize*1.7/1000
+					ScaleTxt_A3 = "A3: "
+				endif
+			endif
+	
+			if	iTitleType = Title_Type2	then
+				txtScalePosY_A3 = txtSclSize*0.2/1000
+				ScaleNum_A3 = "1/"
+				ScaleTxt_A3 = "축척 : "
+
+				ScaleNum_A1 = "1/"
+				ScaleTxt_A1 = "축척 : "
+			endif
+
+		paragraph	"drwScaleTxt_A3"	1,	0,	0,	0,	1
+				pen 	textPen
+				style	drwSsty
+				ScaleTxt_A3
+		endparagraph
+	
+	
+		paragraph	"drwScaleNum_A3"	1,	0,	0,	0,	1
+				pen 	textPen
+				style	drwSsty
+				ScaleNum_A3
+				a3
+		endparagraph
+		
+		textblock	"TB_drwScaleTxt_A3"	0,	3,	0,	1,	1,	0,	"drwScaleTxt_A3"
+		textblock	"TB_drwScaleNum_A3"	0,	3,	0,	1,	1,	0,	"drwScaleNum_A3"
+	
+		rr=request ("TEXTBLOCK_INFO", "TB_drwScaleNum_A3", drwScale_A3_Width, notUseData)
+
+	!	A1 Scale
+	!-----------------------------------------------------------------------------------
+		paragraph	"drwScaleTxt_A1"	1,	0,	0,	0,	1
+				pen 	textPen
+				style	drwSsty
+				ScaleTxt_A1
+		endparagraph
+	
+		paragraph	"drwScaleNum_A1"	1,	0,	0,	0,	1
+				pen 	textPen
+				style	drwSsty
+				ScaleNum_A1
+				a1
+		endparagraph
+
+		textblock	"TB_drwScaleTxt_A1"	0,	3,	0,	1,	1,	0,	"drwScaleTxt_A1"
+		textblock	"TB_drwScaleNum_A1"	0,	3,	0,	1,	1,	0,	"drwScaleNum_A1"
+	
+		rr=request ("TEXTBLOCK_INFO", "TB_drwScaleNum_A1", drwScale_A1_Width, notUseData)
+
+		maxScaleTextWidth = max(drwScale_A1_Width, drwScale_A3_Width)
+
+
+!	텍스트 배치
+!-----------------------------------------------------------------------------------
+	if	ScaleOF = 1	then
+	
+		if	iTitleType = Title_Type1	then
+	
+			if	A1OF = 0	then
+			
+				richtext2	Rd*2 + RdOff + drwNwdt - drwScale_A3_Width,	-txtScalePosY_A3,	"TB_drwScaleTxt_A3"
+				richtext2	Rd*2 + RdOff + drwNwdt,						-txtScalePosY_A3,	"TB_drwScaleNum_A3"
+			
+			else
+			
+				richtext2	Rd*2 + RdOff + drwNwdt - maxScaleTextWidth,	-txtScalePosY_A1,	"TB_drwScaleTxt_A1"
+				richtext2	Rd*2 + RdOff + drwNwdt,						-txtScalePosY_A1,	"TB_drwScaleNum_A1"
+				
+				richtext2	Rd*2 + RdOff + drwNwdt - maxScaleTextWidth,	-txtScalePosY_A3,	"TB_drwScaleTxt_A3"
+				richtext2	Rd*2 + RdOff + drwNwdt,						-txtScalePosY_A3,	"TB_drwScaleNum_A3"
+			
+			endif
+	
+		endif
+	
+		if	iTitleType = Title_Type2	then
+			if	iScaleType = Scale_A1	then
+				richtext2	Rd*2 + RdOff + drwNwdt - drwScale_A3_Width,	-txtScalePosY_A3,	"TB_drwScaleTxt_A1"
+				richtext2	Rd*2 + RdOff + drwNwdt,						-txtScalePosY_A3,	"TB_drwScaleNum_A1"
+			endif
+			if	iScaleType = Scale_A3	then
+				richtext2	Rd*2 + RdOff + drwNwdt - drwScale_A3_Width,	-txtScalePosY_A3,	"TB_drwScaleTxt_A3"
+				richtext2	Rd*2 + RdOff + drwNwdt,						-txtScalePosY_A3,	"TB_drwScaleNum_A3"
+			endif
+		endif
+	
+	endif
+
+
+!-----------------------------------------------------------------------------------
+!	도면번호
+!-----------------------------------------------------------------------------------
+
+paragraph	"drwIDB"	1,	0,	0,	0,	1
+		pen 	TextPen
+		style	drwIDsty
+		ac_drawingNumber
+endparagraph
+
+textblock	"drwID"	0,	5,	0,	1,	1,	0,	"drwIDB"
+
+if	iTitleType = Title_Type1	then
+
+	richtext2	Rd,		Rd/2,	"drwID"
+
+		!	도면번호(좌측하단)
+		!-----------------------------------------------------------------------------------
+		
+		paragraph	"drwPrcB"	1,	0,	0,	0,	1
+				pen 	TextPen
+				style	drwIDsty
+				txtPrc
+		endparagraph
+		
+		textblock	"drwPrc"	0,	5,	0,	1,	1,	0,	"drwPrcB"
+		
+		richtext2	Rd/5*3,	-Rd/7*3,	"drwPrc"
+		
+		
+		
+		!	도면번호(우측하단)
+		!-----------------------------------------------------------------------------------
+		
+		paragraph	"drwCstB"	1,	0,	0,	0,	1
+				pen 	TextPen
+				style	drwIDsty
+				txtCst
+		endparagraph
+		
+		textblock	"drwCst"	0,	5,	0,	1,	1,	0,	"drwCstB"
+		
+		richtext2	Rd + Rd/5*2,	-Rd/7*3,	"drwCst"
+
+else
+
+	richtext2	Rd,		0,	"drwID"
+
+endif
+
+
+!-----------------------------------------------------------------------------------
+!	선 그리기
+!-----------------------------------------------------------------------------------
+pen lblPen
+
+!	수평선
+!-----------------------------------------------------------------------------------
+	if	iTitleType = Title_Type1	then
+		put	0,									0,	1,
+			Rd*2,								0,	1,
+			Rd*2 + RdOff,						0,	1,
+			Rd*2 + RdOff + drwNwdt,				0,	1,
+			Rd*2 + RdOff + drwNwdt + TxtOff,	0,	1
+	endif
+
+	if	iTitleType = Title_Type2	then
+		put	Rd*2,								0,	1,
+			Rd*2 + RdOff,						0,	1,
+			Rd*2 + RdOff + drwNwdt,				0,	1,
+			Rd*2 + RdOff + drwNwdt + TxtOff,	0,	1
+	endif
+
+	poly2_	nsp/3,	1,	use(nsp)
+
+		! hotline
+		for	i = 1	to	(nsp/3) - 2
+			hotline2	get(2) + (use(1) - get(1)),	use(2),	unID	:	unID = unID + 1
+		next i
+			hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1)),	unID	:	unID = unID + 1
+
+!	수직선
+!-----------------------------------------------------------------------------------
+	if	iTitleType = Title_Type1	then
+		add2	Rd,	0
+
+			line2		0,	0,	0,	-Rd
+			hotline2	0,	0,	0,	-Rd,	unID	:	unID = unID + 1
+
+		del 1
+	endif
+
+
+
+!-----------------------------------------------------------------------------------
+!	원 그리기
+!-----------------------------------------------------------------------------------
+fill	65
+pen lblPen
+
+add2	Rd,	0
+
+	put	0,	0,		900+15,
+		Rd,	360,	4000+15
+
+	poly2_B	nsp/3,	1+2+4,	0,	0,	get(nsp)
+
+	hotarc2	0,	0,	Rd,	0,	360,	unID	:	unID = unID + 1
+
+del 1
+
+
+

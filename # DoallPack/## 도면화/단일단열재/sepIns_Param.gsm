@@ -1,0 +1,28 @@
+!===============================================================================================
+!	단일단열재
+!===============================================================================================
+
+values	"insThk"	range	(0,	)
+values	"insLth"	range	(0,	)
+
+values	"offsetL"	range	(	,	insLth + offsetR)
+
+! values	"extLineL"	range	[0,	]
+! values	"extLineR"	range	[0,	]
+
+values	"aShortL"	0,	45
+values	"aShortR"	0,	45
+
+if	aShortL < eps	then
+	parameters	bShortL = 1
+endif
+if	aShortL > 45 - eps	then
+	parameters	bShortL = 0
+endif
+
+if	aShortR < eps	then
+	parameters	bShortR = 1
+endif
+if	aShortR > 45 - eps	then
+	parameters	bShortR = 0
+endif

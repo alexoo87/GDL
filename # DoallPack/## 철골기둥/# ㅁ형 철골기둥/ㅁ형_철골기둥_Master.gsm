@@ -1,0 +1,37 @@
+!===============================================================================================
+!	ㅁ형 철골 기둥
+!===============================================================================================
+
+unID = 100
+eps = 0.0001
+
+!	재질 정보
+!-----------------------------------------------------------------------------------------------
+MAT_INFO_SS400 = 1
+MAT_INFO_SM490 = 2
+MAT_INFO_SM490A = 3
+MAT_INFO_SHN400 = 4
+MAT_INFO_SHN490 = 5
+MAT_INFO_SN490 = 6
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stMatInfo[]
+		stMatInfo[1] = "SS400"
+		stMatInfo[2] = "SM490"
+		stMatInfo[3] = "SM490A"
+		stMatInfo[4] = "SHN400"
+		stMatInfo[5] = "SHN490"
+		stMatInfo[6] = "SN490"
+endif
+
+!	자르기 축
+!-----------------------------------------------------------------------------------------------
+AXIS_X = 1
+AXIS_Y = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stCutAxis[]
+		stCutAxis[1] = "X축"
+		stCutAxis[2] = "Y축"
+endif
+

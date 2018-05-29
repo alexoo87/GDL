@@ -1,0 +1,312 @@
+!===============================================================================================
+!	ㅁ형 철골 기둥
+!===============================================================================================
+
+!	W.P
+hotspot	0,	0,	0,	unID	:	unID = unID + 1
+
+!	철골 기둥
+!-----------------------------------------------------------------------------------------------
+pen			penCol_Elev
+material	matCol
+
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+	_xMainPos = colWdt_1/2
+	_xMainNeg = -colWdt_1/2
+	_yMainPos = colWdt_2/2
+	_yMainNeg = -colWdt_2/2
+
+	_xSubPos = colWdt_1/2 - colThk
+	_xSubNeg = -colWdt_1/2 + colThk
+	_ySubPos = colWdt_2/2 - colThk
+	_ySubNeg = -colWdt_2/2 + colThk
+
+	_bCutOption = ((abs(xTrans) < eps) & (abs(yTrans) < eps))
+	_aTransX = atn(xTrans/colHgt)
+	_aTransY = atn(yTrans/colHgt)
+
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+	if	not(_bCutOption)	then
+		hotspot	_xMainNeg,	_yMainNeg,	0,	unID	:	unID = unID + 1
+		hotspot	_xMainNeg,	_yMainPos,	0,	unID	:	unID = unID + 1
+		hotspot	_xMainPos,	_yMainPos,	0,	unID	:	unID = unID + 1
+		hotspot	_xMainPos,	_yMainNeg,	0,	unID	:	unID = unID + 1
+
+		hotspot	_xMainNeg + xTrans,	_yMainNeg + yTrans,	colHgt,	unID	:	unID = unID + 1
+		hotspot	_xMainNeg + xTrans,	_yMainPos + yTrans,	colHgt,	unID	:	unID = unID + 1
+		hotspot	_xMainPos + xTrans,	_yMainPos + yTrans,	colHgt,	unID	:	unID = unID + 1
+		hotspot	_xMainPos + xTrans,	_yMainNeg + yTrans,	colHgt,	unID	:	unID = unID + 1
+	endif
+
+	hotspot	_xSubNeg,	_ySubNeg,	0,	unID	:	unID = unID + 1
+	hotspot	_xSubNeg,	_ySubPos,	0,	unID	:	unID = unID + 1
+	hotspot	_xSubPos,	_ySubPos,	0,	unID	:	unID = unID + 1
+	hotspot	_xSubPos,	_ySubNeg,	0,	unID	:	unID = unID + 1
+
+	hotspot	_xSubNeg + xTrans,	_ySubNeg + yTrans,	colHgt,	unID	:	unID = unID + 1
+	hotspot	_xSubNeg + xTrans,	_ySubPos + yTrans,	colHgt,	unID	:	unID = unID + 1
+	hotspot	_xSubPos + xTrans,	_ySubPos + yTrans,	colHgt,	unID	:	unID = unID + 1
+	hotspot	_xSubPos + xTrans,	_ySubNeg + yTrans,	colHgt,	unID	:	unID = unID + 1
+
+	_offValue = 0.020
+	add	xTrans,	yTrans,	0
+		hotspot	_offValue,	0,	0,		unID,	colHgt,	1+128	:	unID = unID + 1
+		hotspot	_offValue,	0,	-1,		unID,	colHgt,	3		:	unID = unID + 1
+		hotspot	_offValue,	0,	colHgt,	unID,	colHgt,	2		:	unID = unID + 1
+	del 1
+
+	addz	colHgt
+		hotspot	0,		yTrans,	0,	unID,	xTrans,	1+128	:	unID = unID + 1
+		hotspot	-1,		yTrans,	0,	unID,	xTrans,	3		:	unID = unID + 1
+		hotspot	xTrans,	yTrans,	0,	unID,	xTrans,	2		:	unID = unID + 1
+
+		hotspot	xTrans,	0,		0,	unID,	yTrans,	1+128	:	unID = unID + 1
+		hotspot	xTrans,	-1,		0,	unID,	yTrans,	3		:	unID = unID + 1
+		hotspot	xTrans,	yTrans,	0,	unID,	yTrans,	2		:	unID = unID + 1
+
+	del 1
+
+	!	Main
+	!-----------------------------------------------------------------------------------------------
+	group	"gMainShape"
+		!	하부 좌표
+		put	_xMainNeg - xTrans,	_yMainNeg - yTrans,	0,
+			_xMainNeg - xTrans,	_yMainPos - yTrans,	0,
+			_xMainPos - xTrans,	_yMainPos - yTrans,	0,
+			_xMainPos - xTrans,	_yMainNeg - yTrans,	0
+
+		!	상부 좌표
+		put	_xMainNeg + xTrans*2,	_yMainNeg + yTrans*2,	colHgt*3,
+			_xMainNeg + xTrans*2,	_yMainPos + yTrans*2,	colHgt*3,
+			_xMainPos + xTrans*2,	_yMainPos + yTrans*2,	colHgt*3,
+			_xMainPos + xTrans*2,	_yMainNeg + yTrans*2,	colHgt*3
+
+		addz	-colHgt
+			ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+		del 1
+	endgroup
+
+	!	Sub
+	!-----------------------------------------------------------------------------------------------
+	group	"gSubShape"
+		!	하부 좌표
+		put	_xSubNeg - xTrans,	_ySubNeg - yTrans,	0,
+			_xSubNeg - xTrans,	_ySubPos - yTrans,	0,
+			_xSubPos - xTrans,	_ySubPos - yTrans,	0,
+			_xSubPos - xTrans,	_ySubNeg - yTrans,	0
+
+		!	상부 좌표
+		put	_xSubNeg + xTrans*2,	_ySubNeg + yTrans*2,	colHgt*3,
+			_xSubNeg + xTrans*2,	_ySubPos + yTrans*2,	colHgt*3,
+			_xSubPos + xTrans*2,	_ySubPos + yTrans*2,	colHgt*3,
+			_xSubPos + xTrans*2,	_ySubNeg + yTrans*2,	colHgt*3
+
+		addz	-colHgt
+			ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+		del 1
+	endgroup
+
+	!	2D Representation
+	!-----------------------------------------------------------------------------------------------
+
+	!	Cut
+	!-----------------------------------------------------------------------------------------------
+	_nCut = 0
+	if	not(_bCutOption)	then
+		!	Bottom Cut
+		cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+
+		!	Top Cut
+		addz	colHgt
+			cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+		del 1
+	else
+		!	Bottom Cut
+		if	iCutAxisB = AXIS_X	then
+			rotx	90
+				!	Hotspot
+				addz	_yMainPos
+					gosub	"hotspot_AxisX_Bottom"
+				del 1
+				addz	_yMainNeg
+					gosub	"hotspot_AxisX_Bottom"
+				del 1
+
+				!	Cutpoly
+				put	posCenterB,	0,
+					_xMainNeg,	cutLthB_1,
+					_xMainNeg,	-colHgt,
+					_xMainPos,	-colHgt,
+					_xMainPos,	cutLthB_2
+
+				! poly	nsp/2,	use(nsp)
+				cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+			del 1
+		endif
+		if	iCutAxisB = AXIS_Y	then
+			roty	90
+				!	Hotspot
+				addz	_xMainPos
+					gosub	"hotspot_AxisY_Bottom"
+				del 1
+				addz	_xMainNeg
+					gosub	"hotspot_AxisY_Bottom"
+				del 1
+
+				!	Cutpoly
+				put	0,			posCenterB,
+					-cutLthB_1,	_yMainPos,
+					colHgt,		_yMainPos,
+					colHgt,		_yMainNeg,
+					-cutLthB_2,	_yMainNeg
+
+				! poly	nsp/2,	use(nsp)
+				cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+			del 1
+		endif
+
+		!	Top Cut
+		addz	colHgt
+			if	iCutAxisT = AXIS_X	then
+				rotx	90
+					!	Hotspot
+					addz	_yMainPos
+						gosub	"hotspot_AxisX_Top"
+					del 1
+					addz	_yMainNeg
+						gosub	"hotspot_AxisX_Top"
+					del 1
+
+					!	Cutpoly
+					put	posCenterT,	0,
+						_xMainNeg,	cutLthT_1,
+						_xMainNeg,	colHgt,
+						_xMainPos,	colHgt,
+						_xMainPos,	cutLthT_2
+
+					! poly	nsp/2,	use(nsp)
+					cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+				del 1
+			endif
+			if	iCutAxisT = AXIS_Y	then
+				roty	90
+					!	Hotspot
+					addz	_xMainPos
+						gosub	"hotspot_AxisY_Top"
+					del 1
+					addz	_xMainNeg
+						gosub	"hotspot_AxisY_Top"
+					del 1
+
+					!	Cutpoly
+					put	0,			posCenterT,
+						-cutLthT_1,	_yMainPos,
+						-colHgt,	_yMainPos,
+						-colHgt,	_yMainNeg,
+						-cutLthT_2,	_yMainNeg
+
+					! poly	nsp/2,	use(nsp)
+					cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+				del 1
+			endif
+
+		del 1
+	endif
+
+	!	Place Subgroup Shape
+	!-----------------------------------------------------------------------------------------------
+	placegroup	subgroup("gMainShape", "gSubShape")
+
+	!	Cut End
+	!-----------------------------------------------------------------------------------------------
+	if	_nCut > eps	then
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+	endif
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"hotspot_AxisX_Bottom":
+!-----------------------------------------------------------------------------------------------
+	hotspot	0,			0,	0,	unID,	posCenterB,	1+128	:	unID = unID + 1
+	hotspot	-1,			0,	0,	unID,	posCenterB,	3		:	unID = unID + 1
+	hotspot	posCenterB,	0,	0,	unID,	posCenterB,	2		:	unID = unID + 1
+
+	addx	_xMainNeg
+		hotspot	0,	0,			0,	unID,	cutLthB_1,	1+128	:	unID = unID + 1
+		hotspot	0,	-1,			0,	unID,	cutLthB_1,	3		:	unID = unID + 1
+		hotspot	0,	cutLthB_1,	0,	unID,	cutLthB_1,	2		:	unID = unID + 1
+	del 1
+
+	addx	_xMainPos
+		hotspot	0,	0,			0,	unID,	cutLthB_2,	1+128	:	unID = unID + 1
+		hotspot	0,	-1,			0,	unID,	cutLthB_2,	3		:	unID = unID + 1
+		hotspot	0,	cutLthB_2,	0,	unID,	cutLthB_2,	2		:	unID = unID + 1
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"hotspot_AxisY_Bottom":
+!-----------------------------------------------------------------------------------------------
+	hotspot	0,	0,			0,	unID,	posCenterB,	1+128	:	unID = unID + 1
+	hotspot	0,	-1,			0,	unID,	posCenterB,	3		:	unID = unID + 1
+	hotspot	0,	posCenterB,	0,	unID,	posCenterB,	2		:	unID = unID + 1
+
+	addy	_yMainPos
+		hotspot	0,			0,	0,	unID,	cutLthB_1,	1+128	:	unID = unID + 1
+		hotspot	1,			0,	0,	unID,	cutLthB_1,	3		:	unID = unID + 1
+		hotspot	-cutLthB_1,	0,	0,	unID,	cutLthB_1,	2		:	unID = unID + 1
+	del 1
+
+	addy	_yMainNeg
+		hotspot	0,			0,	0,	unID,	cutLthB_2,	1+128	:	unID = unID + 1
+		hotspot	1,			0,	0,	unID,	cutLthB_2,	3		:	unID = unID + 1
+		hotspot	-cutLthB_2,	0,	0,	unID,	cutLthB_2,	2		:	unID = unID + 1
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"hotspot_AxisX_Top":
+!-----------------------------------------------------------------------------------------------
+	hotspot	0,			0,	0,	unID,	posCenterT,	1+128	:	unID = unID + 1
+	hotspot	-1,			0,	0,	unID,	posCenterT,	3		:	unID = unID + 1
+	hotspot	posCenterT,	0,	0,	unID,	posCenterT,	2		:	unID = unID + 1
+
+	addx	_xMainNeg
+		hotspot	0,	0,			0,	unID,	cutLthT_1,	1+128	:	unID = unID + 1
+		hotspot	0,	-1,			0,	unID,	cutLthT_1,	3		:	unID = unID + 1
+		hotspot	0,	cutLthT_1,	0,	unID,	cutLthT_1,	2		:	unID = unID + 1
+	del 1
+
+	addx	_xMainPos
+		hotspot	0,	0,			0,	unID,	cutLthT_2,	1+128	:	unID = unID + 1
+		hotspot	0,	-1,			0,	unID,	cutLthT_2,	3		:	unID = unID + 1
+		hotspot	0,	cutLthT_2,	0,	unID,	cutLthT_2,	2		:	unID = unID + 1
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"hotspot_AxisY_Top":
+!-----------------------------------------------------------------------------------------------
+	hotspot	0,	0,			0,	unID,	posCenterT,	1+128	:	unID = unID + 1
+	hotspot	0,	-1,			0,	unID,	posCenterT,	3		:	unID = unID + 1
+	hotspot	0,	posCenterT,	0,	unID,	posCenterT,	2		:	unID = unID + 1
+
+	addy	_yMainPos
+		hotspot	0,			0,	0,	unID,	cutLthT_1,	1+128	:	unID = unID + 1
+		hotspot	1,			0,	0,	unID,	cutLthT_1,	3		:	unID = unID + 1
+		hotspot	-cutLthT_1,	0,	0,	unID,	cutLthT_1,	2		:	unID = unID + 1
+	del 1
+
+	addy	_yMainNeg
+		hotspot	0,			0,	0,	unID,	cutLthT_2,	1+128	:	unID = unID + 1
+		hotspot	1,			0,	0,	unID,	cutLthT_2,	3		:	unID = unID + 1
+		hotspot	-cutLthT_2,	0,	0,	unID,	cutLthT_2,	2		:	unID = unID + 1
+	del 1
+return

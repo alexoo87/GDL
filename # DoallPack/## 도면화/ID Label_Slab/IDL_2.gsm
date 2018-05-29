@@ -1,0 +1,840 @@
+!=======================================================================================
+!	Paragraph / textblock 정리
+!=======================================================================================
+!	텍스트 스타일 정의
+!---------------------------------------------------------------------------------------
+define style{2}	"sb_style_01"	LABEL_FONT_NAME,	LABEL_TEXT_SIZE,	LABEL_FONT_STYLE
+
+	r = request("Height_of_style",	"sb_style_01",	_textHgt,	_descent,	_leading)
+	adjustY = LABEL_TEXT_SIZE/2 + _descent + _leading
+	adjustY = adjustY/1000*GLOB_SCALE
+
+!	텍스트 블럭 정의
+!---------------------------------------------------------------------------------------
+	!	ID
+	paragraph	"ID_P" LABEL_TEXT_ALIGN, 0.75, 0, 0.75, LABEL_TEXT_LEADING, 10
+		pen		LABEL_TEXT_PEN
+		style	"sb_style_01"
+		GLOB_ID
+	endparagraph
+	
+	textblock	"TB_1"	0,	8,	0,	LABEL_TEXT_WIDTH_FACT,	LABEL_TEXT_CHARSPACE_FACT,	1,	"ID_P"
+
+	!	치수
+	paragraph	"COL_P"LABEL_TEXT_ALIGN, 0.75, 0, 0.75, LABEL_TEXT_LEADING, 10
+		pen		LABEL_TEXT_PEN
+		style	"sb_style_01"
+		STR("%~.mm", COLU_DIM1)
+		'X'
+		STR("%~.mm", COLU_DIM2)
+	endparagraph
+	
+	textblock	"TB_2"	0,	8,	0,	LABEL_TEXT_WIDTH_FACT,	LABEL_TEXT_CHARSPACE_FACT,	1,	"COL_P"
+
+	paragraph	"BEAM_P" LABEL_TEXT_ALIGN, 0.75, 0, 0.75, LABEL_TEXT_LEADING, 10
+		pen		LABEL_TEXT_PEN
+		style	"sb_style_01"
+		STR("%~.mm", BEAM_THICKNESS)
+		'X'
+		STR("%~.mm", BEAM_HEIGHT)
+	endparagraph
+
+	textblock	"TB_3"	0,	8,	0,	LABEL_TEXT_WIDTH_FACT,	LABEL_TEXT_CHARSPACE_FACT,	1,	"BEAM_P"
+
+	!	Custom 문자
+	paragraph	"CUSTOM_P" LABEL_TEXT_ALIGN, 0.75, 0, 0.75, LABEL_TEXT_LEADING, 10
+		pen		LABEL_TEXT_PEN
+		style	"sb_style_01"
+		LB_custom
+	endparagraph
+
+	textblock	"TB_4"	0,	8,	0,	LABEL_TEXT_WIDTH_FACT,	LABEL_TEXT_CHARSPACE_FACT,	1,	"CUSTOM_P"
+
+!	텍스트 블럭 정보 추출
+!---------------------------------------------------------------------------------------
+r = request("TEXTBLOCK_INFO",	"TB_1",	TB_1_width,	TB_1_height)
+r = request("TEXTBLOCK_INFO",	"TB_2",	TB_2_width,	TB_2_height)
+r = request("TEXTBLOCK_INFO",	"TB_3",	TB_3_width,	TB_3_height)
+r = request("TEXTBLOCK_INFO",	"TB_4",	TB_4_width,	TB_4_height)
+
+TB_1_width = TB_1_width/1000
+TB_2_width = TB_2_width/1000
+TB_3_width = TB_3_width/1000
+TB_4_width = TB_4_width/1000
+
+TB_1_height = TB_1_height/1000
+TB_2_height = TB_2_height/1000
+TB_3_height = TB_3_height/1000
+TB_4_height = TB_4_height/1000
+
+
+!	텍스트 크기 자동 맞춤
+!---------------------------------------------------------------------------------------
+if	bAutoSize | iSymbType = Symb_None	then
+
+	!	변수정리
+	!---------------------------------------------------------------------------------------
+	if	iLabelType = Label_ID	then
+		TBwidthTmp = TB_1_width
+		TBheightTmp = TB_1_height
+	endif
+
+	if	iLabelType = Label_Size	then
+		if	GLOB_ELEM_TYPE = 6	then	!	기둥
+			TBwidthTmp = TB_2_width
+			TBheightTmp = TB_2_height
+		endif
+		if	GLOB_ELEM_TYPE = 12	then	!	보
+			TBwidthTmp = TB_3_width
+			TBheightTmp = TB_3_height
+		endif
+	endif
+
+	if	iLabelType = Label_Custom	then
+		TBwidthTmp = TB_4_width
+		TBheightTmp = TB_4_height
+	endif
+
+	!	Symbol Size
+	!---------------------------------------------------------------------------------------
+	if	iSymbType=Symb_Diamond or iSymbType=Symb_Ellipse	then	! 마름모형, 타원형
+		if	iSymbType = Symb_Diamond	then
+			LabelWidth = TBwidthTmp * 1.75
+			LabelHeight = TBheightTmp * 2
+		else
+			LabelWidth = TBwidthTmp * 1.1
+			LabelHeight = TBheightTmp * 1.4
+		endif
+	else
+		LabelWidth = TBwidthTmp
+		LabelHeight = TBheightTmp
+	endif
+
+endif
+
+
+!=======================================================================================
+!	공통
+!=======================================================================================
+!	라벨 길이 스케일에 맞추기
+LabelWidth = LabelWidth*GLOB_SCALE
+LabelHeight = LabelHeight*GLOB_SCALE
+
+D1 = LabelWidth
+D2 = LabelHeight
+R1 = LabelWidth/2
+R2 = LabelHeight/2
+
+
+if	bLabelOffset	then
+	LabelOffsetLth = LabelOffsetLth/1000
+	LabelOffsetLth = LabelOffsetLth*GLOB_SCALE
+	offsetH = offsetH*GLOB_SCALE
+endif
+
+
+
+!=======================================================================================
+!	라벨 위치 / 오프셋 및 객체에 수평
+!=======================================================================================
+x1 = LABEL_POSITION[1][1]
+y1 = LABEL_POSITION[1][2]
+
+x2 = LABEL_POSITION[2][1]
+y2 = LABEL_POSITION[2][2]
+
+x3 = LABEL_POSITION[3][1]
+y3 = LABEL_POSITION[3][2]
+
+r = request ("View_Rotangle", "", angleViewRot)
+totalRotate_1 = (SYMB_ROTANGLE + angleViewRot) MOD 360
+totalRotate_2 = (LABEL_ROTANGLE + LABEL_ASSOC_ELEM_ORIENTATION + angleViewRot) MOD 360
+totalRotate_3 = (LABEL_ASSOC_ELEM_ORIENTATION + angleViewRot) MOD 360
+nTrans = 0
+
+! text2	0,	1,	totalRotate_2
+! text2	1,	1,	"total"
+! text2	0,	2,	LABEL_ASSOC_ELEM_ORIENTATION
+! text2	1,	2,	"LABEL"
+! text2	0,	3,	angleViewRot
+! text2	1,	3,	"angle"
+! text2	0,	4,	LABEL_ROTANGLE
+
+!	라벨 위치
+!---------------------------------------------------------------------------------------
+add2	x2 + x3,	y2 + y3
+
+hotspot2	0,	0
+
+!	View 각도에 따른 조정
+!---------------------------------------------------------------------------------------
+if	not(bLabelOffset)	then
+	if	GLOB_ELEM_TYPE = 6 | GLOB_ELEM_TYPE = 7	then
+		rot2	-angleViewRot
+
+		if	angleViewRot > 90 + eps & angleViewRot < 270 + eps	then
+			rot2	180
+		endif
+	endif
+
+	if	GLOB_ELEM_TYPE = 1 | GLOB_ELEM_TYPE = 5 | GLOB_ELEM_TYPE = 12	then
+		rot2	LABEL_ASSOC_ELEM_ORIENTATION
+
+		if	angleViewRot > 180 - eps & angleViewRot < 270 + eps	then
+			rot2	180
+		endif
+	endif
+endif
+
+	!	객체 타입별 변수
+	!---------------------------------------------------------------------------------------
+	totalRotateTmp = 0
+	rotAngleTmp = 0
+	labelHalfTmp = 0
+	yOffsetTmp1 = 0
+	yOffsetTmp2 = 0
+	yOffsetTmp3 = 0
+
+		if	iSymbType = Symb_Circle or iSymbType = Symb_Hexagon	then
+			if	iSymbType = Symb_Circle	then
+				labelHalfTmp = D1/2
+			else
+				labelHalfTmp = R1*sin(60)
+			endif
+		else
+			labelHalfTmp = D2/2
+		endif
+
+
+	if	GLOB_ELEM_TYPE = 1	then	! 오브젝트(철골보 라이브러리)
+		totalRotateTmp = totalRotate_1
+		rotAngleTmp = SYMB_ROTANGLE
+		yOffsetTmp1 = labelHalfTmp
+		yOffsetTmp2 = yOffsetTmp1 + LabelOffsetLth
+		yOffsetTmp3 = -yOffsetTmp1 + LabelOffsetLth
+	endif
+
+	if	GLOB_ELEM_TYPE = 5	then	! 벽
+		totalRotateTmp = totalRotate_3
+		rotAngleTmp = LABEL_ASSOC_ELEM_ORIENTATION
+		yOffsetTmp1 = labelHalfTmp + WALL_THICKNESS/2
+		yOffsetTmp2 = yOffsetTmp1 + LabelOffsetLth
+		yOffsetTmp3 = -yOffsetTmp1 + LabelOffsetLth
+	endif
+
+	if	GLOB_ELEM_TYPE = 6	then	! 기둥
+		totalRotateTmp = totalRotate_3
+		rotAngleTmp = LABEL_ASSOC_ELEM_ORIENTATION
+		yOffsetTmp1 = labelHalfTmp + COLU_DIM2/2
+		yOffsetTmp2 = yOffsetTmp1 + LabelOffsetLth
+		yOffsetTmp3 = -yOffsetTmp1 + LabelOffsetLth
+	endif
+
+	if	GLOB_ELEM_TYPE = 7	then	! 슬라브
+		totalRotateTmp = totalRotate_3
+		rotAngleTmp = LABEL_ASSOC_ELEM_ORIENTATION
+		yOffsetTmp1 = 0
+		yOffsetTmp2 = 0
+		yOffsetTmp3 = 0
+	endif
+
+	if	GLOB_ELEM_TYPE = 12	then	! 보
+		totalRotateTmp = totalRotate_3
+		rotAngleTmp = LABEL_ASSOC_ELEM_ORIENTATION
+		yOffsetTmp1 = labelHalfTmp + BEAM_THICKNESS/2
+			if	totalRotateTmp <= 90 or totalRotateTmp > 270	then
+				yOffsetTmp2 = yOffsetTmp1 + LabelOffsetLth + BEAM_REFLINE_OFFSET
+				yOffsetTmp3 = -yOffsetTmp1 + LabelOffsetLth + BEAM_REFLINE_OFFSET
+			else
+				yOffsetTmp2 = yOffsetTmp1 + LabelOffsetLth - BEAM_REFLINE_OFFSET
+				yOffsetTmp3 = -yOffsetTmp1 + LabelOffsetLth - BEAM_REFLINE_OFFSET
+			endif
+	endif
+
+
+	!	객체에 수평(오프셋 On)
+	!---------------------------------------------------------------------------------------
+	if	bLabelOffset	then
+		!	각도
+		rot2	rotAngleTmp - LABEL_ROTANGLE
+		if	totalRotateTmp > 90 + eps & totalRotateTmp < 270 + eps	then
+			rot2	180
+		endif
+		if	angleViewRot > 90 + eps & angleViewRot < 270 + eps	then
+			rot2	180
+		endif
+
+		!	오프셋
+		if	LabelOffsetLth >= 0	then
+			add2	offsetH,	yOffsetTmp2
+			hotspot2	0,	-(LabelOffsetLth + labelHalfTmp)
+
+			add2	0,	-labelHalfTmp
+				hotspot2	0,			0,	unID,	offsetH,	1+1024	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	offsetH,	3		:	unID = unID + 1
+				hotspot2	offsetH,	0,	unID,	offsetH,	2		:	unID = unID + 1
+			del 1
+		else
+			add2	offsetH,	yOffsetTmp3
+			hotspot2	0,	-(LabelOffsetLth - labelHalfTmp)
+
+			add2	0,	labelHalfTmp
+				hotspot2	0,			0,	unID,	offsetH,	1+1024	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	offsetH,	3		:	unID = unID + 1
+				hotspot2	offsetH,	0,	unID,	offsetH,	2		:	unID = unID + 1
+			del 1
+		endif
+	endif
+
+
+!=======================================================================================
+!	라벨 내용 (ID, 치수, CUSTOM)
+!=======================================================================================
+
+!	항상 읽기 가능
+_nTrans = 0
+if	totalRotate_2 > 90 - eps & totalRotate_2 < 270 + eps	then
+	if	LABEL_ALWAYS_READABLE	then
+		rot2	180	:	_nTrans = _nTrans + 1
+	endif
+endif
+	add2	0,	-adjustY
+		!	ID
+		!---------------------------------------------------------------------------------------
+		if	iLabelType = Label_ID	then
+			richtext2	0,	0,	"TB_1"
+		endif
+
+		!	치수
+		!---------------------------------------------------------------------------------------
+		if iLabelType = Label_Size then
+
+			!	기둥
+			!---------------------------------------------------------------------------------------
+			if GLOB_ELEM_TYPE = 6 then
+				richtext2	0,	0,	"TB_2"
+			endif
+
+			!	보
+			!---------------------------------------------------------------------------------------
+			if GLOB_ELEM_TYPE = 12 then
+				richtext2	0,	0,	"TB_3"
+			endif
+		endif
+
+		!	CUSTOM
+		!---------------------------------------------------------------------------------------
+		if	iLabelType = Label_Custom	then
+			richtext2	0,	0,	"TB_4"
+		endif
+	del 1
+if	_nTrans > eps	then
+	del _nTrans
+endif
+
+!=======================================================================================
+!	심볼유형에 따라 심볼그리기
+!=======================================================================================
+unID = 100
+
+pen			penSymb
+fill		fillSymb
+line_type	ltSymb
+
+	!	None
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = Symb_None	then
+
+		put	-R1,	-R2,	1,
+			R1,		-R2,	1,
+			R1,		R2,		1,
+			-R1,	R2,		1,
+			-R1,	-R2,	1
+
+		poly2_B	nsp/3,	2,	penSymb,	LABEL_TEXT_BG_PEN,	get(nsp)
+
+			!	hotspot
+			!---------------------------------------------------------------------------------------
+			hotspot2	-R1,	-R2
+			hotspot2	R1,		-R2
+			hotspot2	R1,		R2
+			hotspot2	-R1,	R2
+			hotspot2	0,		R2
+			hotspot2	0,		-R2
+
+		_xPosLeader = R1
+		_yPosLeader = R2
+	endif
+
+	!	사각형
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = Symb_Rect	then
+
+		put	-R1,	-R2,	1,
+			R1,		-R2,	1,
+			R1,		R2,		1,
+			-R1,	R2,		1,
+			-R1,	-R2,	1
+
+		poly2_B	nsp/3,	1+2,	penSymb,	LABEL_TEXT_BG_PEN,	get(nsp)
+
+			!	hotspot
+			!---------------------------------------------------------------------------------------
+			hotspot2	-R1,	-R2
+			hotspot2	R1,		-R2
+			hotspot2	R1,		R2
+			hotspot2	-R1,	R2
+			hotspot2	0,		R2
+			hotspot2	0,		-R2
+
+		_xPosLeader = R1
+		_yPosLeader = R2
+	endif
+
+	!	마름모형
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = Symb_Diamond	then
+
+		put	0,		-R2,	1,
+			R1,		0,		1,
+			0,		R2,		1,
+			-R1,	0,		1,
+			0,		-R2,	1
+
+		poly2_B	nsp/3,	1+2,	penSymb,	LABEL_TEXT_BG_PEN,	get(nsp)
+
+			!	hotspot
+			!---------------------------------------------------------------------------------------
+			hotspot2	0,		-R2
+			hotspot2	R1,		0
+			hotspot2	0,		R2
+			hotspot2	-R1,	0
+
+		_xPosLeader = R1
+		_yPosLeader = R2
+	endif
+
+	!	원형
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = Symb_Circle	then
+
+		put	0,	0,		900+1,
+			R1,	360,	4000+1
+
+		poly2_B	nsp/3,	1+2,	penSymb,	LABEL_TEXT_BG_PEN,	get(nsp)
+
+			!	hotspot
+			!---------------------------------------------------------------------------------------
+			hotspot2	0,		0
+			hotspot2	R1,		0
+			hotspot2	0,		R1
+			hotspot2	-R1,	0
+			hotspot2	0,		-R1
+
+		_xPosLeader = R1
+		_yPosLeader = R1
+	endif
+
+	!	타원형
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = Symb_Ellipse	then
+
+		mul2	1, LabelHeight/LabelWidth
+
+			put	0,	0,		900+1,
+				R1,	360,	4000+1
+
+			poly2_B	nsp/3,	1+2,	penSymb,	LABEL_TEXT_BG_PEN,	get(nsp)
+
+				!	hotspot
+				!---------------------------------------------------------------------------------------
+				hotspot2	0,		0
+				hotspot2	R1,		0
+				hotspot2	0,		R1
+				hotspot2	-R1,	0
+				hotspot2	0,		-R1
+
+		del	1
+
+		_ratioE = LabelHeight/LabelWidth
+		_xPosLeader = R1
+		_yPosLeader = R1*_ratioE
+	endif
+
+	!	운동장형
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = Symb_Stadium	then
+
+		put	-(R1 - R2),	-R2,	1,
+			R1 - R2,	-R2,	1,
+
+			R1 - R2,	0,		900,
+			0,			180,	4000+1,
+
+			-(R1 - R2),	R2,		1,
+
+			-(R1 - R2),	0,		900,
+			0,			180,	4000+1
+
+		poly2_B	nsp/3,	1+2,	penSymb,	LABEL_TEXT_BG_PEN,	get(nsp)
+
+			!	hotspot
+			!---------------------------------------------------------------------------------------
+			hotspot2	-(R1 - R2),	-R2
+			hotspot2	R1 - R2,	-R2
+			hotspot2	R1,			0
+			hotspot2	R1 - R2,	R2
+			hotspot2	-(R1 - R2),	R2
+			hotspot2	-R1,		0
+			hotspot2	0,			R2
+			hotspot2	0,			-R2
+
+		_xPosLeader = R1
+		_yPosLeader = R2
+	endif
+
+	!	육각형
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = Symb_Hexagon	then
+
+		put	R1,				0,				1,
+			R1*cos(60),		R1*sin(60),		1,
+			-R1*cos(60),	R1*sin(60),		1,
+			-R1,			0,				1,
+			-R1*cos(60),	-R1*sin(60),	1,
+			R1*cos(60),		-R1*sin(60),	1,
+			R1,				0,				1
+
+		poly2_B	nsp/3,	1+2,	penSymb,	LABEL_TEXT_BG_PEN,	get(nsp)
+
+			!	hotspot
+			!---------------------------------------------------------------------------------------
+			hotspot2	R1,				0
+			hotspot2	R1*cos(60),		R1*sin(60)
+			hotspot2	-R1*cos(60),	R1*sin(60)
+			hotspot2	-R1,			0
+			hotspot2	-R1*cos(60),	-R1*sin(60)
+			hotspot2	R1*cos(60),		-R1*sin(60)
+			hotspot2	R1,				0
+
+		_xPosLeader = R1
+		_yPosLeader = R1*sin(60)
+	endif
+
+	!	플래그(벽체안내도)
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = SYMB_FLAG	then
+		_mulx = 1
+		if	bMirrorFlag	then	_mulx = -1
+
+		mul2	_mulx,	1
+
+			put	-R1,		R2,		1,
+				R1,			R2,		1,
+				R1 + R2,	0,		1,
+				R1,			-R2,	1,
+				-R1,		-R2,	1,
+				-R1,		R2,		1
+
+			poly2_B	nsp/3,	1+2,	penSymb,	LABEL_TEXT_BG_PEN,	use(nsp)
+
+			!	hotspot
+			for	h = 1	to	(nsp/3)
+				hotspot2	get(2) + (use(1) - get(1))
+			next	h
+		del 1
+
+		_xPosLeader_L = R1 + R2
+		_xPosLeader_S = R1
+		_yPosLeader = R2
+	endif
+
+!=======================================================================================
+!	지시선
+!=======================================================================================
+pen			penSymb
+fill		64
+line_type	1
+
+_rad = leaderRad*GLOB_SCALE
+
+!	상부
+!---------------------------------------------------------------------------------------
+if	bLeaderT	then
+	add2	0,	_yPosLeader
+		for	i = 1	to	nLeaderT
+			!	Hotspot
+			hotspot2	0,	0,			unID,	distT[i],	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	distT[i],	3		:	unID = unID + 1
+			hotspot2	0,	distT[i],	unID,	distT[i],	2		:	unID = unID + 1
+
+			!	Line
+			line2		0,	0,	0,	distT[i]
+			hotline2	0,	0,	0,	distT[i]
+
+			!	Trans
+			add2	0,	distT[i]
+
+			!	Circle
+			put	0,		0,		900,
+				_rad,	360,	4000
+
+			poly2_	nsp/3,	1+2,	get(nsp)
+		next	i
+
+		del nLeaderT
+	del 1
+endif
+
+!	하부
+!---------------------------------------------------------------------------------------
+if	bLeaderB	then
+	add2	0,	-_yPosLeader
+		for	i = 1	to	nLeaderB
+			!	Hotspot
+			hotspot2	0,	0,			unID,	distB[i],	1+128	:	unID = unID + 1
+			hotspot2	0,	1,			unID,	distB[i],	3		:	unID = unID + 1
+			hotspot2	0,	-distB[i],	unID,	distB[i],	2		:	unID = unID + 1
+
+			!	Line
+			line2		0,	0,	0,	-distB[i]
+			hotline2	0,	0,	0,	-distB[i]
+
+			!	Trans
+			add2	0,	-distB[i]
+
+			!	Circle
+			put	0,		0,		900,
+				_rad,	360,	4000
+
+			poly2_	nsp/3,	1+2,	get(nsp)
+		next	i
+
+		del nLeaderB
+	del 1
+endif
+
+!	좌측
+!---------------------------------------------------------------------------------------
+if	bLeaderL	then
+	if	iSymbType = SYMB_FLAG	then
+		if	bMirrorFlag	then
+			_xPosLeader = _xPosLeader_L
+		else
+			_xPosLeader = _xPosLeader_S
+		endif
+	endif
+
+	add2	-_xPosLeader,	0
+		for	i = 1	to	nLeaderL
+			!	Hotspot
+			hotspot2	0,			0,	unID,	distL[i],	1+128	:	unID = unID + 1
+			hotspot2	1,			0,	unID,	distL[i],	3		:	unID = unID + 1
+			hotspot2	-distL[i],	0,	unID,	distL[i],	2		:	unID = unID + 1
+
+			!	Line
+			line2		0,	0,	-distL[i],	0
+			hotline2	0,	0,	-distL[i],	0
+
+			!	Trans
+			add2	-distL[i],	0
+
+			!	Circle
+			put	0,		0,		900,
+				_rad,	360,	4000
+
+			poly2_	nsp/3,	1+2,	get(nsp)
+		next	i
+
+		del nLeaderL
+	del 1
+endif
+
+!	우측
+!---------------------------------------------------------------------------------------
+if	bLeaderR	then
+	if	iSymbType = SYMB_FLAG	then
+		if	bMirrorFlag	then
+			_xPosLeader = _xPosLeader_S
+		else
+			_xPosLeader = _xPosLeader_L
+		endif
+	endif
+
+	add2	_xPosLeader,	0
+		for	i = 1	to	nLeaderR
+			!	Hotspot
+			hotspot2	0,			0,	unID,	distR[i],	1+128	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	distR[i],	3		:	unID = unID + 1
+			hotspot2	distR[i],	0,	unID,	distR[i],	2		:	unID = unID + 1
+
+			!	Line
+			line2		0,	0,	distR[i],	0
+			hotline2	0,	0,	distR[i],	0
+
+			!	Trans
+			add2	distR[i],	0
+
+			!	Circle
+			put	0,		0,		900,
+				_rad,	360,	4000
+
+			poly2_	nsp/3,	1+2,	get(nsp)
+		next	i
+
+		del nLeaderR
+	del 1
+endif
+
+
+!=======================================================================================
+!	데크슬라브 철근배근 방향 표시
+!=======================================================================================
+
+	!	변수정의
+	!---------------------------------------------------------------------------------------
+	pen		penArw
+	fill	64
+
+	_bDrawFill = not(abs(arwThk) < eps)
+
+	offsetBottom = offsetBottom*GLOB_SCALE
+	lengthBottom = lengthBottom*GLOB_SCALE
+	halfBottom = halfBottom*GLOB_SCALE
+	offsetRight = offsetRight*GLOB_SCALE
+	lengthRight = lengthRight*GLOB_SCALE
+	halfRight = halfRight*GLOB_SCALE
+
+	arwThk = arwThk*GLOB_SCALE
+	arwLth = arwLth*GLOB_SCALE
+
+
+	!	하단
+	!---------------------------------------------------------------------------------------
+	if	iDeckSlabSymb = DeckSlab_Bottom	then
+		add2	0,	-offsetBottom
+			!	중심선
+			line2		-halfBottom,	0,	halfBottom,	0
+			hotline2	-halfBottom,	0,	halfBottom,	0,	unID	:	unID = unID + 1
+
+			_halfLth = halfBottom
+			gosub	"drawArrow"
+
+			mul2	-1,	-1
+				gosub	"drawArrow"
+			del 1
+		del 1
+
+			!	hotspot
+			!---------------------------------------------------------------------------------------
+			hotspot2	0,	0,				unID,	offsetBottom,	1+128+1024	:	unID = unID + 1
+			hotspot2	0,	1,				unID,	offsetBottom,	3			:	unID = unID + 1
+			hotspot2	0,	-offsetBottom,	unID,	offsetBottom,	2			:	unID = unID + 1
+
+			add2	0,	-offsetBottom
+				hotspot2	0,			0,	unID,	halfBottom,	1+128+1024,	lengthBottom	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	halfBottom,	3,			lengthBottom	:	unID = unID + 1
+				hotspot2	halfBottom,	0,	unID,	halfBottom,	2,			lengthBottom	:	unID = unID + 1
+
+				add2	-halfBottom,	0
+					hotspot2	arwLth/2,				0,						unID,	aTilt,	4+128	:	unID = unID + 1
+					hotspot2	(arwLth/2)*cos(aTilt),	(arwLth/2)*sin(aTilt),	unID,	aTilt,	5		:	unID = unID + 1
+					hotspot2	0,						0,						unID,	aTilt,	6		:	unID = unID + 1
+
+					rot2	aTilt
+						hotspot2	0,		0,	unID,	arwLth,	1+1024	:	unID = unID + 1
+						hotspot2	-1,		0,	unID,	arwLth,	3		:	unID = unID + 1
+						hotspot2	arwLth,	0,	unID,	arwLth,	2		:	unID = unID + 1
+
+						add2	arwLth,	0
+							hotspot2	0,	0,			unID,	arwThk,	1+128+1024	:	unID = unID + 1
+							hotspot2	0,	1,			unID,	arwThk,	3			:	unID = unID + 1
+							hotspot2	0,	-arwThk,	unID,	arwThk,	2			:	unID = unID + 1
+						del 1
+					del 1
+				del 1
+			del 1
+
+	endif
+
+	!	우측
+	!---------------------------------------------------------------------------------------
+	if	iDeckSlabSymb = DeckSlab_Right	then
+		add2	offsetRight,	0
+			!	중심선
+			line2		0,	-halfRight,	0,	halfRight
+			hotline2	0,	-halfRight,	0,	halfRight,	unID	:	unID = unID + 1
+
+			_halfLth = halfRight
+			rot2	90
+				gosub	"drawArrow"
+
+				mul2	-1,	-1
+					gosub	"drawArrow"
+				del 1
+			del 1
+		del 1
+
+			!	hotspot
+			!---------------------------------------------------------------------------------------
+			hotspot2	0,				0,	unID,	offsetRight,	1+128+1024	:	unID = unID + 1
+			hotspot2	-1,				0,	unID,	offsetRight,	3			:	unID = unID + 1
+			hotspot2	offsetRight,	0,	unID,	offsetRight,	2			:	unID = unID + 1
+
+			add2	offsetRight,	0
+				hotspot2	0,	0,			unID,	halfRight,	1+128+1024,	lengthRight	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	halfRight,	3,			lengthRight	:	unID = unID + 1
+				hotspot2	0,	halfRight,	unID,	halfRight,	2,			lengthRight	:	unID = unID + 1
+
+				add2	0,	-halfRight
+					rot2	90
+						hotspot2	(arwLth/2),				0,						unID,	aTilt,	4+128	:	unID = unID + 1
+						hotspot2	(arwLth/2)*cos(aTilt),	(arwLth/2)*sin(aTilt),	unID,	aTilt,	5		:	unID = unID + 1
+						hotspot2	0,						0,						unID,	aTilt,	6		:	unID = unID + 1
+
+						rot2	aTilt
+							hotspot2	0,		0,	unID,	arwLth,	1+128+1024	:	unID = unID + 1
+							hotspot2	-1,		0,	unID,	arwLth,	3			:	unID = unID + 1
+							hotspot2	arwLth,	0,	unID,	arwLth,	2			:	unID = unID + 1
+
+							add2	arwLth,	0
+								hotspot2	0,	0,			unID,	arwThk,	1+128+1024	:	unID = unID + 1
+								hotspot2	0,	1,			unID,	arwThk,	3			:	unID = unID + 1
+								hotspot2	0,	-arwThk,	unID,	arwThk,	2			:	unID = unID + 1
+							del 1
+						del 1
+					del 1
+				del 1
+			del 1
+	endif
+
+
+
+!=======================================================================================
+!=======================================================================================
+end
+!=======================================================================================
+!=======================================================================================
+
+
+
+!=======================================================================================
+!	Sub-routine
+!=======================================================================================
+"drawArrow":
+!-----------------------------------------------------------------------------------------------
+	add2	-_halfLth,	0
+		if	_bDrawFill	then
+			put	0,																0,											1,
+				arwLth*cos(aTilt),												arwLth*sin(aTilt),							1,
+				arwLth*cos(aTilt) + arwThk*sin(aTilt),							arwLth*sin(aTilt) - arwThk*cos(aTilt),		1,
+				arwThk/sin(aTilt),												0,											1
+			poly2_a	nsp/3,	1+2+4,	penArw,	get(nsp)
+		else
+			rot2	aTilt
+				line2	0,	0,	arwLth,	0
+			del 1
+		endif
+	del 1
+
+return

@@ -1,0 +1,438 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+! hotspot	0, 0, 0
+! model	wire
+! circle	0.1
+! circle	0.2
+! model	solid
+
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+if	GLOB_FEEDBACK_MODE	then
+	HM_3D_resol = 3
+endif
+
+resol	HM_3D_resol
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+if	GLOB_VIEW_TYPE = 2	then
+	HM_3D_pen = HM_2D_cranePen
+endif
+pen	HM_3D_pen
+
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+call	"HM_Material_White.gsm"
+call	"HM_Material_Black.gsm"
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+
+if	HM_matWarning = ""	then
+	_material = HM_matBody2
+else
+	_material = HM_matWarning
+endif
+
+rotz	HM_WorkingAng
+
+	!	Common Parameters
+	!----------------------------------------------------------------------------------------------------
+	_offsetMain = 1.0195
+
+	material	_material
+
+	!	Outrigger
+	!----------------------------------------------------------------------------------------------------
+	rotz	-HM_WorkingAng
+		call	"HM_mc_Outrigger.gsm"	parameters	all	HM_OutrType = U_09H
+	del 1
+
+
+	!	Deck
+	!----------------------------------------------------------------------------------------------------
+	_deckThk = 0.194
+
+	addz	_offsetMain - _deckThk
+		put	0.720,					-0.350,					15,
+			-2.699 + 0.090*cos(45),	-0.350,					15,
+			-2.699,					-0.350 + 0.090*sin(45),	15,
+			-2.699,					0.350 - 0.090*sin(45),	15,
+			-2.699 + 0.090*cos(45),	0.350,					15,
+			0.720,					0.350,					15
+
+		prism_	nsp/3,	_deckThk,	get(nsp)
+	del 1
+
+		!	Connect(Deck to Jib)
+		_xPosCnt = 0.720
+		_yPosCnt = 0.350
+		_cntThk = 0.009
+
+		add	_xPosCnt,	-_yPosCnt,	_offsetMain - 0.009
+			rotx	90
+				put	0,		0,		15,
+					0,		-0.176,	15,
+					0.080,	-0.176,	15,
+					0.080,	-0.121,	900,
+					0.051,	135,	4000+15
+
+				prism_	nsp/3,	-_cntThk,	use(nsp)
+			del 1
+
+			addy	0.100
+				rotx	90
+					prism_	nsp/3,	-_cntThk,	use(nsp)
+				del 1
+			del 1
+
+			addy	0.591
+				rotx	90
+					prism_	nsp/3,	-_cntThk,	use(nsp)
+				del 1
+			del 1
+
+			addy	0.691
+				rotx	90
+					prism_	nsp/3,	-_cntThk,	get(nsp)
+				del 1
+			del 1
+		del 1
+
+		!	Pulley Tower
+		_yPosPlt = 0.0175
+		_pltWdtV = 0.520
+		_pltWdtH = 0.685
+		_pltThk = 0.010
+
+		_yPosPT = 0.2655
+		_ptThk = 0.009
+		_ptTopWdt = 0.120
+		_ptBtmWdt = 0.500
+		_ptBtmHgt = 0.110
+		_ptTopHgt = 1.830
+
+		addz	_offsetMain
+			addy	-_yPosPlt
+				put	-_pltWdtV/2,	-_pltWdtH/2,	15,
+					-_pltWdtV/2,	_pltWdtH/2,		15,
+					_pltWdtV/2,		_pltWdtH/2,		15,
+					_pltWdtV/2,		-_pltWdtH/2,	15
+
+				prism_	nsp/3,	_pltThk,	get(nsp)
+			del 1
+		del 1
+
+		add	0,	-_yPosPT,	_offsetMain + _pltThk
+			put	-_ptBtmWdt/2,	0,			15,
+				-_ptBtmWdt/2,	-_ptBtmHgt,	15,
+				-_ptTopWdt/2,	-_ptTopHgt,	15,
+				_ptTopWdt/2,	-_ptTopHgt,	15,
+				_ptBtmWdt/2,	-_ptBtmHgt,	15,
+				_ptBtmWdt/2,	0,			15
+
+			rotx	-90
+				prism_	nsp/3,	_ptThk,	use(nsp)
+			del 1
+
+			addy	0.551
+				rotx	-90
+					prism_	nsp/3,	_ptThk,	get(nsp)
+				del 1
+			del 1
+		del 1
+
+			!	Pulley Bar
+			_barRad = 0.025
+			_barLth = 0.642
+			_yPosBar = 0.0145
+			_zPosBar = 1.760
+
+			add	0,	_yPosBar,	_offsetMain + _zPosBar
+				rotx	90
+					addz	-_barLth/2
+						cylind	_barLth,	_barRad
+					del 1
+				del 1
+			del 1
+
+			!	Pulley Wheel
+			_innerSRad = 0.0985
+			_innerSWdt = 0.021
+			_innerLRad = 0.1095
+			_innerLWdt = 0.0055
+			_outerRad = 0.065
+			_outerWdt = 0.009
+
+			addz	_offsetMain + _zPosBar
+				addy	-0.2065
+					gosub	"pulleyWheel_"
+				del 1
+				addy	-0.1515
+					gosub	"pulleyWheel_"
+				del 1
+
+				addy	-0.0275
+					gosub	"pulleyWheel_"
+				del 1
+				addy	0.0275
+					gosub	"pulleyWheel_"
+				del 1
+
+				addy	0.1515
+					gosub	"pulleyWheel_"
+				del 1
+				addy	0.2065
+					gosub	"pulleyWheel_"
+				del 1
+			del 1
+
+	!	Machine(Pulley)
+	!----------------------------------------------------------------------------------------------------
+	_xPosMach = 0.924
+	_yPosMach = 0.0145
+	_zPosMach = 0.310
+	_machDist = 0.252
+	_machR1 = 0.120
+	_machR2 = 0.1125
+	_machThk = 0.008
+	_machWdt = 0.134
+
+	add	-_xPosMach,	-_yPosMach,	_offsetMain + _zPosMach
+		call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _machWdt,
+														HM_Pulley_R1 = _machR1,
+														HM_Pulley_R2 = _machR2,
+														HM_Pulley_Thick = _machThk,
+														HM_matPulley = HM_matBody2,
+														HM_Pulley_Fixed = 1
+		addx	-_machDist
+			call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _machWdt,
+															HM_Pulley_R1 = _machR1,
+															HM_Pulley_R2 = _machR2,
+															HM_Pulley_Thick = _machThk,
+															HM_matPulley = HM_matBody2,
+															HM_Pulley_Fixed = 1
+		del 1
+	del 1
+
+		!	Block
+		_xPosBlock = 1.050
+		_blockWdt = 0.550
+		_blockLth = 0.430
+		_blockHgt = 0.190
+
+		add	-_xPosBlock,	0,	_offsetMain
+			put	-_blockLth/2,	-_blockWdt/2,	15,
+				-_blockLth/2,	_blockWdt/2,	15,
+				_blockLth/2,	_blockWdt/2,	15,
+				_blockLth/2,	-_blockWdt/2,	15
+
+			prism_	nsp/3,	_blockHgt,	get(nsp)
+		del 1
+
+	!	Counter Weight
+	!----------------------------------------------------------------------------------------------------
+	_zPosCW = 0.5965
+	_xPosCW = 2.685
+	_nCW = 46
+	_CWWdt = 0.375
+	_CWHgt = 0.351
+	_CWThk = 0.032
+
+	add	-_xPosCW,	0,	_zPosCW
+		for	i = 1	to	_nCW
+			put	0,		-_CWWdt/2,	15,
+				0,		_CWWdt/2,	15,
+				_CWThk,	_CWWdt/2,	15,
+				_CWThk,	-_CWWdt/2,	15
+
+			addx	_CWThk*(i - 1)
+				prism_	nsp/3,	_CWHgt,	get(nsp)
+			del 1
+		next	i
+	del 1
+
+	!	Jib
+	!----------------------------------------------------------------------------------------------------
+	_xPosJib = 0.800
+	_zPosJib = _offsetMain - 0.134
+
+	!	Working Angle Hotspot
+	_hLth = (HM_JibLength/2)*cos(HM_JibAng)
+	add	_xPosJib,	0,	_zPosJib + HM_JibHeight/2
+		hotspot	_hLth,						0,							0,	unID,	HM_WorkingAng,	4	: unID = unID + 1
+		hotspot	_hLth*cos(HM_WorkingAng),	_hLth*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng,	5	: unID = unID + 1
+		hotspot	0,							0,							0,	unID,	HM_WorkingAng,	6	: unID = unID + 1
+		hotspot	0,							0,							1,	unID,	HM_WorkingAng,	7	: unID = unID + 1
+	del 1
+
+	if	HM_Jib_flag	then
+		add	_xPosJib,	0,	_zPosJib
+			call	"HM_mc_Jib.gsm"	parameters	all	HM_Jib_type = 2
+		del 1
+	endif
+
+	!	Wire
+	!----------------------------------------------------------------------------------------------------
+		!	Deck to Pulley Tower
+		call	"HM_mc_Wire.gsm"	parameters	all		x1 = -(_xPosMach - _machR2),
+														x2 = -_innerSRad,
+														y1 = _yPosMach + 0.0275,
+														y2 = 0.0275,
+														z1 = _offsetMain + _zPosMach,
+														z2 = _offsetMain + _zPosBar,
+														HM_Wire_R = 0.005
+		call	"HM_mc_Wire.gsm"	parameters	all		x1 = -(_xPosMach - _machR2),
+														x2 = -_innerSRad,
+														y1 = _yPosMach - 0.0275,
+														y2 = -0.0275,
+														z1 = _offsetMain + _zPosMach,
+														z2 = _offsetMain + _zPosBar,
+														HM_Wire_R = 0.005
+
+		!	Pulley Tower to Jib
+		call	"HM_mc_Wire.gsm"	parameters	all		x1 = 0,
+														x2 = _xPosJib + HM_JibLength*cos(HM_JibAng) - 0.0985*cos(45),
+														y1 = 0.0275,
+														y2 = 0,
+														z1 = _offsetMain + _zPosBar + 0.100,
+														z2 = _zPosJib + HM_JibLength*sin(HM_JibAng) + 0.0985*sin(45),
+														HM_Wire_R = 0.005
+		call	"HM_mc_Wire.gsm"	parameters	all		x1 = 0,
+														x2 = _xPosJib + HM_JibLength*cos(HM_JibAng) - 0.0985*cos(45),
+														y1 = -0.0275,
+														y2 = 0,
+														z1 = _offsetMain + _zPosBar + 0.100,
+														z2 = _zPosJib + HM_JibLength*sin(HM_JibAng) + 0.0985*sin(45),
+														HM_Wire_R = 0.005
+
+	!	Hook
+	!----------------------------------------------------------------------------------------------------
+	_xPosHook = _xPosJib + HM_JibLength*cos(HM_JibAng)
+	_zPosHook = _zPosJib + HM_JibLength*sin(HM_JibAng)
+	_pulleyRad = 0.0985
+
+	addx	_xPosHook + _pulleyRad
+		addz	_zPosHook
+			!	Wire(Jib to Hook)
+			hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1	: unID = unID + 1
+			hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3	: unID = unID + 1
+			hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2	: unID = unID + 1
+
+			call	"HM_mc_Wire.gsm"	parameters	all		x1 = 0,
+															x2 = 0,
+															y1 = 0,
+															y2 = 0,
+															z1 = 0,
+															z2 = -HM_JibWireLen + HM_HookHeight,
+															HM_Wire_R = 0.005
+
+			addz	-HM_JibWireLen + HM_HookHeight
+				call	"HM_mc_Hook.gsm"	parameters	all	HM_HookType = 2
+			del 1
+		del 1
+	del 1
+
+	!	Suspended Load
+	!----------------------------------------------------------------------------------------------------
+	_xPosLoad = _xPosHook + _pulleyRad
+	_zPosLoad = _zPosHook - HM_JibWireLen
+
+	if	HM_SLshow	then
+		addx	_xPosLoad
+			addz	_zPosLoad
+				hotspot	0,	0,	0,				unID,	HM_SLwireLen, 1	: unID = unID + 1
+				hotspot	0,	0,	1,				unID,	HM_SLwireLen, 3	: unID = unID + 1
+				hotspot	0,	0,	-HM_SLwireLen,	unID,	HM_SLwireLen, 2	: unID = unID + 1
+
+				addz	-HM_SLwireLen
+					rotz	90
+						call	"HM_mc_Suspendedloads.gsm"	parameters	all
+					del	1
+				del 1
+			del 1
+		del 1
+	endif
+
+	!	Load Text
+	!----------------------------------------------------------------------------------------------------
+	if	HM_3D_text_show_load	then
+		if	GLOB_CONTEXT <> 23 	then
+			addx	HM_SLdepth/2
+				addx	_xPosLoad
+					addz	_zPosLoad - HM_SLwireLen
+						rotz	90
+							call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 1,
+																			HM_3D_text_show_plane = 0
+						del	1
+					del	1
+				del 1
+			del	1
+		endif
+	endif
+
+	if	HM_3D_text_show_plane	then
+		!	On the Bottom (TEST)
+		call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 0,
+														HM_3D_text_show_plane = 1
+	endif
+del 1
+
+!----------------------------------------------------------------------------------------------------
+!	Dimension
+!----------------------------------------------------------------------------------------------------
+
+	!	Working Radius
+	!----------------------------------------------------------------------------------------------------
+	if	HM_3D_WorkingR_show	then
+		call	"HM_mc_WorkingR.gsm"	parameters all
+	endif
+
+
+
+
+
+end
+
+
+
+"pulleyWheel_":
+	rotx	90
+		material	_material
+		addz	-(_innerSWdt/2 + _innerLWdt + _outerWdt)
+			cylind	_outerWdt,	_outerRad
+		del 1
+
+		addz	-(_innerSWdt/2 + _innerLWdt)
+			cylind	_innerLWdt,	_innerLRad
+		del 1
+
+		material	HM_matWire
+		addz	-_innerSWdt/2
+			cylind	_innerSWdt,	_innerSRad
+		del 1
+
+		material	_material
+		addz	_innerSWdt/2
+			cylind	_innerLWdt,	_innerLRad
+		del 1
+
+		addz	_innerSWdt/2 + _innerLWdt
+			cylind	_outerWdt,	_outerRad
+		del 1
+	del 1
+
+return

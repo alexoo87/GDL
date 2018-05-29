@@ -1,0 +1,169 @@
+
+
+!======================================================================================================
+!	Window Maker(Opening) 20 
+!======================================================================================================
+!   DATE : 2017/4/12 WED
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Genaral
+!----------------------------------------------------------------------------------------------
+!	Cutting Level
+m2Dcut_level = GLOB_CUTPLANES_INFO[1]
+
+if	bEdit	then
+
+	!	Over Elevation
+	if	(mOpening_posY + mLayout_Offset[iCoordinate_num]) - m2Dcut_level > EPS	then
+		end
+	endif
+	
+	!	Below Elevation
+	if	iOpening_type = Type_FixedGlass | iOpening_type = Type_Frameless	then
+		HeightTmp = 0
+		for	i = 1	to	iCoordinate_num
+			DistanceTmp = abs(mOpening_Coordinate[i][2])
+			HeightTmp = max(HeightTmp,	DistanceTmp)
+		next	i
+	else
+		HeightTmp = mOpeningHeight
+	endif
+
+	if	(mOpening_posY + HeightTmp) - m2Dcut_level < -EPS	then
+		end
+	endif
+
+endif
+
+!----------------------------------------------------------------------------------------------
+!  Test Script
+!----------------------------------------------------------------------------------------------
+
+	! !	투영 
+	! rot2	180
+	! 	project2	4, 90, 2
+	! del	1
+
+	! !	Front
+	! line2	0, 0, 0, 1
+
+!----------------------------------------------------------------------------------------------
+!  2D Symbol
+!----------------------------------------------------------------------------------------------
+add2	0, -mOpening_posy_insert - mOpening_posy_reveal
+
+	if	iDetail_2D = DETAIL_2D_DETAIL	then
+
+		add2	mOpening_posX, 0
+
+			add2	mOpening_Coordinate[1][1],	0
+
+				!	Opening Index
+				if	bOpening_index	then
+					gosub	"Opening_index"	
+				endif
+
+				!	Sash Frame
+				pen	iSash_pen_2D
+				if	iOpening_type # Type_Frameless	then
+					rect2	0,	0,	mOpeningWidth,	-gs_sash_thk
+				endif
+
+				pen	iOpen_pen_2D
+				!	Type = Not Hung Type
+				if	iOpening_type = Type_FixedGlass or iOpening_type = Type_Frameless or iOpening_type = Type_BottomHung or	\
+					iOpening_type = Type_TopHung or iOpening_type = Type_HorPivot or iOpening_type = Type_VerPivot or	\
+					iOpening_type = Type_Grill or iOpening_type = Type_VerPivot_M or iOpening_type = Type_SlidingVer or iOpening_type = Type_DoubleSlidingVer	then
+
+					pen	iGlass_pen_2D
+					if	iOpening_type = Type_Grill	then
+						!	루버(그릴)창은 점선으로 표현
+						line_type iGlass_louver_line
+					endif
+	
+					line2	0,	-gs_sash_thk/2,	mOpeningWidth,	-gs_sash_thk/2
+
+				endif
+
+				if	iDirect = Direct_Reversed	then
+					add2	0,	-gs_sash_thk
+					mul2	1,	-1
+				endif
+
+					!	Type = Side Hung Type
+					if	iOpening_type = Type_SideHung or iOpening_type = Type_TiltTurn or iOpening_type = Type_Double_GS	then
+
+						arc2	mOpeningWidth,	0,	mOpeningWidth,	90,	180
+						line2	mOpeningWidth,	0,	mOpeningWidth,	mOpeningWidth
+
+					endif
+
+					!	Type = Side Hung Mirrored Type
+					if	iOpening_type = Type_SideHung_M or iOpening_type = Type_TiltTurn_M or iOpening_type = Type_Double_GS_M	then
+
+						arc2	0,	0,	mOpeningWidth,	0,	90
+						line2	0,	0,	0,	mOpeningWidth
+
+					endif
+
+					!	Type = Doubel Side Hung
+					if	iOpening_type = Type_DoubleSideHung or iOpening_type = Type_DoubleTiltTurn or iOpening_type = Type_DoubleTiltTurn_M	then
+
+						arc2	0,				0,	mOpeningWidth/2,	0,	90
+						arc2	mOpeningWidth,	0,	mOpeningWidth/2,	90,	180
+						line2	0,				0,	0,					mOpeningWidth/2
+						line2	mOpeningWidth,	0,	mOpeningWidth,		mOpeningWidth/2
+
+					endif
+
+				if	iDirect = Direct_Reversed	then
+					del 2
+				endif
+
+			del 1
+
+		del 1
+
+		mul2	1,	-1
+			!	Type = Sliding
+			if	iOpening_type = Type_Sliding3 or iOpening_type = Type_Sliding4 or iOpening_type = Type_Sliding6 or	\
+				iOpening_type = Type_SlidingHor or iOpening_type = Type_SlidingHor_M or iOpening_type = Type_DoubleSlidingHor or	\
+				iOpening_type = Type_DoubleSlidingHor_M	then
+
+				project2	4,	270,	2
+			endif
+		del 1
+
+	endif
+
+del	1
+
+
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+
+
+!----------------------------------------------------------------------------------------------
+"Opening_index"	:	
+!----------------------------------------------------------------------------------------------
+
+	pen			iText_pen
+	mTextT = 0.002
+
+	if	iSymbol_mirrored = 0	then	
+		mul2	-1, 1
+	else
+		mul2	1, 1
+	endif
+		text2	0, 0, iOpening_index		
+	del	1
+
+return

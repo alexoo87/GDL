@@ -1,0 +1,672 @@
+!===============================================================================================
+!	시스템창호N
+!===============================================================================================
+_infHgt = 19
+_outHgt = 15
+
+
+ui_dialog	"CurtainWall Settings"
+
+!===============================================================================================
+!	기본설정
+!===============================================================================================
+ui_page	1,	-1,	"기본 설정",	"uiTab_WindowSizes_flat(1)"
+!-----------------------------------------------------------------------------------------------
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"기본 설정",	20, 10, 190, 250
+
+	!	outfield
+	posX = 35
+	posY = 45
+	gapY = 35
+
+	ui_style	0,	0
+	ui_outfield	"커튼월 너비",	posX, posY	:	posY = posY + gapY
+	ui_outfield	"커튼월 높이",	posX, posY	:	posY = posY + gapY
+	ui_outfield	"멀리언 개수",	posX, posY	:	posY = posY + gapY
+	ui_outfield	"멀리언 간격",	posX, posY	:	posY = posY + gapY
+	ui_outfield	"트랜섬 개수",	posX, posY	:	posY = posY + gapY
+	ui_outfield	"트랜섬 간격",	posX, posY	:	posY = posY + gapY
+
+	!	infield
+	posX = 120
+	posY = 45 - 4
+	gapY = 35
+
+	ui_infield	"ctwWdt",	posX, posY, 75, _infHgt	:	posY = posY + gapY
+	ui_infield	"ctwHgt",	posX, posY, 75, _infHgt	:	posY = posY + gapY
+	ui_infield	"nMln",		posX, posY, 75, _infHgt	:	posY = posY + gapY
+	ui_infield	"mlnGap",	posX, posY, 75, _infHgt	:	posY = posY + gapY
+	ui_infield	"nTrs",		posX, posY, 75, _infHgt	:	posY = posY + gapY
+	ui_infield	"trsGap",	posX, posY, 75, _infHgt	:	posY = posY + gapY
+
+	!	그림
+	ui_pict	"ui_1_cw_2",	220, 40, 205, 205, 1
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	2,	1,	"창호 설정",	"uiTab_WindowSettings_flat(1)"
+!-----------------------------------------------------------------------------------------------
+posX = 10
+posY = 10
+ui_pict	"ui2_matrix.png",	posX,	posY,	130,	130,	1+2
+
+posY = 155
+gapY = 25
+
+	ui_style	0,	0
+	ui_outfield	"X축",	posX,	posY	:	posY = posY + gapY
+	ui_outfield	"Y축",	posX,	posY	:	posY = posY + gapY
+	ui_outfield	"창호유형",	posX,	posY	:	posY = posY + gapY
+	if	iPnlType_ = PNL_PROJECT | iPnlType_ = PNL_PROJECT_SMOKE	then
+		ui_outfield	"힌지위치",	posX,	posY	:	posY = posY + gapY
+	endif
+	if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP3_HORIZON | iPnlType_ = PNL_SEP2_VERTICAL | iPnlType_ = PNL_SEP3_VERTICAL	then
+		ui_outfield	"프리셋",	posX,	posY	:	posY = posY + gapY
+	endif
+
+posY = 150
+
+	ui_infield	"iPosX",		60,	posY,	80,	20	:	posY = posY + gapY
+	ui_infield	"iPosY",		60,	posY,	80,	20	:	posY = posY + gapY
+	ui_infield	"iPnlType_",	60,	posY,	80,	20	:	posY = posY + gapY
+	if	iPnlType_ = PNL_PROJECT | iPnlType_ = PNL_PROJECT_SMOKE	then
+		ui_infield	"iHingeType_",	60,	posY	:	posY = posY + gapY
+	endif
+	if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP3_HORIZON | iPnlType_ = PNL_SEP2_VERTICAL | iPnlType_ = PNL_SEP3_VERTICAL	then
+		ui_infield	"iSepType_",	60,	posY	:	posY = posY + gapY
+	endif
+
+ui_separator	155,	0,	155,	266
+
+posX = 165
+posY = 10
+gapY = 24
+
+	ui_style	0,	1
+	if	iPagePnl = 2	then
+		ui_outfield	"공통",			posX, posY	:	posY = posY + gapY*2
+		ui_outfield	"텍스트",		posX, posY	:	posY = posY + gapY*3
+		ui_outfield	"프로젝트창",	posX, posY	:	posY = posY + gapY*1
+		ui_outfield	"스팬드럴창",	posX, posY	:	posY = posY + gapY*2
+		ui_outfield	"그릴창",		posX, posY	:	posY = posY + gapY*2
+	endif
+
+	_distY = 0
+	if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP3_HORIZON		then
+		_distY = gapY*3.5
+	endif
+	if	iPnlType_ = PNL_SEP2_VERTICAL | iPnlType_ = PNL_SEP3_VERTICAL	then
+		_distY = gapY*5
+	endif
+
+	ui_outfield	"분할 패널",	posX, posY	:	posY = posY + _distY
+
+	if	iPagePnl = 1	then
+		if	iPnlType_ = PNL_SEP2_HORIZON	then	_stTitle = "2분할(가로)"
+		if	iPnlType_ = PNL_SEP3_HORIZON	then	_stTitle = "3분할(가로)"
+		if	iPnlType_ = PNL_SEP2_VERTICAL	then	_stTitle = "2분할(세로)"
+		if	iPnlType_ = PNL_SEP3_VERTICAL	then	_stTitle = "3분할(세로)"
+
+		ui_outfield	_stTitle,	posX, posY
+	endif
+
+posX = 235
+posY = 10
+
+	ui_style	0,	0
+	if	iPagePnl = 2	then
+		ui_outfield	"창호유형",	posX, posY	:	posY = posY + gapY
+		ui_outfield	"유리위치/두께",	posX, posY	:	posY = posY + gapY
+
+		ui_outfield	"텍스트 On/Off",	posX, posY
+		ui_outfield	'"F"',				posX + 90, posY		ui_tooltip	'고정창 텍스트 "F" On/Off'
+		ui_outfield	'"배"',				posX + 130, posY	ui_tooltip	'배연창 텍스트 "배" On/Off'	:	posY = posY + gapY
+		ui_outfield	"텍스트 반전",		posX, posY	:	posY = posY + gapY
+		ui_outfield	"텍스트 사이즈",	posX, posY	:	posY = posY + gapY
+
+		ui_outfield	"힌지위치",	posX, posY	:	posY = posY + gapY
+
+		ui_outfield	"단열재 두께",	posX, posY	:	posY = posY + gapY*2
+
+		ui_outfield	"그릴 두께/간격",	posX, posY	:	posY = posY + gapY
+		! ui_outfield	"그릴 간격",	posX, posY	:	posY = posY + gapY
+		ui_outfield	"그릴 각도",	posX, posY	:	posY = posY + gapY
+	endif
+
+	ui_outfield	"패널 설정",	posX, posY	:	posY = posY + gapY
+
+posX = 325
+posY = 6
+
+	if	iPagePnl = 2	then
+		ui_infield	"iPnlType",	posX,	posY,	90,	20	:	posY = posY + gapY
+		ui_infield	"glsLct",	posX,	posY,	50,	20	ui_tooltip	'유리 위치'
+		ui_infield	"glsThk",	posX + 55,	posY,	50,	20	ui_tooltip	'유리 두께'	:	posY = posY + gapY
+
+		ui_infield	"bFixTxt",	posX + 20,	posY,	15,	20	ui_tooltip	'고정창 텍스트 "F" On/Off'
+		ui_infield	"bSmkTxt",	posX + 65,	posY,	15,	20	ui_tooltip	'배연창 텍스트 "배" On/Off'	:	posY = posY + gapY
+		ui_infield	"bSymTxt",	posX,	posY,	15,		20	:	posY = posY + gapY
+		ui_infield	"txtSize",	posX,	posY,	90,	20	:	posY = posY + gapY
+
+		ui_infield	"iHingeType",	posX,	posY,	90,	20	:	posY = posY + gapY
+
+		ui_infield	"insThk_1",	posX,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE1) 단열재 두께"
+		ui_infield	"insThk_2",	posX + 55,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE2) 단열재 두께"	:	posY = posY + gapY
+
+		ui_infield	"insThk_3",	posX,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE3) 단열재 두께"
+		ui_infield	"insThk_4",	posX + 55,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE4) 단열재 두께"	:	posY = posY + gapY
+
+		ui_infield	"grlThk",	posX,	posY,	50,	20	ui_tooltip	"그릴창 두께"
+		ui_infield	"grlGap",	posX + 55,	posY,	50,	20	ui_tooltip	"그릴창 간격"	:	posY = posY + gapY
+		ui_infield	"aGrl",		posX,	posY,	90,	20	:	posY = posY + gapY
+	endif
+
+	ui_radiobutton	"iPagePnl",	1,	'ON',	posX,		posY, 45, 20
+	ui_radiobutton	"iPagePnl",	2,	'OFF',	posX + 50,	posY, 45, 20	:	posY = posY + gapY
+
+	if	iPagePnl = 1	then
+		if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP3_HORIZON		then
+			posX = 230
+			posY = 6 + _distY
+		endif
+		if	iPnlType_ = PNL_SEP2_VERTICAL | iPnlType_ = PNL_SEP3_VERTICAL	then
+			posX = 165
+			posY = 6 + _distY + gapY
+		endif
+
+		ui_infield	"iSepType_",	posX,	posY,	55,	_infHgt
+
+		if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP3_HORIZON		then
+			ui_separator	165,	115,	425,	190
+
+			_dist = 425 - 165
+			if	iPnlType_ = PNL_SEP2_HORIZON	then
+				ui_separator	165 + _dist/2,	115,	165 + _dist/2,	190
+
+				ui_infield	"iSep2nd",		165 + 20,	115 + 15,	90,	_infHgt
+				ui_infield	"iHinge2nd",	165 + 20,	115 + 40,	90,	_infHgt
+
+				ui_infield	"iSep1st",		165 + _dist/2 + 20,	115 + 15,	90,	_infHgt
+				ui_infield	"iHinge1st",	165 + _dist/2 + 20,	115 + 40,	90,	_infHgt
+			endif
+			if	iPnlType_ = PNL_SEP3_HORIZON	then
+				ui_separator	165 + _dist/3,		115,	165 + _dist/3,		190
+				ui_separator	165 + _dist/3*2,	115,	165 + _dist/3*2,	190
+
+				ui_infield	"iSep3rd",		165 + 7.5,	115 + 15,	_dist/3 - 15,	_infHgt
+				ui_infield	"iHinge3rd",	165 + 7.5,	115 + 40,	_dist/3 - 15,	_infHgt
+
+				ui_infield	"iSep2nd",		165 + _dist/3 + 7.5,	115 + 15,	_dist/3 - 15,	_infHgt
+				ui_infield	"iHinge2nd",	165 + _dist/3 + 7.5,	115 + 40,	_dist/3 - 15,	_infHgt
+
+				ui_infield	"iSep1st",		165 + _dist/3*2 + 7.5,	115 + 15,	_dist/3 - 15,	_infHgt
+				ui_infield	"iHinge1st",	165 + _dist/3*2 + 7.5,	115 + 40,	_dist/3 - 15,	_infHgt
+			endif
+		endif
+
+		if	iPnlType_ = PNL_SEP2_VERTICAL | iPnlType_ = PNL_SEP3_VERTICAL	then
+			ui_separator	265,	40,	385,	40 + 210
+
+			_dist = 210
+			if	iPnlType_ = PNL_SEP2_VERTICAL	then
+				ui_separator	265,	40 + _dist/2,	385,	40 + _dist/2
+
+				ui_infield	"iSep2nd",		265 + 15,	40 + 30,	90,	_infHgt
+				ui_infield	"iHinge2nd",	265 + 15,	40 + 55,	90,	_infHgt
+
+				ui_infield	"iSep1st",		265 + 15,	40 + _dist/2 + 30,	90,	_infHgt
+				ui_infield	"iHinge1st",	265 + 15,	40 + _dist/2 + 55,	90,	_infHgt
+			endif
+			if	iPnlType_ = PNL_SEP3_VERTICAL	then
+				ui_separator	265,	40 + _dist/3,	385,	40 + _dist/3
+				ui_separator	265,	40 + _dist/3*2,	385,	40 + _dist/3*2
+
+				ui_infield	"iSep3rd",		265 + 15,	40 + 15,	90,	_infHgt
+				ui_infield	"iHinge3rd",	265 + 15,	40 + 40,	90,	_infHgt
+
+				ui_infield	"iSep2nd",		265 + 15,	40 + _dist/3 + 15,	90,	_infHgt
+				ui_infield	"iHinge2nd",	265 + 15,	40 + _dist/3 + 40,	90,	_infHgt
+
+				ui_infield	"iSep1st",		265 + 15,	40 + _dist/3*2 + 15,	90,	_infHgt
+				ui_infield	"iHinge1st",	265 + 15,	40 + _dist/3*2 + 40,	90,	_infHgt
+			endif
+		endif
+	endif
+
+!-----------------------------------------------------------------------------------------------
+ui_page	3,	1,	"문 설정",	"uiTab_DoorSettings_flat(1)"
+!-----------------------------------------------------------------------------------------------
+
+	!	문 On/Off
+	ui_style	0,	1
+	ui_outfield	"문 On/Off",	20, 10
+	ui_infield	"bDoor",		85, 10 - 4, 20, _infHgt
+
+	!	문 선택
+	ui_outfield	"편집할 문 선택",	130, 10
+	ui_infield	"iEditDoor",		210, 10 - 4, 60, _infHgt
+
+	ui_separator	0,	32,	444,	32
+
+	!	문 유형 설정
+	ui_groupbox	"유형 설정",	15, 50, 185, 190
+
+		!	Outfield
+		posX = 25
+		posY = 80
+		gapY = 30
+
+		ui_style	0,	0
+		ui_outfield	"문 유형",		posX, posY, 65, _outHgt, 2	:	posY = posY + gapY
+		ui_outfield	"열림 유형",	posX, posY, 65, _outHgt, 2	:	posY = posY + gapY
+		ui_outfield	"열림 방향",	posX, posY, 65, _outHgt, 2	:	posY = posY + gapY
+		ui_outfield	"프레임 유형",	posX, posY, 65, _outHgt, 2	:	posY = posY + gapY
+		if	iOpenType = OPENTYPE_HINGE	then
+			ui_outfield	"심볼 방향",	posX, posY, 65, _outHgt, 2	:	posY = posY + gapY
+		else
+			ui_outfield	"문 위치",	posX, posY, 65, _outHgt, 2	:	posY = posY + gapY
+		endif
+
+		!	infield
+		posX = 100
+		posY = 80 - 4
+		gapY = 30
+
+		ui_infield	"iDoorType",	posX, posY, 85, _infHgt	:	posY = posY + gapY
+		ui_infield	"iOpenType",	posX, posY, 85, _infHgt	:	posY = posY + gapY
+		ui_infield	"iOpenDirect",	posX, posY, 85, _infHgt	:	posY = posY + gapY
+		ui_infield	"iFrameType",	posX, posY, 85, _infHgt	:	posY = posY + gapY
+		ui_infield	"iSymbol",		posX, posY, 85, _infHgt	:	posY = posY + gapY
+
+	!	문 세부 설정 UI button
+	ui_radiobutton	"iPageDoor",	1,	'Door',		220, 50, 50, _infHgt
+	ui_radiobutton	"iPageDoor",	2,	'Frame',	280, 50, 60, _infHgt
+
+		!	문 관련 너비 설정
+		if	iPageDoor = 1	then
+			!	Outfield
+			posX = 220
+			posY = 85
+			gapY = 25
+
+			ui_outfield	"문 너비",				posX, posY	:	posY = posY + gapY
+			ui_outfield	"좌측문 너비",			posX, posY	:	posY = posY + gapY
+			ui_outfield	"우측문 너비",			posX, posY	:	posY = posY + gapY
+			ui_outfield	"문 높이",				posX, posY	:	posY = posY + gapY
+			ui_outfield	"문 두께",				posX, posY	:	posY = posY + gapY
+			ui_outfield	"좌측 고정문 너비",		posX, posY	:	posY = posY + gapY
+			ui_outfield	"우측 고정문 너비",		posX, posY	:	posY = posY + gapY
+
+			!	Infield
+			posX = 315
+			posY = 85 - 4
+			gapY = 25
+
+			ui_infield	"doorWdt",	posX, posY, 80, _infHgt
+			ui_infield	"bEqual",	posX + 90, posY, _infHgt, _infHgt	ui_tooltip	"좌/우측 문 너비 대칭"	:	posY = posY + gapY
+			ui_infield	"doorWdtL",	posX, posY, 80, _infHgt	:	posY = posY + gapY
+			ui_infield	"doorWdtR",	posX, posY, 80, _infHgt	:	posY = posY + gapY
+			ui_infield	"doorHgt",	posX, posY, 80, _infHgt	:	posY = posY + gapY
+			ui_infield	"doorThk",	posX, posY, 80, _infHgt	:	posY = posY + gapY
+			ui_infield	"fixWdtL",	posX, posY, 80, _infHgt	:	posY = posY + gapY
+			ui_infield	"fixWdtR",	posX, posY, 80, _infHgt	:	posY = posY + gapY
+		endif
+
+		!	프레임 너비 설정
+		if	iPageDoor = 2	then
+			!	Outfield
+			ui_style	0,	1
+			ui_outfield	"프레임 두께",	220, 85
+
+			ui_style	0,	0
+			posX = 220
+			posY = 115
+			gapY = 30
+
+			ui_outfield	"좌측",	posX, posY, 30, 20	:	posY = posY + gapY
+			ui_outfield	"우측",	posX, posY, 30, 20	:	posY = posY + gapY
+			ui_outfield	"상단",	posX, posY, 30, 20	:	posY = posY + gapY
+			ui_outfield	"하단",	posX, posY, 30, 20	:	posY = posY + gapY
+
+			!	Infield
+			posX = 260
+			posY = 115 - 4
+			gapY = 30
+
+			ui_infield	"frmL",	260, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"frmR",	260, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"frmT",	260, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"frmB",	260, posY, 60, _infHgt	:	posY = posY + gapY
+
+			if	iFrameType = FRAME_TYPE1	then
+				ui_pict	"door_ui_200",	350, 105, 60, 120, 1
+			else
+				ui_pict	"door_ui_100",	350, 105, 60, 120, 1
+			endif
+		endif
+
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	4,	-1,	"코너프레임 설정",	"uiTab_StorefrontFrame_flat(1)"
+!-----------------------------------------------------------------------------------------------
+
+	ui_style	0,	1
+	ui_outfield	"코너 프레임 켜기/끄기",	30, 20, 190, 20
+
+	!	상/하/좌/우 체크박스
+	ui_style 0, 0
+	ui_infield{3}	"bFrmT", 40, 40, 50, 20,
+					7, "", 2, 1, 0, 0, 0, 0,
+					"", `상부`, 0,
+					"", `상부`, 1
+
+	ui_infield{3}	"bFrmB", 100, 40, 50, 20,
+					7, "", 2, 1, 0, 0, 0, 0,
+					"", `하부`, 0,
+					"", `하부`, 1
+
+	ui_infield{3}	"bFrmL", 160, 40, 50, 20,
+					7, "", 2, 1, 0, 0, 0, 0,
+					"", `좌측`, 0,
+					"", `좌측`, 1
+
+	ui_infield{3}	"bFrmR", 220, 40, 50, 20,
+					7, "", 2, 1, 0, 0, 0, 0,
+					"", `우측`, 0,
+					"", `우측`, 1
+
+	!	대분류 텍스트
+	ui_style 0, 1
+	ui_groupbox	"세부 설정",	30, 75, 380, 180
+
+	!	세부설정 텍스트
+	ui_style 0, 0
+	ui_radiobutton	"iPageFrm",	1,	'상부',	45,	105, 50, 20
+	ui_radiobutton	"iPageFrm",	2,	'하부',	45,	140, 50, 20
+	ui_radiobutton	"iPageFrm",	3,	'좌측',	45,	175, 50, 20
+	ui_radiobutton	"iPageFrm",	4,	'우측',	45,	210, 50, 20
+
+	!	세부설정 우측 구분선
+	ui_separator	100,	95,	100,	245
+
+	!	프레임 설정
+	CORNER_TOP = 1
+	CORNER_BOTTOM = 2
+	CORNER_LEFT = 3
+	CORNER_RIGHT = 4
+
+		!	Outfield
+		posX = 115
+		posY = 105
+		gapY = 25
+
+		ui_style	0, 1
+		ui_outfield	"유형",	posX, posY	:	posY = posY + gapY
+		ui_style	0, 0
+		ui_outfield	"프레임 너비",	posX + 5, posY	:	posY = posY + gapY
+		ui_outfield	"프레임 두께",	posX + 5, posY	:	posY = posY + gapY
+		ui_outfield	"개스킷 너비",	posX + 5, posY	:	posY = posY + gapY
+
+		if	iPageFrm = CORNER_TOP | iPageFrm = CORNER_BOTTOM	then
+			ui_outfield	"프레임 각도",		posX + 5, posY, 60, _outHgt, 4	:	posY = posY + gapY
+			ui_outfield	"코너프레임 유형",	posX + 5, posY, 90, _outHgt, 4	:	posY = posY + gapY
+		endif
+
+		if	iPageFrm = CORNER_LEFT | iPageFrm = CORNER_RIGHT	then
+			ui_outfield	"프레임 각도",		posX + 5, posY, 60, _outHgt	:	posY = posY + gapY
+			ui_outfield	"코너프레임 유형",	posX + 5, posY, 90, _outHgt	:	posY = posY + gapY
+		endif
+
+
+
+		!	Infield
+		posX = 150
+		posY = 105 - 4
+
+		if	iPageFrm = CORNER_TOP	then
+			ui_infield	"iFrmTypeT",	posX, posY, 100, _infHgt		:	posY = posY + gapY
+			ui_infield	"frmWdtT",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"frmThkT",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"gskWdtT",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+
+			_frmType = iFrmTypeT
+		endif
+
+		if	iPageFrm = CORNER_BOTTOM	then
+			ui_infield	"iFrmTypeB",	posX, posY, 100, _infHgt		:	posY = posY + gapY
+			ui_infield	"frmWdtB",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"frmThkB",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"gskWdtB",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+
+			_frmType = iFrmTypeB
+		endif
+
+		if	iPageFrm = CORNER_LEFT	then
+			ui_infield	"iFrmTypeL",	posX, posY, 100, _infHgt		:	posY = posY + gapY
+			ui_infield	"frmWdtL",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"frmThkL",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"gskWdtL",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"aFrmL",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"iCornerType",	posX + 60, posY, 95, _infHgt	:	posY = posY + gapY
+
+			_frmType = iFrmTypeL
+		endif
+
+		if	iPageFrm = CORNER_RIGHT	then
+			ui_infield	"iFrmTypeR",	posX, posY, 100, _infHgt		:	posY = posY + gapY
+			ui_infield	"frmWdtR",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"frmThkR",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"gskWdtR",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"aFrmR",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
+			ui_infield	"iCornerType",	posX + 60, posY, 95, _infHgt	:	posY = posY + gapY
+
+			_frmType = iFrmTypeR
+		endif
+
+		!	Image
+		if	_frmType = FRAME_BOUNDARY		then	ui_pict	"ui3_Boundary.png",		310, 110, 50, 100, 1+2
+		if	not(_frmType = FRAME_BOUNDARY)	then	ui_pict	"ui3_notBoundary.png",	310, 110, 50, 100, 1+2
+
+!-----------------------------------------------------------------------------------------------
+ui_page	5,	-1,	"멀리언 설정",	"uiTab_StorefrontMullion_flat(1)"
+!-----------------------------------------------------------------------------------------------
+posX = 30
+posY = 25
+gapY = 30
+
+	ui_style	0,	0
+	ui_outfield	"멀리언 개수",		posX,	posY	:	posY = posY + gapY
+	ui_outfield	"멀리언 유형",		posX,	posY	:	posY = posY + gapY
+	ui_outfield	"멀리언 간격",		posX,	posY	:	posY = posY + gapY
+	ui_outfield	"(1)멀리언 너비",	posX,	posY	:	posY = posY + gapY
+	ui_outfield	"(2)개스킷 너비",	posX,	posY	:	posY = posY + gapY
+	ui_outfield	"(3)멀리언 두께",	posX,	posY	:	posY = posY + gapY
+	ui_outfield	"개스킷 두께",		posX,	posY	:	posY = posY + gapY
+	ui_outfield	"개스킷 캡 두께",	posX,	posY	:	posY = posY + gapY
+
+	! ui_outfield	"돌출 멀리언 On/Off",	posX,	posY	:	posY = posY + gapY
+	! ui_outfield	"(3)돌출 멀리언 두께",	posX,	posY	:	posY = posY + gapY
+
+posX = 120
+posY = 25 - 4
+gapY = 30
+
+	ui_infield	"nMln",			posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"iMlnType",		posX,	posY,	115,	_infHgt	:	posY = posY + gapY
+	ui_infield	"mlnGap",		posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"mlnWdt",		posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"mlnGskWdt",	posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"mlnThk",		posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"gskThk",		posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"gskCapThk",	posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+
+	! ui_infield	"bExMln",	posX,	posY,	75,	20	:	posY = posY + gapY
+	! ui_infield	"exMlnThk",	posX,	posY,	75,	20	:	posY = posY + gapY
+
+
+posX = 240
+posY = 35
+_mul = 1.1
+
+if	iMlnType = MLN_TYPE1	then
+	ui_pict	"mlnType1.png",	posX,	posY,	150*_mul,	175*_mul,	1+2
+endif
+if	iMlnType = MLN_TYPE2	then
+	ui_pict	"mlnType2.png",	posX,	posY,	150*_mul,	175*_mul,	1+2
+endif
+
+!-----------------------------------------------------------------------------------------------
+ui_page	6,	-1,	"트랜섬 설정",	"uiTab_StorefrontMullion_flat(1)"
+!-----------------------------------------------------------------------------------------------
+posX = 30
+posY = 25
+gapY = 30
+
+	ui_style	0,	0
+	ui_outfield	"트랜섬 개수",		posX,	posY	:	posY = posY + gapY
+	ui_outfield	"트랜섬 유형",		posX,	posY	:	posY = posY + gapY
+	ui_outfield	"트랜섬 간격",		posX,	posY	:	posY = posY + gapY
+	ui_outfield	"(1)트랜섬 너비",	posX,	posY	:	posY = posY + gapY
+	ui_outfield	"(2)개스킷 너비",	posX,	posY	:	posY = posY + gapY
+	ui_outfield	"(3)트랜섬 두께",	posX,	posY	:	posY = posY + gapY
+	ui_outfield	"개스킷 두께",		posX,	posY	:	posY = posY + gapY
+	ui_outfield	"개스킷 캡 두께",	posX,	posY	:	posY = posY + gapY
+
+posX = 220
+posY = 10
+
+	! ui_outfield	"돌출 트랜섬 On/Off",	posX,	posY	:	posY = posY + gapY
+	! ui_outfield	"(3)돌출 트랜섬 두께",	posX,	posY	:	posY = posY + gapY
+
+posX = 125
+posY = 25 - 4
+gapY = 30
+
+	ui_infield	"nTrs",			posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"iTrsType",		posX,	posY,	115,	_infHgt	:	posY = posY + gapY
+	ui_infield	"trsGap",		posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"trsWdt",		posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"trsGskWdt",	posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"trsThk",		posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"gskThk",		posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+	ui_infield	"gskCapThk",	posX,	posY,	85,	_infHgt	:	posY = posY + gapY
+
+posX = 330
+posY = 5
+
+	! ui_infield	"bExTrs",	posX,	posY,	75,	20	:	posY = posY + gapY
+	! ui_infield	"exTrsThk",	posX,	posY,	75,	20	:	posY = posY + gapY
+
+
+posX = 230
+posY = 85
+_mul = 1.1
+
+if	iTrsType = TRS_TYPE1	then
+	ui_pict	"trsType1.png",	posX,	posY,	175*_mul,	100*_mul,	1+2
+endif
+if	iTrsType = TRS_TYPE2	then
+	ui_pict	"trsType2.png",	posX,	posY,	175*_mul,	100*_mul,	1+2
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	7,	-1,	"2D/3D/재질 설정",	"ui_list_3DPen_flat(1)"
+!-----------------------------------------------------------------------------------------------
+
+fieldID = 100
+
+ui_listfield	1,	5,	5,	425,	259,	0,	"title",	"value"	:	fieldID = fieldID + 1
+
+	!	All Relevant Stories
+	ui_listitem	fieldID,	1,	"",	0,	"",	"All Relevant Stories"	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"ac_toplevel",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"ac_bottomlevel",	1	:	fieldID = fieldID + 1
+
+	!	단열 철판
+	ui_listitem	fieldID,	1,	"",	0,	"",	"단열 철판 설정"	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"bSpdFrm",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"spdFrmThk",	1	:	fieldID = fieldID + 1
+
+	!	2D 표현
+	ui_listitem	fieldID,	1,	"",	0,	"",	"2D 표현"	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"b2DOff",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"ceilPen",	1	:	fieldID = fieldID + 1
+
+		ui_listitem	fieldID,	1,	"iDisplay",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"iProjectTo",	1	:	fieldID = fieldID + 1
+
+		! ui_listitem	fieldID,	1,	"cutPen",		1	:	fieldID = fieldID + 1
+		! ui_listitem	fieldID,	1,	"cutFill",		1	:	fieldID = fieldID + 1
+		! ui_listitem	fieldID,	1,	"cutFillPen",	1	:	fieldID = fieldID + 1
+		! ui_listitem	fieldID,	1,	"cutBackPen",	1	:	fieldID = fieldID + 1
+
+		ui_listitem	fieldID,	1,	"overPen",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"overLT",		1	:	fieldID = fieldID + 1
+
+		! ui_listitem	fieldID,	1,	"btmPen",		1	:	fieldID = fieldID + 1
+		! ui_listitem	fieldID,	1,	"btmFill",		1	:	fieldID = fieldID + 1
+		! ui_listitem	fieldID,	1,	"btmFillPen",	1	:	fieldID = fieldID + 1
+		! ui_listitem	fieldID,	1,	"btmBackPen",	1	:	fieldID = fieldID + 1
+
+		ui_listitem	fieldID,	1,	"symFrmPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"symGlsPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"symEtcPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"symOplinePen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"symOplineLT",	1	:	fieldID = fieldID + 1
+	!	입/단면 설정
+	ui_listitem	fieldID,	1,	"",	0,	"",	"입/단면 설정"	:	fieldID = fieldID + 1
+		!	프레임
+		ui_listitem	fieldID,	1,	"frmElevPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"frmSectPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"frmFill",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"frmFillPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"frmBackPen",	1	:	fieldID = fieldID + 1
+
+		!	유리
+		ui_listitem	fieldID,	1,	"glsElevPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"glsSectPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"glsFill",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"glsFillPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"glsBackPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"oplinePen",	1	:	fieldID = fieldID + 1
+
+		!	단열재
+		ui_listitem	fieldID,	1,	"insElevPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insSectPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insHtcPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insFill",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insFillPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insBackPen",	1	:	fieldID = fieldID + 1
+
+		!	그릴
+		ui_listitem	fieldID,	1,	"grlElevPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"grlSectPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"grlFill",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"grlFillPen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"grlBackPen",	1	:	fieldID = fieldID + 1
+
+	!	배연창 2D Symbol
+	! ui_listitem	fieldID,	1,	"",	0,	"",	"배연창 2D Symbol"	:	fieldID = fieldID + 1
+	! 	ui_listitem	fieldID,	1,	"bSymbol2D",	1	:	fieldID = fieldID + 1
+	! 	ui_listitem	fieldID,	1,	"symbolPen",	1	:	fieldID = fieldID + 1
+	! 	ui_listitem	fieldID,	1,	"symbolOffset",	1	:	fieldID = fieldID + 1
+	! 	ui_listitem	fieldID,	1,	"symbolSize",	1	:	fieldID = fieldID + 1
+
+	!	재질 설정
+	ui_listitem	fieldID,	1,	"",	0,	"",	"재질 설정"	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"frmMat",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"glsMat",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"spdFrmMat",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"spdGlsMat_1",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insMat_1",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"spdGlsMat_2",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insMat_2",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"spdGlsMat_3",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insMat_3",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"spdGlsMat_4",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"insMat_4",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"grlMat",		1	:	fieldID = fieldID + 1

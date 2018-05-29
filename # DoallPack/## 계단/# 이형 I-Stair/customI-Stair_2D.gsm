@@ -1,0 +1,2725 @@
+!===============================================================================================
+!	이형 I-Stair
+!===============================================================================================
+! project2	3,	270,	3
+
+!	원점
+! circle2		0,	0,	0.01
+! circle2		0,	0,	0.02
+hotspot2	0,	0
+
+!	Story Value
+Story_Current = 1
+Story_Upstairs = 2
+
+if	GLOB_CH_STORY_DIST = 0	then
+	_storyValue = Story_Current
+endif
+if	GLOB_CH_STORY_DIST > eps	then
+	_storyValue = Story_Upstairs
+endif
+
+!	Model Value
+Entire_Model = 1
+Core_Only = 2
+
+if	GLOB_STRUCTURE_DISPLAY = 0	then
+	_modelValue = Entire_Model
+	!	계단참이 계단 역할을 하기에 하나 빼기
+	nRsr = nRsr - 1
+else
+	_modelValue = Core_Only
+endif
+
+!	수직마감재 + 바탕재 두께 변수 정의
+if	_modelValue = Entire_Model	then
+	_fnsThk = 0
+else
+	if	bFns	then
+		_fnsThk = vFnsThk + basThk
+	endif
+endif
+
+!	Break Line Angle
+brkAng = 21.8
+rBrkAng = (90 - brkAng)
+
+!	핸드레일 변수 정의
+_bHnd_Out = 0
+_bHnd_In = 0
+ if	_modelValue = Entire_Model	then
+	_bHndLine_Out = 1
+	_bHndLine_In = 1
+
+	if	bHnd_Out	then
+		_bHndLine_Out = 0
+		_bHnd_Out = 1
+	endif
+	if	bHnd_In	then
+		_bHndLine_In = 0
+		_bHnd_In = 1
+	endif
+else
+	_bHndLine_Out = 1
+	_bHndLine_In = 1
+endif
+
+!	Define Style
+define style	"style_Up"	stFontType,	textSize,	2,	0
+define style	"style_Dn"	stFontType,	textSize,	8,	0
+
+
+!===============================================================================================
+!	단 방향 - 수평
+!===============================================================================================
+if	iTreadType = treadType_Parallel	then
+
+	!-----------------------------------------------------------------------------------------------
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+		!	핸드레일
+		!-----------------------------------------------------------------------------------------------
+			!	좌측 각도
+			_aStrL = 0
+			_aStrL = atn((xEnd_L - xStart_L)/strLth)
+
+			!	우측 각도
+			_aStrR = 0
+			_aStrR = atn((xStart_R - xEnd_R)/strLth)
+
+		!	Break Line
+		!-----------------------------------------------------------------------------------------------
+			!	작업층
+			if	_storyValue = Story_Current	then
+				!	Break Line Lct
+				yPos = strTrd*iWrkBrkLct
+				gosub	"calc_xPos_L"
+
+				yPos = strTrd*(iWrkBrkLct + 1)
+				gosub	"calc_xPos_R"
+
+				!	Break Line Length
+				_xLength = xPos_R - xPos_L
+				_yLength = strTrd
+				_brkLth = sqr(_xLength^2 + _yLength^2)
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				!	Break Line Lct
+				yPos = strTrd*iUprBrkLct
+				gosub	"calc_xPos_L"
+
+				yPos = strTrd*(iUprBrkLct + 1)
+				gosub	"calc_xPos_R"
+
+				!	Break Line Length
+				_xLength = xPos_R - xPos_L
+				_yLength = strTrd
+				_brkLth = sqr(_xLength^2 + _yLength^2)
+			endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+		!	계단 너비 strWdt
+		!-----------------------------------------------------------------------------------------------
+		if	iStairType_R = stairType_Straight & (xStart_R < eps)	then	_offset = -0.050
+		hotspot2	0,		_offset,	unID,	strWdt,	1 + 128	:	unID = unID + 1
+		hotspot2	-1,		_offset,	unID,	strWdt,	3		:	unID = unID + 1
+		hotspot2	strWdt,	_offset,	unID,	strWdt,	2		:	unID = unID + 1
+
+		!	외곽선
+		!-----------------------------------------------------------------------------------------------
+			!	작업층
+			if	_storyValue = Story_Current	then
+				if	not(iWrkFlr = View_None)	then
+					!	xCenter_L,	xCenter_R
+					add2	0,	(strTrd*nRsr)/2
+						if	iStairType_L = stairType_Curve	then
+							hotspot2	0,			0,	unID,	xCenter_L,	1 + 128	:	unID = unID + 1
+							hotspot2	-1,			0,	unID,	xCenter_L,	3		:	unID = unID + 1
+							hotspot2	xCenter_L,	0,	unID,	xCenter_L,	2		:	unID = unID + 1
+						endif
+
+						if	iStairType_R = stairType_Curve	then
+							add2	strWdt,	0
+								hotspot2	0,			0,	unID,	xCenter_R,	1 + 128	:	unID = unID + 1
+								hotspot2	-1,			0,	unID,	xCenter_R,	3		:	unID = unID + 1
+								hotspot2	xCenter_R,	0,	unID,	xCenter_R,	2		:	unID = unID + 1
+							del 1
+						endif
+					del 1
+
+					!	xStart_L,	xStart_R
+					if	iStairType_L = stairType_Straight	then
+						hotspot2	0,			0,	unID,	xStart_L,	1 + 128	:	unID = unID + 1
+						hotspot2	1,			0,	unID,	xStart_L,	3		:	unID = unID + 1
+						hotspot2	-xStart_L,	0,	unID,	xStart_L,	2		:	unID = unID + 1
+					endif
+
+					if	iStairType_R = stairType_Straight	then
+						add2	strWdt,	0
+							hotspot2	0,			0,	unID,	xStart_R,	1 + 128	:	unID = unID + 1
+							hotspot2	-1,			0,	unID,	xStart_R,	3		:	unID = unID + 1
+							hotspot2	xStart_R,	0,	unID,	xStart_R,	2		:	unID = unID + 1
+						del 1
+					endif
+
+					!	xEnd_L,	xEnd_R
+					if	iWrkFlr = View_Entire	then
+						add2	0,	strTrd*nRsr
+							if	iStairType_L = stairType_Straight	then
+								hotspot2	0,			0,	unID,	xEnd_L,	1 + 128	:	unID = unID + 1
+								hotspot2	1,			0,	unID,	xEnd_L,	3		:	unID = unID + 1
+								hotspot2	-xEnd_L,	0,	unID,	xEnd_L,	2		:	unID = unID + 1
+							endif
+
+							if	iStairType_R = stairType_Straight	then
+								add2	strWdt,	0
+									hotspot2	0,		0,	unID,	xEnd_R,	1 + 128	:	unID = unID + 1
+									hotspot2	-1,		0,	unID,	xEnd_R,	3		:	unID = unID + 1
+									hotspot2	xEnd_R,	0,	unID,	xEnd_R,	2		:	unID = unID + 1
+								del 1
+							endif
+						del 1
+					endif
+				endif
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				if	not(iUprFlr = View_None)	then
+					!	xCenter_L,	xCenter_R
+					add2	0,	(strTrd*nRsr)/2
+						if	iStairType_L = stairType_Curve	then
+							hotspot2	0,			0,	unID,	xCenter_L,	1 + 128	:	unID = unID + 1
+							hotspot2	-1,			0,	unID,	xCenter_L,	3		:	unID = unID + 1
+							hotspot2	xCenter_L,	0,	unID,	xCenter_L,	2		:	unID = unID + 1
+						endif
+
+						if	iStairType_R = stairType_Curve	then
+							add2	strWdt,	0
+								hotspot2	0,			0,	unID,	xCenter_R,	1 + 128	:	unID = unID + 1
+								hotspot2	-1,			0,	unID,	xCenter_R,	3		:	unID = unID + 1
+								hotspot2	xCenter_R,	0,	unID,	xCenter_R,	2		:	unID = unID + 1
+							del 1
+						endif
+					del 1
+
+					!	xEnd_L,	xEnd_R
+					add2	0,	strTrd*nRsr
+						if	iStairType_L = stairType_Straight	then
+							hotspot2	0,			0,	unID,	xEnd_L,	1 + 128	:	unID = unID + 1
+							hotspot2	1,			0,	unID,	xEnd_L,	3		:	unID = unID + 1
+							hotspot2	-xEnd_L,	0,	unID,	xEnd_L,	2		:	unID = unID + 1
+						endif
+
+						if	iStairType_R = stairType_Straight	then
+							add2	strWdt,	0
+								hotspot2	0,		0,	unID,	xEnd_R,	1 + 128	:	unID = unID + 1
+								hotspot2	-1,		0,	unID,	xEnd_R,	3		:	unID = unID + 1
+								hotspot2	xEnd_R,	0,	unID,	xEnd_R,	2		:	unID = unID + 1
+							del 1
+						endif
+					del 1
+
+					!	xStart_L,	xStart_R
+					if	iUprFlr = View_Entire	then
+						if	iStairType_L = stairType_Straight	then
+							hotspot2	0,			0,	unID,	xStart_L,	1 + 128	:	unID = unID + 1
+							hotspot2	1,			0,	unID,	xStart_L,	3		:	unID = unID + 1
+							hotspot2	-xStart_L,	0,	unID,	xStart_L,	2		:	unID = unID + 1
+						endif
+
+						if	iStairType_R = stairType_Straight	then
+							add2	strWdt,	0
+								hotspot2	0,			0,	unID,	xStart_R,	1 + 128	:	unID = unID + 1
+								hotspot2	-1,			0,	unID,	xStart_R,	3		:	unID = unID + 1
+								hotspot2	xStart_R,	0,	unID,	xStart_R,	2		:	unID = unID + 1
+							del 1
+						endif
+					endif
+				endif
+			endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	외곽선
+	!-----------------------------------------------------------------------------------------------
+		pen		strPen
+		fill	65
+		fillPen = 0
+		backPen = 0
+
+		!	작업층
+		!-----------------------------------------------------------------------------------------------
+		if	_storyValue = Story_Current	then
+			!	2D표현 : Cut
+			if	iWrkFlr = View_Cut	then
+				yPos = strTrd*iWrkBrkLct + _fnsThk
+				gosub	"calc_xPos_L"
+
+				yPos = strTrd*(iWrkBrkLct + 1) + _fnsThk
+				gosub	"calc_xPos_R"
+
+				!	좌측
+				if	iStairType_L = stairType_Straight	then
+					put	-xStart_L,	0,								1,
+						xPos_L,		strTrd*iWrkBrkLct + _fnsThk,	0
+				endif
+
+				if	iStairType_L = stairType_Curve	then
+					put	0,			0,								1,
+						xCenter_L,	yCenter_L,						900+1,
+						xPos_L,		strTrd*iWrkBrkLct + _fnsThk,	3000
+				endif
+
+				!	우측
+				if	iStairType_R = stairType_Straight	then
+					put	xPos_R,				strTrd*(iWrkBrkLct + 1) + _fnsThk,	1,
+						strWdt + xStart_R,	0,									0
+				endif
+
+				if	iStairType_R = stairType_Curve	then
+					put	xPos_R,					strTrd*(iWrkBrkLct + 1) + _fnsThk,	1,
+						strWdt + xCenter_R,		yCenter_R,							900+1,
+						strWdt,					0,									3000
+				endif
+
+				poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	get(nsp)
+
+				!	Cut Hotline
+				hotline2	xPos_L,	strTrd*iWrkBrkLct + _fnsThk,	xPos_R,	strTrd*(iWrkBrkLct + 1) + _fnsThk
+			endif
+
+			!	2D표현 : Entire/None
+			if	iWrkFlr = View_Entire | iWrkFlr = View_None	then
+				!	변수 정의
+				_bLine = 1
+				if	iWrkFlr = View_None	then
+					_bLine = 0
+				endif
+
+				!	좌측
+				if	iStairType_L = stairType_Straight	then
+					put	-xStart_L,	0,				1,
+						-xEnd_L,	strTrd*nRsr,	0
+				endif
+
+				if	iStairType_L = stairType_Curve	then
+					put	0,			0,				1,
+						xCenter_L,	yCenter_L,		900+1,
+						0,			strTrd*nRsr,	3000
+				endif
+
+				!	우측
+				if	iStairType_R = stairType_Straight	then
+					put	strWdt + xEnd_R,	strTrd*nRsr,	1,
+						strWdt + xStart_R,	0,				0
+				endif
+
+				if	iStairType_R = stairType_Curve	then
+					put	strWdt,				strTrd*nRsr,	1,
+						strWdt + xCenter_R,	yCenter_R,		900+1,
+						strWdt,				0,				3000
+				endif
+
+				poly2_b	nsp/3,	1*(_bLine)+2+4,	fillPen,	backPen,	get(nsp)
+			endif
+		endif
+
+		!	상부층
+		!-----------------------------------------------------------------------------------------------
+		if	_storyValue = Story_Upstairs	then
+			!	2D표현 : Cut
+			if	iUprFlr = View_Cut	then
+				yPos = strTrd*iUprBrkLct + _fnsThk
+				gosub	"calc_xPos_L"
+
+				yPos = strTrd*(iUprBrkLct + 1) + _fnsThk
+				gosub	"calc_xPos_R"
+
+				!	좌측
+				if	iStairType_L = stairType_Straight	then
+					put	xPos_L,		strTrd*iUprBrkLct + _fnsThk,	1,
+						-xEnd_L,	strTrd*nRsr,					0
+				endif
+
+				if	iStairType_L = stairType_Curve	then
+					put	xPos_L,		strTrd*iUprBrkLct + _fnsThk,	1,
+						xCenter_L,	yCenter_L,						900 + 1,
+						0,			strTrd*nRsr,					3000
+				endif
+
+				!	우측
+				if	iStairType_R = stairType_Straight	then
+					put	strWdt + xEnd_R,	strTrd*nRsr,						1,
+						xPos_R,				strTrd*(iUprBrkLct + 1) + _fnsThk,	0
+				endif
+
+				if	iStairType_R = stairType_Curve	then
+					put	strWdt,				strTrd*nRsr,						1,
+						strWdt + xCenter_R,	yCenter_R,							900 + 1,
+						xPos_R,				strTrd*(iUprBrkLct + 1) + _fnsThk,	3000
+				endif
+
+				poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	get(nsp)
+
+				!	Cut Hotline
+				hotline2	xPos_L,	strTrd*iUprBrkLct + _fnsThk,	xPos_R,	strTrd*(iUprBrkLct + 1) + _fnsThk
+			endif
+
+			!	2D표현 : Entire/None
+			if	iUprFlr = View_Entire | iUprFlr = View_None	then
+				!	변수 정의
+				_bLine = 1
+				if	iUprFlr = View_None	then
+					_bLine = 0
+				endif
+				!	변수 정의
+				_bLine = 1
+				if	iWrkFlr = View_None	then
+					_bLine = 0
+				endif
+
+				!	좌측
+				if	iStairType_L = stairType_Straight	then
+					put	-xStart_L,	0,				1,
+						-xEnd_L,	strTrd*nRsr,	0
+				endif
+
+				if	iStairType_L = stairType_Curve	then
+					put	0,			0,				1,
+						xCenter_L,	yCenter_L,		900 + 1,
+						0,			strTrd*nRsr,	3000
+				endif
+
+				!	우측
+				if	iStairType_R = stairType_Straight	then
+					put	strWdt + xEnd_R,	strTrd*nRsr,	1,
+						strWdt + xStart_R,	0,				0
+				endif
+
+				if	iStairType_R = stairType_Curve	then
+					put	strWdt,				strTrd*nRsr,	1,
+						strWdt + xCenter_R,	yCenter_R,		900 + 1,
+						strWdt,				0,				3000
+				endif
+
+				poly2_b	nsp/3,	1*(_bLine)+2+4,	fillPen,	backPen,	get(nsp)
+			endif
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	단
+	!-----------------------------------------------------------------------------------------------
+		pen	strPen
+
+		!	작업층
+		!-----------------------------------------------------------------------------------------------
+		if	_storyValue = Story_Current	then
+			!	2D표현 : Cut
+			if	iWrkFlr = View_Cut	then
+				for	i = 1	to	iWrkBrkLct + 1
+					gosub	"trd_"
+				next	i
+			endif
+
+			!	2D표현 : Entire
+			if	iWrkFlr = View_Entire	then
+				for	i = 1	to	nRsr + 1 - (_fnsThk > eps)
+					gosub	"trd_"
+				next	i
+			endif
+		endif
+
+		!	상부층
+		!-----------------------------------------------------------------------------------------------
+		if	_storyValue = Story_Upstairs	then
+			!	2D표현 : Cut
+			if	iUprFlr = View_Cut	then
+				for	i = iUprBrkLct + 2	to	nRsr + 1 - (_fnsThk > eps)
+					gosub	"trd_"
+				next	i
+			endif
+
+			!	2D표현 : Entire
+			if	iUprFlr = View_Entire	then
+				for	i = 1	to	nRsr + 1 - (_fnsThk > eps)
+					gosub	"trd_"
+				next	i
+			endif
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	Text & 2D
+	!-----------------------------------------------------------------------------------------------
+		!	x위치
+		!-----------------------------------------------------------------------------------------------
+		if	bText | bArrow	then
+			if	_storyValue = Story_Current	then
+				if	not(iWrkFlr = View_None)	then
+					hotspot2	0,			0,	unID,	xTextWrk,	1 + 128	:	unID = unID + 1
+					hotspot2	-1,			0,	unID,	xTextWrk,	3		:	unID = unID + 1
+					hotspot2	xTextWrk,	0,	unID,	xTextWrk,	2		:	unID = unID + 1
+				endif
+			endif
+
+			if	_storyValue = Story_Upstairs	then
+				if	not(iUprFlr = View_None)	then
+					add2	0,	strTrd*nRsr
+						!	위치
+						hotspot2	0,			0,	unID,	xTextUpr,	1 + 128	:	unID = unID + 1
+						hotspot2	-1,			0,	unID,	xTextUpr,	3		:	unID = unID + 1
+						hotspot2	xTextUpr,	0,	unID,	xTextUpr,	2		:	unID = unID + 1
+					del 1
+				endif
+			endif
+		endif
+
+		!	Text
+		!-----------------------------------------------------------------------------------------------
+		pen	textPen
+
+		if	bText	then
+			!	UP
+			if	_storyValue = Story_Current	then
+				if	not(iWrkFlr = View_None)	then
+					!	y위치
+					add2	xTextWrk,	0
+						hotspot2	0,	0,			unID,	yTextWrk,	1 + 128	:	unID = unID + 1
+						hotspot2	0,	1,			unID,	yTextWrk,	3		:	unID = unID + 1
+						hotspot2	0,	-yTextWrk,	unID,	yTextWrk,	2		:	unID = unID + 1
+					del 1
+
+					!	Text
+					add2	xTextWrk,	-yTextWrk
+						style	"style_Up"
+						text2	0,	0,	"UP"
+					del 1
+				endif
+			endif
+
+			!	DN
+			if	_storyValue = Story_Upstairs	then
+				if	not(iUprFlr = View_None)	then
+					add2	0,	strTrd*nRsr
+						!	y위치
+						add2	xTextUpr,	0
+							hotspot2	0,	0,			unID,	yTextUpr,	1 + 128	:	unID = unID + 1
+							hotspot2	0,	-1,			unID,	yTextUpr,	3		:	unID = unID + 1
+							hotspot2	0,	yTextUpr,	unID,	yTextUpr,	2		:	unID = unID + 1
+						del 1
+
+						!	Text
+						add2	xTextUpr,	yTextUpr
+							style	"style_Dn"
+							text2	0,	0,	"DN"
+						del 1
+					del 1
+				endif
+			endif
+		endif
+
+		!	Up/Down Arrow/Line
+		!-----------------------------------------------------------------------------------------------
+		pen	etcPen
+
+		if	bArrow	then
+			!	작업층
+			if	_storyValue = Story_Current	then
+				if	not(iWrkFlr = View_None)	then
+					add2	xTextWrk,	0
+						!	S.P
+						circle2	0,	0,	0.075
+
+						!	2D표현 : Cut
+						if	iWrkFlr = View_Cut	then
+							line2	0,	0,	0,	strTrd*iWrkBrkLct
+
+							add2	0,	strTrd*iWrkBrkLct
+								put	0,		-0.040,
+									0.100,	-0.100,
+									0.120,	-0.070,
+									0,		0,
+									-0.120,	-0.070,
+									-0.100,	-0.100,
+									0,		-0.040
+
+								poly2	nsp/2,	1,	get(nsp)
+							del 1
+						endif
+
+						!	2D표현 : Entire
+						if	iWrkFlr = View_Entire	then
+							line2	0,	0,	0,	strTrd*nRsr
+
+							add2	0,	strTrd*nRsr
+								put	0,		-0.040,
+									0.100,	-0.100,
+									0.120,	-0.070,
+									0,		0,
+									-0.120,	-0.070,
+									-0.100,	-0.100,
+									0,		-0.040
+
+								poly2	nsp/2,	1,	get(nsp)
+							del 1
+						endif
+					del 1
+				endif
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				if	not(iUprFlr = View_None)	then
+					add2	xTextUpr,	0
+						!	S.P
+						add2	0,	strTrd*nRsr
+							circle2	0,	0,	0.075
+						del 1
+
+						!	2D표현 : Cut
+						if	iUprFlr = View_Cut	then
+							line2	0,	strTrd*(iUprBrkLct + 1),	0,	strTrd*nRsr
+
+							add2	0,	strTrd*(iUprBrkLct + 1)
+								put	0,		0,
+									0.120,	0.070,
+									0.100,	0.100,
+									0,		0.040,
+									-0.100,	0.100,
+									-0.120,	0.070,
+									0,		0
+
+								poly2	nsp/2,	1,	get(nsp)
+							del 1
+						endif
+
+						!	2D표현 : Entire
+						if	iUprFlr = View_Entire	then
+							line2	0,	0,	0,	strTrd*nRsr
+
+							put	0,		0,
+								0.120,	0.070,
+								0.100,	0.100,
+								0,		0.040,
+								-0.100,	0.100,
+								-0.120,	0.070,
+								0,		0
+
+							poly2	nsp/2,	1,	get(nsp)
+						endif
+					del 1
+				endif
+			endif
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	핸드레일
+	!-----------------------------------------------------------------------------------------------
+		pen	strPen
+
+		!	Hotspot
+		!-----------------------------------------------------------------------------------------------
+			_moveHndWrk_Out = 0
+			_moveHndUpr_Out = 0
+			if	iStairType_L = stairType_Straight	then
+				_moveHndWrk_Out = -xStart_L
+				_moveHndUpr_Out = -xEnd_L
+			endif
+
+			_moveHndWrk_In = 0
+			_moveHndUpr_In = 0
+			if	iStairType_R = stairType_Straight	then
+				_moveHndWrk_In = xStart_R
+				_moveHndUpr_In = xEnd_R
+			endif
+
+			!	바깥쪽 핸드레일
+			if	_bHnd_Out	then
+				!	작업층
+				if	_storyValue = Story_Current	then
+					if	not(iWrkFlr = View_None)	then
+						add2	_moveHndWrk_Out,	0
+							hotspot2	0,			0,	unID,	hndOff_Out,	1 + 128	:	unID = unID + 1
+							hotspot2	-1,			0,	unID,	hndOff_Out,	3		:	unID = unID + 1
+							hotspot2	hndOff_Out,	0,	unID,	hndOff_Out,	2		:	unID = unID + 1
+
+							add2	hndOff_Out,	0
+								hotspot2	0,	0,				unID,	hndWrk_Out,	1 + 128	:	unID = unID + 1
+								hotspot2	0,	1,				unID,	hndWrk_Out,	3		:	unID = unID + 1
+								hotspot2	0,	-hndWrk_Out,	unID,	hndWrk_Out,	2		:	unID = unID + 1
+							del 1
+						del 1
+
+						if	iWrkFlr = View_Entire	then
+							add2	_moveHndUpr_Out,	strTrd*nRsr
+								hotspot2	0,			0,	unID,	hndOff_Out,	1 + 128	:	unID = unID + 1
+								hotspot2	-1,			0,	unID,	hndOff_Out,	3		:	unID = unID + 1
+								hotspot2	hndOff_Out,	0,	unID,	hndOff_Out,	2		:	unID = unID + 1
+
+								add2	hndOff_Out,	0
+									hotspot2	0,	0,			unID,	hndUpr_Out,	1 + 128	:	unID = unID + 1
+									hotspot2	0,	-1,			unID,	hndUpr_Out,	3		:	unID = unID + 1
+									hotspot2	0,	hndUpr_Out,	unID,	hndUpr_Out,	2		:	unID = unID + 1
+								del 1
+							del 1
+						endif
+					endif
+				endif
+
+				!	상부층
+				if	_storyValue = Story_Upstairs	then
+					if	not(iUprFlr = View_None)	then
+						add2	_moveHndUpr_Out,	strTrd*nRsr
+							hotspot2	0,			0,	unID,	hndOff_Out,	1 + 128	:	unID = unID + 1
+							hotspot2	-1,			0,	unID,	hndOff_Out,	3		:	unID = unID + 1
+							hotspot2	hndOff_Out,	0,	unID,	hndOff_Out,	2		:	unID = unID + 1
+
+							add2	hndOff_Out,	0
+								hotspot2	0,	0,			unID,	hndUpr_Out,	1 + 128	:	unID = unID + 1
+								hotspot2	0,	-1,			unID,	hndUpr_Out,	3		:	unID = unID + 1
+								hotspot2	0,	hndUpr_Out,	unID,	hndUpr_Out,	2		:	unID = unID + 1
+							del 1
+						del 1
+
+						if	iUprFlr = View_Entire	then
+							add2	_moveHndWrk_Out,	0
+								hotspot2	0,			0,	unID,	hndOff_Out,	1 + 128	:	unID = unID + 1
+								hotspot2	-1,			0,	unID,	hndOff_Out,	3		:	unID = unID + 1
+								hotspot2	hndOff_Out,	0,	unID,	hndOff_Out,	2		:	unID = unID + 1
+
+								add2	hndOff_Out,	0
+									hotspot2	0,	0,				unID,	hndWrk_Out,	1 + 128	:	unID = unID + 1
+									hotspot2	0,	1,				unID,	hndWrk_Out,	3		:	unID = unID + 1
+									hotspot2	0,	-hndWrk_Out,	unID,	hndWrk_Out,	2		:	unID = unID + 1
+								del 1
+							del 1
+						endif
+					endif
+				endif
+			endif
+
+			!	안쪽 핸드레일
+			if	_bHnd_In	then
+				add2	strWdt,	0
+					!	작업층
+					if	_storyValue = Story_Current	then
+						if	not(iWrkFlr = View_None)	then
+							add2	_moveHndWrk_In,	0
+								hotspot2	0,			0,	unID,	hndOff_In,	1 + 128	:	unID = unID + 1
+								hotspot2	1,			0,	unID,	hndOff_In,	3		:	unID = unID + 1
+								hotspot2	-hndOff_In,	0,	unID,	hndOff_In,	2		:	unID = unID + 1
+
+								add2	-hndOff_In,	0
+									hotspot2	0,	0,			unID,	hndWrk_In,	1 + 128	:	unID = unID + 1
+									hotspot2	0,	1,			unID,	hndWrk_In,	3		:	unID = unID + 1
+									hotspot2	0,	-hndWrk_In,	unID,	hndWrk_In,	2		:	unID = unID + 1
+								del 1
+							del 1
+
+							if	iWrkFlr = View_Entire	then
+								add2	_moveHndUpr_In,	strTrd*nRsr
+									hotspot2	0,			0,	unID,	hndOff_In,	1 + 128	:	unID = unID + 1
+									hotspot2	1,			0,	unID,	hndOff_In,	3		:	unID = unID + 1
+									hotspot2	-hndOff_In,	0,	unID,	hndOff_In,	2		:	unID = unID + 1
+
+									add2	-hndOff_In,	0
+										hotspot2	0,	0,			unID,	hndUpr_In,	1 + 128	:	unID = unID + 1
+										hotspot2	0,	-1,			unID,	hndUpr_In,	3		:	unID = unID + 1
+										hotspot2	0,	hndUpr_In,	unID,	hndUpr_In,	2		:	unID = unID + 1
+									del 1
+								del 1
+							endif
+						endif
+					endif
+
+					!	상부층
+					if	_storyValue = Story_Upstairs	then
+						if	not(iUprFlr = View_None)	then
+							add2	_moveHndUpr_In,	strTrd*nRsr
+								hotspot2	0,			0,	unID,	hndOff_In,	1 + 128	:	unID = unID + 1
+								hotspot2	1,			0,	unID,	hndOff_In,	3		:	unID = unID + 1
+								hotspot2	-hndOff_In,	0,	unID,	hndOff_In,	2		:	unID = unID + 1
+
+								add2	-hndOff_In,	0
+									hotspot2	0,	0,			unID,	hndUpr_In,	1 + 128	:	unID = unID + 1
+									hotspot2	0,	-1,			unID,	hndUpr_In,	3		:	unID = unID + 1
+									hotspot2	0,	hndUpr_In,	unID,	hndUpr_In,	2		:	unID = unID + 1
+								del 1
+							del 1
+
+							if	iUprFlr = View_Entire	then
+								add2	_moveHndWrk_In,	0
+									hotspot2	0,			0,	unID,	hndOff_In,	1 + 128	:	unID = unID + 1
+									hotspot2	1,			0,	unID,	hndOff_In,	3		:	unID = unID + 1
+									hotspot2	-hndOff_In,	0,	unID,	hndOff_In,	2		:	unID = unID + 1
+
+									add2	-hndOff_In,	0
+										hotspot2	0,	0,			unID,	hndWrk_In,	1 + 128	:	unID = unID + 1
+										hotspot2	0,	1,			unID,	hndWrk_In,	3		:	unID = unID + 1
+										hotspot2	0,	-hndWrk_In,	unID,	hndWrk_In,	2		:	unID = unID + 1
+									del 1
+								del 1
+							endif
+						endif
+					endif
+				del 1
+			endif
+
+		!	바깥쪽 핸드레일
+		!-----------------------------------------------------------------------------------------------
+		if	_bHnd_Out	then
+			!	작업층
+			if	_storyValue = Story_Current	then
+				if	not(iWrkFlr = View_None)	then
+					!	2D표현 : Cut
+					if	iWrkFlr = View_Cut	then
+						yPos = -(hndWrk_Out + hndRd)
+						gosub	"calc_xPos_L"
+						xPosHndWrk = xPos_L
+
+						yPos = strTrd*iWrkBrkLct
+						gosub	"calc_xPos_L"
+						xPosHndUpr = xPos_L
+
+						if	iStairType_L = stairType_Straight	then
+							put	xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),	1,
+								xPosHndUpr + (hndOff_Out - hndRd),	strTrd*iWrkBrkLct,		0,
+								xPosHndUpr + (hndOff_Out + hndRd),	strTrd*iWrkBrkLct,		1,
+								xPosHndWrk + (hndOff_Out + hndRd),	-(hndWrk_Out + hndRd),	1,
+								xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),	1
+
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+							!	Cut
+							add2	xPosHndUpr + (hndOff_Out - hndRd),	strTrd*iWrkBrkLct
+								rot2	_aStrL
+									line2	0,	0,	0,	exHndWrk[1]
+
+									hotspot2	0,	0,				unID,	exHndWrk[1],	1+128	:	unID = unID + 1
+									hotspot2	0,	-1,				unID,	exHndWrk[1],	3		:	unID = unID + 1
+									hotspot2	0,	exHndWrk[1],	unID,	exHndWrk[1],	2		:	unID = unID + 1
+								del 1
+							del 1
+
+							add2	xPosHndUpr + (hndOff_Out + hndRd),	strTrd*iWrkBrkLct
+								rot2	_aStrL
+									line2	0,	0,	0,	exHndWrk[2]
+
+									hotspot2	0,	0,				unID,	exHndWrk[2],	1+128	:	unID = unID + 1
+									hotspot2	0,	-1,				unID,	exHndWrk[2],	3		:	unID = unID + 1
+									hotspot2	0,	exHndWrk[2],	unID,	exHndWrk[2],	2		:	unID = unID + 1
+								del 1
+							del 1
+						endif
+
+						if	iStairType_L = stairType_Curve	then
+							put	xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),	1,
+								xCenter_L + (hndOff_Out - hndRd),	yCenter_L,				900+1,
+								xPosHndUpr + (hndOff_Out - hndRd),	strTrd*iWrkBrkLct,		3000,
+								xPosHndUpr + (hndOff_Out + hndRd),	strTrd*iWrkBrkLct,		1,
+								xCenter_L + (hndOff_Out + hndRd),	yCenter_L,				900+1,
+								xPosHndWrk + (hndOff_Out + hndRd),	-(hndWrk_Out + hndRd),	3000+1,
+								xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),	1
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							!	Cut
+							yPos = strTrd*iWrkBrkLct + exHndWrk[1]
+							gosub	"calc_xPos_L"
+							xPosHndCut = xPos_L
+							yPosHndCut = yPos
+
+							put	xPosHndUpr + (hndOff_Out - hndRd),	strTrd*iWrkBrkLct,	1,
+								xCenter_L + (hndOff_Out - hndRd),	yCenter_L,			900+1,
+								xPosHndCut + (hndOff_Out - hndRd),	yPosHndCut,			3000
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							add2	xPosHndCut + (hndOff_Out - hndRd),	strTrd*iWrkBrkLct
+								hotspot2	0,	0,				unID,	exHndWrk[1],	1+128	:	unID = unID + 1
+								hotspot2	0,	-1,				unID,	exHndWrk[1],	3		:	unID = unID + 1
+								hotspot2	0,	exHndWrk[1],	unID,	exHndWrk[1],	2		:	unID = unID + 1
+							del 1
+
+							yPos = strTrd*iWrkBrkLct + exHndWrk[2]
+							gosub	"calc_xPos_L"
+							xPosHndCut = xPos_L
+							yPosHndCut = yPos
+
+							put	xPosHndUpr + (hndOff_Out + hndRd),	strTrd*iWrkBrkLct,	1,
+								xCenter_L + (hndOff_Out + hndRd),	yCenter_L,			900+1,
+								xPosHndCut + (hndOff_Out + hndRd),	yPosHndCut,			3000
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							add2	xPosHndCut + (hndOff_Out + hndRd),	strTrd*iWrkBrkLct
+								hotspot2	0,	0,				unID,	exHndWrk[2],	1+128	:	unID = unID + 1
+								hotspot2	0,	-1,				unID,	exHndWrk[2],	3		:	unID = unID + 1
+								hotspot2	0,	exHndWrk[2],	unID,	exHndWrk[2],	2		:	unID = unID + 1
+							del 1
+						endif
+					endif
+
+					!	2D표현 : Entire
+					if	iWrkFlr = View_Entire	then
+						yPos = -(hndWrk_Out + hndRd)
+						gosub	"calc_xPos_L"
+						xPosHndWrk = xPos_L
+
+						yPos = strTrd*nRsr + (hndUpr_Out + hndRd)
+						gosub	"calc_xPos_L"
+						xPosHndUpr = xPos_L
+
+						if	iStairType_L = stairType_Straight	then
+							put	xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),				1,
+								xPosHndUpr + (hndOff_Out - hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xPosHndUpr + (hndOff_Out + hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xPosHndWrk + (hndOff_Out + hndRd),	-(hndWrk_Out + hndRd),				1,
+								xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),				1
+
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						endif
+
+						if	iStairType_L = stairType_Curve	then
+							put	xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),				1,
+								xCenter_L + (hndOff_Out - hndRd),	yCenter_L,							900+1,
+								xPosHndUpr + (hndOff_Out - hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	3000+1,
+								xPosHndUpr + (hndOff_Out + hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xCenter_L + (hndOff_Out + hndRd),	yCenter_L,							900+1,
+								xPosHndWrk + (hndOff_Out + hndRd),	-(hndWrk_Out + hndRd),				3000+1,
+								xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),				1
+
+							poly2_	nsp/3,	1,	get(nsp)
+						endif
+					endif
+				endif
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				if	not(iUprFlr = View_None)	then
+					!	2D표현 : Cut
+					if	iUprFlr = View_Cut	then
+						yPos = strTrd*(iUprBrkLct + 1)
+						gosub	"calc_xPos_L"
+						xPosHndWrk = xPos_L
+
+						yPos = strTrd*nRsr + (hndUpr_Out + hndRd)
+						gosub	"calc_xPos_L"
+						xPosHndUpr = xPos_L
+
+						if	iStairType_L = stairType_Straight	then
+							put	xPosHndWrk + (hndOff_Out - hndRd),	strTrd*(iUprBrkLct + 1),			1,
+								xPosHndUpr + (hndOff_Out - hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xPosHndUpr + (hndOff_Out + hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xPosHndWrk + (hndOff_Out + hndRd),	strTrd*(iUprBrkLct + 1),			0,
+								xPosHndWrk + (hndOff_Out - hndRd),	strTrd*(iUprBrkLct + 1),			1
+
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+							!	Cut
+							add2	xPosHndWrk + (hndOff_Out - hndRd),	strTrd*(iUprBrkLct + 1)
+								rot2	_aStrL
+									line2	0,	0,	0,	-exHndUpr[1]
+
+									hotspot2	0,	0,				unID,	exHndUpr[1],	1+128	:	unID = unID + 1
+									hotspot2	0,	1,				unID,	exHndUpr[1],	3		:	unID = unID + 1
+									hotspot2	0,	-exHndUpr[1],	unID,	exHndUpr[1],	2		:	unID = unID + 1
+								del 1
+							del 1
+
+							add2	xPosHndWrk + (hndOff_Out + hndRd),	strTrd*(iUprBrkLct + 1)
+								rot2	_aStrL
+									line2	0,	0,	0,	-exHndUpr[2]
+
+									hotspot2	0,	0,				unID,	exHndUpr[2],	1+128	:	unID = unID + 1
+									hotspot2	0,	1,				unID,	exHndUpr[2],	3		:	unID = unID + 1
+									hotspot2	0,	-exHndUpr[2],	unID,	exHndUpr[2],	2		:	unID = unID + 1
+								del 1
+							del 1
+						endif
+
+						if	iStairType_L = stairType_Curve	then
+							put	xPosHndWrk + (hndOff_Out - hndRd),	strTrd*(iUprBrkLct + 1),			1,
+								xCenter_L + (hndOff_Out - hndRd),	yCenter_L,							900+1,
+								xPosHndUpr + (hndOff_Out - hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	3000+1,
+								xPosHndUpr + (hndOff_Out + hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xCenter_L + (hndOff_Out + hndRd),	yCenter_L,							900+1,
+								xPosHndWrk + (hndOff_Out + hndRd),	strTrd*(iUprBrkLct + 1),			3000,
+								xPosHndWrk + (hndOff_Out - hndRd),	strTrd*(iUprBrkLct + 1),			1
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							!	Cut
+							yPos = strTrd*(iUprBrkLct + 1) - exHndUpr[1]
+							gosub	"calc_xPos_L"
+							xPosHndCut = xPos_L
+							yPosHndCut = yPos
+
+							put	xPosHndWrk + (hndOff_Out - hndRd),	strTrd*(iUprBrkLct + 1),	1,
+								xCenter_L + (hndOff_Out - hndRd),	yCenter_L,					900+1,
+								xPosHndCut + (hndOff_Out - hndRd),	yPosHndCut,					3000
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							add2	xPosHndCut + (hndOff_Out - hndRd),	strTrd*(iUprBrkLct + 1)
+								hotspot2	0,	0,				unID,	exHndUpr[1],	1+128	:	unID = unID + 1
+								hotspot2	0,	1,				unID,	exHndUpr[1],	3		:	unID = unID + 1
+								hotspot2	0,	-exHndUpr[1],	unID,	exHndUpr[1],	2		:	unID = unID + 1
+							del 1
+
+							yPos = strTrd*(iUprBrkLct + 1) - exHndUpr[2]
+							gosub	"calc_xPos_L"
+							xPosHndCut = xPos_L
+							yPosHndCut = yPos
+
+							put	xPosHndWrk + (hndOff_Out + hndRd),	strTrd*(iUprBrkLct + 1),	1,
+								xCenter_L + (hndOff_Out + hndRd),	yCenter_L,					900+1,
+								xPosHndCut + (hndOff_Out + hndRd),	yPosHndCut,					3000
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							add2	xPosHndCut + (hndOff_Out + hndRd),	strTrd*(iUprBrkLct + 1)
+								hotspot2	0,	0,				unID,	exHndUpr[2],	1+128	:	unID = unID + 1
+								hotspot2	0,	1,				unID,	exHndUpr[2],	3		:	unID = unID + 1
+								hotspot2	0,	-exHndUpr[2],	unID,	exHndUpr[2],	2		:	unID = unID + 1
+							del 1
+						endif
+					endif
+
+					!	2D표현 : Entire
+					if	iUprFlr = View_Entire	then
+						yPos = -(hndWrk_Out + hndRd)
+						gosub	"calc_xPos_L"
+						xPosHndWrk = xPos_L
+
+						yPos = strTrd*nRsr + (hndUpr_Out + hndRd)
+						gosub	"calc_xPos_L"
+						xPosHndUpr = xPos_L
+
+						if	iStairType_L = stairType_Straight	then
+							put	xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),				1,
+								xPosHndUpr + (hndOff_Out - hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xPosHndUpr + (hndOff_Out + hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xPosHndWrk + (hndOff_Out + hndRd),	-(hndWrk_Out + hndRd),				1,
+								xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),				1
+
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						endif
+
+						if	iStairType_L = stairType_Curve	then
+							put	xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),				1,
+								xCenter_L + (hndOff_Out - hndRd),	yCenter_L,							900+1,
+								xPosHndUpr + (hndOff_Out - hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	3000+1,
+								xPosHndUpr + (hndOff_Out + hndRd),	strTrd*nRsr + (hndUpr_Out + hndRd),	1,
+								xCenter_L + (hndOff_Out + hndRd),	yCenter_L,							900+1,
+								xPosHndWrk + (hndOff_Out + hndRd),	-(hndWrk_Out + hndRd),				3000+1,
+								xPosHndWrk + (hndOff_Out - hndRd),	-(hndWrk_Out + hndRd),				1
+
+							poly2_	nsp/3,	1,	get(nsp)
+						endif
+					endif
+				endif
+			endif
+		endif
+
+		!	안쪽 핸드레일
+		!-----------------------------------------------------------------------------------------------
+		if	_bHnd_In	then
+			!	작업층
+			if	_storyValue = Story_Current	then
+				if	not(iWrkFlr = View_None)	then
+					!	2D표현 : Cut
+					if	iWrkFlr = View_Cut	then
+						yPos = -(hndWrk_In + hndRd)
+						gosub	"calc_xPos_R"
+						xPosHndWrk = xPos_R
+
+						yPos = strTrd*iWrkBrkLct
+						gosub	"calc_xPos_R"
+						xPosHndUpr = xPos_R
+
+						if	iStairType_R = stairType_Straight	then
+							put	xPosHndWrk - (hndOff_In + hndRd),	-(hndWrk_In + hndRd),	1,
+								xPosHndUpr - (hndOff_In + hndRd),	strTrd*iWrkBrkLct,		0,
+								xPosHndUpr - (hndOff_In - hndRd),	strTrd*iWrkBrkLct,		1,
+								xPosHndWrk - (hndOff_In - hndRd),	-(hndWrk_In + hndRd),	1,
+								xPosHndWrk - (hndOff_In + hndRd),	-(hndWrk_In + hndRd),	1
+
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+							!	Cut
+							add2	xPosHndUpr - (hndOff_In + hndRd),	strTrd*iWrkBrkLct
+								rot2	_aStrR
+									line2	0,	0,	0,	exHndWrk[3]
+
+									hotspot2	0,	0,				unID,	exHndWrk[3],	1+128	:	unID = unID + 1
+									hotspot2	0,	-1,				unID,	exHndWrk[3],	3		:	unID = unID + 1
+									hotspot2	0,	exHndWrk[3],	unID,	exHndWrk[3],	2		:	unID = unID + 1
+								del 1
+							del 1
+
+							add2	xPosHndUpr - (hndOff_In - hndRd),	strTrd*iWrkBrkLct
+								rot2	_aStrR
+									line2	0,	0,	0,	exHndWrk[4]
+
+									hotspot2	0,	0,				unID,	exHndWrk[4],	1+128	:	unID = unID + 1
+									hotspot2	0,	-1,				unID,	exHndWrk[4],	3		:	unID = unID + 1
+									hotspot2	0,	exHndWrk[4],	unID,	exHndWrk[4],	2		:	unID = unID + 1
+								del 1
+							del 1
+						endif
+
+						if	iStairType_R = stairType_Curve	then
+							put	xPosHndWrk - (hndOff_In + hndRd),			-(hndWrk_In + hndRd),	1,
+								strWdt + xCenter_R - (hndOff_In + hndRd),	yCenter_R,				900+1,
+								xPosHndUpr - (hndOff_In + hndRd),			strTrd*iWrkBrkLct,		3000,
+								xPosHndUpr - (hndOff_In - hndRd),			strTrd*iWrkBrkLct,		1,
+								strWdt + xCenter_R - (hndOff_In - hndRd),	yCenter_R,				900+1,
+								xPosHndWrk - (hndOff_In - hndRd),			-(hndWrk_In + hndRd),	3000+1,
+								xPosHndWrk - (hndOff_In + hndRd),			-(hndWrk_In + hndRd),	1
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							!	Cut
+							yPos = strTrd*iWrkBrkLct + exHndWrk[3]
+							gosub	"calc_xPos_R"
+							xPosHndCut = xPos_R
+							yPosHndCut = yPos
+
+							put	xPosHndUpr - (hndOff_In + hndRd),			strTrd*iWrkBrkLct,	1,
+								strWdt + xCenter_R - (hndOff_In + hndRd),	yCenter_R,			900+1,
+								xPosHndCut - (hndOff_In + hndRd),			yPosHndCut,			3000
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							add2	xPosHndCut - (hndOff_In + hndRd),	strTrd*iWrkBrkLct
+								hotspot2	0,	0,				unID,	exHndWrk[3],	1+128	:	unID = unID + 1
+								hotspot2	0,	-1,				unID,	exHndWrk[3],	3		:	unID = unID + 1
+								hotspot2	0,	exHndWrk[3],	unID,	exHndWrk[3],	2		:	unID = unID + 1
+							del 1
+
+							yPos = strTrd*iWrkBrkLct + exHndWrk[4]
+							gosub	"calc_xPos_R"
+							xPosHndCut = xPos_R
+							yPosHndCut = yPos
+
+							put	xPosHndUpr - (hndOff_In - hndRd),			strTrd*iWrkBrkLct,	1,
+								strWdt + xCenter_R - (hndOff_In - hndRd),	yCenter_R,			900+1,
+								xPosHndCut - (hndOff_In - hndRd),			yPosHndCut,			3000
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							add2	xPosHndCut - (hndOff_In - hndRd),	strTrd*iWrkBrkLct
+								hotspot2	0,	0,				unID,	exHndWrk[4],	1+128	:	unID = unID + 1
+								hotspot2	0,	-1,				unID,	exHndWrk[4],	3		:	unID = unID + 1
+								hotspot2	0,	exHndWrk[4],	unID,	exHndWrk[4],	2		:	unID = unID + 1
+							del 1
+						endif
+					endif
+
+					!	2D표현 : Entire
+					if	iWrkFlr = View_Entire	then
+						yPos = -(hndWrk_In + hndRd)
+						gosub	"calc_xPos_R"
+						xPosHndWrk = xPos_R
+
+						yPos = strTrd*nRsr + (hndUpr_In + hndRd)
+						gosub	"calc_xPos_R"
+						xPosHndUpr = xPos_R
+
+						if	iStairType_R = stairType_Straight	then
+							put	xPosHndWrk - (hndOff_In + hndRd),	-(hndWrk_In + hndRd),				1,
+								xPosHndUpr - (hndOff_In + hndRd),	strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								xPosHndUpr - (hndOff_In - hndRd),	strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								xPosHndWrk - (hndOff_In - hndRd),	-(hndWrk_In + hndRd),				1,
+								xPosHndWrk - (hndOff_In + hndRd),	-(hndWrk_In + hndRd),				1
+
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						endif
+
+						if	iStairType_R = stairType_Curve	then
+							put	xPosHndWrk - (hndOff_In + hndRd),			-(hndWrk_In + hndRd),				1,
+								strWdt + xCenter_R - (hndOff_In + hndRd),	yCenter_R,							900+1,
+								xPosHndUpr - (hndOff_In + hndRd),			strTrd*nRsr + (hndUpr_In + hndRd),	3000+1,
+								xPosHndUpr - (hndOff_In - hndRd),			strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								strWdt + xCenter_R - (hndOff_In - hndRd),	yCenter_R,							900+1,
+								xPosHndWrk - (hndOff_In - hndRd),			-(hndWrk_In + hndRd),				3000+1,
+								xPosHndWrk - (hndOff_In + hndRd),			-(hndWrk_In + hndRd),				1
+
+							poly2_	nsp/3,	1,	get(nsp)
+						endif
+					endif
+				endif
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				if	not(iUprFlr = View_None)	then
+					!	2D표현 : Cut
+					if	iUprFlr = View_Cut	then
+						yPos = strTrd*(iUprBrkLct + 1)
+						gosub	"calc_xPos_R"
+						xPosHndWrk = xPos_R
+
+						yPos = strTrd*nRsr + (hndUpr_In + hndRd)
+						gosub	"calc_xPos_R"
+						xPosHndUpr = xPos_R
+
+						if	iStairType_R = stairType_Straight	then
+							put	xPosHndWrk - (hndOff_In + hndRd),	strTrd*(iUprBrkLct + 1),			1,
+								xPosHndUpr - (hndOff_In + hndRd),	strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								xPosHndUpr - (hndOff_In - hndRd),	strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								xPosHndWrk - (hndOff_In - hndRd),	strTrd*(iUprBrkLct + 1),			0,
+								xPosHndWrk - (hndOff_In + hndRd),	strTrd*(iUprBrkLct + 1),			1
+
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+							!	Cut
+							add2	xPosHndWrk - (hndOff_In + hndRd),	strTrd*(iUprBrkLct + 1)
+								rot2	_aStrR
+									line2	0,	0,	0,	-exHndUpr[3]
+
+									hotspot2	0,	0,				unID,	exHndUpr[3],	1+128	:	unID = unID + 1
+									hotspot2	0,	1,				unID,	exHndUpr[3],	3		:	unID = unID + 1
+									hotspot2	0,	-exHndUpr[3],	unID,	exHndUpr[3],	2		:	unID = unID + 1
+								del 1
+							del 1
+
+							add2	xPosHndWrk - (hndOff_In - hndRd),	strTrd*(iUprBrkLct + 1)
+								rot2	_aStrR
+									line2	0,	0,	0,	-exHndUpr[4]
+
+									hotspot2	0,	0,				unID,	exHndUpr[4],	1+128	:	unID = unID + 1
+									hotspot2	0,	1,				unID,	exHndUpr[4],	3		:	unID = unID + 1
+									hotspot2	0,	-exHndUpr[4],	unID,	exHndUpr[4],	2		:	unID = unID + 1
+								del 1
+							del 1
+						endif
+
+						if	iStairType_R = stairType_Curve	then
+							put	xPosHndWrk - (hndOff_In + hndRd),			strTrd*(iUprBrkLct + 1),			1,
+								strWdt + xCenter_R - (hndOff_In + hndRd),	yCenter_R,							900+1,
+								xPosHndUpr - (hndOff_In + hndRd),			strTrd*nRsr + (hndUpr_In + hndRd),	3000+1,
+								xPosHndUpr - (hndOff_In - hndRd),			strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								strWdt + xCenter_R - (hndOff_In - hndRd),	yCenter_R,							900+1,
+								xPosHndWrk - (hndOff_In - hndRd),			strTrd*(iUprBrkLct + 1),			3000,
+								xPosHndWrk - (hndOff_In + hndRd),			strTrd*(iUprBrkLct + 1),			1
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							!	Cut
+							yPos = strTrd*(iUprBrkLct + 1) - exHndUpr[3]
+							gosub	"calc_xPos_R"
+							xPosHndCut = xPos_R
+							yPosHndCut = yPos
+
+							put	xPosHndWrk - (hndOff_In + hndRd),			strTrd*(iUprBrkLct + 1),	1,
+								strWdt + xCenter_R - (hndOff_In + hndRd),	yCenter_R,					900+1,
+								xPosHndCut - (hndOff_In + hndRd),			yPosHndCut,					3000
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							add2	xPosHndCut - (hndOff_In + hndRd),	strTrd*(iUprBrkLct + 1)
+								hotspot2	0,	0,				unID,	exHndUpr[3],	1+128	:	unID = unID + 1
+								hotspot2	0,	1,				unID,	exHndUpr[3],	3		:	unID = unID + 1
+								hotspot2	0,	-exHndUpr[3],	unID,	exHndUpr[3],	2		:	unID = unID + 1
+							del 1
+
+							yPos = strTrd*(iUprBrkLct + 1) - exHndUpr[4]
+							gosub	"calc_xPos_R"
+							xPosHndCut = xPos_R
+							yPosHndCut = yPos
+
+							put	xPosHndWrk - (hndOff_In - hndRd),			strTrd*(iUprBrkLct + 1),	1,
+								strWdt + xCenter_R - (hndOff_In - hndRd),	yCenter_R,					900+1,
+								xPosHndCut - (hndOff_In - hndRd),			yPosHndCut,					3000
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+							add2	xPosHndCut - (hndOff_In - hndRd),	strTrd*(iUprBrkLct + 1)
+								hotspot2	0,	0,				unID,	exHndUpr[4],	1+128	:	unID = unID + 1
+								hotspot2	0,	1,				unID,	exHndUpr[4],	3		:	unID = unID + 1
+								hotspot2	0,	-exHndUpr[4],	unID,	exHndUpr[4],	2		:	unID = unID + 1
+							del 1
+						endif
+					endif
+
+					!	2D표현 : Entire
+					if	iUprFlr = View_Entire	then
+						yPos = -(hndWrk_In + hndRd)
+						gosub	"calc_xPos_R"
+						xPosHndWrk = xPos_R
+
+						yPos = strTrd*nRsr + (hndUpr_In + hndRd)
+						gosub	"calc_xPos_R"
+						xPosHndUpr = xPos_R
+
+						if	iStairType_R = stairType_Straight	then
+							put	xPosHndWrk - (hndOff_In + hndRd),	-(hndWrk_In + hndRd),				1,
+								xPosHndUpr - (hndOff_In + hndRd),	strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								xPosHndUpr - (hndOff_In - hndRd),	strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								xPosHndWrk - (hndOff_In - hndRd),	-(hndWrk_In + hndRd),				1,
+								xPosHndWrk - (hndOff_In + hndRd),	-(hndWrk_In + hndRd),				1
+
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						endif
+
+						if	iStairType_R = stairType_Curve	then
+							put	xPosHndWrk - (hndOff_In + hndRd),			-(hndWrk_In + hndRd),				1,
+								strWdt + xCenter_R - (hndOff_In + hndRd),	yCenter_R,							900+1,
+								xPosHndUpr - (hndOff_In + hndRd),			strTrd*nRsr + (hndUpr_In + hndRd),	3000+1,
+								xPosHndUpr - (hndOff_In - hndRd),			strTrd*nRsr + (hndUpr_In + hndRd),	1,
+								strWdt + xCenter_R - (hndOff_In - hndRd),	yCenter_R,							900+1,
+								xPosHndWrk - (hndOff_In - hndRd),			-(hndWrk_In + hndRd),				3000+1,
+								xPosHndWrk - (hndOff_In + hndRd),			-(hndWrk_In + hndRd),				1
+
+							poly2_	nsp/3,	1,	get(nsp)
+						endif
+					endif
+				endif
+			endif
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	Break Line
+	!-----------------------------------------------------------------------------------------------
+		pen	etcPen
+
+		!	작업층
+		if	_storyValue = Story_Current	then
+			if	iWrkFlr = View_Cut	then
+				if	bWrkBrk	then
+					yPos = strTrd*iWrkBrkLct
+					gosub	"calc_xPos_L"
+
+					yPos = strTrd*(iWrkBrkLct + 1)
+					gosub	"calc_xPos_R"
+
+					!	Break Line Length
+					_xLength = xPos_R - xPos_L
+					_yLength = strTrd
+					_brkLth = sqr(_xLength^2 + _yLength^2)
+					_aBrk = atn(_yLength/_xLength)
+
+					add2	xPos_L,	strTrd*iWrkBrkLct + _fnsThk
+						rot2	_aBrk
+							add2	_brkLth/2,	0
+								gosub	"brk_"
+							del 1
+						del 1
+					del 1
+				endif
+			endif
+		endif
+
+		!	상부층
+		if	_storyValue = Story_Upstairs	then
+			if	iUprFlr = View_Cut	then
+				if	bUprBrk	then
+					yPos = strTrd*iUprBrkLct
+					gosub	"calc_xPos_L"
+
+					yPos = strTrd*(iUprBrkLct + 1)
+					gosub	"calc_xPos_R"
+
+					!	Break Line Length
+					_xLength = xPos_R - xPos_L
+					_yLength = strTrd
+					_brkLth = sqr(_xLength^2 + _yLength^2)
+					_aBrk = atn(_yLength/_xLength)
+
+					add2	xPos_L,	strTrd*iUprBrkLct + _fnsThk
+						rot2	_aBrk
+							add2	_brkLth/2,	0
+								gosub	"brk_"
+							del 1
+						del 1
+					del 1
+				endif
+			endif
+		endif
+endif
+
+
+!===============================================================================================
+!	단 방향 - 원점(원형계단)
+!===============================================================================================
+if	iTreadType = treadType_Center	then
+
+	!-----------------------------------------------------------------------------------------------
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+		!	마감재 두께에 따른 각도
+		_aFinish = 0
+		if	_modelValue = Core_Only & bFns	then
+			_aFinish = (vFnsThk/(PI*strRad))*180
+		endif
+
+		!	Break Line
+			!	작업층
+			if	_storyValue = Story_Current	then
+				!	Break Line Lct
+				_aTrd = aStr/(nRsr + 1)
+				_aBrkSP = _aTrd*iWrkBrkLct
+				_aBrkEP = _aTrd*(iWrkBrkLct + 1)
+
+				!	Break Line Length
+				_xLength = (strRad + strWdt)*cos(_aBrkEP + _aFinish) - strRad*cos(_aBrkSP + _aFinish)
+				_yLength = (strRad + strWdt)*sin(_aBrkEP + _aFinish) - strRad*sin(_aBrkSP + _aFinish)
+				_brkLth = sqr(_xLength^2 + _yLength^2)
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				!	Break Line Lct
+				_aTrd = aStr/(nRsr + 1)
+				_aBrkSP = _aTrd*iUprBrkLct
+				_aBrkEP = _aTrd*(iUprBrkLct + 1)
+
+				!	Break Line Length
+				_xLength = (strRad + strWdt)*cos(_aBrkEP + _aFinish) - strRad*cos(_aBrkSP + _aFinish)
+				_yLength = (strRad + strWdt)*sin(_aBrkEP + _aFinish) - strRad*sin(_aBrkSP + _aFinish)
+				_brkLth = sqr(_xLength^2 + _yLength^2)
+			endif
+
+		!	내부 곡선 펴기
+		_aInner = 90 - aStr/2
+
+		!	핸드레일
+			!	핸드레일 안쪽
+			_bHndLine_In = 1
+			if	bHnd_In & _modelValue = Entire_Model	then
+				_bHndLine_In = 0
+			endif
+
+			_hndInLct1 = strRad + (hndOff_In - hndRd)
+			_hndInLct2 = strRad + (hndOff_In + hndRd)
+
+			!	핸드레일 바깥쪽
+			_bHndLine_Out = 1
+			if	bHnd_Out & _modelValue = Entire_Model	then
+				_bHndLine_Out = 0
+			endif
+
+			_hndOutLct1 = (strRad + strWdt) - (hndOff_Out + hndRd)
+			_hndOutLct2 = (strRad + strWdt) - (hndOff_Out - hndRd)
+
+			dim	_xPosHnd1[],	_xPosHnd2[],	_yPosHnd1[],	_yPosHnd2[]
+
+			for	i = 1	to	nRsr + 1
+				_xPosHnd1[i] = (strRad - (exTrdLth[i] - (hndOff_In - hndRd)))*cos(_aTrd*i)
+				_xPosHnd2[i] = (strRad - (exTrdLth[i] - (hndOff_In + hndRd)))*cos(_aTrd*i)
+
+				_yPosHnd1[i] = (strRad - (exTrdLth[i] - (hndOff_In - hndRd)))*sin(_aTrd*i)
+				_yPosHnd2[i] = (strRad - (exTrdLth[i] - (hndOff_In + hndRd)))*sin(_aTrd*i)
+			next	i
+
+		!	전체각도
+		if	not(bStraight)	then
+			if	_modelValue = Entire_Model	then
+				aStr = aStr - _aTrd
+			endif
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+		!	마감재 두께 : Core Only
+		rot2	_aFinish
+			if	_storyValue = Story_Current	then
+				if	not(iWrkFlr = View_None)	then
+					hotspot2	0,		0,	unID,	strRad,	1 + 128	:	unID = unID + 1
+					hotspot2	-1,		0,	unID,	strRad,	3		:	unID = unID + 1
+					hotspot2	strRad,	0,	unID,	strRad,	2		:	unID = unID + 1
+
+					add2	strRad,	0
+						hotspot2	0,		0,	unID,	strWdt,	1 + 128	:	unID = unID + 1
+						hotspot2	-1,		0,	unID,	strWdt,	3		:	unID = unID + 1
+						hotspot2	strWdt,	0,	unID,	strWdt,	2		:	unID = unID + 1
+					del 1
+
+					rot2	aStr
+						add2	strRad,	0
+							hotspot2	0,		0,	unID,	strWdt,	1	:	unID = unID + 1
+							hotspot2	-1,		0,	unID,	strWdt,	3	:	unID = unID + 1
+							hotspot2	strWdt,	0,	unID,	strWdt,	2	:	unID = unID + 1
+						del 1
+					del 1
+
+					if	iCalcTrd = calcTrd_AngnRsr	then
+						hotspot2	strRad,				0,					unID,	aStr,	4+256	:	unID = unID + 1
+						hotspot2	strRad*cos(aStr),	strRad*sin(aStr),	unID,	aStr,	5		:	unID = unID + 1
+						hotspot2	0,					0,					unID,	aStr,	6		:	unID = unID + 1
+					endif
+				endif
+			endif
+
+			if	_storyValue = Story_Upstairs	then
+				if	not(iUprFlr = View_None)	then
+					rot2	aStr
+						hotspot2	0,		0,	unID,	strRad,	1 + 128	:	unID = unID + 1
+						hotspot2	-1,		0,	unID,	strRad,	3		:	unID = unID + 1
+						hotspot2	strRad,	0,	unID,	strRad,	2		:	unID = unID + 1
+
+						add2	strRad,	0
+							hotspot2	0,		0,	unID,	strWdt,	1 + 128	:	unID = unID + 1
+							hotspot2	-1,		0,	unID,	strWdt,	3		:	unID = unID + 1
+							hotspot2	strWdt,	0,	unID,	strWdt,	2		:	unID = unID + 1
+						del 1
+					del 1
+
+					add2	strRad,	0
+						hotspot2	0,		0,	unID,	strWdt,	1	:	unID = unID + 1
+						hotspot2	-1,		0,	unID,	strWdt,	3	:	unID = unID + 1
+						hotspot2	strWdt,	0,	unID,	strWdt,	2	:	unID = unID + 1
+					del 1
+
+					if	iCalcTrd = calcTrd_AngnRsr	then
+						hotspot2	strRad,				0,					unID,	aStr,	4+256	:	unID = unID + 1
+						hotspot2	strRad*cos(aStr),	strRad*sin(aStr),	unID,	aStr,	5		:	unID = unID + 1
+						hotspot2	0,					0,					unID,	aStr,	6		:	unID = unID + 1
+					endif
+				endif
+			endif
+
+		del 1
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	외곽선
+	!-----------------------------------------------------------------------------------------------
+		drawindex	10
+		pen		strPen
+		fill	65
+		fillPen = 0
+		backPen = 0
+
+		!	마감재 두께 : Core Only
+		rot2	_aFinish
+
+			!	작업층
+			if	_storyValue = Story_Current	then
+				!	2D표현 : Cut
+				if	iWrkFlr = View_Cut	then
+					if	not(bStraight)	then
+						put	strRad,					0,						1,
+							0,						0,						900,
+							strRad*cos(_aBrkSP),	strRad*sin(_aBrkSP),	3000
+					else
+						put	strRad,					0,						1,
+							exCntWrk,				180 - _aInner,			200
+
+						!	exCntWrk
+						add2	strRad,	0
+							rot2	aStr/2
+								hotspot2	0,	0,			unID,	exCntWrk,	1+128	:	unID = unID + 1
+								hotspot2	0,	-1,			unID,	exCntWrk,	3		:	unID = unID + 1
+								hotspot2	0,	exCntWrk,	unID,	exCntWrk,	2		:	unID = unID + 1
+
+								hotline2	0,	0,	0,	exCntWrk
+							del 1
+						del 1
+					endif
+
+					put	(strRad + strWdt)*cos(_aBrkEP),	(strRad + strWdt)*sin(_aBrkEP),	1,
+						0,								0,								900,
+						(strRad + strWdt),				-_aBrkEP,						4000+1,
+						_hndOutLct2,					0,								_bHndLine_Out,
+						_hndOutLct1,					0,								1,
+						_hndInLct2,						0,								_bHndLine_In,
+						_hndInLct1,						0,								1
+
+					poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	get(nsp)
+
+						!	Hotline
+						hotarc2	0,	0,	strRad,				0,	_aBrkSP,	unID	:	unID = unID + 1
+						hotarc2	0,	0,	(strRad + strWdt),	0,	_aBrkEP,	unID	:	unID = unID + 1
+
+						hotline2	strRad*cos(_aBrkSP),	strRad*sin(_aBrkSP),	(strRad + strWdt)*cos(_aBrkEP),	(strRad + strWdt)*sin(_aBrkEP)
+
+						put	strRad,			0,	1,
+							_hndInLct1,		0,	1,
+							_hndInLct2,		0,	1,
+							_hndOutLct1,	0,	1,
+							_hndOutLct2,	0,	1
+
+						for	h = 1	to	(nsp/3) - 2
+							hotline2	get(2) + (use(1) - get(1)),	use(2)
+						next	h
+							hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+				endif
+
+				!	2D표현 : 전체/None
+				if	iWrkFlr = View_Entire | iWrkFlr = View_None	then
+					!	변수 정의
+						!	2D표현 : None = 채우기만
+						_bLine = 1
+						if	iWrkFlr = View_None	then
+							_bLine = 0
+						endif
+
+					!	그리기
+					if	not(bStraight)	then
+						put	strRad,				0,					1,
+							0,					0,					900,
+							strRad,				aStr,				4000+1
+					else
+						put	strRad,				0,					1,
+							strRad*cos(aStr),	strRad*sin(aStr),	1
+
+						hotline2	strRad,	0,	strRad*cos(aStr),	strRad*sin(aStr)
+					endif
+
+					put	_hndInLct1*cos(aStr),			_hndInLct1*sin(aStr),			_bHndLine_In,
+						_hndInLct2*cos(aStr),			_hndInLct2*sin(aStr),			1,
+						_hndOutLct1*cos(aStr),			_hndOutLct1*sin(aStr),			_bHndLine_Out,
+						_hndOutLct2*cos(aStr),			_hndOutLct2*sin(aStr),			1,
+						(strRad + strWdt)*cos(aStr),	(strRad + strWdt)*sin(aStr),	1,
+						0,								0,								900,
+						(strRad + strWdt),				-aStr,							4000+1,
+						_hndOutLct2,					0,								_bHndLine_Out,
+						_hndOutLct1,					0,								1,
+						_hndInLct2,						0,								_bHndLine_In,
+						_hndInLct1,						0,								1
+
+					poly2_b	nsp/3,	1*(_bLine)+2+4,	fillPen,	backPen,	get(nsp)
+				endif
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				!	2D표현 : Cut
+				if	iUprFlr = View_Cut	then
+					put	(strRad + strWdt)*cos(_aBrkEP),	(strRad + strWdt)*sin(_aBrkEP),	1,
+						0,								0,								900,
+						(strRad + strWdt),				aStr - _aBrkEP,					4000,
+						_hndOutLct2*cos(aStr),			_hndOutLct2*sin(aStr),			_bHndLine_Out,
+						_hndOutLct1*cos(aStr),			_hndOutLct1*sin(aStr),			1,
+						_hndInLct2*cos(aStr),			_hndInLct2*sin(aStr),			_bHndLine_In,
+						_hndInLct1*cos(aStr),			_hndInLct1*sin(aStr),			1
+
+					if	not(bStraight)	then
+						put	strRad*cos(aStr),	strRad*sin(aStr),	1,
+							0,					0,					900,
+							strRad,				-(aStr - _aBrkSP),	4000
+					else
+						put	strRad*cos(aStr),	strRad*sin(aStr),	1,
+							-exCntUpr,			180 - _aInner,		200
+
+						!	exCntUpr
+						add2	strRad*cos(aStr),	strRad*sin(aStr)
+							rot2	aStr/2
+								hotspot2	0,	0,			unID,	exCntUpr,	1+128	:	unID = unID + 1
+								hotspot2	0,	1,			unID,	exCntUpr,	3		:	unID = unID + 1
+								hotspot2	0,	-exCntUpr,	unID,	exCntUpr,	2		:	unID = unID + 1
+
+								hotline2	0,	0,	0,	-exCntUpr
+							del 1
+						del 1
+					endif
+
+					poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	get(nsp)
+
+						!	Hotline
+						hotarc2	0,	0,	strRad,				_aBrkSP,	aStr,	unID	:	unID = unID + 1
+						hotarc2	0,	0,	(strRad + strWdt),	_aBrkEP,	aStr,	unID	:	unID = unID + 1
+
+						hotline2	strRad*cos(_aBrkSP),	strRad*sin(_aBrkSP),	(strRad + strWdt)*cos(_aBrkEP),	(strRad + strWdt)*sin(_aBrkEP)
+
+						rot2	aStr
+							put	strRad,			0,	1,
+								_hndInLct1,		0,	1,
+								_hndInLct2,		0,	1,
+								_hndOutLct1,	0,	1,
+								_hndOutLct2,	0,	1
+
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						del 1
+				endif
+
+				!	2D표현 : 전체/None
+				if	iUprFlr = View_Entire | iUprFlr = View_None	then
+					!	변수 정의
+						!	2D표현 : None = 채우기만
+						_bLine = 1
+						if	iUprFlr = View_None	then
+							_bLine = 0
+						endif
+
+					!	그리기
+					if	not(bStraight)	then
+						put	strRad,							0,								1,
+							0,								0,								900,
+							strRad,							aStr,							4000+1
+					else
+						put	strRad,							0,								1,
+							strRad*cos(aStr),				strRad*sin(aStr),				1
+
+						hotline2	strRad,	0,	strRad*cos(aStr),	strRad*sin(aStr)
+					endif
+
+					put	_hndInLct1*cos(aStr),			_hndInLct1*sin(aStr),			_bHndLine_In,
+						_hndInLct2*cos(aStr),			_hndInLct2*sin(aStr),			1,
+						_hndOutLct1*cos(aStr),			_hndOutLct1*sin(aStr),			_bHndLine_Out,
+						_hndOutLct2*cos(aStr),			_hndOutLct2*sin(aStr),			1,
+						(strRad + strWdt)*cos(aStr),	(strRad + strWdt)*sin(aStr),	1,
+						0,								0,								900,
+						(strRad + strWdt),				-aStr,							4000+1,
+						_hndOutLct2,					0,								_bHndLine_Out,
+						_hndOutLct1,					0,								1,
+						_hndInLct2,						0,								_bHndLine_In,
+						_hndInLct1,						0,								1
+
+					poly2_b	nsp/3,	1*(_bLine)+2+4,	fillPen,	backPen,	get(nsp)
+				endif
+			endif
+		del 1
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	단
+	!-----------------------------------------------------------------------------------------------
+		pen	strPen
+
+		!	마감재 두께 : Core Only
+		rot2	_aFinish
+
+			!	작업층
+			if	_storyValue = Story_Current	then
+				!	2D표현 : Cut
+				if	iWrkFlr = View_Cut	then
+					for	i = 1	to	iWrkBrkLct
+						_idxCut = iWrkBrkLct
+						gosub	"trd_"
+					next	i
+				endif
+
+				!	2D표현 : 전체
+				if	iWrkFlr = View_Entire	then
+					for	i = 1	to	nRsr
+						_idxCut = 0
+						gosub	"trd_"
+					next	i
+				endif
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				!	2D표현 : Cut
+				if	iUprFlr = View_Cut	then
+					for	i = (iUprBrkLct + 1)	to	nRsr
+						_idxCut = 0
+						gosub	"trd_"
+					next	i
+				endif
+
+				!	2D표현 : 전체
+				if	iUprFlr = View_Entire	then
+					for	i = 1	to	nRsr
+						_idxCut = 0
+						gosub	"trd_"
+					next	i
+				endif
+			endif
+		del 1
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	핸드레일
+	!-----------------------------------------------------------------------------------------------
+		pen	strPen
+
+		!	변수 정의
+
+		!	전체 모델
+		if	_modelValue = Entire_Model	then
+			!	마감재 두께 : Core Only
+			rot2	_aFinish
+				!	안쪽 핸드레일
+				!-----------------------------------------------------------------------------------------------
+				if	bHnd_In	then
+					!	작업층
+					if	_storyValue = Story_Current	then
+						!	2D표현 : Cut
+						if	iWrkFlr = View_Cut	then
+							!	난간 길이(작업층)
+							gosub	"wrkHndIn_"
+
+							if	not(bStraight)	then
+								!	계단 난간 : Cut 전까지
+								arc2	0,	0,	_hndInLct1,	0,	_aTrd*iWrkBrkLct
+								arc2	0,	0,	_hndInLct2,	0,	_aTrd*iWrkBrkLct
+
+								hotarc2	0,	0,	_hndInLct1,	0,	_aTrd*iWrkBrkLct
+								hotarc2	0,	0,	_hndInLct2,	0,	_aTrd*iWrkBrkLct
+
+								!	계단 난간 : Cut
+								rot2	_aTrd*iWrkBrkLct
+									hotspot2	_hndInLct1,						0,								unID,	aExHndWrk[1],	4+128	:	unID = unID + 1
+									hotspot2	_hndInLct1*cos(aExHndWrk[1]),	_hndInLct1*sin(aExHndWrk[1]),	unID,	aExHndWrk[1],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExHndWrk[1],	6		:	unID = unID + 1
+
+									arc2	0,	0,	_hndInLct1,	0,	aExHndWrk[1]
+									hotarc2	0,	0,	_hndInLct1,	0,	aExHndWrk[1]
+
+									hotspot2	_hndInLct2,						0,								unID,	aExHndWrk[2],	4+128	:	unID = unID + 1
+									hotspot2	_hndInLct2*cos(aExHndWrk[2]),	_hndInLct2*sin(aExHndWrk[2]),	unID,	aExHndWrk[2],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExHndWrk[2],	6		:	unID = unID + 1
+
+									arc2	0,	0,	_hndInLct2,	0,	aExHndWrk[2]
+									hotarc2	0,	0,	_hndInLct2,	0,	aExHndWrk[2]
+								del 1
+							else
+								!	계단 난간 : Cut 전까지
+								line2	_hndInLct1,	0,	_xPosHnd1[1],	_yPosHnd1[1]
+								line2	_hndInLct2,	0,	_xPosHnd2[1],	_yPosHnd2[1]
+
+								hotline2	_hndInLct1,	0,	_xPosHnd1[1],	_yPosHnd1[1]
+								hotline2	_hndInLct2,	0,	_xPosHnd2[1],	_yPosHnd2[1]
+
+								for	i = 1	to	iWrkBrkLct - 2
+									line2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+									line2	_xPosHnd2[i],	_yPosHnd2[i],	_xPosHnd2[i + 1],	_yPosHnd2[i + 1]
+
+									hotline2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+									hotline2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+								next	i
+
+								!	계단 난간 : Cut
+								add2	_xPosHnd1[iWrkBrkLct - 1],	_yPosHnd1[iWrkBrkLct - 1]
+									rot2	aStr/2
+										line2	0,	0,	0,	exHndWrk[1]
+
+										hotline2	0,	0,	0,	exHndWrk[1]
+
+										hotspot2	0,	0,				unID,	exHndWrk[1],	1+128	:	unID = unID + 1
+										hotspot2	0,	-1,				unID,	exHndWrk[1],	3		:	unID = unID + 1
+										hotspot2	0,	exHndWrk[1],	unID,	exHndWrk[1],	2		:	unID = unID + 1
+									del 1
+								del 1
+
+								add2	_xPosHnd2[iWrkBrkLct - 1],	_yPosHnd2[iWrkBrkLct - 1]
+									rot2	aStr/2
+										line2	0,	0,	0,	exHndWrk[2]
+
+										hotline2	0,	0,	0,	exHndWrk[2]
+
+										hotspot2	0,	0,				unID,	exHndWrk[2],	1+128	:	unID = unID + 1
+										hotspot2	0,	-1,				unID,	exHndWrk[2],	3		:	unID = unID + 1
+										hotspot2	0,	exHndWrk[2],	unID,	exHndWrk[2],	2		:	unID = unID + 1
+									del 1
+								del 1
+
+							endif
+						endif
+
+						!	2D표현 : Entire
+						if	iWrkFlr = View_Entire	then
+							!	난간 길이(작업층)
+							gosub	"wrkHndIn_"
+
+							!	난간 길이(상부층)
+							gosub	"uprHndIn_"
+
+							!	계단 난간
+							if	not(bStraight)	then
+								arc2	0,	0,	_hndInLct1,	0,	aStr
+								arc2	0,	0,	_hndInLct2,	0,	aStr
+
+								hotarc2	0,	0,	_hndInLct1,	0,	aStr
+								hotarc2	0,	0,	_hndInLct2,	0,	aStr
+							else
+								line2	_hndInLct1,	0,	_xPosHnd1[1],	_yPosHnd1[1]
+								line2	_hndInLct2,	0,	_xPosHnd2[1],	_yPosHnd2[1]
+
+								hotline2	_hndInLct1,	0,	_xPosHnd1[1],	_yPosHnd1[1]
+								hotline2	_hndInLct2,	0,	_xPosHnd2[1],	_yPosHnd2[1]
+
+								for	i = 1	to	nRsr
+									line2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+									line2	_xPosHnd2[i],	_yPosHnd2[i],	_xPosHnd2[i + 1],	_yPosHnd2[i + 1]
+
+									hotline2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+									hotline2	_xPosHnd2[i],	_yPosHnd2[i],	_xPosHnd2[i + 1],	_yPosHnd2[i + 1]
+								next	i
+							endif
+						endif
+					endif
+
+					!	상부층
+					if	_storyValue = Story_Upstairs	then
+						!	2D표현 : Cut
+						if	iUprFlr = View_Cut	then
+							!	난간 길이(상부층)
+							gosub	"uprHndIn_"
+
+							if	not(bStraight)	then
+								!	계단 난간 : Cut 전까지
+								arc2	0,	0,	_hndInLct1,	_aTrd*iUprBrkLct + aExHndUpr[1],	aStr
+								arc2	0,	0,	_hndInLct2,	_aTrd*iUprBrkLct + aExHndUpr[2],	aStr
+
+								hotarc2	0,	0,	_hndInLct1,	_aTrd*iUprBrkLct + aExHndUpr[1],	aStr
+								hotarc2	0,	0,	_hndInLct2,	_aTrd*iUprBrkLct + aExHndUpr[2],	aStr
+
+								!	계단 난간 : Cut
+								rot2	_aTrd*iUprBrkLct
+									hotspot2	_hndInLct1,						0,								unID,	aExHndUpr[1],	4+128	:	unID = unID + 1
+									hotspot2	_hndInLct1*cos(aExHndUpr[1]),	_hndInLct1*sin(aExHndUpr[1]),	unID,	aExHndUpr[1],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExHndUpr[1],	6		:	unID = unID + 1
+
+									hotspot2	_hndInLct2,						0,								unID,	aExHndUpr[2],	4+128	:	unID = unID + 1
+									hotspot2	_hndInLct2*cos(aExHndUpr[2]),	_hndInLct2*sin(aExHndUpr[2]),	unID,	aExHndUpr[2],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExHndUpr[2],	6		:	unID = unID + 1
+								del 1
+							else
+								!	계단 난간 : Cut 전까지
+								for	i = iUprBrkLct + 1	to	nRsr
+									line2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+									line2	_xPosHnd2[i],	_yPosHnd2[i],	_xPosHnd2[i + 1],	_yPosHnd2[i + 1]
+
+									hotline2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+									hotline2	_xPosHnd2[i],	_yPosHnd2[i],	_xPosHnd2[i + 1],	_yPosHnd2[i + 1]
+								next	i
+
+								!	계단 난간 : Cut
+								add2	_xPosHnd1[iUprBrkLct + 1],	_yPosHnd1[iUprBrkLct + 1]
+									rot2	aStr/2
+										line2	0,	0,	0,	-exHndUpr[1]
+
+										hotline2	0,	0,	0,	-exHndUpr[1]
+
+										hotspot2	0,	0,				unID,	exHndUpr[1],	1+128	:	unID = unID + 1
+										hotspot2	0,	1,				unID,	exHndUpr[1],	3		:	unID = unID + 1
+										hotspot2	0,	-exHndUpr[1],	unID,	exHndUpr[1],	2		:	unID = unID + 1
+									del 1
+								del 1
+
+								add2	_xPosHnd2[iUprBrkLct + 1],	_yPosHnd2[iUprBrkLct + 1]
+									rot2	aStr/2
+										line2	0,	0,	0,	-exHndUpr[2]
+
+										hotline2	0,	0,	0,	-exHndUpr[2]
+
+										hotspot2	0,	0,				unID,	exHndUpr[2],	1+128	:	unID = unID + 1
+										hotspot2	0,	1,				unID,	exHndUpr[2],	3		:	unID = unID + 1
+										hotspot2	0,	-exHndUpr[2],	unID,	exHndUpr[2],	2		:	unID = unID + 1
+									del 1
+								del 1
+							endif
+						endif
+
+						!	2D표현 : Entire
+						if	iUprFlr = View_Entire	then
+							!	난간 길이(작업층)
+							gosub	"wrkHndIn_"
+
+							!	난간 길이(상부층)
+							gosub	"uprHndIn_"
+
+							!	계단 난간
+							if	not(bStraight)	then
+								arc2	0,	0,	_hndInLct1,	0,	aStr
+								arc2	0,	0,	_hndInLct2,	0,	aStr
+
+								hotarc2	0,	0,	_hndInLct1,	0,	aStr
+								hotarc2	0,	0,	_hndInLct2,	0,	aStr
+							else
+								line2	_hndInLct1,	0,	_xPosHnd1[1],	_yPosHnd1[1]
+								line2	_hndInLct2,	0,	_xPosHnd2[1],	_yPosHnd2[1]
+
+								hotline2	_hndInLct1,	0,	_xPosHnd1[1],	_yPosHnd1[1]
+								hotline2	_hndInLct2,	0,	_xPosHnd2[1],	_yPosHnd2[1]
+
+								for	i = 1	to	nRsr
+									line2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+									line2	_xPosHnd2[i],	_yPosHnd2[i],	_xPosHnd2[i + 1],	_yPosHnd2[i + 1]
+
+									hotline2	_xPosHnd1[i],	_yPosHnd1[i],	_xPosHnd1[i + 1],	_yPosHnd1[i + 1]
+									hotline2	_xPosHnd2[i],	_yPosHnd2[i],	_xPosHnd2[i + 1],	_yPosHnd2[i + 1]
+								next	i
+							endif
+						endif
+					endif
+				endif
+
+				!	바깥쪽 핸드레일
+				!-----------------------------------------------------------------------------------------------
+				if	bHnd_Out	then
+					!	작업층
+					if	_storyValue = Story_Current	then
+						!	2D표현 : Cut
+						if	iWrkFlr = View_Cut	then
+							!	난간 길이(작업층)
+							gosub	"wrkHndOut_"
+
+							!	계단 난간 : Cut 전까지
+							arc2	0,	0,	_hndOutLct1,	0,	_aTrd*iWrkBrkLct
+							arc2	0,	0,	_hndOutLct2,	0,	_aTrd*iWrkBrkLct
+
+							hotarc2	0,	0,	_hndOutLct1,	0,	_aTrd*iWrkBrkLct
+							hotarc2	0,	0,	_hndOutLct2,	0,	_aTrd*iWrkBrkLct
+
+							!	계단 난간 : Cut
+							rot2	_aTrd*iWrkBrkLct
+								hotspot2	_hndOutLct1,					0,								unID,	aExHndWrk[3],	4+128	:	unID = unID + 1
+								hotspot2	_hndOutLct1*cos(aExHndWrk[3]),	_hndOutLct1*sin(aExHndWrk[3]),	unID,	aExHndWrk[3],	5		:	unID = unID + 1
+								hotspot2	0,								0,								unID,	aExHndWrk[3],	6		:	unID = unID + 1
+
+								arc2	0,	0,	_hndOutLct1,	0,	aExHndWrk[3]
+								hotarc2	0,	0,	_hndOutLct1,	0,	aExHndWrk[3]
+
+								hotspot2	_hndOutLct2,					0,								unID,	aExHndWrk[4],	4+128	:	unID = unID + 1
+								hotspot2	_hndOutLct2*cos(aExHndWrk[4]),	_hndOutLct2*sin(aExHndWrk[4]),	unID,	aExHndWrk[4],	5		:	unID = unID + 1
+								hotspot2	0,								0,								unID,	aExHndWrk[4],	6		:	unID = unID + 1
+
+								arc2	0,	0,	_hndOutLct2,	0,	aExHndWrk[4]
+								hotarc2	0,	0,	_hndOutLct2,	0,	aExHndWrk[4]
+							del 1
+						endif
+
+						!	2D표현 : Entire
+						if	iWrkFlr = View_Entire	then
+							!	난간 길이(작업층)
+							gosub	"wrkHndOut_"
+
+							!	난간 길이(상부층)
+							gosub	"uprHndOut_"
+
+							!	계단 난간
+							arc2	0,	0,	_hndOutLct1,	0,	aStr
+							arc2	0,	0,	_hndOutLct2,	0,	aStr
+
+							hotarc2	0,	0,	_hndOutLct1,	0,	aStr
+							hotarc2	0,	0,	_hndOutLct2,	0,	aStr
+						endif
+					endif
+
+					!	상부층
+					if	_storyValue = Story_Upstairs	then
+						!	2D표현 : Cut
+						if	iUprFlr = View_Cut	then
+							!	난간 길이(상부층)
+							gosub	"uprHndOut_"
+
+							!	계단 난간 : Cut 전까지
+							arc2	0,	0,	_hndOutLct1,	_aTrd*iUprBrkLct + aExHndUpr[3],	aStr
+							arc2	0,	0,	_hndOutLct2,	_aTrd*iUprBrkLct + aExHndUpr[4],	aStr
+
+							hotarc2	0,	0,	_hndOutLct1,	_aTrd*iUprBrkLct + aExHndUpr[3],	aStr
+							hotarc2	0,	0,	_hndOutLct2,	_aTrd*iUprBrkLct + aExHndUpr[4],	aStr
+
+							!	계단 난간 : Cut
+							rot2	_aTrd*iUprBrkLct
+								hotspot2	_hndOutLct1,					0,								unID,	aExHndUpr[3],	4+128	:	unID = unID + 1
+								hotspot2	_hndOutLct1*cos(aExHndUpr[3]),	_hndOutLct1*sin(aExHndUpr[3]),	unID,	aExHndUpr[3],	5		:	unID = unID + 1
+								hotspot2	0,								0,								unID,	aExHndUpr[3],	6		:	unID = unID + 1
+
+								hotspot2	_hndOutLct2,					0,								unID,	aExHndUpr[4],	4+128	:	unID = unID + 1
+								hotspot2	_hndOutLct2*cos(aExHndUpr[4]),	_hndOutLct2*sin(aExHndUpr[4]),	unID,	aExHndUpr[4],	5		:	unID = unID + 1
+								hotspot2	0,								0,								unID,	aExHndUpr[4],	6		:	unID = unID + 1
+							del 1
+						endif
+
+						!	2D표현 : Entire
+						if	iUprFlr = View_Entire	then
+							!	난간 길이(작업층)
+							gosub	"wrkHndOut_"
+
+							!	난간 길이(상부층)
+							gosub	"uprHndOut_"
+
+							!	계단 난간
+							arc2	0,	0,	_hndOutLct1,	0,	aStr
+							arc2	0,	0,	_hndOutLct2,	0,	aStr
+
+							hotarc2	0,	0,	_hndOutLct1,	0,	aStr
+							hotarc2	0,	0,	_hndOutLct2,	0,	aStr
+						endif
+					endif
+				endif
+			del 1
+		endif
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	Text & 2D
+	!-----------------------------------------------------------------------------------------------
+
+		!	마감재 두께 : Core Only
+		rot2	_aFinish
+
+			!	Text
+			!-----------------------------------------------------------------------------------------------
+			pen	textPen
+
+			if	bText	then
+				!	작업층
+				if	_storyValue = Story_Current	then
+					if	not(iWrkFlr = View_None)	then
+						!	UP
+						add2	strRad + strWdt/2,	0
+							hotspot2	0,	0,			unID,	yTextWrk,	1 + 128	:	unID = unID + 1
+							hotspot2	0,	1,			unID,	yTextWrk,	3		:	unID = unID + 1
+							hotspot2	0,	-yTextWrk,	unID,	yTextWrk,	2		:	unID = unID + 1
+
+							add2	0,	-yTextWrk
+								style	"style_Up"
+								text2	0,	0,	"UP"
+							del 1
+						del 1
+					endif
+				endif
+
+				!	상부층
+				if	_storyValue = Story_Upstairs	then
+					if	not(iUprFlr = View_None)	then
+						!	DN
+						rot2	aStr
+							add2	strRad + strWdt/2,	0
+								hotspot2	0,	0,			unID,	yTextUpr,	1 + 128	:	unID = unID + 1
+								hotspot2	0,	-1,			unID,	yTextUpr,	3		:	unID = unID + 1
+								hotspot2	0,	yTextUpr,	unID,	yTextUpr,	2		:	unID = unID + 1
+
+								add2	0,	yTextUpr
+									style	"style_Dn"
+									text2	0,	0,	"DN"
+								del 1
+							del 1
+						del 1
+					endif
+				endif
+			endif
+
+
+			!	Up/Down Arrow/Line
+			!-----------------------------------------------------------------------------------------------
+			pen	etcPen
+
+			if	bArrow	then
+				!	작업층
+				if	_storyValue = Story_Current	then
+					if	not(iWrkFlr = View_None)	then
+						!	S.P
+						add2	strRad + strWdt/2,	0
+							circle2	0,	0,	0.075
+						del 1
+
+						!	Arc
+						if	iWrkFlr = View_Cut	then
+							arc2	0,	0,	strRad + strWdt/2,	0,	_aTrd*iWrkBrkLct
+
+							rot2	_aTrd*iWrkBrkLct
+								add2	strRad + strWdt/2,	0
+										put	0,		-0.040,
+											0.100,	-0.100,
+											0.120,	-0.070,
+											0,		0,
+											-0.120,	-0.070,
+											-0.100,	-0.100,
+											0,		-0.040
+
+										poly2	nsp/2,	1,	get(nsp)
+								del 1
+							del 1
+						endif
+
+						if	iWrkFlr = View_Entire	then
+							arc2	0,	0,	strRad + strWdt/2,	0,	aStr
+
+							rot2	aStr
+								add2	strRad + strWdt/2,	0
+										put	0,		-0.040,
+											0.100,	-0.100,
+											0.120,	-0.070,
+											0,		0,
+											-0.120,	-0.070,
+											-0.100,	-0.100,
+											0,		-0.040
+
+										poly2	nsp/2,	1,	get(nsp)
+								del 1
+							del 1
+						endif
+					endif
+				endif
+
+				!	상부층
+				if	_storyValue = Story_Upstairs	then
+					if	not(iUprFlr = View_None)	then
+						!	Arc
+						if	iUprFlr = View_Cut	then
+							arc2	0,	0,	strRad + strWdt/2,	_aTrd*(iUprBrkLct + 1),	aStr
+
+							rot2	_aTrd*(iUprBrkLct + 1)
+								add2	strRad + strWdt/2,	0
+										put	0,		0.040,
+											0.100,	0.100,
+											0.120,	0.070,
+											0,		0,
+											-0.120,	0.070,
+											-0.100,	0.100,
+											0,		0.040
+
+										poly2	nsp/2,	1,	get(nsp)
+								del 1
+							del 1
+						endif
+
+						if	iUprFlr = View_Entire	then
+							arc2	0,	0,	strRad + strWdt/2,	0,	aStr
+
+							add2	strRad + strWdt/2,	0
+									put	0,		0.040,
+										0.100,	0.100,
+										0.120,	0.070,
+										0,		0,
+										-0.120,	0.070,
+										-0.100,	0.100,
+										0,		0.040
+
+									poly2	nsp/2,	1,	get(nsp)
+							del 1
+						endif
+
+						!	E.P
+						rot2	aStr
+							add2	strRad + strWdt/2,	0
+								circle2	0,	0,	0.075
+							del 1
+						del 1
+					endif
+				endif
+			endif
+
+		del 1
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	Break Line
+	!-----------------------------------------------------------------------------------------------
+		pen	etcPen
+
+		!	마감재 두께 : Core Only
+		rot2	_aFinish
+			!	작업층
+			if	_storyValue = Story_Current	then
+				if	iWrkFlr = View_Cut	then
+					if	bWrkBrk	then
+						_aBrk = atn(_yLength/_xLength)
+
+						add2	strRad*cos(_aBrkSP),	strRad*sin(_aBrkSP)
+							rot2	_aBrk - _aFinish
+								add2	_brkLth/2,	0
+									gosub	"brk_"
+								del 1
+							del 1
+						del 1
+					endif
+				endif
+			endif
+
+			!	상부층
+			if	_storyValue = Story_Upstairs	then
+				if	iUprFlr = View_Cut	then
+					if	bUprBrk	then
+						_aBrk = atn(_yLength/_xLength)
+
+						add2	strRad*cos(_aBrkSP),	strRad*sin(_aBrkSP)
+							rot2	_aBrk - _aFinish
+								add2	_brkLth/2,	0
+									gosub	"brk_"
+								del 1
+							del 1
+						del 1
+					endif
+				endif
+			endif
+		del 1
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	하부 보
+	!-----------------------------------------------------------------------------------------------
+		drawindex	20
+		line_type	beamLt
+		pen			beamPen
+
+		!	뷰 옵션이 Entire Model이 아닐 경우에만 2D표현
+		if	_modelValue = Core_Only	then
+			!	Beam 1
+			if	nBeam > 0	then
+				rot2	_aFinish
+					add2	strRad,	0
+						!	beamLct1
+						hotspot2	0,			0,	unID,	beamLct1,	1+128	:	unID = unID + 1
+						hotspot2	-1,			0,	unID,	beamLct1,	3		:	unID = unID + 1
+						hotspot2	beamLct1,	0,	unID,	beamLct1,	2		:	unID = unID + 1
+					del 1
+
+					_beamWdt1 = strRad + beamLct1 - beamWdt1/2
+					_beamWdt2 = strRad + beamLct1 + beamWdt1/2
+
+					!	작업층
+					if	_storyValue = Story_Current	then
+						if	not(iWrkFlr = View_None)	then
+							if	iWrkFlr = View_Cut	then
+								arc2	0,	0,	_beamWdt1,	0,	_aTrd*iWrkBrkLct + aExBeamWrk[1]
+								arc2	0,	0,	_beamWdt2,	0,	_aTrd*iWrkBrkLct + aExBeamWrk[2]
+
+								hotarc2	0,	0,	_beamWdt1,	0,	_aTrd*iWrkBrkLct + aExBeamWrk[1]
+								hotarc2	0,	0,	_beamWdt2,	0,	_aTrd*iWrkBrkLct + aExBeamWrk[2]
+
+								rot2	_aTrd*iWrkBrkLct
+									hotspot2	_beamWdt1,						0,								unID,	aExBeamWrk[1],	4+128	:	unID = unID + 1
+									hotspot2	_beamWdt1*cos(aExBeamWrk[1]),	_beamWdt1*sin(aExBeamWrk[1]),	unID,	aExBeamWrk[1],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExBeamWrk[1],	6		:	unID = unID + 1
+
+									hotspot2	_beamWdt2,						0,								unID,	aExBeamWrk[2],	4+128	:	unID = unID + 1
+									hotspot2	_beamWdt2*cos(aExBeamWrk[2]),	_beamWdt2*sin(aExBeamWrk[2]),	unID,	aExBeamWrk[2],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExBeamWrk[2],	6		:	unID = unID + 1
+								del 1
+							endif
+							if	iWrkFlr = View_Entire	then
+								arc2	0,	0,	_beamWdt1,	0,	aStr
+								arc2	0,	0,	_beamWdt2,	0,	aStr
+
+								hotarc2	0,	0,	_beamWdt1,	0,	aStr
+								hotarc2	0,	0,	_beamWdt2,	0,	aStr
+							endif
+						endif
+					endif
+
+					!	상부층
+					if	_storyValue = Story_Upstairs	then
+						if	not(iUprFlr = View_None)	then
+							if	iUprFlr = View_Cut	then
+								arc2	0,	0,	_beamWdt1,	_aTrd*iUprBrkLct + aExBeamUpr[1],	aStr
+								arc2	0,	0,	_beamWdt2,	_aTrd*iUprBrkLct + aExBeamUpr[2],	aStr
+
+								hotarc2	0,	0,	_beamWdt1,	_aTrd*iUprBrkLct + aExBeamUpr[1],	aStr
+								hotarc2	0,	0,	_beamWdt2,	_aTrd*iUprBrkLct + aExBeamUpr[2],	aStr
+
+								rot2	_aTrd*iUprBrkLct
+									hotspot2	_beamWdt1,						0,								unID,	aExBeamUpr[1],	4+128	:	unID = unID + 1
+									hotspot2	_beamWdt1*cos(aExBeamUpr[1]),	_beamWdt1*sin(aExBeamUpr[1]),	unID,	aExBeamUpr[1],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExBeamUpr[1],	6		:	unID = unID + 1
+
+									hotspot2	_beamWdt2,						0,								unID,	aExBeamUpr[2],	4+128	:	unID = unID + 1
+									hotspot2	_beamWdt2*cos(aExBeamUpr[2]),	_beamWdt2*sin(aExBeamUpr[2]),	unID,	aExBeamUpr[2],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExBeamUpr[2],	6		:	unID = unID + 1
+								del 1
+							endif
+							if	iUprFlr = View_Entire	then
+								arc2	0,	0,	_beamWdt1,	0,	aStr
+								arc2	0,	0,	_beamWdt2,	0,	aStr
+
+								hotarc2	0,	0,	_beamWdt1,	0,	aStr
+								hotarc2	0,	0,	_beamWdt2,	0,	aStr
+							endif
+						endif
+					endif
+				del 1
+			endif
+
+			!	Beam 2
+			if	nBeam > 1	then
+				rot2	_aFinish
+					add2	strRad,	0
+						!	beamLct1
+						hotspot2	0,			0,	unID,	beamLct2,	1+128	:	unID = unID + 1
+						hotspot2	-1,			0,	unID,	beamLct2,	3		:	unID = unID + 1
+						hotspot2	beamLct2,	0,	unID,	beamLct2,	2		:	unID = unID + 1
+					del 1
+
+					_beamWdt3 = strRad + beamLct2 - beamWdt2/2
+					_beamWdt4 = strRad + beamLct2 + beamWdt2/2
+
+					!	작업층
+					if	_storyValue = Story_Current	then
+						if	not(iWrkFlr = View_None)	then
+							if	iWrkFlr = View_Cut	then
+								arc2	0,	0,	_beamWdt3,	0,	_aTrd*iWrkBrkLct + aExBeamWrk[3]
+								arc2	0,	0,	_beamWdt4,	0,	_aTrd*iWrkBrkLct + aExBeamWrk[4]
+
+								hotarc2	0,	0,	_beamWdt3,	0,	_aTrd*iWrkBrkLct + aExBeamWrk[3]
+								hotarc2	0,	0,	_beamWdt4,	0,	_aTrd*iWrkBrkLct + aExBeamWrk[4]
+
+								rot2	_aTrd*iWrkBrkLct
+									hotspot2	_beamWdt3,						0,								unID,	aExBeamWrk[3],	4+128	:	unID = unID + 1
+									hotspot2	_beamWdt3*cos(aExBeamWrk[3]),	_beamWdt3*sin(aExBeamWrk[3]),	unID,	aExBeamWrk[3],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExBeamWrk[3],	6		:	unID = unID + 1
+
+									hotspot2	_beamWdt4,						0,								unID,	aExBeamWrk[4],	4+128	:	unID = unID + 1
+									hotspot2	_beamWdt4*cos(aExBeamWrk[4]),	_beamWdt4*sin(aExBeamWrk[4]),	unID,	aExBeamWrk[4],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExBeamWrk[4],	6		:	unID = unID + 1
+								del 1
+							endif
+							if	iWrkFlr = View_Entire	then
+								arc2	0,	0,	_beamWdt3,	0,	aStr
+								arc2	0,	0,	_beamWdt4,	0,	aStr
+
+								hotarc2	0,	0,	_beamWdt3,	0,	aStr
+								hotarc2	0,	0,	_beamWdt4,	0,	aStr
+							endif
+						endif
+					endif
+
+					!	상부층
+					if	_storyValue = Story_Upstairs	then
+						if	not(iUprFlr = View_None)	then
+							if	iUprFlr = View_Cut	then
+								arc2	0,	0,	_beamWdt3,	_aTrd*iUprBrkLct + aExBeamUpr[3],	aStr
+								arc2	0,	0,	_beamWdt4,	_aTrd*iUprBrkLct + aExBeamUpr[4],	aStr
+
+								hotarc2	0,	0,	_beamWdt3,	_aTrd*iUprBrkLct + aExBeamUpr[3],	aStr
+								hotarc2	0,	0,	_beamWdt4,	_aTrd*iUprBrkLct + aExBeamUpr[4],	aStr
+
+								rot2	_aTrd*iUprBrkLct
+									hotspot2	_beamWdt3,						0,								unID,	aExBeamUpr[3],	4+128	:	unID = unID + 1
+									hotspot2	_beamWdt3*cos(aExBeamUpr[3]),	_beamWdt3*sin(aExBeamUpr[3]),	unID,	aExBeamUpr[3],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExBeamUpr[3],	6		:	unID = unID + 1
+
+									hotspot2	_beamWdt4,						0,								unID,	aExBeamUpr[4],	4+128	:	unID = unID + 1
+									hotspot2	_beamWdt4*cos(aExBeamUpr[4]),	_beamWdt4*sin(aExBeamUpr[4]),	unID,	aExBeamUpr[4],	5		:	unID = unID + 1
+									hotspot2	0,								0,								unID,	aExBeamUpr[4],	6		:	unID = unID + 1
+								del 1
+							endif
+							if	iUprFlr = View_Entire	then
+								arc2	0,	0,	_beamWdt3,	0,	aStr
+								arc2	0,	0,	_beamWdt4,	0,	aStr
+
+								hotarc2	0,	0,	_beamWdt3,	0,	aStr
+								hotarc2	0,	0,	_beamWdt4,	0,	aStr
+							endif
+						endif
+					endif
+				del 1
+			endif
+		endif
+
+endif
+
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+
+
+!===============================================================================================
+!	Sub-Routine
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+"calc_xPos_L":	!	xPos_L 계산
+!-----------------------------------------------------------------------------------------------
+	if	iStairType_L = stairType_Straight	then
+		!	각도
+		_xDist = xStart_L - xEnd_L
+		_yDist = strTrd*nRsr
+
+		!	수식
+		if	abs(_xDist) < eps	then
+			_xPos_L = -xStart_L
+		else
+			_Ang_L = atn(_yDist/_xDist)
+			_xPos_L = yPos/tan(_Ang_L) - xStart_L
+		endif
+	endif
+
+	if	iStairType_L = stairType_Curve	then
+		if	xCenter_L > eps	then
+			_xPos_L = -sqr(radius_L^2 - (yPos - yCenter_L)^2) + xCenter_L
+		endif
+		if	xCenter_L <= eps	then
+			_xPos_L = sqr(radius_L^2 - (yPos - yCenter_L)^2) + xCenter_L
+		endif
+		! _xPos_L = _xPos_L - radius_L*2
+	endif
+
+	xPos_L = _xPos_L
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"calc_xPos_R":	!	xPos_R 계산
+!-----------------------------------------------------------------------------------------------
+	if	iStairType_R = stairType_Straight	then
+		!	각도
+		_xDist = xEnd_R - xStart_R
+		_yDist = strTrd*nRsr
+
+		!	수식
+		if	abs(_xDist) < eps	then
+			_xPos_R = xStart_R
+		else
+			_Ang_R = atn(_yDist/_xDist)
+			_xPos_R = yPos/tan(_Ang_R) + xStart_R
+		endif
+	endif
+
+	if	iStairType_R = stairType_Curve	then
+		if	xCenter_R > eps	then
+			_xPos_R = -sqr(radius_R^2 - (yPos - yCenter_R)^2) + xCenter_R
+		endif
+		if	xCenter_R <= eps	then
+			_xPos_R = sqr(radius_R^2 - (yPos - yCenter_R)^2) + xCenter_R
+		endif
+	endif
+
+	_xPos_R = _xPos_R + strWdt
+	xPos_R = _xPos_R
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"convertDegree":	!	Radian → Degree
+!-----------------------------------------------------------------------------------------------
+
+	Degree = Radian*180/PI
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"brk_":	!	Break Line
+!-----------------------------------------------------------------------------------------------
+	!	Break Line
+	put	-(_brkLth/2 + brkLine_L),	0,
+		-0.075,						0,
+		0,							-0.150,
+		0,							0.150,
+		0.075,						0,
+		_brkLth/2 + brkLine_R,		0
+
+	poly2	nsp/2,	1,	use(nsp)
+
+	!	Hotline
+	for	h = 1	to	(nsp/2) - 2
+		hotline2	get(2),	use(2)
+	next	h
+		hotline2	get(2),	get(2)
+
+	!	Hotspot
+	add2	-_brkLth/2,	0
+		hotspot2	0,			0,	unID,	brkLine_L,	1 + 128	:	unID = unID + 1
+		hotspot2	1,			0,	unID,	brkLine_L,	3		:	unID = unID + 1
+		hotspot2	-brkLine_L,	0,	unID,	brkLine_L,	2		:	unID = unID + 1
+	del 1
+
+	add2	_brkLth/2,	0
+		hotspot2	0,			0,	unID,	brkLine_R,	1 + 128	:	unID = unID + 1
+		hotspot2	-1,			0,	unID,	brkLine_R,	3		:	unID = unID + 1
+		hotspot2	brkLine_R,	0,	unID,	brkLine_R,	2		:	unID = unID + 1
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"trd_":	!	단
+!-----------------------------------------------------------------------------------------------
+	!	단 방향 : 수평
+	if	iTreadType = treadType_Parallel	then
+		yPos = strTrd*(i - 1) + _fnsThk
+		gosub	"calc_xPos_L"
+		gosub	"calc_xPos_R"
+
+		put	xPos_L,							yPos,	1,
+			xPos_L + (hndOff_Out - hndRd),	yPos,	_bHndLine_Out,
+			xPos_L + (hndOff_Out + hndRd),	yPos,	1,
+			xPos_R - (hndOff_In + hndRd),	yPos,	_bHndLine_In,
+			xPos_R - (hndOff_In - hndRd),	yPos,	1,
+			xPos_R,							yPos,	1
+
+		poly2_	nsp/3,	1,	use(nsp)
+
+		!	Hotline
+		for	h = 1	to	(nsp/3) - 2
+			hotline2	get(2) + (use(1) - get(1)),	use(2)
+		next	h
+			hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+	endif
+
+	!	단 방향 : 원점
+	if	iTreadType = treadType_Center	then
+		rot2	_aTrd*i
+			if	not(bStraight)	then
+				put	strRad,				0,	1,
+					_hndInLct1,			0,	_bHndLine_In,
+					_hndInLct2,			0,	1,
+					_hndOutLct1,		0,	_bHndLine_Out,
+					_hndOutLct2,		0,	1,
+					strRad + strWdt,	0,	1
+
+				poly2_b	nsp/3,	1+2,	fillPen,	backPen,	use(nsp)
+
+					!	Hotline
+					for	h = 1	to	(nsp/3) - 2
+						hotline2	get(2) + (use(1) - get(1)),	use(2)
+					next	h
+						hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+			else
+				add2	strRad,	0
+					if	i = _idxCut	then
+						put	0,									0,	1,
+							strWdt - (hndOff_Out + hndRd),		0,	_bHndLine_Out,
+							strWdt - (hndOff_Out - hndRd),		0,	1,
+							strWdt,								0,	1
+					else
+						put	-exTrdLth[i],						0,	1,
+							-exTrdLth[i] + (hndOff_In - hndRd),	0,	_bHndLine_In,
+							-exTrdLth[i] + (hndOff_In + hndRd),	0,	1,
+							strWdt - (hndOff_Out + hndRd),		0,	_bHndLine_Out,
+							strWdt - (hndOff_Out - hndRd),		0,	1,
+							strWdt,								0,	1
+					endif
+
+					poly2_b	nsp/3,	1+2,	fillPen,	backPen,	use(nsp)
+
+						!	Hotline
+						for	h = 1	to	(nsp/3) - 2
+							hotline2	get(2) + (use(1) - get(1)),	use(2)
+						next	h
+							hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+					!	exTrdLth
+					hotspot2	0,				0,	unID,	exTrdLth[i],	1+128	:	unID = unID + 1
+					hotspot2	1,				0,	unID,	exTrdLth[i],	3		:	unID = unID + 1
+					hotspot2	-exTrdLth[i],	0,	unID,	exTrdLth[i],	2		:	unID = unID + 1
+				del 1
+			endif
+		del 1
+	endif
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"wrkHndIn_":	!	안쪽 난간 길이(작업층)
+!-----------------------------------------------------------------------------------------------
+	put	-hndRd,	0,						1,
+		-hndRd,	-(hndWrk_In + hndRd),	1,
+		hndRd,	-(hndWrk_In + hndRd),	1,
+		hndRd,	0,						1
+
+	add2	strRad + hndOff_In,	0
+		poly2_	nsp/3,	1,	use(nsp)
+
+		for	h = 1	to	(nsp/3) - 2
+			hotline2	get(2) + (use(1) - get(1)),	use(2)
+		next	h
+			hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"wrkHndOut_":	!	바깥쪽 난간 길이(작업층)
+!-----------------------------------------------------------------------------------------------
+	put	-hndRd,	0,						1,
+		-hndRd,	-(hndWrk_Out + hndRd),	1,
+		hndRd,	-(hndWrk_Out + hndRd),	1,
+		hndRd,	0,						1
+
+	add2	strRad + strWdt - hndOff_Out,	0
+		poly2_	nsp/3,	1,	use(nsp)
+
+		for	h = 1	to	(nsp/3) - 2
+			hotline2	get(2) + (use(1) - get(1)),	use(2)
+		next	h
+			hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"uprHndIn_":	!	안쪽 난간 길이(상부층)
+!-----------------------------------------------------------------------------------------------
+	put	-hndRd,	0,						1,
+		-hndRd,	(hndUpr_In + hndRd),	1,
+		hndRd,	(hndUpr_In + hndRd),	1,
+		hndRd,	0,						1
+
+	rot2	aStr
+		add2	strRad + hndOff_In,	0
+			poly2_	nsp/3,	1,	use(nsp)
+
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+		del 1
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"uprHndOut_":	!	바깥쪽 난간 길이(상부층)
+!-----------------------------------------------------------------------------------------------
+	put	-hndRd,	0,						1,
+		-hndRd,	(hndUpr_Out + hndRd),	1,
+		hndRd,	(hndUpr_Out + hndRd),	1,
+		hndRd,	0,						1
+
+	rot2	aStr
+		add2	strRad + strWdt - hndOff_Out,	0
+			poly2_	nsp/3,	1,	use(nsp)
+
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+		del 1
+	del 1
+return

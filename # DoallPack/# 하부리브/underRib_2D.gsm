@@ -1,0 +1,206 @@
+!===============================================================================================
+!	하부리브
+!===============================================================================================
+
+!	W.P
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+!-----------------------------------------------------------------------------------------------
+!	Guide
+!-----------------------------------------------------------------------------------------------
+if	bGuide	then
+	if	iRibType = RIB_ARC	then
+		circle2	0,	0,	0.100
+		line2		0,	0,	0,	distWP
+		hotline2	0,	0,	0,	distWP,	unID	:	unID = unID + 1
+	endif
+
+	if	iRibType = RIB_FREE	then
+		for	i = 1	to	nSplit
+			line2		xPosRib[i],	yPosRib[i],	xPosRib[i + 1],	yPosRib[i + 1]
+			hotline2	xPosRib[i],	yPosRib[i],	xPosRib[i + 1],	yPosRib[i + 1],	unID	:	unID = unID + 1
+		next	i
+	endif
+endif
+
+!	채우기
+fill	65
+
+_dist = 0
+if	iRibType = RIB_ARC	then	_dist = distWP
+
+_xPosFill = 0
+_yPosFill = 0
+if	iRibType = RIB_FREE	then
+	_xPosFill = xPosRib[1]
+	_yPosFill = yPosRib[1]
+endif
+
+if	bFinish	then
+	put	fnsWdtOut/2,	_dist - fnsOff,				1,
+		fnsWdtIn/2,		_dist + fnsLth - fnsOff,	1,
+		-fnsWdtIn/2,	_dist + fnsLth - fnsOff,	1,
+		-fnsWdtOut/2,	_dist - fnsOff,				1
+else
+	put	prfWdtOut/2,	_dist,			1,
+		prfWdtIn/2,		_dist + prfLth,	1,
+		-prfWdtIn/2,	_dist + prfLth,	1,
+		-prfWdtOut/2,	_dist,			1
+endif
+
+add2	_xPosFill,	_yPosFill
+	poly2_b	nsp/3,	2+4,	0,	0,	get(nsp)
+del 1
+
+!-----------------------------------------------------------------------------------------------
+!	Hotspot
+!-----------------------------------------------------------------------------------------------
+_dist = 0
+if	iRibType = RIB_ARC	then	_dist = distWP
+
+put	prfWdtOut/2,	_dist,			1,
+	prfWdtIn/2,		_dist + prfLth,	1,
+	-prfWdtIn/2,	_dist + prfLth,	1,
+	-prfWdtOut/2,	_dist,			1
+
+if	bFinish	then
+	put	fnsWdtOut/2,	_dist - fnsOff,				1,
+		fnsWdtIn/2,		_dist + fnsLth - fnsOff,	1,
+		-fnsWdtIn/2,	_dist + fnsLth - fnsOff,	1,
+		-fnsWdtOut/2,	_dist - fnsOff,				1
+endif
+
+for	h = 1	to	(nsp/3)
+	hotspot2	get(2) + (use(1) - get(1)),	unID	:	unID = unID + 1
+next	h
+
+
+if	iRibType = RIB_VERTICAL	then
+	if	bFinish	then
+		hotspot2	0,	0,			unID,	fnsOff,	1+128	:	unID = unID + 1
+		hotspot2	0,	1,			unID,	fnsOff,	3		:	unID = unID + 1
+		hotspot2	0,	-fnsOff,	unID,	fnsOff,	2		:	unID = unID + 1
+	endif
+endif
+
+if	iRibType = RIB_ARC	then
+	hotspot2	0,	0,		unID,	distWP,	1+128	:	unID = unID + 1
+	hotspot2	0,	-1,		unID,	distWP,	3		:	unID = unID + 1
+	hotspot2	0,	distWP,	unID,	distWP,	2		:	unID = unID + 1
+
+	if	bFinish	then
+		add2	0,	distWP
+			hotspot2	0,	0,			unID,	fnsOff,	1+128	:	unID = unID + 1
+			hotspot2	0,	1,			unID,	fnsOff,	3		:	unID = unID + 1
+			hotspot2	0,	-fnsOff,	unID,	fnsOff,	2		:	unID = unID + 1
+		del 1
+	endif
+endif
+
+if	iRibType = RIB_FREE	then
+	for	i = 1	to	(nSplit + 1)
+		hotspot2	0,			yPosRib[i],	unID,	xPosRib[i],	1+128	:	unID = unID + 1
+		hotspot2	-1,			yPosRib[i],	unID,	xPosRib[i],	3		:	unID = unID + 1
+		hotspot2	xPosRib[i],	yPosRib[i],	unID,	xPosRib[i],	2		:	unID = unID + 1
+
+		hotspot2	xPosRib[i],	0,			unID,	yPosRib[i],	1+128	:	unID = unID + 1
+		hotspot2	xPosRib[i],	-1,			unID,	yPosRib[i],	3		:	unID = unID + 1
+		hotspot2	xPosRib[i],	yPosRib[i],	unID,	yPosRib[i],	2		:	unID = unID + 1
+
+		add2	xPosRib[i],	yPosRib[i]
+			hotspot2	0,							prfLth,						unID,	aPartRib[i],	4+128	:	unID = unID + 1
+			hotspot2	-prfLth*sin(aPartRib[i]),	prfLth*cos(aPartRib[i]),	unID,	aPartRib[i],	5		:	unID = unID + 1
+			hotspot2	0,							0,							unID,	aPartRib[i],	6		:	unID = unID + 1
+		del 1
+	next	i
+
+	if	bFinish	then
+		hotspot2	0,	0,			unID,	fnsOff,	1+128	:	unID = unID + 1
+		hotspot2	0,	1,			unID,	fnsOff,	3		:	unID = unID + 1
+		hotspot2	0,	-fnsOff,	unID,	fnsOff,	2		:	unID = unID + 1
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+	!	Height of Plane
+	_cutPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[1]
+	_topPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[2]
+	_btmPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[3]
+	if	iProjectTo = PROJECTTO_ABSOLUTE	then
+		_btmPlaneHgt = GLOB_CUTPLANES_INFO[4]
+	endif
+
+	_bCutPlane = (iDisplay = DISPLAY_CUTPLANE | iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD)
+
+	!	절단면/하단면
+	if	_bCutPlane	then
+		!	절단면
+		pen			cutPen
+		fill		cutFill
+		line_type	1
+
+		project2{3}	3,	270,	2+16,	1+2,	cutBackPen,
+			parameters	bSymbol			= 1,
+						iProjectType	= 1,
+						cutPlaneHgt		= _cutPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+
+		!	하단면
+		if	not(iDisplay = DISPLAY_CUTPLANE)	then
+			pen			btmPen
+			fill		btmFill
+			line_type	1
+
+			project2{3}	3,	270,	3+32,	4+8,	btmBackPen,
+				parameters	bSymbol			= 1,
+							iProjectType	= 1,
+							cutPlaneHgt		= _cutPlaneHgt,
+							topPlaneHgt		= _topPlaneHgt,
+							btmPlaneHgt		= _btmPlaneHgt
+		endif
+	endif
+
+	!	Overhead
+	if	iDisplay = DISPLAY_WITHOVERHEAD	then
+		pen			overPen
+		line_type	overLT
+
+		project2{3}	3,	270,	2+32,	2+8,
+			parameters	bSymbol			= 1,
+						iProjectType	= 2,
+						cutPlaneHgt		= _cutPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Outlines only
+	if	iDisplay = DISPLAY_OUTLINES	then
+		!	하단면
+		pen			btmPen
+		fill		btmFill
+		line_type	1
+
+		project2{3}	3,	270,	3+32,	2+4+8,	btmBackPen,
+			parameters	bSymbol			= 1,
+						iProjectType	= 1,
+						cutPlaneHgt		= _topPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Overhead all
+	if	iDisplay = DISPLAY_OVERHEAD	then
+		!	하단면
+		pen			overPen
+		line_type	overLT
+
+		project2{3}	3,	270,	2+32,	2+8,
+			parameters	bSymbol			= 1,
+						iProjectType	= 2,
+						cutPlaneHgt		= _btmPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif

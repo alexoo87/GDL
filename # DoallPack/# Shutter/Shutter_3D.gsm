@@ -1,0 +1,1027 @@
+eps = 0.0001
+unID = 100
+
+!	변수 정의
+_offsetZ = m_box_Dist
+
+!	가이드레일 각도
+if	not(abs(slpLthL) < eps)	then
+	_aRailL = atn(zzyzx/slpLthL)
+else
+	_aRailL = 90
+endif
+
+if	not(abs(slpLthR) < eps)	then
+	_aRailR = atn(zzyzx/slpLthR)
+else
+	_aRailR = 90
+endif
+
+!	연장 길이
+_addLthL = 0
+if	slpLthL < -eps	then
+	_addLthL = (zzyzx + m_box_Height + _offsetZ)/tan(_aRailL)
+endif
+
+_addLthR = 0
+if	slpLthR < -eps	then
+	_addLthR = (zzyzx + m_box_Height + _offsetZ)/tan(_aRailR)
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	Box
+!-----------------------------------------------------------------------------------------------
+!	Hotspot
+hotspot	0,	0,	0,	unID, A, 1 + 256	: unID = unID + 1
+hotspot	A,	0,	0,	unID, A, 2			: unID = unID + 1
+hotspot	-1,	0,	0,	unID, A, 3			: unID = unID + 1
+
+addz	zzyzx + _offsetZ
+	addx	A/2
+		hotspot	0,	0,	0,				unID, m_box_Height, 1 + 128	: unID = unID + 1
+		hotspot	0,	0,	-1,				unID, m_box_Height, 3		: unID = unID + 1
+		hotspot	0,	0,	m_box_Height,	unID, m_box_Height, 2		: unID = unID + 1
+	del 1
+
+	if	iBoxType = Box_Flush	then
+		hotspot	0,					0,	0,	unID, m_box_leaf_left,	1 + 128	: unID = unID + 1
+		hotspot	-m_box_leaf_left,	0,	0,	unID, m_box_leaf_left,	2		: unID = unID + 1
+		hotspot	1,					0,	0,	unID, m_box_leaf_left,	3		: unID = unID + 1
+
+		addx	A
+			hotspot	0,					0,	0,	unID, m_box_leaf_right,	1 + 128	: unID = unID + 1
+			hotspot	m_box_leaf_right,	0,	0,	unID, m_box_leaf_right,	2		: unID = unID + 1
+			hotspot	-1,					0,	0,	unID, m_box_leaf_right,	3		: unID = unID + 1
+		del 1
+
+		addx	A/2
+			addz	-m_box_Dist
+				hotspot	0,	0,	0,			unID, m_box_Dist, 1 + 128	: unID = unID + 1
+				hotspot	0,	0,	-1,			unID, m_box_Dist, 3			: unID = unID + 1
+				hotspot	0,	0,	m_box_Dist,	unID, m_box_Dist, 2			: unID = unID + 1
+			del 1
+		del 1
+	endif
+
+	addz	m_box_Height
+		for	i = 1	to	2
+			hotspot	0,	0,				0,	unID,	m_box_Depth,	1 + 256	: unID = unID + 1
+			hotspot	0,	m_box_Depth,	0,	unID,	m_box_Depth,	2		: unID = unID + 1
+			hotspot	0,	-1,				0,	unID,	m_box_Depth,	3		: unID = unID + 1
+
+			addx	A
+		next	i
+		del 2
+	del 1
+
+	!	Outer Box
+	group	"gBox_Base"
+		pen			boxElevPen
+		sect_fill	65,	0,	1,	boxSectPen
+		material	gs_mat_box
+
+		!	매입형
+		if	iBoxType = Box_Flush	then
+			put	_addLthL - m_box_leaf_left,			0,				15,
+				A - _addLthR + m_box_leaf_right,	0,				15,
+				A - _addLthR + m_box_leaf_right,	m_box_Depth,	15,
+				_addLthL - m_box_leaf_left,			m_box_Depth,	15
+		endif
+
+		!	노출형
+		if	iBoxType = Box_Surface	then
+			put	_addLthL,		0,				15,
+				A - _addLthR,	0,				15,
+				A - _addLthR,	m_box_Depth,	15,
+				_addLthL,		m_box_Depth,	15
+		endif
+
+		prism_	nsp/3,	m_box_Height,	get(nsp)
+	endgroup
+
+	!	Inner Box
+	_boxThk = 0.003
+
+	group	"gBox_Cut"
+		!	매입형
+		if	iBoxType = Box_Flush	then
+			put	_addLthL - (m_box_leaf_left -_boxThk),		_boxThk,				15,
+				A - _addLthR + m_box_leaf_right - _boxThk,	_boxThk,				15,
+				A - _addLthR + m_box_leaf_right - _boxThk,	m_box_Depth - _boxThk,	15,
+				_addLthL - (m_box_leaf_left - _boxThk),		m_box_Depth - _boxThk,	15
+		endif
+
+		!	노출형
+		if	iBoxType = Box_Surface	then
+			put	_addLthL + _boxThk,		_boxThk,				15,
+				A - _addLthR - _boxThk,	_boxThk,				15,
+				A - _addLthR - _boxThk,	m_box_Depth - _boxThk,	15,
+				_addLthL + _boxThk,		m_box_Depth - _boxThk,	15
+		endif
+
+		addz	_boxThk
+			prism_	nsp/3,	m_box_Height - _boxThk*2,	get(nsp)
+		del 1
+	endgroup
+
+	!	Box
+	_nCut = 0
+	addx	m_Lguide_moveX
+		! if	bCornerL	then
+		! 	_iDirect_Corner = iDirect_CornerL
+		! 	_guideDist = m_Lguide_moveX
+		! 	_boxLeaf = m_box_leaf_left
+
+		! 	addy	m_screen_move_y
+		! 		gosub	"cornerCut"
+		! 	del 1
+		! endif
+
+		if	not(abs(slpLthL) < eps)	then
+			addz	-(zzyzx + _offsetZ)
+				roty	-_aRailL
+					if	slpLthL > eps	then
+						cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+					else
+						cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+					endif
+				del 1
+			del 1
+		endif
+	del 1
+
+	addx	A - m_Rguide_moveX
+		mulx	-1
+			! if	bCornerR	then
+			! 	_iDirect_Corner = iDirect_CornerR
+			! 	_guideDist = m_Rguide_moveX
+			! 	_boxLeaf = m_box_leaf_right
+
+			! 	addy	m_screen_move_y
+			! 		gosub	"cornerCut"
+			! 	del 1
+			! endif
+
+			if	not(abs(slpLthR) < eps)	then
+				addz	-(zzyzx + _offsetZ)
+					roty	-_aRailR
+						if	slpLthR > eps	then
+							cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+						else
+							cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+						endif
+					del 1
+				del 1
+			endif
+		del 1
+	del 1
+
+		placegroup	subgroup("gBox_Base",	"gBox_Cut")
+
+	if	_nCut > eps	then
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+	endif
+
+	!	Machinery(Section)
+	if	GLOB_VIEW_TYPE = 4	then
+		sect_fill	65,	0,	1,	machPen
+
+		if	bShowMach	then
+			_rad1 = (m_box_Depth*(3/5))/2
+			_rad2 = (m_box_Depth*(2/5))/2
+
+			if	_rad1*0.8 > m_box_Height/2	then
+				_rad1 =  m_box_Height/2
+				_rad2 = _rad1*(2/3)
+			endif
+
+			add	0,	_rad1,	m_box_Height/2
+				roty	-90
+					_inputRad = _rad1*0.1
+					gosub	"coor_Circle"
+
+					extrude	nsp/3,	0,	0,	-A,	0,	get(nsp)
+
+					_inputRad = _rad1*0.3
+					gosub	"coor_Circle"
+
+					extrude	nsp/3,	0,	0,	-A,	0,	get(nsp)
+
+					_inputRad = _rad1*0.8
+					gosub	"coor_Circle"
+
+					extrude	nsp/3,	0,	0,	-A,	0,	get(nsp)
+				del 1
+			del 1
+
+			add	0,	_rad1*2 + _rad2,	m_box_Height/2
+				roty	-90
+					_inputRad = _rad2*0.75
+					gosub	"coor_Circle"
+
+					extrude	nsp/3,	0,	0,	-A,	0,	get(nsp)
+				del 1
+
+				addy	-_rad2*0.25
+					roty	-90
+						_inputRad = _rad2*0.1
+						gosub	"coor_Circle"
+
+						extrude	nsp/3,	0,	0,	-A,	0,	get(nsp)
+
+						_inputRad = _rad2*0.25
+						gosub	"coor_Circle"
+
+						extrude	nsp/3,	0,	0,	-A,	0,	get(nsp)
+					del 1
+				del 1
+			del 1
+
+			add	0,	_rad1,	m_box_Height/2
+				roty	-90
+					put	(_rad1*0.9)*cos(25),	(_rad1*0.9)*sin(25),						1,
+						0,						0,											900 + 1,
+						0,						-230,										4000 + 1,
+						-(_rad2*0.3)*cos(25),	_rad1 + _rad2*0.75 + (_rad2*0.3)*sin(25),	1,
+						0,						_rad1 + _rad2*0.75,							900 + 1,
+						0,						-130,										4000 + 1,
+						(_rad1*0.9)*cos(25),	(_rad1*0.9)*sin(25),						1
+
+					extrude	nsp/3,	0,	0,	-A,	0,	get(nsp)
+				del 1
+			del 1
+		endif
+	endif
+
+
+del 1
+
+!-----------------------------------------------------------------------------------------------
+!	Guide Rail
+!-----------------------------------------------------------------------------------------------
+pen			guideElevPen
+sect_fill	65,	0,	1,	guideSectPen
+material	gs_mat_guide
+
+addx	m_Lguide_moveX - 0.030
+	hotspot	0,	0,					0,	unID,	m_screen_move_y,	1 + 128	: unID = unID + 1
+	hotspot	0,	m_screen_move_y,	0,	unID,	m_screen_move_y,	2		: unID = unID + 1
+	hotspot	0,	-1,					0,	unID,	m_screen_move_y,	3		: unID = unID + 1
+del 1
+
+addx	A - m_Rguide_moveX + 0.030
+	hotspot	0,	0,					0,	unID,	m_screen_move_y,	1 + 128	: unID = unID + 1
+	hotspot	0,	m_screen_move_y,	0,	unID,	m_screen_move_y,	2		: unID = unID + 1
+	hotspot	0,	-1,					0,	unID,	m_screen_move_y,	3		: unID = unID + 1
+del 1
+
+addy	m_screen_move_y
+	hotspot	A/2,	0,	0,		unID,	zzyzx,	1 + 256	: unID = unID + 1
+	hotspot	A/2,	0,	zzyzx,	unID,	zzyzx,	2		: unID = unID + 1
+	hotspot	A/2,	0,	-1,		unID,	zzyzx,	3		: unID = unID + 1
+
+	addy	m_guide_width
+		hotspot	0,				0,	0,	unID,	m_Lguide_moveX,	1 + 128	: unID = unID + 1
+		hotspot	m_Lguide_moveX,	0,	0,	unID,	m_Lguide_moveX,	2		: unID = unID + 1
+		hotspot	-1,				0,	0,	unID,	m_Lguide_moveX,	3		: unID = unID + 1
+	del 1
+
+	!	Left
+	if	bGuideRailL	then
+		addx	m_Lguide_moveX
+			if	bCornerL	then
+				_nCut = 0
+				_iDirect_Corner = iDirect_CornerL
+				_guideDist = m_Lguide_moveX
+				_boxLeaf = m_box_leaf_left
+
+				gosub	"cornerCut"
+			endif
+
+				addz	zzyzx
+					hotspot	0,			0,	0,	unID,	slpLthL,	1+128	:	unID = unID + 1
+					hotspot	-1,			0,	0,	unID,	slpLthL,	3		:	unID = unID + 1
+					hotspot	slpLthL,	0,	0,	unID,	slpLthL,	2		:	unID = unID + 1
+				del 1
+
+				_slpLth = slpLthL
+				gosub	"guideRail"
+
+			if	_nCut > eps	then
+				for	c = 1	to	_nCut
+					cutend
+				next	c
+			endif
+		del 1
+	endif
+
+	addx	A
+		addy	m_guide_width
+			hotspot	0,					0,	0,	unID, m_Rguide_moveX, 1 + 128	: unID = unID + 1
+			hotspot	-m_Rguide_moveX,	0,	0,	unID, m_Rguide_moveX, 2			: unID = unID + 1
+			hotspot	1,					0,	0,	unID, m_Rguide_moveX, 3			: unID = unID + 1
+		del 1
+
+		!	Right
+		if	bGuideRailR	then
+			addx	-m_Rguide_moveX
+				mulx -1
+					if	bCornerR	then
+						_nCut = 0
+						_iDirect_Corner = iDirect_CornerR
+						_guideDist = m_Rguide_moveX
+						_boxLeaf = m_box_leaf_right
+
+						gosub	"cornerCut"
+					endif
+
+						addz	zzyzx
+							hotspot	0,			0,	0,	unID,	slpLthR,	1+128	:	unID = unID + 1
+							hotspot	-1,			0,	0,	unID,	slpLthR,	3		:	unID = unID + 1
+							hotspot	slpLthR,	0,	0,	unID,	slpLthR,	2		:	unID = unID + 1
+						del 1
+
+						_slpLth = slpLthR
+						gosub	"guideRail"
+
+					if	_nCut > eps	then
+						for	c = 1	to	_nCut
+							cutend
+						next	c
+					endif
+				del 1
+			del 1
+		endif
+	del 1
+del 1
+
+!-----------------------------------------------------------------------------------------------
+!	Slat Screen
+!-----------------------------------------------------------------------------------------------
+material	gs_mat_screen
+
+if	slpLthL > eps	then
+	_slpLthL = slpLthL
+else
+	if	slpLthL < -eps	then
+		_slpLthL = 0
+	endif
+endif
+
+if	slpLthR > eps	then
+	_slpLthR = slpLthR
+else
+	if	slpLthR < -eps	then
+		_slpLthR = 0
+	endif
+endif
+
+
+addy	m_screen_move_y
+	addx	m_Lguide_moveX + _slpLthL
+		addy	m_guide_width/2
+
+			addz	zzyzx
+				!	변수 정의
+				_subLengthL = m_guide_depth - m_rail_depth + 0.01
+				_subLengthR = m_guide_depth - m_rail_depth + 0.01
+				_scrLength = A - m_Rguide_moveX - m_Lguide_moveX - (_slpLthL  + _slpLthR)
+
+				if	not(bGuideRailL)	then	_subLengthL = 0
+				if	not(bGuideRailR)	then	_subLengthR = 0
+
+				!	3D View
+				if	not(GLOB_VIEW_TYPE = 4)	then
+					!	셔터
+					hotspot	A/3,	0,	0,						unID,	m_screen_cutplane,	1 + 128	: unID = unID + 1
+					hotspot	A/3,	0,	1,						unID,	m_screen_cutplane,	3		: unID = unID + 1
+					hotspot	A/3,	0,	-m_screen_cutplane,		unID,	m_screen_cutplane,	2		: unID = unID + 1
+
+					addz	-m_screen_cutplane
+						!	Shutter
+						if	bDoor	then	gosub	"cutOpening"	!	문 부분 Cut
+							!	Shutter Type : Slat
+							if	iShtType = Shutter_Slat	then
+								_nScr = int((m_screen_cutplane + _offsetZ)/m_slat_hght)
+								_rScr = (m_screen_cutplane + _offsetZ) MOD m_slat_hght
+
+								for	i = 1	to	_nScr + 1
+									if	i < (_nScr + 1)	then
+										_slatHgt = m_slat_hght
+									else
+										_slatHgt = _rScr
+									endif
+
+									addy	-m_slat_thk/2
+										put	_subLengthL,				0,			15,
+											_scrLength - _subLengthR,	0,			15,
+											_scrLength - _subLengthR,	m_slat_thk,	15,
+											_subLengthL,				m_slat_thk,	15
+
+										prism_	nsp/3,	_slatHgt,	get(nsp)
+									del 1
+
+									addz	_slatHgt
+								next	i
+								del _nScr + 1
+							endif
+
+							!	Shutter Type : Screen
+							if	iShtType = Shutter_Screen	then
+								addy	-scrThk/2
+									put	_subLengthL,				0,		15,
+										_scrLength - _subLengthR,	0,		15,
+										_scrLength - _subLengthR,	scrThk,	15,
+										_subLengthL,				scrThk,	15
+
+									prism_	nsp/3,	m_screen_cutplane + _offsetZ,	get(nsp)
+								del 1
+							endif
+						if	bDoor	then	cutend
+
+						!	Door
+						if	bDoor	then
+							material	matDoor
+
+							!	셔터문 위치 무빙 핫스팟(좌측 하단)
+							hotspot	xDoorPos,	0,	0,			unID,	yDoorPos,	1+128	: unID = unID + 1
+							hotspot	xDoorPos,	0,	yDoorPos,	unID,	yDoorPos,	2		: unID = unID + 1
+							hotspot	xDoorPos,	0,	-1,			unID,	yDoorPos,	3		: unID = unID + 1
+
+							hotspot	0,			0,	yDoorPos,	unID, 	xDoorPos,	1+128	: unID = unID + 1
+							hotspot	xDoorPos,	0,	yDoorPos,	unID,	xDoorPos,	2		: unID = unID + 1
+							hotspot	-1,			0,	yDoorPos,	unID,	xDoorPos,	3		: unID = unID + 1
+
+							!	셔터문 크기 무빙 핫스팟(우측 상단)
+							addx	xDoorPos
+								addz	yDoorPos
+									hotspot	doorWdt,	0,	0,			unID, 	doorHgt,	1	: unID = unID + 1
+									hotspot	doorWdt,	0,	doorHgt,	unID,	doorHgt,	2	: unID = unID + 1
+									hotspot	doorWdt,	0,	-1,			unID,	doorHgt,	3	: unID = unID + 1
+
+									hotspot	0,			0,	doorHgt,	unID, 	doorWdt,	1	: unID = unID + 1
+									hotspot	doorWdt,	0,	doorHgt,	unID,	doorWdt,	2	: unID = unID + 1
+									hotspot	-1,			0,	doorHgt,	unID,	doorWdt,	3	: unID = unID + 1
+								del	1
+							del	1
+
+							!	상부 Cut
+							addz	m_screen_cutplane + _offsetZ
+								cutplane
+							del 1
+
+							addx	xDoorPos
+								addz	yDoorPos
+									!	Door Type : Slat
+									if	iDoorType = DOOR_SLAT	then
+										_nDoorScr = int(doorHgt/m_slat_hght)
+										_rDoorScr = doorHgt MOD m_slat_hght
+										_offsetY = -m_slat_thk/2
+										_doorThk = m_slat_thk
+
+										addy	_offsetY
+											for	i = 1	to	_nDoorScr + 1
+												if	i # (_nDoorScr + 1)	then	_slatHgt = m_slat_hght
+												if	i = (_nDoorScr + 1)	then	_slatHgt = _rDoorScr
+												put	0,			0,			15,
+													doorWdt,	0,			15,
+													doorWdt,	m_slat_thk,	15,
+													0,			m_slat_thk,	15
+
+												prism_	nsp/3,	_slatHgt,	get(nsp)
+
+												addz	m_slat_hght
+											next	i
+											del _nDoorScr + 1
+										del 1
+									endif
+
+									!	Door Type : Screen
+									if	iDoorType = DOOR_SCREEN	then
+										_offsetY = -scrThk/2
+										_doorThk = scrThk
+
+										addy	_offsetY
+											block	doorWdt,	scrThk,	doorHgt
+										del 1
+									endif
+
+									!	Openline
+									if	bSymbol3D	then
+										addy	_offsetY
+											!	Left
+											if	iHingePos = HINGE_LEFT	then
+												lin_	doorWdt,	0,	0,
+														0,			0,	doorHgt/2
+												lin_	0,			0,	doorHgt/2,
+														doorWdt,	0,	doorHgt
+
+												addy	_doorThk
+													lin_	doorWdt,	0,	0,
+															0,			0,	doorHgt/2
+													lin_	0,			0,	doorHgt/2,
+															doorWdt,	0,	doorHgt
+												del 1
+											endif
+
+											!	Right
+											if	iHingePos = HINGE_RIGHT	then
+												lin_	0,			0,	0,
+														doorWdt,	0,	doorHgt/2
+												lin_	doorWdt,	0,	doorHgt/2,
+														0,			0,	doorHgt
+
+												addy	_doorThk
+													lin_	0,			0,	0,
+															doorWdt,	0,	doorHgt/2
+													lin_	doorWdt,	0,	doorHgt/2,
+															0,			0,	doorHgt
+												del 1
+											endif
+										del 1
+									endif
+								del 1
+							del 1
+
+							cutend
+						endif
+					del 1
+
+					! !	철판(좌)
+					! material	gs_mat_screen
+					! if	slpLthL > eps	then
+					! 	addx	_subLengthL - _slpLthL
+					! 		addz	-zzyzx
+					! 			roty	-_aRailL
+					! 				cutplane	1,	1,	0
+					! 			del 1
+
+					! 			if	iShtType = Shutter_Slat	then
+					! 				_shtThk = m_slat_thk
+					! 			endif
+					! 			if	iShtType = Shutter_Screen	then
+					! 				_shtThk = scrThk
+					! 			endif
+
+					! 				addy	-_shtThk/2
+					! 					put	0,			0,			15,
+					! 						slpLthL,	0,			15,
+					! 						slpLthL,	_shtThk,	15,
+					! 						0,			_shtThk,	15
+
+					! 					prism_	nsp/3,	zzyzx,	get(nsp)
+					! 				del 1
+
+					! 			cutend
+					! 		del 1
+					! 	del 1
+					! endif
+					! if	slpLthL < -eps	then
+					! 	addx	_subLengthL
+					! 		addz	-zzyzx
+					! 			roty	-_aRailL
+					! 				cutplane	1,	1,	0,	1
+					! 			del 1
+
+					! 			if	iShtType = Shutter_Slat	then
+					! 				_shtThk = m_slat_thk
+					! 			endif
+					! 			if	iShtType = Shutter_Screen	then
+					! 				_shtThk = scrThk
+					! 			endif
+
+					! 				addy	-_shtThk/2
+					! 					put	0,			0,			15,
+					! 						slpLthL,	0,			15,
+					! 						slpLthL,	_shtThk,	15,
+					! 						0,			_shtThk,	15
+
+					! 					prism_	nsp/3,	zzyzx,	get(nsp)
+					! 				del 1
+
+					! 			cutend
+					! 		del 1
+					! 	del 1
+					! endif
+
+					! !	철판(우)
+					! material	gs_mat_screen
+					! if	slpLthR > eps	then
+					! 	addx	A - _slpLthL
+					! 		mulx	-1
+
+					! 			addx	_subLengthR
+					! 				addz	-zzyzx
+					! 					roty	-_aRailR
+					! 						cutplane	1,	1,	0
+					! 					del 1
+
+					! 					if	iShtType = Shutter_Slat	then
+					! 						_shtThk = m_slat_thk
+					! 					endif
+					! 					if	iShtType = Shutter_Screen	then
+					! 						_shtThk = scrThk
+					! 					endif
+
+					! 						addy	-_shtThk/2
+					! 							put	0,			0,			15,
+					! 								slpLthR,	0,			15,
+					! 								slpLthR,	_shtThk,	15,
+					! 								0,			_shtThk,	15
+
+					! 							prism_	nsp/3,	zzyzx,	get(nsp)
+					! 						del 1
+
+					! 					cutend
+					! 				del 1
+					! 			del 1
+
+					! 		del 1
+					! 	del 1
+					! endif
+					! if	slpLthR < -eps	then
+					! 	addx	A - _slpLthL
+					! 		mulx	-1
+
+					! 			addx	_subLengthR
+					! 				addz	-zzyzx
+					! 					roty	-_aRailR
+					! 						cutplane	1,	1,	0,	1
+					! 					del 1
+
+					! 					if	iShtType = Shutter_Slat	then
+					! 						_shtThk = m_slat_thk
+					! 					endif
+					! 					if	iShtType = Shutter_Screen	then
+					! 						_shtThk = scrThk
+					! 					endif
+
+					! 						addy	-_shtThk/2
+					! 							put	0,			0,			15,
+					! 								slpLthR,	0,			15,
+					! 								slpLthR,	_shtThk,	15,
+					! 								0,			_shtThk,	15
+
+					! 							prism_	nsp/3,	zzyzx,	get(nsp)
+					! 						del 1
+
+					! 					cutend
+					! 				del 1
+					! 			del 1
+
+					! 		del 1
+					! 	del 1
+					! endif
+				endif
+
+				!	Section
+				if	GLOB_VIEW_TYPE = 4	then
+					sect_fill	65,	0,	1,	shtPen
+
+					hotspot	A/3,	0,	0,						unID,	m_screen_section,	1 + 128	: unID = unID + 1
+					hotspot	A/3,	0,	1,						unID,	m_screen_section,	3		: unID = unID + 1
+					hotspot	A/3,	0,	-m_screen_section,		unID,	m_screen_section,	2		: unID = unID + 1
+
+					addz	-m_screen_section
+						addx	_subLengthL + m_Lguide_moveX
+							roty	-90
+								!	실선
+								if	iLineType = LINETYPE_SOLID	then
+									put	0,																				0,																1,
+										m_screen_section + _offsetZ,													0,																1,
+										m_screen_section + _offsetZ + (m_box_Height/2)*bShowMach + eps*(1 - bShowMach),	((_rad1*0.7 - m_guide_width/2) - m_screen_move_y)*bShowMach,	1
+
+									extrude	nsp/3,	0,	0,	-(_scrLength - _subLengthR),	0,	get(nsp)
+								endif
+
+								!	점선
+								if	iLineType = LINETYPE_DASHED	then
+									!	변수 정의
+									_lineLth_Solid = dash_Solid*GLOB_SCALE
+									_lineLth_Offset = dash_Offset*GLOB_SCALE
+									_lineLth = (_lineLth_Solid + _lineLth_Offset)
+
+									_nDash = int((m_screen_section + _offsetZ)/_lineLth)
+
+									_rLineLth = (m_screen_section + _offsetZ) - _lineLth*_nDash
+
+									!	점선
+									for	i = 1	to	_nDash
+										put	0,					0,	1,
+											_lineLth_Solid/2,	0,	1,
+											_lineLth_Solid,		0,	1
+
+										extrude	nsp/3,	0,	0,	-(_scrLength - _subLengthR),	0,	get(nsp)
+
+										addx	_lineLth
+									next	i
+
+									del	_nDash
+
+									!	나머지
+									if	fra((m_screen_section + _offsetZ)/(_lineLth_Solid + _lineLth_Offset)) > eps	then
+										addx	_lineLth*_nDash
+											if	_rLineLth - _lineLth_Solid < eps	then
+												put	0,				0,	1,
+													_rLineLth/2,	0,	1,
+													_rLineLth,		0,	1
+											else
+												put	0,					0,	1,
+													_lineLth_Solid/2,	0,	1,
+													_lineLth_Solid,		0,	1
+											endif
+
+											extrude	nsp/3,	0,	0,	-(_scrLength - _subLengthR),	0,	get(nsp)
+										del 1
+									endif
+
+									!	기계 연결
+									_xLth = (m_box_Height/2)*bShowMach + eps*(1 - bShowMach)
+									_yLth = ((_rad1*0.7 - m_guide_width/2) - m_screen_move_y)*bShowMach
+
+									addx	m_screen_section + _offsetZ
+										put 0,			0,			1,
+											_xLth/2,	_yLth/2,	1,
+											_xLth,		_yLth,		1
+
+										extrude	nsp/3,	0,	0,	-(_scrLength - _subLengthR),	0,	get(nsp)
+									del 1
+
+								endif
+							del 1
+						del 1
+					del 1
+				endif
+			del 1
+
+		del 1
+	del 1
+del 1
+
+!-----------------------------------------------------------------------------------------------
+!	Angle Line
+!-----------------------------------------------------------------------------------------------
+addy	m_screen_move_y
+	addx	m_Lguide_moveX
+		addz	zzyzx + _offsetZ + m_box_Height
+
+			if	bAngleLine & GLOB_VIEW_TYPE = 4	then
+				sect_fill	65,	0,	1,	angleLinePen
+
+				roty	-90
+
+					addy	m_box_Depth/2
+						hotspot	0,		0,	0,	unID,	angThk,	1+128	:	unID = unID + 1
+						hotspot	-1,		0,	0,	unID,	angThk,	3		:	unID = unID + 1
+						hotspot	angThk,	0,	0,	unID,	angThk,	2		:	unID = unID + 1
+
+						hotspot	0,		0,	0,	unID,	angHgt,	1+128	:	unID = unID + 1
+						hotspot	-1,		0,	0,	unID,	angHgt,	3		:	unID = unID + 1
+						hotspot	angHgt,	0,	0,	unID,	angHgt,	2		:	unID = unID + 1
+					del 1
+
+					!	하부
+					put	0,		0,				1,
+						0,		m_box_Depth,	1,
+						angThk,	m_box_Depth,	1,
+						angThk,	0,				1,
+						0,		0,				1
+
+					extrude	nsp/3,	0,	0,	-(A - (m_Lguide_moveX + m_Rguide_moveX)),	0,	get(nsp)
+
+					!	기둥
+					addx	angThk
+						put	0,					0,		1,
+							0,					angThk,	1,
+							angHgt - angThk,	angThk,	1,
+							angHgt - angThk,	0,		1,
+							0,					0,		1
+
+						extrude	nsp/3,	0,	0,	-(A - (m_Lguide_moveX + m_Rguide_moveX)),	0,	get(nsp)
+
+						put	0,					m_box_Depth,			1,
+							0,					m_box_Depth - angThk,	1,
+							angHgt - angThk,	m_box_Depth - angThk,	1,
+							angHgt - angThk,	m_box_Depth,			1,
+							0,					m_box_Depth,			1
+
+						extrude	nsp/3,	0,	0,	-(A - (m_Lguide_moveX + m_Rguide_moveX)),	0,	get(nsp)
+					del 1
+
+				del 1
+			endif
+
+		del 1
+	del 1
+del 1
+
+!-----------------------------------------------------------------------------------------------
+!	셔터박스 상부 벽
+!-----------------------------------------------------------------------------------------------
+pen			uprWallPen
+material	matUprWall
+
+if	bUprWall & not(GLOB_VIEW_TYPE = 4)	then
+
+	!	상부 가이드레일 오프셋에 맞춰 자르기
+	_nCut = 0
+
+	if	not(abs(slpLthL) < eps)	then
+		roty	-_aRailL
+			if	slpLthL > eps	then
+				cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+			else
+				cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+			endif
+		del 1
+	endif
+
+	addx	A
+		mulx	-1
+			if	not(abs(slpLthR) < eps)	then
+				roty	-_aRailR
+					if	slpLthR > eps	then
+						cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+					else
+						cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+					endif
+				del 1
+			endif
+		del 1
+	del 1
+
+	!	벽 형태
+	addz	zzyzx + _offsetZ + m_box_Height
+		addx	-0.030
+			hotspot	0,	0,			0,	unID,	uprWallLct,	1+128	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	uprWallLct,	3		:	unID = unID + 1
+			hotspot	0,	uprWallLct,	0,	unID,	uprWallLct,	2		:	unID = unID + 1
+		del 1
+
+		addy	uprWallLct
+			addx	-0.030
+				hotspot	0,	0,			0,	unID,	uprWallThk,	1+128	:	unID = unID + 1
+				hotspot	0,	-1,			0,	unID,	uprWallThk,	3		:	unID = unID + 1
+				hotspot	0,	uprWallThk,	0,	unID,	uprWallThk,	2		:	unID = unID + 1
+			del 1
+
+			hotspot	0,	0,	0,			unID,	uprWallHgt,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	uprWallHgt,	3		:	unID = unID + 1
+			hotspot	0,	0,	uprWallHgt,	unID,	uprWallHgt,	2		:	unID = unID + 1
+
+			if	iBoxType = Box_Flush	then
+				put	-m_box_leaf_left,		0,			15,
+					-m_box_leaf_left,		uprWallThk,	15,
+					A + m_box_leaf_right,	uprWallThk,	15,
+					A + m_box_leaf_right,	0,			15
+			endif
+
+			if	iBoxType = Box_Surface	then
+				put	0,	0,			15,
+					0,	uprWallThk,	15,
+					A,	uprWallThk,	15,
+					A,	0,			15
+			endif
+
+			prism_	nsp/3,	uprWallHgt,	get(nsp)
+		del 1
+	del 1
+
+	if	_nCut > eps	then
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+	endif
+endif
+
+
+
+
+
+
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"guideRail":
+!-----------------------------------------------------------------------------------------------
+	if	_slpLth > eps	then
+		!	하부 좌표
+		put	0,										0,								0,
+			_slpLth + m_guide_depth,				0,								0,
+			_slpLth + m_guide_depth,				m_guide_thk,					0,
+			_slpLth + m_guide_depth - m_rail_depth,	m_guide_thk,					0,
+			_slpLth + m_guide_depth - m_rail_depth,	m_guide_width - m_guide_thk,	0,
+			_slpLth + m_guide_depth,				m_guide_width - m_guide_thk,	0,
+			_slpLth + m_guide_depth,				m_guide_width,					0,
+			0,										m_guide_width,					0
+
+		!	상부 좌표
+		put	_slpLth,								0,								zzyzx,
+			_slpLth + m_guide_depth,				0,								zzyzx,
+			_slpLth + m_guide_depth,				m_guide_thk,					zzyzx,
+			_slpLth + m_guide_depth - m_rail_depth,	m_guide_thk,					zzyzx,
+			_slpLth + m_guide_depth - m_rail_depth,	m_guide_width - m_guide_thk,	zzyzx,
+			_slpLth + m_guide_depth,				m_guide_width - m_guide_thk,	zzyzx,
+			_slpLth + m_guide_depth,				m_guide_width,					zzyzx,
+			_slpLth,								m_guide_width,					zzyzx
+	else
+		!	하부 좌표
+		put	0,								0,								0,
+			m_guide_depth,					0,								0,
+			m_guide_depth,					m_guide_thk,					0,
+			m_guide_depth - m_rail_depth,	m_guide_thk,					0,
+			m_guide_depth - m_rail_depth,	m_guide_width - m_guide_thk,	0,
+			m_guide_depth,					m_guide_width - m_guide_thk,	0,
+			m_guide_depth,					m_guide_width,					0,
+			0,								m_guide_width,					0
+
+		!	상부 좌표
+		put	_slpLth,						0,								zzyzx,
+			m_guide_depth,					0,								zzyzx,
+			m_guide_depth,					m_guide_thk,					zzyzx,
+			m_guide_depth - m_rail_depth,	m_guide_thk,					zzyzx,
+			m_guide_depth - m_rail_depth,	m_guide_width - m_guide_thk,	zzyzx,
+			m_guide_depth,					m_guide_width - m_guide_thk,	zzyzx,
+			m_guide_depth,					m_guide_width,					zzyzx,
+			_slpLth,						m_guide_width,					zzyzx
+	endif
+
+	ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+
+
+	hotspot	0,								0,								0
+	hotspot	m_guide_depth,					0,								0
+	hotspot	m_guide_depth,					m_guide_thk,					0
+	hotspot	m_guide_depth - m_rail_depth,	m_guide_thk,					0
+	hotspot	m_guide_depth - m_rail_depth,	m_guide_width - m_guide_thk,	0
+	hotspot	m_guide_depth,					m_guide_width - m_guide_thk,	0
+	hotspot	m_guide_depth,					m_guide_width,					0
+	hotspot	0,								m_guide_width,					0
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"coor_Circle":
+!-----------------------------------------------------------------------------------------------
+	put	_inputRad,	0,		1,
+		0,			0,		900 + 1,
+		0,			180,	4000 + 1,
+		-_inputRad,	0,		1,
+		0,			0,		900 + 1,
+		0,			180,	4000 + 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"cutOpening":
+!-----------------------------------------------------------------------------------------------
+	addx	xDoorPos
+		addz	yDoorPos
+			addy	-m_slat_thk/2
+				rotx	90
+					put	0,			0,			7,
+						doorWdt,	0,			7,
+						doorWdt,	doorHgt,	7,
+						0,			doorHgt,	7
+
+					cutpolya	nsp/3,	1,	0,	get(nsp)
+				del 1
+			del 1
+		del 1
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"cornerCut":	!	코너
+!-----------------------------------------------------------------------------------------------
+	_aCorner = atn(m_guide_width/m_guide_depth)
+
+		if	_iDirect_Corner = CORNER_NORMAL	then
+			put	-_guideDist,														-m_screen_move_y,
+				m_guide_depth + m_screen_move_y/tan(_aCorner),						-m_screen_move_y,
+				-m_box_Depth/tan(_aCorner) + m_guide_depth,							m_box_Depth,
+				-m_box_Depth/tan(_aCorner) - _guideDist - _boxLeaf + m_guide_depth,	m_box_Depth,
+				-m_box_Depth/tan(_aCorner) - _guideDist - _boxLeaf + m_guide_depth,	-m_screen_move_y
+		endif
+
+		if	_iDirect_Corner = CORNER_MIRROR	then
+			put	-_guideDist,				0,
+				0,							0,
+				m_box_Depth/tan(_aCorner),	m_box_Depth,
+				-_guideDist,				m_box_Depth,
+				-_guideDist,				0
+		endif
+
+		! poly	nsp/2,	use(nsp)
+		cutpoly	nsp/2,	get(nsp)
+
+	_nCut = _nCut + 1
+
+return

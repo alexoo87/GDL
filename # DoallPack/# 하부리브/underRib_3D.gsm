@@ -1,0 +1,1211 @@
+!===============================================================================================
+!	하부리브
+!===============================================================================================
+
+!	W.P
+hotspot	0,	0,	0,	unID	:	unID = unID + 1
+
+!	Resolution
+resol	iResol
+
+!	피드백 모드
+if	GLOB_FEEDBACK_MODE	then
+	resol	12
+endif
+
+!	건축 마감 고정 변수
+_outWdt1 = 0.015
+_outDpt1 = 0.070
+_outWdt2 = 0.080
+_outDpt2 = 0.050
+_outWdt3 = fnsWdtOut
+
+_inWdt1 = 0.015
+_inDpt1 = 0.020
+_inWdt2 = fnsWdtIn
+
+_sideLct1 = 0.050
+_sideLct2 = 0.035
+_sideDpt = 0.020
+
+!	건축 마감 2D표현
+if	GLOB_STRUCTURE_DISPLAY > eps	then
+	bFinish = 0
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	Guide
+!-----------------------------------------------------------------------------------------------
+if	bGuide	then
+	if	iRibType = RIB_ARC	then
+		sphere	0.100
+		lin_	0,	0,	0,	0,	distWP,	0
+	endif
+
+	if	iRibType = RIB_FREE	then
+		_partHgt = ribHgt/nSplit
+
+		for	i = 1	to	nSplit
+			if	bEqualZ	then
+				lin_		xPosRib[i],	yPosRib[i],	_partHgt*(i - 1),	xPosRib[i + 1],	yPosRib[i + 1],	_partHgt*i
+				hotline		xPosRib[i],	yPosRib[i],	_partHgt*(i - 1),	xPosRib[i + 1],	yPosRib[i + 1],	_partHgt*i,	unID	:	unID = unID + 1
+			else
+				lin_		xPosRib[i],	yPosRib[i],	zPosRib[i],	xPosRib[i + 1],	yPosRib[i + 1],	zPosRib[i + 1]
+				hotline		xPosRib[i],	yPosRib[i],	zPosRib[i],	xPosRib[i + 1],	yPosRib[i + 1],	zPosRib[i + 1],	unID	:	unID = unID + 1
+			endif
+		next	i
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+if	bSymbol	then
+	_n2Dcut = 0
+	if	iProjectTo = PROJECTTO_FLOORPLAN | (iProjectTo = PROJECTTO_ABSOLUTE & btmPlaneHgt < cutPlaneHgt)	then
+		addz	btmPlaneHgt
+			cutplane{2}	180,	2	:	_n2Dcut = _n2Dcut + 1
+		del 1
+	endif
+
+	addz	cutPlaneHgt
+		cutplane{2}	180*(iProjectType = 2),	1	:	_n2Dcut = _n2Dcut + 1
+	del 1
+
+	if	iProjectTo = PROJECTTO_FLOORPLAN | (iProjectTo = PROJECTTO_ABSOLUTE & btmPlaneHgt < cutPlaneHgt)	then
+		addz	topPlaneHgt
+			cutplane{2}	0,	2	:	_n2Dcut = _n2Dcut + 1
+		del 1
+	endif
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	Type1(수직리브)
+!-----------------------------------------------------------------------------------------------
+if	iRibType = RIB_VERTICAL	then
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+	gosub	"basicHotspot"
+	addz	ribHgt
+		gosub	"basicHotspot"
+	del 1
+
+	!	높이
+	addy	prfLth/2
+		hotspot	0,	0,	0,		unID,	ribHgt,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	-1,		unID,	ribHgt,	3		:	unID = unID + 1
+		hotspot	0,	0,	ribHgt,	unID,	ribHgt,	2		:	unID = unID + 1
+	del 1
+
+	!	건축 마감 위치
+	if	bFinish	then
+		hotspot	0,	0,			0,	unID,	fnsOff,	1+128	:	unID = unID + 1
+		hotspot	0,	1,			0,	unID,	fnsOff,	3		:	unID = unID + 1
+		hotspot	0,	-fnsOff,	0,	unID,	fnsOff,	2		:	unID = unID + 1
+	endif
+
+	!	형상(구조)
+	!-----------------------------------------------------------------------------------------------
+	if	bProfile	then
+		material	ribMat
+		pen			ribPen
+
+		_si = 15
+		_dist = 0
+
+		group	"gBaseShapeT1"
+			if	iPrfType = PROFILE_TRAPEZOID	then	gosub	"bShapeTrapezoid"	!	프로파일 : 사다리꼴
+			if	iPrfType = PROFILE_TRIANGLE		then	gosub	"bShapeTriAngle"	!	프로파일 : 삼각형
+
+			prism_	nsp/3,	ribHgt,	get(nsp)
+		endgroup
+
+		group	"gInnerShapeT1"
+			if	iPrfType = PROFILE_TRAPEZOID	then	gosub	"iShapeTrapezoid"	!	프로파일 : 사다리꼴
+			if	iPrfType = PROFILE_TRIANGLE		then	gosub	"iShapeTriAngle"	!	프로파일 : 삼각형
+
+			prism_	nsp/3,	ribHgt,	get(nsp)
+		endgroup
+
+		placegroup	subgroup("gBaseShapeT1",	"gInnerShapeT1")
+	endif
+
+	!	형상(건축)
+	!-----------------------------------------------------------------------------------------------
+	if	bFinish	then
+		material	fnsMat
+		pen			fnsPen
+
+		_si = 15
+		_dist = -fnsOff
+
+		group	"gBaseShapeF1"
+			gosub	"bShapeFinish"
+
+			prism_	nsp/3,	ribHgt,	get(nsp)
+		endgroup
+
+		group	"gInnerShapeF1"
+			gosub	"iShapeFinish"
+
+			prism_	nsp/3,	ribHgt,	get(nsp)
+		endgroup
+
+		placegroup	subgroup("gBaseShapeF1",	"gInnerShapeF1")
+	endif
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	Type2(곡선리브)
+!-----------------------------------------------------------------------------------------------
+if	iRibType = RIB_ARC	then
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+	_hOff = 0.015
+
+	hotspot	0,	distWP,				0,					unID,	aRot,	4+128	:	unID = unID + 1
+	hotspot	0,	distWP*cos(aRot),	distWP*sin(aRot),	unID,	aRot,	5		:	unID = unID + 1
+	hotspot	0,	0,					0,					unID,	aRot,	6		:	unID = unID + 1
+	hotspot	1,	0,					0,					unID,	aRot,	7		:	unID = unID + 1
+
+	hotspot	0,	(distWP + prfLth)*cos(aRot),	(distWP + prfLth)*sin(aRot),	unID	:	unID = unID + 1
+
+	rotx	aRot
+		!	원점으로부터 거리
+		hotspot	_hOff,	0,		0,	unID,	distWP,	1+128	:	unID = unID + 1
+		hotspot	_hOff,	-1,		0,	unID,	distWP,	3		:	unID = unID + 1
+		hotspot	_hOff,	distWP,	0,	unID,	distWP,	2		:	unID = unID + 1
+
+		gosub	"basicHotspot"
+
+		!	건축 마감 위치
+		if	bFinish	then
+			addy	_dist
+				hotspot	0,	0,			0,	unID,	fnsOff,	1+128	:	unID = unID + 1
+				hotspot	0,	1,			0,	unID,	fnsOff,	3		:	unID = unID + 1
+				hotspot	0,	-fnsOff,	0,	unID,	fnsOff,	2		:	unID = unID + 1
+			del 1
+		endif
+
+		hotspot	0,	distWP,				0,					unID,	aRib,	4+128	:	unID = unID + 1
+		hotspot	0,	distWP*cos(aRib),	distWP*sin(aRib),	unID,	aRib,	5		:	unID = unID + 1
+		hotspot	0,	0,					0,					unID,	aRib,	6		:	unID = unID + 1
+		hotspot	1,	0,					0,					unID,	aRib,	7		:	unID = unID + 1
+
+		hotspot	0,	(distWP + prfLth)*cos(aRib),	(distWP + prfLth)*sin(aRib),	unID	:	unID = unID + 1
+
+		rotx	aRib
+			!	원점으로부터 거리
+			hotspot	_hOff,	0,		0,	unID,	distWP,	1+128	:	unID = unID + 1
+			hotspot	_hOff,	-1,		0,	unID,	distWP,	3		:	unID = unID + 1
+			hotspot	_hOff,	distWP,	0,	unID,	distWP,	2		:	unID = unID + 1
+
+			gosub	"basicHotspot"
+
+			!	건축 마감 위치
+			if	bFinish	then
+				addy	_dist
+					hotspot	0,	0,			0,	unID,	fnsOff,	1+128	:	unID = unID + 1
+					hotspot	0,	1,			0,	unID,	fnsOff,	3		:	unID = unID + 1
+					hotspot	0,	-fnsOff,	0,	unID,	fnsOff,	2		:	unID = unID + 1
+				del 1
+			endif
+		del 1
+	del 1
+
+	!	형상(구조)
+	!-----------------------------------------------------------------------------------------------
+	if	bProfile	then
+		material	ribMat
+		pen			ribPen
+
+		_si = 2
+		_dist = distWP
+
+		group	"gBaseShapeT2"
+			if	iPrfType = PROFILE_TRAPEZOID	then	gosub	"bShapeTrapezoid"	!	프로파일 : 사다리꼴
+			if	iPrfType = PROFILE_TRIANGLE		then	gosub	"bShapeTriAngle"	!	프로파일 : 삼각형
+
+			rotx	aRot
+				revolve	nsp/3,	aRib,	1+2+4+8+16+32,	get(nsp)
+			del 1
+		endgroup
+
+		group	"gInnerShapeT2"
+			if	iPrfType = PROFILE_TRAPEZOID	then	gosub	"iShapeTrapezoid"	!	프로파일 : 사다리꼴
+			if	iPrfType = PROFILE_TRIANGLE		then	gosub	"iShapeTriAngle"	!	프로파일 : 삼각형
+
+			rotx	aRot
+				revolve	nsp/3,	aRib,	1+2+4+8+16+32,	get(nsp)
+			del 1
+		endgroup
+
+			!	Cut Plane
+			if	not(GLOB_VIEW_TYPE = 2)	then
+				_nCut = 0
+				if	bCutP	then
+					hotspot	0,			yPosCutP,	zPosCutP,	unID,	xPosCutP,	1+128	:	unID = unID + 1
+					hotspot	-1,			yPosCutP,	zPosCutP,	unID,	xPosCutP,	3		:	unID = unID + 1
+					hotspot	xPosCutP,	yPosCutP,	zPosCutP,	unID,	xPosCutP,	2		:	unID = unID + 1
+
+					hotspot	xPosCutP,	0,			zPosCutP,	unID,	yPosCutP,	1+128	:	unID = unID + 1
+					hotspot	xPosCutP,	-1,			zPosCutP,	unID,	yPosCutP,	3		:	unID = unID + 1
+					hotspot	xPosCutP,	yPosCutP,	zPosCutP,	unID,	yPosCutP,	2		:	unID = unID + 1
+
+					hotspot	xPosCutP,	yPosCutP,	0,			unID,	zPosCutP,	1+128	:	unID = unID + 1
+					hotspot	xPosCutP,	yPosCutP,	-1,			unID,	zPosCutP,	3		:	unID = unID + 1
+					hotspot	xPosCutP,	yPosCutP,	zPosCutP,	unID,	zPosCutP,	2		:	unID = unID + 1
+
+					add	xPosCutP,	yPosCutP,	zPosCutP
+						roty	-90
+							hotspot	0,			0,	0,	unID,	cutPHgt,	1+128	:	unID = unID + 1
+							hotspot	1,			0,	0,	unID,	cutPHgt,	3		:	unID = unID + 1
+							hotspot	-cutPHgt,	0,	0,	unID,	cutPHgt,	2		:	unID = unID + 1
+
+							hotspot	0,	0,			0,	unID,	cutPWdt,	1+128	:	unID = unID + 1
+							hotspot	0,	-1,			0,	unID,	cutPWdt,	3		:	unID = unID + 1
+							hotspot	0,	cutPWdt,	0,	unID,	cutPWdt,	2		:	unID = unID + 1
+
+							put	0,			0,
+								-cutPHgt,	0,
+								-cutPHgt,	cutPWdt,
+								0,			cutPWdt
+
+							if	bGuide	then
+								poly	nsp/2,	use(nsp)
+							endif
+							cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+						del 1
+					del 1
+				endif
+			endif
+
+		placegroup	subgroup("gBaseShapeT2",	"gInnerShapeT2")
+
+			if	not(GLOB_VIEW_TYPE = 2)	then
+				if	_nCut > eps	then
+					for	c = 1	to	_nCut
+						cutend
+					next	c
+				endif
+			endif
+	endif
+
+	!	형상(건축)
+	!-----------------------------------------------------------------------------------------------
+	if	bFinish	then
+		material	fnsMat
+		pen			fnsPen
+
+		_si = 2
+		_dist = distWP - fnsOff
+
+		group	"gBaseShapeF2"
+			gosub	"bShapeFinish"
+
+			rotx	aRot
+				revolve	nsp/3,	aRib,	1+2+4+8+16+32,	get(nsp)
+			del 1
+		endgroup
+
+		group	"gInnerShapeF2"
+			gosub	"iShapeFinish"
+
+			rotx	aRot
+				revolve	nsp/3,	aRib,	1+2+4+8+16+32,	get(nsp)
+			del 1
+		endgroup
+
+			!	Cut Plane
+			if	not(GLOB_VIEW_TYPE = 2)	then
+				_nCut_A = 0
+				if	bCutP_A	then
+					hotspot	0,			yPosCutP_A,	zPosCutP_A,	unID,	xPosCutP_A,	1+128	:	unID = unID + 1
+					hotspot	-1,			yPosCutP_A,	zPosCutP_A,	unID,	xPosCutP_A,	3		:	unID = unID + 1
+					hotspot	xPosCutP_A,	yPosCutP_A,	zPosCutP_A,	unID,	xPosCutP_A,	2		:	unID = unID + 1
+
+					hotspot	xPosCutP_A,	0,			zPosCutP_A,	unID,	yPosCutP_A,	1+128	:	unID = unID + 1
+					hotspot	xPosCutP_A,	-1,			zPosCutP_A,	unID,	yPosCutP_A,	3		:	unID = unID + 1
+					hotspot	xPosCutP_A,	yPosCutP_A,	zPosCutP_A,	unID,	yPosCutP_A,	2		:	unID = unID + 1
+
+					hotspot	xPosCutP_A,	yPosCutP_A,	0,			unID,	zPosCutP_A,	1+128	:	unID = unID + 1
+					hotspot	xPosCutP_A,	yPosCutP_A,	-1,			unID,	zPosCutP_A,	3		:	unID = unID + 1
+					hotspot	xPosCutP_A,	yPosCutP_A,	zPosCutP_A,	unID,	zPosCutP_A,	2		:	unID = unID + 1
+
+					add	xPosCutP_A,	yPosCutP_A,	zPosCutP_A
+						roty	-90
+							!	Point 1
+							hotspot	coorCutP_A[1][2],	0,					0,	unID,	coorCutP_A[1][1],	1+128	:	unID = unID + 1
+							hotspot	coorCutP_A[1][2],	-1,					0,	unID,	coorCutP_A[1][1],	3		:	unID = unID + 1
+							hotspot	coorCutP_A[1][2],	coorCutP_A[1][1],	0,	unID,	coorCutP_A[1][1],	2,	coorCutP_A[1][1],	"xPoint1"		:	unID = unID + 1
+
+							hotspot	0,					coorCutP_A[1][1],	0,	unID,	coorCutP_A[1][2],	1+128	:	unID = unID + 1
+							hotspot	-1,					coorCutP_A[1][1],	0,	unID,	coorCutP_A[1][2],	3		:	unID = unID + 1
+							hotspot	coorCutP_A[1][2],	coorCutP_A[1][1],	0,	unID,	coorCutP_A[1][2],	2,	coorCutP_A[1][2],	"yPoint1"		:	unID = unID + 1
+
+							!	Point 2
+							hotspot	coorCutP_A[2][2],	0,					0,	unID,	coorCutP_A[2][1],	1+128	:	unID = unID + 1
+							hotspot	coorCutP_A[2][2],	-1,					0,	unID,	coorCutP_A[2][1],	3		:	unID = unID + 1
+							hotspot	coorCutP_A[2][2],	coorCutP_A[2][1],	0,	unID,	coorCutP_A[2][1],	2,	coorCutP_A[2][1],	"xPoint2"		:	unID = unID + 1
+
+							hotspot	0,					coorCutP_A[2][1],	0,	unID,	coorCutP_A[2][2],	1+128	:	unID = unID + 1
+							hotspot	-1,					coorCutP_A[2][1],	0,	unID,	coorCutP_A[2][2],	3		:	unID = unID + 1
+							hotspot	coorCutP_A[2][2],	coorCutP_A[2][1],	0,	unID,	coorCutP_A[2][2],	2,	coorCutP_A[2][2],	"yPoint2"	:	unID = unID + 1
+
+							!	Point 3
+							hotspot	coorCutP_A[3][2],	0,					0,	unID,	coorCutP_A[3][1],	1+128	:	unID = unID + 1
+							hotspot	coorCutP_A[3][2],	-1,					0,	unID,	coorCutP_A[3][1],	3		:	unID = unID + 1
+							hotspot	coorCutP_A[3][2],	coorCutP_A[3][1],	0,	unID,	coorCutP_A[3][1],	2,	coorCutP_A[3][1],	"xPoint3"		:	unID = unID + 1
+
+							hotspot	0,					coorCutP_A[3][1],	0,	unID,	coorCutP_A[3][2],	1+128	:	unID = unID + 1
+							hotspot	-1,					coorCutP_A[3][1],	0,	unID,	coorCutP_A[3][2],	3		:	unID = unID + 1
+							hotspot	coorCutP_A[3][2],	coorCutP_A[3][1],	0,	unID,	coorCutP_A[3][2],	2,	coorCutP_A[3][2],	"yPoint3"		:	unID = unID + 1
+
+							!	Point 4
+							hotspot	coorCutP_A[4][2],	0,					0,	unID,	coorCutP_A[4][1],	1+128	:	unID = unID + 1
+							hotspot	coorCutP_A[4][2],	-1,					0,	unID,	coorCutP_A[4][1],	3		:	unID = unID + 1
+							hotspot	coorCutP_A[4][2],	coorCutP_A[4][1],	0,	unID,	coorCutP_A[4][1],	2,	coorCutP_A[4][1],	"xPoint4"		:	unID = unID + 1
+
+							hotspot	0,					coorCutP_A[4][1],	0,	unID,	coorCutP_A[4][2],	1+128	:	unID = unID + 1
+							hotspot	-1,					coorCutP_A[4][1],	0,	unID,	coorCutP_A[4][2],	3		:	unID = unID + 1
+							hotspot	coorCutP_A[4][2],	coorCutP_A[4][1],	0,	unID,	coorCutP_A[4][2],	2,	coorCutP_A[4][2],	"yPoint4"		:	unID = unID + 1
+
+							put	0,					0,
+								coorCutP_A[1][2],	coorCutP_A[1][1],
+								coorCutP_A[2][2],	coorCutP_A[2][1],
+								coorCutP_A[3][2],	coorCutP_A[3][1],
+								coorCutP_A[4][2],	coorCutP_A[4][1]
+
+							if	bGuide	then
+								poly	nsp/2,	use(nsp)
+							endif
+							cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+						del 1
+					del 1
+				endif
+			endif
+
+		placegroup	subgroup("gBaseShapeF2",	"gInnerShapeF2")
+
+			if	not(GLOB_VIEW_TYPE = 2)	then
+				if	_nCut_A > eps	then
+					for	c = 1	to	_nCut_A
+						cutend
+					next	c
+				endif
+			endif
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	Type2(이형리브)
+!-----------------------------------------------------------------------------------------------
+if	iRibType = RIB_FREE	then
+	_si = 0
+	_dist = 0
+
+	_partHgt = ribHgt/nSplit
+
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+	if	not(bEqualZ)	then
+		for	i = 2	to	(nSplit + 1)
+			add	xPosRib[i],	yPosRib[i],	0
+				hotspot	0,	0,	0,			unID,	zPosRib[i],	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	zPosRib[i],	3		:	unID = unID + 1
+				hotspot	0,	0,	zPosRib[i],	unID,	zPosRib[i],	2		:	unID = unID + 1
+			del 1
+		next	i
+	endif
+
+	for	i = 1	to	(nSplit + 1)
+		if	bEqualZ	then
+			addz	_partHgt*(i - 1)
+		else
+			addz	zPosRib[i]
+		endif
+			hotspot	0,			yPosRib[i],	0,	unID,	xPosRib[i],	1+128	:	unID = unID + 1
+			hotspot	-1,			yPosRib[i],	0,	unID,	xPosRib[i],	3		:	unID = unID + 1
+			hotspot	xPosRib[i],	yPosRib[i],	0,	unID,	xPosRib[i],	2		:	unID = unID + 1
+
+			hotspot	xPosRib[i],	0,			0,	unID,	yPosRib[i],	1+128	:	unID = unID + 1
+			hotspot	xPosRib[i],	-1,			0,	unID,	yPosRib[i],	3		:	unID = unID + 1
+			hotspot	xPosRib[i],	yPosRib[i],	0,	unID,	yPosRib[i],	2		:	unID = unID + 1
+
+			add	xPosRib[i],	yPosRib[i],	0
+				hotspot	0,							prfLth,						0,	unID,	aPartRib[i],	4+128	:	unID = unID + 1
+				hotspot	-prfLth*sin(aPartRib[i]),	prfLth*cos(aPartRib[i]),	0,	unID,	aPartRib[i],	5		:	unID = unID + 1
+				hotspot	0,							0,							0,	unID,	aPartRib[i],	6		:	unID = unID + 1
+				hotspot	0,							0,							1,	unID,	aPartRib[i],	7		:	unID = unID + 1
+
+				rotz	aPartRib[i]
+					gosub	"basicHotspot"
+				del 1
+			del 1
+		del 1
+	next	i
+
+	!	리브 높이
+	add	xPosRib[nSplit + 1],	yPosRib[nSplit + 1],	0
+		rotz	aPartRib[nSplit + 1]
+			addy	prfLth/2
+				hotspot	0,	0,	0,		unID,	ribHgt,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,		unID,	ribHgt,	3		:	unID = unID + 1
+				hotspot	0,	0,	ribHgt,	unID,	ribHgt,	2		:	unID = unID + 1
+			del 1
+		del 1
+	del 1
+
+	!	건축 마감 위치
+	if	bFinish	then
+		rotz	aPartRib[1]
+			hotspot	0,	0,			0,	unID,	fnsOff,	1+128	:	unID = unID + 1
+			hotspot	0,	1,			0,	unID,	fnsOff,	3		:	unID = unID + 1
+			hotspot	0,	-fnsOff,	0,	unID,	fnsOff,	2		:	unID = unID + 1
+		del 1
+
+		add	xPosRib[nSplit + 1],	yPosRib[nSplit + 1],	ribHgt
+			rotz	aPartRib[nSplit + 1]
+				hotspot	0,	0,			0,	unID,	fnsOff,	1+128	:	unID = unID + 1
+				hotspot	0,	1,			0,	unID,	fnsOff,	3		:	unID = unID + 1
+				hotspot	0,	-fnsOff,	0,	unID,	fnsOff,	2		:	unID = unID + 1
+			del 1
+		del 1
+	endif
+
+	!	형상(구조)
+	!-----------------------------------------------------------------------------------------------
+	if	bProfile	then
+		material	ribMat
+		pen			ribPen
+
+		group	"gBaseShapeT3"
+			for	i = 1	to	nSplit
+				!	변수 정의
+				dim	bCoorOrigin[][]
+
+				_aPartRib_B = aPartRib[i]
+				_aPartRib_T = aPartRib[i + 1]
+
+				_offsetX = xPosRib[i]
+				_offsetY = yPosRib[i]
+
+				_distX = xPosRib[i + 1] - xPosRib[i]
+				_distY = yPosRib[i + 1] - yPosRib[i]
+				if	bEqualZ	then
+					_distZ = _partHgt
+				else
+					_distZ = zPosRib[i + 1] - zPosRib[i]
+				endif
+
+				!	프로파일
+				if	iPrfType = PROFILE_TRAPEZOID	then
+					_nPoly = 4
+
+					bCoorOrigin[1][1] = prfWdtOut/2
+					bCoorOrigin[1][2] = 0
+
+					bCoorOrigin[2][1] = prfWdtIn/2
+					bCoorOrigin[2][2] = prfLth
+
+					bCoorOrigin[3][1] = -prfWdtIn/2
+					bCoorOrigin[3][2] = prfLth
+
+					bCoorOrigin[4][1] = -prfWdtOut/2
+					bCoorOrigin[4][2] = 0
+				endif
+
+				if	iPrfType = PROFILE_TRIANGLE	then
+					_nPoly = 3
+
+					bCoorOrigin[1][1] = 0
+					bCoorOrigin[1][2] = 0
+
+					bCoorOrigin[2][1] = prfWdtIn/2
+					bCoorOrigin[2][2] = prfLth
+
+					bCoorOrigin[3][1] = -prfWdtIn/2
+					bCoorOrigin[3][2] = prfLth
+				endif
+
+				!	하부 좌표
+				_aRot = aPartRib[i]
+				for	t = 1	to	_nPoly
+					_originX = bCoorOrigin[t][1]
+					_originY = bCoorOrigin[t][2]
+					gosub	"transCoordinates"
+					put	_transX,	_transY,	0
+				next	t
+
+				!	상부 좌표
+				_aRot = aPartRib[i + 1]
+				for	t = 1	to	_nPoly
+					_originX = bCoorOrigin[t][1]
+					_originY = bCoorOrigin[t][2]
+					gosub	"transCoordinates"
+					put	_distX + _transX,	_distY + _transY,	_distZ
+				next	t
+
+				add	_offsetX,	_offsetY,	0
+					ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+
+					hotspot	0,	0,	0,	unID	:	unID = unID + 1
+				del 1
+
+				addz	_distZ
+			next	i
+
+			del nSplit
+		endgroup
+
+		group	"gInnerShapeT3"
+			for	i = 1	to	nSplit
+				!	변수 정의
+				dim	iCoorOrigin[][]
+
+				_aPartRib_B = aPartRib[i]
+				_aPartRib_T = aPartRib[i + 1]
+
+				_offsetX = xPosRib[i]
+				_offsetY = yPosRib[i]
+
+				_distX = xPosRib[i + 1] - xPosRib[i]
+				_distY = yPosRib[i + 1] - yPosRib[i]
+				if	bEqualZ	then
+					_distZ = _partHgt
+				else
+					_distZ = zPosRib[i + 1] - zPosRib[i]
+				endif
+
+				!	프로파일
+				if	iPrfType = PROFILE_TRAPEZOID	then
+					_nPoly = 4
+					_gapX = ((prfWdtIn - prfWdtOut)/2)
+					if	abs(_gapX) < eps	then
+						_aPrf = 90
+					else
+						_aPrf = atn(prfLth/_gapX)
+					endif
+
+					iCoorOrigin[1][1] = prfWdtOut/2 + prfThk/tan(_aPrf) - prfThk/sin(_aPrf)
+					iCoorOrigin[1][2] = prfThk
+
+					iCoorOrigin[2][1] = prfWdtIn/2 - prfThk/tan(_aPrf) - prfThk/sin(_aPrf)
+					iCoorOrigin[2][2] = prfLth - prfThk
+
+					iCoorOrigin[3][1] = -(prfWdtIn/2 - prfThk/tan(_aPrf) - prfThk/sin(_aPrf))
+					iCoorOrigin[3][2] = prfLth - prfThk
+
+					iCoorOrigin[4][1] = -(prfWdtOut/2 + prfThk/tan(_aPrf) - prfThk/sin(_aPrf))
+					iCoorOrigin[4][2] = prfThk
+				endif
+
+				if	iPrfType = PROFILE_TRIANGLE	then
+					_nPoly = 3
+					_gapX = prfWdtIn/2
+					if	abs(_gapX) < eps	then
+						_aPrf = 90
+					else
+						_aPrf = atn(prfLth/_gapX)
+					endif
+
+					iCoorOrigin[1][1] = 0
+					iCoorOrigin[1][2] = prfThk/cos(_aPrf)
+
+					iCoorOrigin[2][1] = prfWdtIn/2 - prfThk/tan(_aPrf) - prfThk/sin(_aPrf)
+					iCoorOrigin[2][2] = prfLth - prfThk
+
+					iCoorOrigin[3][1] = -(prfWdtIn/2 - prfThk/tan(_aPrf) - prfThk/sin(_aPrf))
+					iCoorOrigin[3][2] = prfLth - prfThk
+				endif
+
+				!	하부 좌표
+				_aRot = aPartRib[i]
+				for	t = 1	to	_nPoly
+					_originX = iCoorOrigin[t][1]
+					_originY = iCoorOrigin[t][2]
+					gosub	"transCoordinates"
+					put	_transX,	_transY,	0
+				next	t
+
+				!	상부 좌표
+				_aRot = aPartRib[i + 1]
+				for	t = 1	to	_nPoly
+					_originX = iCoorOrigin[t][1]
+					_originY = iCoorOrigin[t][2]
+					gosub	"transCoordinates"
+					put	_distX + _transX,	_distY + _transY,	_distZ
+				next	t
+
+				add	_offsetX,	_offsetY,	0
+					ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+
+					hotspot	0,	0,	0,	unID	:	unID = unID + 1
+				del 1
+
+				addz	_distZ
+			next	i
+
+			del nSplit
+		endgroup
+
+		placegroup	subgroup("gBaseShapeT3",	"gInnerShapeT3")
+	endif
+
+	!	형상(건축)
+	!-----------------------------------------------------------------------------------------------
+	if	bFinish	then
+		material	fnsMat
+		pen			fnsPen
+
+		group	"gBaseShapeF3"
+			for	i = 1	to	nSplit
+				!	변수 정의
+				dim	bCoorOrigin[][]
+
+				_aPartRib_B = aPartRib[i]
+				_aPartRib_T = aPartRib[i + 1]
+
+				_offsetX = xPosRib[i]
+				_offsetY = yPosRib[i]
+
+				_distX = xPosRib[i + 1] - xPosRib[i]
+				_distY = yPosRib[i + 1] - yPosRib[i]
+				if	bEqualZ	then
+					_distZ = _partHgt
+				else
+					_distZ = zPosRib[i + 1] - zPosRib[i]
+				endif
+
+				!	프로파일
+				if	iFnsType = FINISH_TYPE1	then
+					_nPoly = 16
+					_dist = -fnsOff
+
+					bCoorOrigin[1][1] = _outWdt1/2
+					bCoorOrigin[1][2] = _dist + _outDpt1
+
+					bCoorOrigin[2][1] = _outWdt1/2
+					bCoorOrigin[2][2] = _dist + _outDpt2
+
+					bCoorOrigin[3][1] = _outWdt2/2
+					bCoorOrigin[3][2] = _dist + _outDpt2
+
+					bCoorOrigin[4][1] = _outWdt2/2
+					bCoorOrigin[4][2] = _dist
+
+					bCoorOrigin[5][1] = _outWdt3/2
+					bCoorOrigin[5][2] = _dist
+
+					bCoorOrigin[6][1] = _inWdt2/2
+					bCoorOrigin[6][2] = _dist + fnsLth
+
+					bCoorOrigin[7][1] = _inWdt1/2
+					bCoorOrigin[7][2] = _dist + fnsLth
+
+					bCoorOrigin[8][1] = _inWdt1/2
+					bCoorOrigin[8][2] = _dist + fnsLth - _inDpt1
+
+					bCoorOrigin[9][1] = -_inWdt1/2
+					bCoorOrigin[9][2] = _dist + fnsLth - _inDpt1
+
+					bCoorOrigin[10][1] = -_inWdt1/2
+					bCoorOrigin[10][2] =_dist + fnsLth
+
+					bCoorOrigin[11][1] = -_inWdt2/2
+					bCoorOrigin[11][2] = _dist + fnsLth
+
+					bCoorOrigin[12][1] = -_outWdt3/2
+					bCoorOrigin[12][2] = _dist
+
+					bCoorOrigin[13][1] = -_outWdt2/2
+					bCoorOrigin[13][2] = _dist
+
+					bCoorOrigin[14][1] = -_outWdt2/2
+					bCoorOrigin[14][2] = _dist + _outDpt2
+
+					bCoorOrigin[15][1] = -_outWdt1/2
+					bCoorOrigin[15][2] = _dist + _outDpt2
+
+					bCoorOrigin[16][1] = -_outWdt1/2
+					bCoorOrigin[16][2] = _dist + _outDpt1
+				endif
+
+				if	iFnsType = FINISH_TYPE2	then
+					_nPoly = 20
+					_dist = -fnsOff
+					_gapX = ((fnsWdtIn - fnsWdtOut)/2)
+					if	abs(_gapX) < eps	then
+						_aFns = 90
+					else
+						_aFns = atn(fnsLth/_gapX)
+					endif
+
+					bCoorOrigin[1][1] = _outWdt1/2
+					bCoorOrigin[1][2] = _dist + _outDpt1
+
+					bCoorOrigin[2][1] = _outWdt1/2
+					bCoorOrigin[2][2] = _dist + _outDpt2
+
+					bCoorOrigin[3][1] = _outWdt2/2
+					bCoorOrigin[3][2] = _dist + _outDpt2
+
+					bCoorOrigin[4][1] = _outWdt2/2
+					bCoorOrigin[4][2] = _dist
+
+					bCoorOrigin[5][1] = _outWdt3/2
+					bCoorOrigin[5][2] = _dist
+
+					bCoorOrigin[6][1] = _inWdt2/2 - _sideLct1/tan(_aFns)
+					bCoorOrigin[6][2] = _dist + fnsLth - _sideLct1
+
+					bCoorOrigin[7][1] = _inWdt2/2 - _sideLct1/tan(_aFns) - _sideDpt
+					bCoorOrigin[7][2] = _dist + fnsLth - _sideLct1
+
+					bCoorOrigin[8][1] = _inWdt2/2 - _sideLct2/tan(_aFns) - _sideDpt
+					bCoorOrigin[8][2] = _dist + fnsLth - _sideLct2
+
+					bCoorOrigin[9][1] = _inWdt2/2 - _sideLct2/tan(_aFns)
+					bCoorOrigin[9][2] = _dist + fnsLth - _sideLct2
+
+					bCoorOrigin[10][1] = _inWdt2/2
+					bCoorOrigin[10][2] = _dist + fnsLth
+
+					bCoorOrigin[11][1] = -_inWdt2/2
+					bCoorOrigin[11][2] = _dist + fnsLth
+
+					bCoorOrigin[12][1] = -(_inWdt2/2 - _sideLct2/tan(_aFns))
+					bCoorOrigin[12][2] = _dist + fnsLth - _sideLct2
+
+					bCoorOrigin[13][1] = -(_inWdt2/2 - _sideLct2/tan(_aFns) - _sideDpt)
+					bCoorOrigin[13][2] = _dist + fnsLth - _sideLct2
+
+					bCoorOrigin[14][1] = -(_inWdt2/2 - _sideLct1/tan(_aFns) - _sideDpt)
+					bCoorOrigin[14][2] = _dist + fnsLth - _sideLct1
+
+					bCoorOrigin[15][1] = -(_inWdt2/2 - _sideLct1/tan(_aFns))
+					bCoorOrigin[15][2] = _dist + fnsLth - _sideLct1
+
+					bCoorOrigin[16][1] = -_outWdt3/2
+					bCoorOrigin[16][2] = _dist
+
+					bCoorOrigin[17][1] = -_outWdt2/2
+					bCoorOrigin[17][2] = _dist
+
+					bCoorOrigin[18][1] = -_outWdt2/2
+					bCoorOrigin[18][2] = _dist + _outDpt2
+
+					bCoorOrigin[19][1] = -_outWdt1/2
+					bCoorOrigin[19][2] = _dist + _outDpt2
+
+					bCoorOrigin[20][1] = -_outWdt1/2
+					bCoorOrigin[20][2] = _dist + _outDpt1
+				endif
+
+				!	하부 좌표
+				_aRot = aPartRib[i]
+				for	t = 1	to	_nPoly
+					_originX = bCoorOrigin[t][1]
+					_originY = bCoorOrigin[t][2]
+					gosub	"transCoordinates"
+					put	_transX,	_transY,	0
+				next	t
+
+				!	상부 좌표
+				_aRot = aPartRib[i + 1]
+				for	t = 1	to	_nPoly
+					_originX = bCoorOrigin[t][1]
+					_originY = bCoorOrigin[t][2]
+					gosub	"transCoordinates"
+					put	_distX + _transX,	_distY + _transY,	_distZ
+				next	t
+
+				add	_offsetX,	_offsetY,	0
+					ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+
+					hotspot	0,	0,	0,	unID	:	unID = unID + 1
+				del 1
+
+				addz	_distZ
+			next	i
+
+			del nSplit
+		endgroup
+
+		group	"gInnerShapeF3"
+			for	i = 1	to	nSplit
+				!	변수 정의
+				dim	iCoorOrigin[][]
+
+				_aPartRib_B = aPartRib[i]
+				_aPartRib_T = aPartRib[i + 1]
+
+				_offsetX = xPosRib[i]
+				_offsetY = yPosRib[i]
+
+				_distX = xPosRib[i + 1] - xPosRib[i]
+				_distY = yPosRib[i + 1] - yPosRib[i]
+				if	bEqualZ	then
+					_distZ = _partHgt
+				else
+					_distZ = zPosRib[i + 1] - zPosRib[i]
+				endif
+
+				!	프로파일
+				if	iFnsType = FINISH_TYPE1	then
+					_nPoly = 16
+					_dist = -fnsOff
+					_gapX = ((fnsWdtIn - fnsWdtOut)/2)
+					if	abs(_gapX) < eps	then
+						_aFns = 90
+					else
+						_aFns = atn(fnsLth/_gapX)
+					endif
+
+					iCoorOrigin[1][1] = _outWdt1/2 + fnsThk
+					iCoorOrigin[1][2] = _dist + _outDpt1 + fnsThk
+
+					iCoorOrigin[2][1] = _outWdt1/2 + fnsThk
+					iCoorOrigin[2][2] = _dist + _outDpt2 + fnsThk
+
+					iCoorOrigin[3][1] = _outWdt2/2 + fnsThk
+					iCoorOrigin[3][2] = _dist + _outDpt2 + fnsThk
+
+					iCoorOrigin[4][1] = _outWdt2/2 + fnsThk
+					iCoorOrigin[4][2] = _dist + fnsThk
+
+					iCoorOrigin[5][1] = _outWdt3/2 + fnsThk/tan(_aFns) - fnsThk/sin(_aFns)
+					iCoorOrigin[5][2] = _dist + fnsThk
+
+					iCoorOrigin[6][1] = _inWdt2/2 - fnsThk/tan(_aFns) - fnsThk/sin(_aFns)
+					iCoorOrigin[6][2] = _dist + fnsLth - fnsThk
+
+					iCoorOrigin[7][1] = _inWdt1/2 + fnsThk
+					iCoorOrigin[7][2] = _dist + fnsLth - fnsThk
+
+					iCoorOrigin[8][1] = _inWdt1/2 + fnsThk
+					iCoorOrigin[8][2] = _dist + fnsLth - _inDpt1 - fnsThk
+
+					iCoorOrigin[9][1] = -(_inWdt1/2 + fnsThk)
+					iCoorOrigin[9][2] = _dist + fnsLth - _inDpt1 - fnsThk
+
+					iCoorOrigin[10][1] = -(_inWdt1/2 + fnsThk)
+					iCoorOrigin[10][2] = _dist + fnsLth - fnsThk
+
+					iCoorOrigin[11][1] = -(_inWdt2/2 - fnsThk/tan(_aFns) - fnsThk/sin(_aFns))
+					iCoorOrigin[11][2] = _dist + fnsLth - fnsThk
+
+					iCoorOrigin[12][1] = -(_outWdt3/2 + fnsThk/tan(_aFns) - fnsThk/sin(_aFns))
+					iCoorOrigin[12][2] = _dist + fnsThk
+
+					iCoorOrigin[13][1] = -(_outWdt2/2 + fnsThk)
+					iCoorOrigin[13][2] = _dist + fnsThk
+
+					iCoorOrigin[14][1] = -(_outWdt2/2 + fnsThk)
+					iCoorOrigin[14][2] = _dist + _outDpt2 + fnsThk
+
+					iCoorOrigin[15][1] = -(_outWdt1/2 + fnsThk)
+					iCoorOrigin[15][2] = _dist + _outDpt2 + fnsThk
+
+					iCoorOrigin[16][1] = -(_outWdt1/2 + fnsThk)
+					iCoorOrigin[16][2] = _dist + _outDpt1 + fnsThk
+				endif
+
+				if	iFnsType = FINISH_TYPE2	then
+					_nPoly = 20
+					_dist = -fnsOff
+					_gapX = ((fnsWdtIn - fnsWdtOut)/2)
+					if	abs(_gapX) < eps	then
+						_aFns = 90
+					else
+						_aFns = atn(fnsLth/_gapX)
+					endif
+
+					iCoorOrigin[1][1] = _outWdt1/2 + fnsThk
+					iCoorOrigin[1][2] = _dist + _outDpt1 + fnsThk
+
+					iCoorOrigin[2][1] = _outWdt1/2 + fnsThk
+					iCoorOrigin[2][2] = _dist + _outDpt2 + fnsThk
+
+					iCoorOrigin[3][1] = _outWdt2/2 + fnsThk
+					iCoorOrigin[3][2] = _dist + _outDpt2 + fnsThk
+
+					iCoorOrigin[4][1] = _outWdt2/2 + fnsThk
+					iCoorOrigin[4][2] = _dist + fnsThk
+
+					iCoorOrigin[5][1] = _outWdt3/2 + fnsThk/tan(_aFns) - fnsThk/sin(_aFns)
+					iCoorOrigin[5][2] = _dist + fnsThk
+
+					iCoorOrigin[6][1] = _inWdt2/2 - _sideLct1/tan(_aFns) - fnsThk/tan(_aFns) - fnsThk/sin(_aFns)
+					iCoorOrigin[6][2] = _dist + fnsLth - _sideLct1 - fnsThk
+
+					iCoorOrigin[7][1] = _inWdt2/2 - _sideLct1/tan(_aFns) - _sideDpt - fnsThk/tan(_aFns) - fnsThk/sin(_aFns)
+					iCoorOrigin[7][2] = _dist + fnsLth - _sideLct1 - fnsThk
+
+					iCoorOrigin[8][1] = _inWdt2/2 - _sideLct2/tan(_aFns) - _sideDpt + fnsThk/tan(_aFns) - fnsThk/sin(_aFns)
+					iCoorOrigin[8][2] = _dist + fnsLth - _sideLct2 + fnsThk
+
+					iCoorOrigin[9][1] = _inWdt2/2 - _sideLct2/tan(_aFns) + fnsThk/tan(_aFns) - fnsThk/sin(_aFns)
+					iCoorOrigin[9][2] = _dist + fnsLth - _sideLct2 + fnsThk
+
+					iCoorOrigin[10][1] = _inWdt2/2 - fnsThk/tan(_aFns) - fnsThk/sin(_aFns)
+					iCoorOrigin[10][2] = _dist + fnsLth - fnsThk
+
+					iCoorOrigin[11][1] = -(_inWdt2/2 - fnsThk/tan(_aFns) - fnsThk/sin(_aFns))
+					iCoorOrigin[11][2] = _dist + fnsLth - fnsThk
+
+					iCoorOrigin[12][1] = -(_inWdt2/2 - _sideLct2/tan(_aFns) + fnsThk/tan(_aFns) - fnsThk/sin(_aFns))
+					iCoorOrigin[12][2] = _dist + fnsLth - _sideLct2 + fnsThk
+
+					iCoorOrigin[13][1] = -(_inWdt2/2 - _sideLct2/tan(_aFns) - _sideDpt + fnsThk/tan(_aFns) - fnsThk/sin(_aFns))
+					iCoorOrigin[13][2] = _dist + fnsLth - _sideLct2 + fnsThk
+
+					iCoorOrigin[14][1] = -(_inWdt2/2 - _sideLct1/tan(_aFns) - _sideDpt - fnsThk/tan(_aFns) - fnsThk/sin(_aFns))
+					iCoorOrigin[14][2] = _dist + fnsLth - _sideLct1 - fnsThk
+
+					iCoorOrigin[15][1] = -(_inWdt2/2 - _sideLct1/tan(_aFns) - fnsThk/tan(_aFns) - fnsThk/sin(_aFns))
+					iCoorOrigin[15][2] = _dist + fnsLth - _sideLct1 - fnsThk
+
+					iCoorOrigin[16][1] = -(_outWdt3/2 + fnsThk/tan(_aFns) - fnsThk/sin(_aFns))
+					iCoorOrigin[16][2] = _dist + fnsThk
+
+					iCoorOrigin[17][1] = -(_outWdt2/2 + fnsThk)
+					iCoorOrigin[17][2] = _dist + fnsThk
+
+					iCoorOrigin[18][1] = -(_outWdt2/2 + fnsThk)
+					iCoorOrigin[18][2] = _dist + _outDpt2 + fnsThk
+
+					iCoorOrigin[19][1] = -(_outWdt1/2 + fnsThk)
+					iCoorOrigin[19][2] = _dist + _outDpt2 + fnsThk
+
+					iCoorOrigin[20][1] = -(_outWdt1/2 + fnsThk)
+					iCoorOrigin[20][2] = _dist + _outDpt1 + fnsThk
+				endif
+
+				!	하부 좌표
+				_aRot = aPartRib[i]
+				for	t = 1	to	_nPoly
+					_originX = iCoorOrigin[t][1]
+					_originY = iCoorOrigin[t][2]
+					gosub	"transCoordinates"
+					put	_transX,	_transY,	0
+				next	t
+
+				!	상부 좌표
+				_aRot = aPartRib[i + 1]
+				for	t = 1	to	_nPoly
+					_originX = iCoorOrigin[t][1]
+					_originY = iCoorOrigin[t][2]
+					gosub	"transCoordinates"
+					put	_distX + _transX,	_distY + _transY,	_distZ
+				next	t
+
+				add	_offsetX,	_offsetY,	0
+					ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+
+					hotspot	0,	0,	0,	unID	:	unID = unID + 1
+				del 1
+
+				addz	_distZ
+			next	i
+
+			del nSplit
+		endgroup
+
+		placegroup	subgroup("gBaseShapeF3",	"gInnerShapeF3")
+	endif
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+if	bSymbol	then
+	for	i = 1	to	_n2Dcut
+		cutend
+	next	i
+endif
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+!-----------------------------------------------------------------------------------------------
+"basicHotspot":	!	공통 기본 핫스팟
+!-----------------------------------------------------------------------------------------------
+	_dist = 0
+	if	iRibType = RIB_ARC	then	_dist = distWP
+
+	put	prfWdtOut/2,	_dist,			0,
+		prfWdtIn/2,		_dist + prfLth,	0,
+		-prfWdtIn/2,	_dist + prfLth,	0,
+		-prfWdtOut/2,	_dist,			0
+
+	if	bFinish	then
+		put	fnsWdtOut/2,	_dist - fnsOff,				0,
+			fnsWdtIn/2,		_dist + fnsLth - fnsOff,	0,
+			-fnsWdtIn/2,	_dist + fnsLth - fnsOff,	0,
+			-fnsWdtOut/2,	_dist - fnsOff,				0
+	endif
+
+	for	h = 1	to	(nsp/3)
+		hotspot	get(3),	unID	:	unID = unID + 1
+	next	h
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"bShapeTrapezoid":	!	사다리꼴 베이스 좌표
+!-----------------------------------------------------------------------------------------------
+	put	prfWdtOut/2,	_dist,			_si,
+		prfWdtIn/2,		_dist + prfLth,	_si,
+		-prfWdtIn/2,	_dist + prfLth,	_si,
+		-prfWdtOut/2,	_dist,			_si,
+		prfWdtOut/2,	_dist,			_si
+return
+
+!-----------------------------------------------------------------------------------------------
+"iShapeTrapezoid":	!	사다리꼴 내부 좌표
+!-----------------------------------------------------------------------------------------------
+	_gapX = ((prfWdtIn - prfWdtOut)/2)
+	if	abs(_gapX) < eps	then
+		_aPrf = 90
+	else
+		_aPrf = atn(prfLth/_gapX)
+	endif
+
+	put	prfWdtOut/2 + prfThk/tan(_aPrf) - prfThk/sin(_aPrf),	_dist + prfThk,				_si,
+		prfWdtIn/2 - prfThk/tan(_aPrf) - prfThk/sin(_aPrf),		_dist + prfLth - prfThk,	_si,
+		-(prfWdtIn/2 - prfThk/tan(_aPrf) - prfThk/sin(_aPrf)),	_dist + prfLth - prfThk,	_si,
+		-(prfWdtOut/2 + prfThk/tan(_aPrf) - prfThk/sin(_aPrf)),	_dist + prfThk,				_si,
+		prfWdtOut/2 + prfThk/tan(_aPrf) - prfThk/sin(_aPrf),	_dist + prfThk,				_si
+return
+
+!-----------------------------------------------------------------------------------------------
+"bShapeTriAngle":	!	삼각형 베이스 좌표
+!-----------------------------------------------------------------------------------------------
+	put	0,				_dist,			_si,
+		prfWdtIn/2,		_dist + prfLth,	_si,
+		-prfWdtIn/2,	_dist + prfLth,	_si,
+		0,				_dist,			_si
+return
+
+!-----------------------------------------------------------------------------------------------
+"iShapeTriAngle":	!	삼각형 내부 좌표
+!-----------------------------------------------------------------------------------------------
+	_gapX = prfWdtIn/2
+	if	abs(_gapX) < eps	then
+		_aPrf = 90
+	else
+		_aPrf = atn(prfLth/_gapX)
+	endif
+
+	put	0,														_dist + prfThk/cos(_aPrf),	_si,
+		prfWdtIn/2 - prfThk/tan(_aPrf) - prfThk/sin(_aPrf),		_dist + prfLth - prfThk,	_si,
+		-(prfWdtIn/2 - prfThk/tan(_aPrf) - prfThk/sin(_aPrf)),	_dist + prfLth - prfThk,	_si,
+		0,														_dist + prfThk/cos(_aPrf),	_si
+return
+
+!-----------------------------------------------------------------------------------------------
+"transCoordinates":	!	회전 좌표 변환
+!-----------------------------------------------------------------------------------------------
+	_transX = _originX*cos(_aRot) - _originY*sin(_aRot) 
+	_transY = _originX*sin(_aRot) + _originY*cos(_aRot)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"bShapeFinish":	!	건축 마감 베이스 좌표
+!-----------------------------------------------------------------------------------------------
+	_gapX = ((fnsWdtIn - fnsWdtOut)/2)
+	if	abs(_gapX) < eps	then
+		_aFns = 90
+	else
+		_aFns = atn(fnsLth/_gapX)
+	endif
+
+	put	_outWdt1/2,	_dist + _outDpt1,	_si,
+		_outWdt1/2,	_dist + _outDpt2,	_si,
+		_outWdt2/2,	_dist + _outDpt2,	_si,
+		_outWdt2/2,	_dist,				_si,
+		_outWdt3/2,	_dist,				_si
+
+
+	if	iFnsType = FINISH_TYPE1	then
+		put	_inWdt2/2,		_dist + fnsLth,				_si,
+			_inWdt1/2,		_dist + fnsLth,				_si,
+			_inWdt1/2,		_dist + fnsLth - _inDpt1,	_si,
+			-_inWdt1/2,		_dist + fnsLth - _inDpt1,	_si,
+			-_inWdt1/2,		_dist + fnsLth,				_si,
+			-_inWdt2/2,		_dist + fnsLth,				_si
+	endif
+	if	iFnsType = FINISH_TYPE2	then
+		put	_inWdt2/2 - _sideLct1/tan(_aFns),				_dist + fnsLth - _sideLct1,	_si,
+			_inWdt2/2 - _sideLct1/tan(_aFns) - _sideDpt,	_dist + fnsLth - _sideLct1,	_si,
+			_inWdt2/2 - _sideLct2/tan(_aFns) - _sideDpt,	_dist + fnsLth - _sideLct2,	_si,
+			_inWdt2/2 - _sideLct2/tan(_aFns),				_dist + fnsLth - _sideLct2,	_si,
+			_inWdt2/2,										_dist + fnsLth,				_si,
+			-_inWdt2/2,										_dist + fnsLth,				_si,
+			-(_inWdt2/2 - _sideLct2/tan(_aFns)),			_dist + fnsLth - _sideLct2,	_si,
+			-(_inWdt2/2 - _sideLct2/tan(_aFns) - _sideDpt),	_dist + fnsLth - _sideLct2,	_si,
+			-(_inWdt2/2 - _sideLct1/tan(_aFns) - _sideDpt),	_dist + fnsLth - _sideLct1,	_si,
+			-(_inWdt2/2 - _sideLct1/tan(_aFns)),			_dist + fnsLth - _sideLct1,	_si
+	endif
+
+	put	-_outWdt3/2,	_dist,						_si,
+		-_outWdt2/2,	_dist,						_si,
+		-_outWdt2/2,	_dist + _outDpt2,			_si,
+		-_outWdt1/2,	_dist + _outDpt2,			_si,
+		-_outWdt1/2,	_dist + _outDpt1,			_si,
+		_outWdt1/2,		_dist + _outDpt1,			_si
+return
+
+!-----------------------------------------------------------------------------------------------
+"iShapeFinish":	!	건축 마감 내부 좌표
+!-----------------------------------------------------------------------------------------------
+	_gapX = ((fnsWdtIn - fnsWdtOut)/2)
+	if	abs(_gapX) < eps	then
+		_aFns = 90
+	else
+		_aFns = atn(fnsLth/_gapX)
+	endif
+
+	put	_outWdt1/2 + fnsThk,									_dist + _outDpt1 + fnsThk,			_si,
+		_outWdt1/2 + fnsThk,									_dist + _outDpt2 + fnsThk,			_si,
+		_outWdt2/2 + fnsThk,									_dist + _outDpt2 + fnsThk,			_si,
+		_outWdt2/2 + fnsThk,									_dist + fnsThk,						_si,
+		_outWdt3/2 + fnsThk/tan(_aFns) - fnsThk/sin(_aFns),		_dist + fnsThk,						_si
+
+	if	iFnsType = FINISH_TYPE1	then
+		put	_inWdt2/2 - fnsThk/tan(_aFns) - fnsThk/sin(_aFns),		_dist + fnsLth - fnsThk,			_si,
+			_inWdt1/2 + fnsThk,										_dist + fnsLth - fnsThk,			_si,
+			_inWdt1/2 + fnsThk,										_dist + fnsLth - _inDpt1 - fnsThk,	_si,
+			-(_inWdt1/2 + fnsThk),									_dist + fnsLth - _inDpt1 - fnsThk,	_si,
+			-(_inWdt1/2 + fnsThk),									_dist + fnsLth - fnsThk,			_si,
+			-(_inWdt2/2 - fnsThk/tan(_aFns) - fnsThk/sin(_aFns)),	_dist + fnsLth - fnsThk,			_si
+	endif
+	if	iFnsType = FINISH_TYPE2	then
+		put	_inWdt2/2 - _sideLct1/tan(_aFns) - fnsThk/tan(_aFns) - fnsThk/sin(_aFns),				_dist + fnsLth - _sideLct1 - fnsThk,	_si,
+			_inWdt2/2 - _sideLct1/tan(_aFns) - _sideDpt - fnsThk/tan(_aFns) - fnsThk/sin(_aFns),	_dist + fnsLth - _sideLct1 - fnsThk,	_si,
+			_inWdt2/2 - _sideLct2/tan(_aFns) - _sideDpt + fnsThk/tan(_aFns) - fnsThk/sin(_aFns),	_dist + fnsLth - _sideLct2 + fnsThk,	_si,
+			_inWdt2/2 - _sideLct2/tan(_aFns) + fnsThk/tan(_aFns) - fnsThk/sin(_aFns),				_dist + fnsLth - _sideLct2 + fnsThk,	_si,
+			_inWdt2/2 - fnsThk/tan(_aFns) - fnsThk/sin(_aFns),										_dist + fnsLth - fnsThk,				_si,
+			-(_inWdt2/2 - fnsThk/tan(_aFns) - fnsThk/sin(_aFns)),									_dist + fnsLth - fnsThk,				_si,
+			-(_inWdt2/2 - _sideLct2/tan(_aFns) + fnsThk/tan(_aFns) - fnsThk/sin(_aFns)),			_dist + fnsLth - _sideLct2 + fnsThk,	_si,
+			-(_inWdt2/2 - _sideLct2/tan(_aFns) - _sideDpt + fnsThk/tan(_aFns) - fnsThk/sin(_aFns)),	_dist + fnsLth - _sideLct2 + fnsThk,	_si,
+			-(_inWdt2/2 - _sideLct1/tan(_aFns) - _sideDpt - fnsThk/tan(_aFns) - fnsThk/sin(_aFns)),	_dist + fnsLth - _sideLct1 - fnsThk,	_si,
+			-(_inWdt2/2 - _sideLct1/tan(_aFns) - fnsThk/tan(_aFns) - fnsThk/sin(_aFns)),			_dist + fnsLth - _sideLct1 - fnsThk,	_si
+	endif
+
+	put	-(_outWdt3/2 + fnsThk/tan(_aFns) - fnsThk/sin(_aFns)),	_dist + fnsThk,						_si,
+		-(_outWdt2/2 + fnsThk),									_dist + fnsThk,						_si,
+		-(_outWdt2/2 + fnsThk),									_dist + _outDpt2 + fnsThk,			_si,
+		-(_outWdt1/2 + fnsThk),									_dist + _outDpt2 + fnsThk,			_si,
+		-(_outWdt1/2 + fnsThk),									_dist + _outDpt1 + fnsThk,			_si,
+		_outWdt1/2 + fnsThk,									_dist + _outDpt1 + fnsThk,			_si
+return

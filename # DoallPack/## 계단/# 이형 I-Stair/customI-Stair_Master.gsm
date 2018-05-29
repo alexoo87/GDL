@@ -1,0 +1,84 @@
+!===============================================================================================
+!	이형 I-Stair
+!===============================================================================================
+eps = 0.0001
+unID = 100
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+
+!	층 보이기 설정
+!-----------------------------------------------------------------------------------------------
+View_Cut = 1
+View_Entire = 2
+View_None = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stView[]
+		stView[1] = "Cut"
+		stView[2] = "Entire"
+		stView[3] = "None"
+endif
+
+
+!	좌/우 계단 유형
+!-----------------------------------------------------------------------------------------------
+stairType_Straight = 1
+stairType_Curve = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stStairType[]
+		stStairType[1] = "직선형"
+		stStairType[2] = "곡선형"
+endif
+
+
+!	단 방향
+!-----------------------------------------------------------------------------------------------
+treadType_Parallel = 1
+treadType_Center = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stTreadType[]
+		stTreadType[1] = "수평"
+		stTreadType[2] = "원점"
+endif
+
+!	단 방향 : `원점` - 디딤판 너비 계산 방법
+!-----------------------------------------------------------------------------------------------
+calcTrd_trdnRsr = 1
+calcTrd_AngnRsr = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stCalcTrd[]
+		stCalcTrd[1] = "직접 입력"
+		stCalcTrd[2] = "자동 계산(디딤판 너비 = 전체 각도/단 개수)"
+endif
+
+
+
+!	Center Y좌표는 계단의 중간
+!-----------------------------------------------------------------------------------------------
+if	iTreadType = treadType_Parallel	then
+	yCenter_L = strTrd*nRsr/2
+	yCenter_R = strTrd*nRsr/2
+endif
+
+if	iTreadType = treadType_Center	then
+	yCenter_L = strLth/2
+	yCenter_R = strLth/2
+endif
+
+	!	핸드레일 단면 형상
+	!-----------------------------------------------------------------------------------------------
+	RailSect_Line = 1
+	RailSect_3D = 2
+	RailSect_MVO = 3
+
+	if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+		dim	stRailSect[]
+			stRailSect[1] = "단선"
+			stRailSect[2] = "3D형상"
+			stRailSect[3] = "by MVO"
+	endif

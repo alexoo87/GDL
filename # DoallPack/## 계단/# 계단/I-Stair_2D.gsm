@@ -1,0 +1,2164 @@
+
+!===========================================================================================
+!	기본설정
+!===========================================================================================
+
+! project2	3,	270,	3
+
+!	텍스트 정의
+!-------------------------------------------------------------------------------------------
+define style{2}	txtSty1	stFontType,	TextSize*GLOB_SCALE/1000,	0
+define style{2}	txtSty2	stFontType,	dimTxtSize*GLOB_SCALE/1000,	0
+
+
+!	계단참이 하나의 계단 역할을 하기때문에 하나씩 제거
+!-------------------------------------------------------------------------------------------
+strRsrN = strRsrN - 1
+
+
+!	핸드레일
+!-------------------------------------------------------------------------------------------
+outHndTmp = 1
+inHndTmp = 1
+
+	if	GLOB_STRUCTURE_DISPLAY = 0	then
+		outHndTmp = 1
+		inHndTmp = 1
+
+		if	bHandIn		then	inHndTmp = 0
+		if	bHandOut	then	outHndTmp = 0
+	endif
+
+!	변수정의
+!-------------------------------------------------------------------------------------------
+brkPosY = tan(brkAng)*strWdt/2	
+CstrRsrN = (brkL - brkPosY)/strTrd
+
+
+!	작업층 : None and 상부층 : None
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST = 0	then
+	if	CutPlaneTmp < cutHeight	then
+		if	iWrkFlr = wrkFlr_None	then
+				gosub	"Blank"
+			end
+		endif
+	else
+		if	iUprFlr = uprFlr_None	then
+				gosub	"Blank"
+			end
+		endif
+	endif
+else
+	if	iUprFlr = uprFlr_None	then
+			gosub	"Blank"
+		end
+	endif
+endif
+
+
+!	마감재 두께
+!-------------------------------------------------------------------------------------------
+fnsTmpY = 0
+
+if	bFns	then
+	if	GLOB_STRUCTURE_DISPLAY # 0	then
+		fnsTmpY = vFnsThk + basThk
+	endif
+else
+	vFnsThk = 0
+	basThk = 0
+endif
+
+
+
+
+!===========================================================================================
+!	2D hotspot
+!===========================================================================================
+unID = 100
+
+!	브레이크라인
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST = 0	then
+	if	CutPlaneTmp < cutHeight	then
+		if	iWrkFlr = wrkFlr_Cut	then
+			add2	strWdt/2,	0
+				hotspot2	0,	0,		unID,	brkL,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,		unID,	brkL,	3		:	unID = unID + 1
+				hotspot2	0,	brkL,	unID,	brkL,	2		:	unID = unID + 1
+			del 1
+		endif
+	else
+		if	iUprFlr = uprFlr_Cut	then
+			add2	strWdt/2,	0
+				hotspot2	0,	0,			unID,	uprbrkL,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	uprbrkL,	3		:	unID = unID + 1
+				hotspot2	0,	uprbrkL,	unID,	uprbrkL,	2		:	unID = unID + 1
+			del 1
+		endif
+	endif
+else
+	if	iUprFlr = uprFlr_Cut	then
+		add2	strWdt/2,	0
+			hotspot2	0,	0,			unID,	uprbrkL,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	uprbrkL,	3		:	unID = unID + 1
+			hotspot2	0,	uprbrkL,	unID,	uprbrkL,	2		:	unID = unID + 1
+		del 1
+	endif
+endif
+
+
+!	계단 너비
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST = 0	then
+	if	CutPlaneTmp < cutHeight	then
+		if	iWrkFlr <> wrkFlr_None	then
+			hotspot2	0,		fnsTmpY,		unID,	strWdt,	1+256	:	unID = unID + 1
+			hotspot2	-1,		fnsTmpY,		unID,	strWdt,	3		:	unID = unID + 1
+			hotspot2	strWdt,	fnsTmpY,		unID,	strWdt,	2		:	unID = unID + 1
+		endif
+	else
+		if	iUprFlr = uprFlr_Entire	then
+			hotspot2	0,		fnsTmpY,		unID,	strWdt,	1+256	:	unID = unID + 1
+			hotspot2	-1,		fnsTmpY,		unID,	strWdt,	3		:	unID = unID + 1
+			hotspot2	strWdt,	fnsTmpY,		unID,	strWdt,	2		:	unID = unID + 1
+		endif
+	endif
+else
+	if	iUprFlr = uprFlr_Entire	then
+		hotspot2	0,		fnsTmpY,		unID,	strWdt,	1+256	:	unID = unID + 1
+		hotspot2	-1,		fnsTmpY,		unID,	strWdt,	3		:	unID = unID + 1
+		hotspot2	strWdt,	fnsTmpY,		unID,	strWdt,	2		:	unID = unID + 1
+	endif
+endif
+
+!	핸드레일 핫스팟
+!-------------------------------------------------------------------------------------------
+if	GLOB_STRUCTURE_DISPLAY = 0	then
+	!	작업층
+	if	GLOB_CH_STORY_DIST = 0 	then
+		!	Cutplane(작업층)
+		if	CutPlaneTmp < cutHeight	then
+			if	bHandOut	then
+				hotspot2	0,			0,		unID,	OhndOff,	1+128	:	unID = unID + 1
+				hotspot2	-1,			0,		unID,	OhndOff,	3		:	unID = unID + 1
+				hotspot2	OhndOff,	0,		unID,	OhndOff,	2		:	unID = unID + 1
+		
+				add2	OhndOff,	0
+					hotspot2	0,	0,			unID,	WhndOff1,	1+128	:	unID = unID + 1
+					hotspot2	0,	1,			unID,	WhndOff1,	3		:	unID = unID + 1
+					hotspot2	0,	-WhndOff1,	unID,	WhndOff1,	2		:	unID = unID + 1	
+				del 1
+
+				if	iWrkFlr = wrkFlr_Entire	then
+					add2	OhndOff,	strTrd*strRsrN + lndLength
+						hotspot2	0,	0,			unID,	WhndOff2,	1+128	:	unID = unID + 1
+						hotspot2	0,	-1,			unID,	WhndOff2,	3		:	unID = unID + 1
+						hotspot2	0,	WhndOff2,	unID,	WhndOff2,	2		:	unID = unID + 1	
+					del 1
+				endif
+			endif
+
+			if	bHandIn	then
+				add2	strWdt,	0
+					hotspot2	0,			0,	unID,	IhndOff,	1+128	:	unID = unID + 1
+					hotspot2	1,			0,	unID,	IhndOff,	3		:	unID = unID + 1
+					hotspot2	-IhndOff,	0,	unID,	IhndOff,	2		:	unID = unID + 1
+				del 1
+		
+				add2	strWdt - IhndOff,	0
+					hotspot2	0,	0,			unID,	WhndOff1,	1+128	:	unID = unID + 1
+					hotspot2	0,	1,			unID,	WhndOff1,	3		:	unID = unID + 1
+					hotspot2	0,	-WhndOff1,	unID,	WhndOff1,	2		:	unID = unID + 1	
+				del 1
+
+				if	iWrkFlr = wrkFlr_Entire	then
+					add2	strWdt - IhndOff,	strTrd*strRsrN + lndLength
+						hotspot2	0,	0,			unID,	WhndOff2,	1+128	:	unID = unID + 1
+						hotspot2	0,	-1,			unID,	WhndOff2,	3		:	unID = unID + 1
+						hotspot2	0,	WhndOff2,	unID,	WhndOff2,	2		:	unID = unID + 1	
+					del 1
+				endif
+			endif
+
+		!	Cutplane(상부층)
+		else
+			if	bHandOut	then
+				if	iUprFlr = uprFlr_Entire	then
+					hotspot2	0,			0,		unID,	OhndOff,	1+128	:	unID = unID + 1
+					hotspot2	-1,			0,		unID,	OhndOff,	3		:	unID = unID + 1
+					hotspot2	OhndOff,	0,		unID,	OhndOff,	2		:	unID = unID + 1
+			
+					add2	OhndOff,	0
+						hotspot2	0,	0,			unID,	WhndOff1,	1+128	:	unID = unID + 1
+						hotspot2	0,	1,			unID,	WhndOff1,	3		:	unID = unID + 1
+						hotspot2	0,	-WhndOff1,	unID,	WhndOff1,	2		:	unID = unID + 1	
+					del 1
+				endif
+
+				add2	OhndOff,	strTrd*strRsrN + lndLength
+					hotspot2	0,	0,			unID,	WhndOff2,	1+128	:	unID = unID + 1
+					hotspot2	0,	-1,			unID,	WhndOff2,	3		:	unID = unID + 1
+					hotspot2	0,	WhndOff2,	unID,	WhndOff2,	2		:	unID = unID + 1	
+				del 1
+			endif
+
+			if	bHandIn	then
+				if	iUprFlr = uprFlr_Entire	then
+					add2	strWdt,	0
+						hotspot2	0,			0,	unID,	IhndOff,	1+128	:	unID = unID + 1
+						hotspot2	1,			0,	unID,	IhndOff,	3		:	unID = unID + 1
+						hotspot2	-IhndOff,	0,	unID,	IhndOff,	2		:	unID = unID + 1
+					del 1
+			
+					add2	strWdt - IhndOff,	0
+						hotspot2	0,	0,			unID,	WhndOff1,	1+128	:	unID = unID + 1
+						hotspot2	0,	1,			unID,	WhndOff1,	3		:	unID = unID + 1
+						hotspot2	0,	-WhndOff1,	unID,	WhndOff1,	2		:	unID = unID + 1	
+					del 1
+				endif
+
+				add2	strWdt - IhndOff,	strTrd*strRsrN + lndLength
+					hotspot2	0,	0,			unID,	WhndOff2,	1+128	:	unID = unID + 1
+					hotspot2	0,	-1,			unID,	WhndOff2,	3		:	unID = unID + 1
+					hotspot2	0,	WhndOff2,	unID,	WhndOff2,	2		:	unID = unID + 1	
+				del 1
+			endif
+		endif
+	!	상부층
+	else
+		if	bHandOut	then
+			if	iUprFlr = uprFlr_Entire	then
+				hotspot2	0,			0,		unID,	OhndOff,	1+128	:	unID = unID + 1
+				hotspot2	-1,			0,		unID,	OhndOff,	3		:	unID = unID + 1
+				hotspot2	OhndOff,	0,		unID,	OhndOff,	2		:	unID = unID + 1
+		
+				add2	OhndOff,	0
+					hotspot2	0,	0,			unID,	WhndOff1,	1+128	:	unID = unID + 1
+					hotspot2	0,	1,			unID,	WhndOff1,	3		:	unID = unID + 1
+					hotspot2	0,	-WhndOff1,	unID,	WhndOff1,	2		:	unID = unID + 1	
+				del 1
+			endif
+
+			add2	OhndOff,	strTrd*strRsrN + lndLength
+				hotspot2	0,	0,			unID,	WhndOff2,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	WhndOff2,	3		:	unID = unID + 1
+				hotspot2	0,	WhndOff2,	unID,	WhndOff2,	2		:	unID = unID + 1	
+			del 1
+		endif
+
+		if	bHandIn	then
+			if	iUprFlr = uprFlr_Entire	then
+				add2	strWdt,	0
+					hotspot2	0,			0,	unID,	IhndOff,	1+128	:	unID = unID + 1
+					hotspot2	1,			0,	unID,	IhndOff,	3		:	unID = unID + 1
+					hotspot2	-IhndOff,	0,	unID,	IhndOff,	2		:	unID = unID + 1
+				del 1
+		
+				add2	strWdt - IhndOff,	0
+					hotspot2	0,	0,			unID,	WhndOff1,	1+128	:	unID = unID + 1
+					hotspot2	0,	1,			unID,	WhndOff1,	3		:	unID = unID + 1
+					hotspot2	0,	-WhndOff1,	unID,	WhndOff1,	2		:	unID = unID + 1	
+				del 1
+			endif
+
+			add2	strWdt - IhndOff,	strTrd*strRsrN + lndLength
+				hotspot2	0,	0,			unID,	WhndOff2,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	WhndOff2,	3		:	unID = unID + 1
+				hotspot2	0,	WhndOff2,	unID,	WhndOff2,	2		:	unID = unID + 1	
+			del 1
+		endif
+	endif
+endif
+
+
+
+!===========================================================================================
+!	계단
+!===========================================================================================
+
+!-------------------------------------------------------------------------------------------
+!	브레이크 라인 그리기
+!-------------------------------------------------------------------------------------------
+drawindex	30
+pen	etcPen
+
+!	작업층
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST = 0	then
+
+	!	CutPlane높이(작업층이 보임)
+	!-------------------------------------------------------------------------------------------
+	if	CutPlaneTmp < cutHeight	then
+
+		!	작업층 : Cut
+		!-------------------------------------------------------------------------------------------
+		if	iWrkFlr = wrkFlr_Cut and bWrkBrk	then
+			add2	strWdt/2,	0
+				add2	0,	brkL
+
+					put	-strWdt/2 - 0.300,	-(strWdt/2)*0.400 - 0.120,
+						-strWdt/2,			-(strWdt/2)*0.400,
+						-0.0005*100,		-0.0002*100,
+						0,					-0.0015*100,
+						0,					0.0015*100,
+						0.0005*100,			0.0002*100,
+						strWdt/2,			(strWdt/2)*0.400,
+						strWdt/2 + 0.300,	(strWdt/2)*0.400 + 0.120
+
+					poly2	nsp/2,	1,	get(nsp)
+
+				del 1
+			del 1
+		endif
+
+	!	CutPlane높이(상부층이 보임)
+	!-------------------------------------------------------------------------------------------
+	else
+
+		!	상부층 : Cut
+		!-------------------------------------------------------------------------------------------
+		if	iUprFlr = uprFlr_Cut and bUprBrk	then
+			add2	strWdt/2,	0
+				add2	0,	uprbrkL
+	
+					put	-strWdt/2 - 0.300,	-(strWdt/2)*0.400 - 0.120,
+						-strWdt/2,			-(strWdt/2)*0.400,
+						-0.0005*100,		-0.0002*100,
+						0,					-0.0015*100,
+						0,					0.0015*100,
+						0.0005*100,			0.0002*100,
+						strWdt/2,			(strWdt/2)*0.400,
+						strWdt/2 + 0.300,	(strWdt/2)*0.400 + 0.120
+	
+					poly2	nsp/2,	1,	get(nsp)
+	
+				del 1
+			del 1
+		endif
+
+	endif
+endif
+
+!	상부층
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST <> 0	then
+
+	!	상부층 : Cut
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Cut and bUprBrk	then
+		add2	strWdt/2,	0
+			add2	0,	uprbrkL
+
+				put	-strWdt/2 - 0.300,	-(strWdt/2)*0.400 - 0.120,
+					-strWdt/2,			-(strWdt/2)*0.400,
+					-0.0005*100,		-0.0002*100,
+					0,					-0.0015*100,
+					0,					0.0015*100,
+					0.0005*100,			0.0002*100,
+					strWdt/2,			(strWdt/2)*0.400,
+					strWdt/2 + 0.300,	(strWdt/2)*0.400 + 0.120
+
+				poly2	nsp/2,	1,	get(nsp)
+
+			del 1
+		del 1
+	endif
+
+endif
+
+
+
+!-------------------------------------------------------------------------------------------
+!	외곽선 그리기
+!-------------------------------------------------------------------------------------------
+drawindex	20
+
+strFillPen = 0
+strFillPenBg = 0
+
+pen	strPen
+fill	65
+
+!	작업층
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST = 0	then
+
+	!	CutPlane 높이(작업층이 보임)
+	!-------------------------------------------------------------------------------------------
+	if	CutPlaneTmp < cutHeight	then
+		if	iWrkFlr = wrkFlr_Cut	then
+
+			put	0,							brkL - brkPosY,	1,
+				0,							fnsTmpY,		1,
+				OhndOff - hndRd,			fnsTmpY,		outHndTmp,
+				OhndOff + hndRd,			fnsTmpY,		1,
+				strWdt - IhndOff - hndRd,	fnsTmpY,		inHndTmp,
+				strWdt - IhndOff + hndRd,	fnsTmpY,		1,
+				strWdt,						fnsTmpY,		1,
+				strWdt,						brkL + brkPosY,	0,
+				0,							brkL - brkPosY,	1
+
+		endif
+
+
+		if	iWrkFlr = wrkFlr_Entire	then
+
+			put	0,							fnsTmpY,					1,
+				OhndOff - hndRd,			fnsTmpY,					outHndTmp,
+				OhndOff + hndRd,			fnsTmpY,					1,
+				strWdt - (IhndOff + hndRd),	fnsTmpY,					inHndTmp,
+				strWdt - (IhndOff - hndRd),	fnsTmpY,					1,	
+				strWdt,						fnsTmpY,					1,
+				strWdt,						strTrd*strRsrN + fnsTmpY,	1,
+				strWdt - (IhndOff - hndRd),	strTrd*strRsrN + fnsTmpY,	inHndTmp,
+				strWdt - (IhndOff + hndRd),	strTrd*strRsrN + fnsTmpY,	1,
+				OhndOff + hndRd,			strTrd*strRsrN + fnsTmpY,	outHndTmp,
+				OhndOff - hndRd,			strTrd*strRsrN + fnsTmpY,	1,
+				0,							strTrd*strRsrN + fnsTmpY,	1,
+				0,							fnsTmpY,					1
+
+		endif
+
+	!	CutPlane 높이(상부층이 보임)
+	!-------------------------------------------------------------------------------------------
+	else
+
+		gosub	"uprOutline_"
+
+	endif
+
+
+!	상부층
+!-------------------------------------------------------------------------------------------
+else
+
+	gosub	"uprOutline_"
+
+endif
+
+	poly2_B	nsp/3,	1+2,	strFillPen,	strFillPenBg,	use(nsp)
+
+
+	!	hotline
+	!------------------------------------------------------------------------------------------
+	for	i = 1	to	(nsp/3)-2
+		hotline2	get(2)+(use(1)-get(1)),	use(2)	: unID = unID + 1
+	next i
+		hotline2	get(2)+(use(1)-get(1)),	get(2)+(use(1)-get(1))	: unID = unID + 1
+
+
+!	상/하부슬래브 라인
+!------------------------------------------------------------------------------------------
+a1_addvalue = (-(bLndThk + bFnsThk - fnsThk - basThk) + y1)/tan(slpAng) + x1
+
+!	하부슬래브 라인
+if	a1_addvalue + vfnsThk < eps	then
+	if	GLOB_CH_STORY_DIST = 0	then
+		if	CutPlaneTmp < cutHeight	then
+			line2	0,		fnsTmpY,	0,		a1_addvalue + vfnsThk + basThk
+			line2	strWdt,	fnsTmpY,	strWdt,	a1_addvalue + vfnsThk + basThk
+
+			hotline2	0,		fnsTmpY,	0,		a1_addvalue + vfnsThk + basThk
+			hotline2	strWdt,	fnsTmpY,	strWdt,	a1_addvalue + vfnsThk + basThk
+		else
+			if	iUprFlr = uprFlr_Entire	then
+				line2	0,		fnsTmpY,	0,		a1_addvalue + vfnsThk + basThk
+				line2	strWdt,	fnsTmpY,	strWdt,	a1_addvalue + vfnsThk + basThk
+
+				hotline2	0,		fnsTmpY,	0,		a1_addvalue + vfnsThk + basThk
+				hotline2	strWdt,	fnsTmpY,	strWdt,	a1_addvalue + vfnsThk + basThk
+			endif
+		endif
+	else
+		if	iUprFlr = uprFlr_Entire	then
+			line2	0,		fnsTmpY,	0,		a1_addvalue + vfnsThk + basThk
+			line2	strWdt,	fnsTmpY,	strWdt,	a1_addvalue + vfnsThk + basThk
+
+			hotline2	0,		fnsTmpY,	0,		a1_addvalue + vfnsThk + basThk
+			hotline2	strWdt,	fnsTmpY,	strWdt,	a1_addvalue + vfnsThk + basThk
+		endif
+	endif
+endif
+
+!	상부슬래브 라인
+if	bFns	then
+	if	GLOB_CH_STORY_DIST = 0	then
+		if	CutPlaneTmp < cutHeight	then
+			if	iWrkFlr = wrkFlr_Entire	then
+				add2	0,	strTrd*strRsrN
+					line2	0,		0,	0,		vfnsThk + basThk
+					line2	strWdt,	0,	strWdt,	vfnsThk + basThk
+
+					hotline2	0,		0,	0,		vfnsThk + basThk
+					hotline2	strWdt,	0,	strWdt,	vfnsThk + basThk
+				del 1
+			endif
+		else
+			add2	0,	strTrd*strRsrN
+				line2	0,		0,	0,		vfnsThk + basThk
+				line2	strWdt,	0,	strWdt,	vfnsThk + basThk
+
+				hotline2	0,		0,	0,		vfnsThk + basThk
+				hotline2	strWdt,	0,	strWdt,	vfnsThk + basThk
+			del 1
+		endif
+	else
+		add2	0,	strTrd*strRsrN
+			line2	0,		0,	0,		vfnsThk + basThk
+			line2	strWdt,	0,	strWdt,	vfnsThk + basThk
+
+			hotline2	0,		0,	0,		vfnsThk + basThk
+			hotline2	strWdt,	0,	strWdt,	vfnsThk + basThk
+		del 1
+	endif
+endif
+
+
+
+!-------------------------------------------------------------------------------------------
+!	단 그리기
+!-------------------------------------------------------------------------------------------
+drawindex	20
+
+dim	m[], x[], xx[], xxx[], y[]
+
+pen	strPen
+
+
+add2	0,	fnsTmpY
+
+	!	작업층
+	!-------------------------------------------------------------------------------------------
+	if	GLOB_CH_STORY_DIST = 0	then
+
+		!	CutPlane 높이(작업층이 보임)
+		!-------------------------------------------------------------------------------------------
+		if	CutPlaneTmp < cutHeight	then
+
+			!	작업층 : Cut
+			!-------------------------------------------------------------------------------------------
+			if	iWrkFlr = wrkFlr_Cut	then
+				brkPosY = tan(brkAng)*strWdt/2
+				CstrRsrN = (brkL - brkPosY - fnsTmpY)/strTrd
+			
+				for	i = 1	to	int(CstrRsrN)
+					add2	0,	strTrd
+		
+						put	0,							0,	1,
+							OhndOff - hndRd,			0,	outHndTmp,
+							OhndOff + hndRd,			0,	1,
+							strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+							strWdt - (IhndOff - hndRd),	0,	1,
+							strWdt,						0,	1
+	
+						poly2_	nsp/3,	1,	get(nsp)
+		
+						hotline2	0,	0,	strWdt,	0,	unID	:	unID = unID + 1
+	
+				next i
+	
+				del int(CstrRsrN)
+			
+					!	잘린 부위 계단참 그리기
+					add2	0,	strTrd*int(CstrRsrN)
+		
+						for	i = 1	to	5
+		
+							m[i] = strTrd*(int(CstrRsrN) + i) + fnsTmpY
+			
+							y1 = (brkL - brkPosY - fnsTmpY) - (int(CstrRsrN)*strTrd)
+							x[i] = 2.5*(strTrd*i - y1)
+							xx[i] = ((-0.150 + 0.300*strWdt/2*10) - (strTrd*i - y1))/2.6
+							xxx[i] = ((0.150 + 0.300*strWdt/2*10) - (strTrd*i - y1))/2.6
+	
+	
+							!	단이 그려질 전체 범위
+							if	m[i] >= (brkL - brkPosY) and m[i] <= (brkL + brkPosY)	then
+	
+								!	하부 구간
+								if	m[i] < (brkL - 0.020)	then
+	
+									if	m[i] > (brkL - 0.150)	then
+	
+										put	x[i],						0,	1,
+											xx[i],						0,	0,
+											strWdt/2,					0,	1,
+											strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+											strWdt - (IhndOff - hndRd),	0,	1,
+											strWdt,						0,	1
+	
+									else
+	
+										if	x[i] < OhndOff - hndRd	then
+	
+											put	x[i],						0,	1,
+												OhndOff - hndRd,			0,	outHndTmp,
+												OhndOff + hndRd,			0,	1,
+												strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+												strWdt - (IhndOff - hndRd),	0,	1,
+												strWdt,						0,	1
+	
+										else
+	
+											if	x[i] < OhndOff + hndRd	then
+	
+												put	OhndOff + hndRd,			0,	1,
+													strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+													strWdt - (IhndOff - hndRd),	0,	1,
+													strWdt,						0,	1
+	
+											else
+	
+												put	x[i],						0,	1,
+													strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+													strWdt - (IhndOff - hndRd),	0,	1,
+													strWdt,						0,	1
+	
+											endif
+	
+										endif
+	
+									endif
+	
+								endif
+	
+	
+								!	사이 구간
+								if	m[i] >= (brkL - 0.020) and m[i] <= (brkL + 0.020)	then
+	
+									put	strWdt/2,					0,	1,
+										strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+										strWdt - (IhndOff - hndRd),	0,	1,
+										strWdt,						0,	1
+	
+								endif
+	
+	
+								!	상부구간
+								if	m[i] > (brkL + 0.020)	then
+	
+									if	m[i] < (brkL + 0.150)	then
+		
+										if	xxx[i] > strWdt/2 	then
+	
+											put	strWdt/2,	0,	1,
+												xxx[i],		0,	0
+	
+										endif
+	
+									endif
+	
+									if	x[i] < strWdt - (IhndOff + hndRd)	then
+	
+										put	x[i],						0,	1,
+											strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+											strWdt - (IhndOff - hndRd),	0,	1,
+											strWdt,						0,	1
+	
+									endif
+	
+									if	x[i] >= strWdt - (IhndOff + hndRd) and x[i] < strWdt - (IhndOff - hndRd)	then
+	
+										put	strWdt - (IhndOff - hndRd),	0,	1,
+											strWdt,						0,	1
+	
+									endif
+	
+									if	x[i] >= strWdt - (IhndOff - hndRd)	then
+	
+										put	x[i],	0,	1,
+											strWdt,	0,	1
+	
+									endif
+	
+								endif
+	
+	
+								!	단 그리기
+								add2	0,	strTrd * i
+	
+									poly2_	nsp/3,	1,	get(nsp)
+	
+								del 1
+	
+							endif
+	
+						next i
+				del 1
+		
+			endif
+	
+	
+			!	작업층 : Entire
+			!-------------------------------------------------------------------------------------------
+			if	iWrkFlr = wrkFlr_Entire	then
+		
+				for	i = 1	to strRsrN - 1
+	
+					add2	0,	strTrd
+		
+						put	0,							0,	1,
+							OhndOff - hndRd,			0,	outHndTmp,
+							OhndOff + hndRd,			0,	1,
+							strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+							strWdt - (IhndOff - hndRd),	0,	1,
+							strWdt,						0,	1
+	
+						poly2_	nsp/3,	1,	get(nsp)
+		
+						hotline2	0,	0,	strWdt,	0,	unID	:	unID = unID + 1
+		
+				next i
+		
+				del strRsrN-1
+		
+			endif
+
+		!	CutPlane 높이(상부층이 보임)
+		!-------------------------------------------------------------------------------------------
+		else
+
+			gosub	"uprTread_"
+
+		endif
+
+	!	상부층
+	!-------------------------------------------------------------------------------------------	
+	else
+
+		gosub	"uprTread_"
+
+	endif
+
+del 1
+
+
+
+!-------------------------------------------------------------------------------------------
+!	UP 표현 그리기
+!-------------------------------------------------------------------------------------------
+pen etcPen
+
+!	작업층
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST = 0	then
+
+	!	CutPlane 높이(작업층이 보임)
+	!-------------------------------------------------------------------------------------------
+	if	CutPlaneTmp < cutHeight	then
+
+		!	화살표 On
+		!-------------------------------------------------------------------------------------------
+		if	bArrow	then
+
+			!	변수정의
+			!-------------------------------------------------------------------------------------------
+			if	iWrkFlr = wrkFlr_Cut	then
+				upLineTmp = brkL
+				OffsetTmp = 0.0027*100 + fnsTmpY
+			endif
+		
+			if	iWrkFlr = wrkFlr_Entire	then
+				upLineTmp = strTrd*strRsrN + fnsTmpY
+				OffsetTmp = 0.0004*100 + fnsTmpY
+			endif
+		
+		
+			!	선+화살표
+			!-------------------------------------------------------------------------------------------
+			add2	strWdt/2,	fnsTmpY
+				circle2	0,	0,	0.00075*100
+				line2	0,	0,	0,	upLineTmp - OffsetTmp
+		
+				add2	0,	upLineTmp - OffsetTmp
+		
+					! 화살표
+					put	0,				0,
+						0.001*100,		-0.0006*100,
+						0.0012*100,		-0.0003*100,
+						0,				0.0004*100,
+						-0.0012*100,	-0.0003*100,
+						-0.001*100,		-0.0006*100
+		
+					poly2	nsp/2,	1+4,	get(nsp)
+		
+				del 1
+			del 1
+
+		endif
+	
+	
+		!	텍스트
+		!-------------------------------------------------------------------------------------------
+		if	bTxt	then
+	
+			paragraph	"prgUP"	2,	0,	0,	0,	1
+						pen	TextPen
+						style	txtSty1
+						"UP"
+			endparagraph
+		
+			textblock	"UP"	0,	5,	txtAng,	1,	1,	0,	"prgUP"
+		
+			add2	strWdt/2,	fnsTmpY
+				richtext2	0,	-txtLct1 - TextSize*GLOB_SCALE/2000,	"UP"
+			del 1
+	
+	
+				!	hotspot
+				!-------------------------------------------------------------------------------------------
+				add2	strWdt/2,	fnsTmpY
+					hotspot2		0,		0,			unID,	txtLct1,	1	:	unID = unID + 1
+					hotspot2		0,		1,			unID,	txtLct1,	3	:	unID = unID + 1
+					hotspot2		0,		-txtLct1,	unID,	txtLct1,	2	:	unID = unID + 1
+	
+					add2	0,	-txtLct1 - TextSize*GLOB_SCALE/2000
+						hotspot2		0.200,				0,					unID,	txtAng,	4+128	:	unID = unID + 1
+						hotspot2		0.200*cos(txtAng),	0.200*sin(txtAng),	unID,	txtAng,	5		:	unID = unID + 1
+						hotspot2		0,					0,					unID,	txtAng,	6		:	unID = unID + 1
+					del 1
+				del 1
+	
+		endif
+
+	endif
+endif
+
+
+
+!-------------------------------------------------------------------------------------------
+!	DOWN 표현 그리기
+!-------------------------------------------------------------------------------------------
+pen etcPen
+
+!	작업층
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST = 0	then
+	if	CutPlaneTmp >= cutHeight	then
+		gosub	"downArrow_"
+	endif
+endif
+
+
+!	상부층
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST <> 0 then
+
+	gosub	"downArrow_"
+
+endif
+
+
+
+!-------------------------------------------------------------------------------------------
+!	논슬립 그리기
+!-------------------------------------------------------------------------------------------
+drawindex	10
+pen	nslpPen
+
+add2	0,	fnsTmpY
+
+	if	GLOB_STRUCTURE_DISPLAY = 0 and bNonSlp	then
+	
+		!	작업층
+		!-------------------------------------------------------------------------------------------
+		if	GLOB_CH_STORY_DIST = 0	then	
+	
+			!	CutPlane높이(작업층이 보임)
+			!-------------------------------------------------------------------------------------------
+			if	CutPlaneTmp < cutHeight	then
+	
+				!	작업층 : Cut
+				!-------------------------------------------------------------------------------------------
+				if	iWrkFlr = wrkFlr_Cut	then
+					brkPosY = tan(brkAng)*strWdt/2
+					CstrRsrN = (brkL - brkPosY - 0.050 + fnsTmpY)/strTrd
+			
+					for	i = 1	to	int(CstrRsrN) + 1
+			
+						if	(OhndOff - hndRd) < 0.050	then
+	
+							put	OhndOff + hndRd,	0.050,	1,
+								strWdt - 0.150,		0.050,	1,
+								strWdt - 0.150,		0,		1
+	
+						else
+	
+							if	i = int(CstrRsrN) + 1	then
+								b2 = (brkL - brkPosY + 0.050) - int(CstrRsrN1)*strTrd
+								a2 = 2.5*(strTrd + 0.050 - b2)
+								c1 = 0.4*0.050 + b2
+								b1 = 0.4*(OhndOff - hndRd) + b2
+	
+								if	c1 < 0.050	then
+									put	0.050,				0,		1,
+										0.050,				c1,		0,
+										0.050,				0.050,	0,
+										OhndOff - hndRd,	0.050,	outHndTmp,
+										OhndOff + hndRd,	0.050,	1,
+										strWdt - 0.150,		0.050,	1,
+										strWdt - 0.150,		0,		1
+								else
+									put	0.050,				0,		1,
+										0.050,				0.050,	1,
+										OhndOff - hndRd,	0.050,	outHndTmp,
+										OhndOff + hndRd,	0.050,	1,
+										strWdt - 0.150,		0.050,	1,
+										strWdt - 0.150,		0,		1
+								endif
+							else
+								put	0.050,				0,		1,
+									0.050,				0.050,	1,
+									OhndOff - hndRd,	0.050,	outHndTmp,
+									OhndOff + hndRd,	0.050,	1,
+									strWdt - 0.150,		0.050,	1,
+									strWdt - 0.150,		0,		1
+							endif
+						endif
+	
+							poly2_	nsp/3,	1,	get(nsp)
+		
+						add2	0,	strTrd
+		
+					next i
+		
+					!	잘린 위치 논슬립
+					!-------------------------------------------------------------------------------------------
+					for	i = 1	to 	5
+		
+						m[i] = strTrd*(int(CstrRsrN) + i) + 0.050 - fnsTmpY
+				
+						y1 = (brkL - brkPosY + fnsTmpY) - int(CstrRsrN)*strTrd
+						y2 = 0.4*(0.050) - (strTrd*i + 0.050)
+						y3 = 0.4*(strWdt - 0.150) - (strTrd*i + 0.050)
+						x[i] = 2.5*(strTrd*i + 0.050 - y1)
+						xx[i] = ((-0.150 + 0.300*strWdt/2*10) - (strTrd*i + 0.050 - y1))/2.6
+						xxx[i] = ((0.150 + 0.300*strWdt/2*10) - (strTrd*i + 0.050 - y1))/2.6
+						bZero = y1 + y2 > -0.050
+
+						!	단이 그려질 전체 범위
+						if	m[i] >= (brkL - brkPosY) and m[i] <= (brkL + brkPosY)	then
+
+							!	하부구간
+							if	m[i] < (brkL - 0.020)	then
+								if	m[i] > (brkL - 0.150)	then
+									put	x[i],				0,		1,
+										xx[i],				0,		0,
+										strWdt/2,			0,		1,
+										strWdt - 0.150,		0,		1,
+										strWdt - 0.150,		-0.050,	1
+								else
+									if	x[i] > 0.050	then
+										if	x[i] < OhndOff - hndRd	then
+											put	0.050,				-0.050,		1,
+												0.050,				y1 + y2,	0,
+												x[i],				0,			1,
+												OhndOff - hndRd,	0,			outHndTmp,
+												OhndOff + hndRd,	0,			1,
+												strWdt - 0.150,		0,			1,
+												strWdt - 0.150,		-0.050,		1
+										else
+											if	x[i] < OhndOff + hndRd	then
+												put	0.050,				-0.050,		bZero,
+													0.050,				y1 + y2,	0,
+													OhndOff + hndRd,	0,			1,
+													strWdt - 0.150,		0,			1,
+													strWdt - 0.150,		-0.050,		1
+											else
+												if	y1 + y2 > -0.050	then
+													put	0.050,	-0.050,		1,
+														0.050,	y1 + y2,	1
+												endif
+	
+												put	x[i],				0,			1,
+													strWdt - 0.150,		0,			1,
+													strWdt - 0.150,		-0.050,		1
+											endif
+										endif
+									else
+										put	0.050,				-0.050,		1,
+											0.050,				0,			1,
+											OhndOff - hndRd,	0,			outHndTmp,
+											OhndOff + hndRd,	0,			1,
+											strWdt - 0.150,		0,			1,
+											strWdt - 0.150,		-0.050,		1
+									endif
+								endif
+							endif
+
+							!	사이구간
+							if	m[i] >= (brkL - 0.020) and m[i] <= (brkL + 0.020)	then
+								put	strWdt/2,		0,		1,
+									strWdt - 0.150,	0,		1,
+									strWdt - 0.150,	-0.050,	1
+							endif
+
+							!	상부구간
+							if	m[i] > (brkL + 0.020)	then
+								if	m[i] < (brkL + 0.150)	then
+									put	strWdt/2,		0,		1,
+										xxx[i],			0,		0,
+										x[i],			0,		1,
+										strWdt - 0.150,	0,		1,
+										strWdt - 0.150,	-0.050,	1
+								else
+									if	x[i] <= (strWdt - 0.150)	then
+										put	x[i],			0,		1,
+											strWdt - 0.150,	0,		1,
+											strWdt - 0.150,	-0.050,	1
+									endif
+	
+									if	x[i] > (strWdt - 0.150) 	then
+										if	(y1 + y3) >= -0.050	then
+											put	strWdt - 0.150,	y1 + y3,	1,
+												strWdt - 0.150,	-0.050,		1
+										else
+											put	strWdt - 0.150,	0,			1,
+												strWdt - 0.150,	-0.050,		1
+										endif
+									endif
+								endif
+							endif
+	
+							add2	0,	strTrd*(i - 1) + 0.050
+
+								poly2_ nsp/3,	1,	get(nsp)
+
+							del 1
+	
+						endif
+	
+					next i
+		
+					del	int(CstrRsrN)+1
+		
+				endif
+	
+	
+				!	작업층 : Entire
+				!-------------------------------------------------------------------------------------------
+				if	iWrkFlr = wrkFlr_Entire	then
+		
+					for	i = 1	to	strRsrN + 1
+			
+						if	(OhndOff - hndRd) < 0.050	then
+		
+							put	OhndOff + hndRd,	0.050,	1,
+								strWdt - 0.150,		0.050,	1,
+								strWdt - 0.150,		0,		1
+		
+						else
+		
+							put	0.050,				0,		1,
+								0.050,				0.050,	1,
+								OhndOff - hndRd,	0.050,	outHndTmp,
+								OhndOff + hndRd,	0.050,	1,
+								strWdt - 0.150,		0.050,	1,
+								strWdt - 0.150,		0,		1
+						endif
+		
+							poly2_	nsp/3,	1,	get(nsp)
+			
+						add2	0,	strTrd
+			
+					next i
+		
+					del	strRsrN+1
+				endif
+	
+			!	CutPlane높이(상부층이 보임)
+			else
+	
+				gosub	"uprNonSlip_"
+	
+			endif
+	
+		!	상부층
+		!-------------------------------------------------------------------------------------------
+		else
+	
+			gosub	"uprNonSlip_"
+	
+		endif
+	endif
+
+
+del 1
+
+
+!-------------------------------------------------------------------------------------------
+!	계단참 그리기
+!-------------------------------------------------------------------------------------------
+pen		strPen
+fill	65
+
+!	작업층
+!-------------------------------------------------------------------------------------------
+if	GLOB_CH_STORY_DIST = 0	then
+
+	!	CutPlane높이(작업층이 보임)
+	!-------------------------------------------------------------------------------------------
+	if	CutPlaneTmp < cutHeight	then
+		if	iWrkFlr = wrkFlr_Entire	then
+			gosub	"Landing_"
+		endif
+
+	!	CutPlane높이(상부층이 보임)
+	!-------------------------------------------------------------------------------------------
+	else
+		gosub	"Landing_"
+	endif
+
+!	상부층
+!-------------------------------------------------------------------------------------------
+else
+
+	gosub	"Landing_"
+
+endif
+
+
+
+!-------------------------------------------------------------------------------------------
+!	안쪽 난간 그리기
+!-------------------------------------------------------------------------------------------
+pen	strPen
+
+!	변수정의
+!-------------------------------------------------------------------------------------------
+x1 = strWdt - (IhndOff + hndRd)
+x2 = strWdt - (IhndOff - hndRd)
+
+
+!	부분구조디스플레이
+!-------------------------------------------------------------------------------------------
+if	GLOB_STRUCTURE_DISPLAY=0	then
+
+	!	안쪽 난간 On
+	!-------------------------------------------------------------------------------------------
+	if	bHandIn	then
+
+		!	작업층
+		!-------------------------------------------------------------------------------------------
+		if	GLOB_CH_STORY_DIST=0	then
+
+			!	CutPlane높이(작업층이 보임)
+			!-------------------------------------------------------------------------------------------
+			if	CutPlaneTmp < cutHeight	then
+				if	iWrkFlr = wrkFlr_Cut	then
+		
+					y1 = 0.4*x1 + (brkL - brkPosY)
+					y2 = 0.4*x2 + (brkL - brkPosY)
+			
+					put	x1,	-WhndOff1 - hndRd,
+						x2,	-WhndOff1 - hndRd,
+						x2,	y2,
+						x1,	y1,
+						x1,	-WhndOff1 - hndRd
+	
+				endif
+		
+				if	iWrkFlr = wrkFlr_Entire	then
+	
+					put	x1,	-WhndOff1 - hndRd,
+						x2,	-WhndOff1 - hndRd,
+						x2,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+						x1,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+						x1,	-WhndOff1 - hndRd
+	
+				endif
+
+			!	CutPlane높이(상부층이 보임)
+			!-------------------------------------------------------------------------------------------
+			else
+
+				gosub	"inHnd_"
+
+			endif
+
+		!	상부층
+		!-------------------------------------------------------------------------------------------
+		else
+
+			gosub	"inHnd_"
+
+		endif
+
+	
+			poly2	nsp/2,	1,	use(nsp)
+
+			!	hotline
+			!-------------------------------------------------------------------------------------------
+			for	i=1	to	(nsp/2)-2
+				hotline2	get(2),	use(2)	: unID = unID + 1
+			next i
+				hotline2	get(2),	get(2)	: unID = unID + 1
+	endif
+endif
+
+
+
+!-------------------------------------------------------------------------------------------
+!	바깥쪽 난간 그리기
+!-------------------------------------------------------------------------------------------
+pen	strPen
+
+
+!	변수정의
+!-------------------------------------------------------------------------------------------
+x1 = OhndOff - hndRd
+x2 = OhndOff + hndRd
+
+
+!	부분구조디스플레이
+!-------------------------------------------------------------------------------------------
+if	GLOB_STRUCTURE_DISPLAY = 0	then
+
+	!	바깥쪽 난간 On
+	!-------------------------------------------------------------------------------------------
+	if	bHandOut	then
+
+		!	작업층
+		!-------------------------------------------------------------------------------------------
+		if	GLOB_CH_STORY_DIST = 0	then
+
+			!	CutPlane높이(작업층이 보임)
+			!-------------------------------------------------------------------------------------------
+			if	CutPlaneTmp < cutHeight	then
+
+				!	작업층 : Cut
+				!-------------------------------------------------------------------------------------------
+				if	iWrkFlr = wrkFlr_Cut	then
+			
+					y1 = 0.4*x1 + (brkL - brkPosY)
+					y2 = 0.4*x2 + (brkL - brkPosY)
+			
+					put	x1,	-WhndOff1 - hndRd,
+						x2,	-WhndOff1 - hndRd,
+						x2,	y2,
+						x1,	y1,
+						x1,	-WhndOff1 - hndRd
+	
+				endif
+
+				!	작업층 : Entire
+				!-------------------------------------------------------------------------------------------
+				if	iWrkFlr = wrkFlr_Entire	then
+	
+					put	x1,	-WhndOff1 - hndRd,
+						x2,	-WhndOff1 - hndRd,
+						x2,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+						x1,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+						x1,	-WhndOff1 - hndRd
+	
+				endif
+
+			!	CutPlane높이(상부층이 보임)
+			!-------------------------------------------------------------------------------------------
+			else
+
+				gosub	"outHnd_"
+
+			endif
+
+		!	상부층
+		!-------------------------------------------------------------------------------------------
+		else
+
+			gosub	"outHnd_"
+
+		endif
+
+			poly2	nsp/2,	1,	use(nsp)
+
+			!	hotline
+			!-------------------------------------------------------------------------------------------
+			for	i=1	to	(nsp/2)-2
+				hotline2	get(2),	use(2)	: unID = unID + 1
+			next i
+				hotline2	get(2),	get(2)	: unID = unID + 1
+	endif
+endif
+
+
+
+!===========================================================================================
+!	치수
+!===========================================================================================
+!	모델뷰옵션 불러오기
+!-------------------------------------------------------------------------------------------
+success = LIBRARYGLOBAL("MVO_StairSettings",	"iDimPlan",	dimSettingValue)
+
+!	치수 On
+_bDimension = not(bViewScale) | (bViewScale & abs(GLOB_SCALE - iViewScale) < eps)
+
+if	iDimPlan = DimPlan_On | (iDimPlan = DimPlan_MVO & dimSettingValue = 2)	then
+	if	_bDimension	then
+		if	idimLct = DimLct_Left	then
+			DimTxtAng = 90
+			gosub	"Dimension"
+		endif
+
+		if	idimLct = DimLct_Right	then
+			DimTxtAng = -90
+			add2	strWdt,	0
+				mul2	-1,	1
+				gosub	"Dimension"
+			del 2
+		endif
+	endif
+endif
+
+
+
+
+
+
+
+!===========================================================================================
+!===========================================================================================
+end
+!===========================================================================================
+!===========================================================================================
+
+
+
+
+
+
+!===========================================================================================
+!	Sub-routine
+!===========================================================================================
+"uprOutline_":	!	상부층 외곽선
+!-------------------------------------------------------------------------------------------
+
+	!	상부층 : Cut
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Cut	then
+
+		put	0,							uprbrkL - brkPosY,			1,
+			0,							strTrd*strRsrN + fnsTmpY,	1,
+			OhndOff - hndRd,			strTrd*strRsrN + fnsTmpY,	outHndTmp,
+			OhndOff + hndRd,			strTrd*strRsrN + fnsTmpY,	1,
+			strWdt - IhndOff - hndRd,	strTrd*strRsrN + fnsTmpY,	inHndTmp,
+			strWdt - IhndOff + hndRd,	strTrd*strRsrN + fnsTmpY,	1,
+			strWdt,						strTrd*strRsrN + fnsTmpY,	1,
+			strWdt,						uprbrkL + brkPosY,			0,
+			0,							uprbrkL - brkPosY,			1
+
+	endif
+
+	!	상부층 : Entire
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Entire	then
+
+		put	0,							fnsTmpY,					1,
+			OhndOff - hndRd,			fnsTmpY,					outHndTmp,
+			OhndOff + hndRd,			fnsTmpY,					1,
+			strWdt - (IhndOff + hndRd),	fnsTmpY,					inHndTmp,
+			strWdt - (IhndOff - hndRd),	fnsTmpY,					1,
+			strWdt,						fnsTmpY,					1,
+			strWdt,						strTrd*strRsrN + fnsTmpY,	1,
+			strWdt - (IhndOff - hndRd),	strTrd*strRsrN + fnsTmpY,	inHndTmp,
+			strWdt - (IhndOff + hndRd),	strTrd*strRsrN + fnsTmpY,	1,
+			OhndOff + hndRd,			strTrd*strRsrN + fnsTmpY,	outHndTmp,
+			OhndOff - hndRd,			strTrd*strRsrN + fnsTmpY,	1,
+			0,							strTrd*strRsrN + fnsTmpY,	1,
+			0,							fnsTmpY,					1
+
+	endif
+
+return
+
+
+!-------------------------------------------------------------------------------------------
+"uprTread_":	! 상부층 단
+!-------------------------------------------------------------------------------------------
+
+	!	상부층 : Cut
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Cut	then
+		brkPosY = tan(brkAng) * strWdt/2
+		CstrRsrN1 = (uprbrkL - brkPosY - fnsTmpY) / strTrd
+		CstrRsrN2 = (uprbrkL + brkPosY - fnsTmpY) / strTrd
+		RsrN1 = strRsrN - int(CstrRsrN2)
+
+		add2	0,	strTrd*int(CstrRsrN1)
+		
+			! 계단참 그리기 For
+			for	i = 1	to	5
+				m[i] = strTrd * (int(CstrRsrN1) + i) + fnsTmpY
+		
+				y1 = (uprbrkL - brkPosY - fnsTmpY) - int(CstrRsrN1) * strTrd
+				x[i] = 2.5 * (strTrd * i - y1)
+				xx[i] = ((-0.150 + 0.300 * strWdt / 2 * 10) - (strTrd * i - y1)) / 2.6
+				xxx[i] = ((0.150 + 0.300 * strWdt / 2 * 10) - (strTrd * i - y1)) / 2.6
+
+
+				! 단이 그려질 전체 범위			
+				if	m[i] >= (uprbrkL - brkPosY) and m[i] <= (uprbrkL + brkPosY)	then
+
+					! 하부 구간
+					if	m[i] < (uprbrkL - 0.020)	then
+
+						if	m[i] > (uprbrkL - 0.150)	then
+
+							put	0,					0,	1,
+								OhndOff - hndRd,	0,	outHndTmp,
+								OhndOff + hndRd,	0,	1,
+								x[i],				0,	0,
+								xx[i],				0,	1,
+								strWdt/2,			0,	1
+
+						else
+
+							if	x[i] >= OhndOff + hndRd	then
+
+								put	0,					0,	1,
+									OhndOff - hndRd,	0,	outHndTmp,
+									OhndOff + hndRd,	0,	1,
+									x[i],				0,	1
+
+							endif
+
+							if	x[i] >= OhndOff - hndRd and	x[i] < OhndOff + hndRd 	then
+
+								put	0,					0,	1,
+									OhndOff - hndRd,	0,	1
+
+							endif
+
+							if	x[i] < OhndOff-hndRd	then
+
+								put	0,		0,	1,
+									x[i],	0,	1
+
+							endif
+
+						endif
+
+					endif
+
+
+					! 사이 구간
+					if	m[i] >= (uprbrkL - 0.020) and m[i] <= (uprbrkL + 0.020)	then
+
+						put	0,					0,	1,
+							OhndOff - hndRd,	0,	outHndTmp,
+							OhndOff + hndRd,	0,	1,
+							strWdt/2,			0,	1
+		
+					endif
+
+
+					! 상부 구간
+					if	m[i] > (uprbrkL + 0.020)	then
+
+						if	m[i] < (uprbrkL + 0.150)	then
+
+							put	0,					0,	1,
+								OhndOff - hndRd,	0,	outHndTmp,
+								OhndOff + hndRd,	0,	1,
+								strWdt/2,			0,	0
+	
+							if	xxx[i] > strWdt/2 	then
+
+								put	xxx[i],	0,	1,
+									x[i],	0,	1
+
+							endif
+
+						else
+	
+							if	x[i] >= strWdt - (IhndOff - hndRd)		then
+
+								put	0,								0,	1,
+									OhndOff - hndRd,				0,	outHndTmp_,
+									OhndOff + hndRd,				0,	1,
+									strWdt - (IhndOff + hndRd),		0,	inHndTmp,
+									strWdt - (IhndOff - hndRd),		0,	1,
+									x[i],							0,	1
+
+							endif
+
+							if	x[i] < strWdt - (IhndOff - hndRd) and x[i] >= strWdt - (IhndOff + hndRd)	then
+
+								put	0,								0,	1,
+									OhndOff - hndRd,				0,	outHndTmp,
+									OhndOff + hndRd,				0,	1,
+									strWdt - (IhndOff + hndRd),		0,	1
+
+							endif
+
+							if	x[i] < strWdt - (IhndOff + hndRd)	then
+								put	0,					0,	1,
+									OhndOff - hndRd,	0,	outHndTmp,
+									OhndOff + hndRd,	0,	1,
+									x[i],				0,	1
+							endif
+	
+						endif
+
+					endif
+
+
+					! 단 그리기
+					add2	0,	strTrd * i
+
+						poly2_	nsp/3,	1,	get(nsp)
+
+					del 1
+
+				endif
+
+			next i
+
+		del 1
+		
+		! 잘린 부위 윗부분 나머지 계단참 그리기
+		add2	0,	strTrd * int(CstrRsrN2)
+		
+			for	i=1	to	RsrN1
+
+				add2	0,	strTrd
+		
+					put	0,							0,	1,
+						OhndOff - hndRd,			0,	outHndTmp,
+						OhndOff + hndRd,			0,	1,
+						strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+						strWdt - (IhndOff - hndRd),	0,	1,
+						strWdt,						0,	1
+		
+					poly2_	nsp/3,	1,	get(nsp)
+		
+					hotline2	0,	0,	strWdt,	0,	unID	:	unID = unID + 1
+
+			next i
+
+			del RsrN1
+
+		del 1
+
+	endif
+
+	!	상부층 : Entire
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Entire	then
+
+		for	i=1	to strRsrN-1
+
+			add2	0,	strTrd
+
+				put	0,							0,	1,
+					OhndOff - hndRd,			0,	outHndTmp,
+					OhndOff + hndRd,			0,	1,
+					strWdt - (IhndOff + hndRd),	0,	inHndTmp,
+					strWdt - (IhndOff - hndRd),	0,	1,
+					strWdt,						0,	1
+
+				poly2_	nsp/3,	1,	get(nsp)
+
+				hotline2	0,	0,	strWdt,	0,	unID	:	unID = unID + 1
+
+		next i
+
+		del strRsrN-1
+
+	endif
+
+
+return
+
+
+!-------------------------------------------------------------------------------------------
+"Landing_":	! 계단참
+!-------------------------------------------------------------------------------------------
+if	lndLength > eps	then
+
+	add2	0,	strTrd*strRsrN
+
+		put	0,							fnsTmpY,						1,
+			OhndOff - hndRd,			fnsTmpY,						outHndTmp,
+			OhndOff + hndRd,			fnsTmpY,						1,
+			strWdt - (IhndOff + hndRd),	fnsTmpY,						inHndTmp,
+			strWdt - (IhndOff - hndRd),	fnsTmpY,						1,
+			strWdt,						fnsTmpY,						1,
+			strWdt,						lndLength + vFnsThk + basThk,	1,
+			strWdt - (IhndOff - hndRd),	lndLength + vFnsThk + basThk,	inHndTmp,
+			strWdt - (IhndOff + hndRd),	lndLength + vFnsThk + basThk,	1,
+			OhndOff + hndRd,			lndLength + vFnsThk + basThk,	outHndTmp,
+			OhndOff - hndRd,			lndLength + vFnsThk + basThk,	1,
+			0,							lndLength + vFnsThk + basThk,	1,
+			0,							fnsTmpY,						1
+
+
+		poly2_B	nsp/3,	1+2,	strFillPen,	strFillPenBg,	use(nsp)
+
+			! hotline
+			! ------------------------------------------------
+			for	i = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)	: unID = unID + 1
+			next i
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))	: unID = unID + 1
+	del 1
+
+	add2	0,	strTrd*strRsrN + vFnsThk + basThk
+
+			! hotspot
+			! ------------------------------------------------
+			hotspot2	0,	0,			unID,	lndLength,	1+128	: unID = unID + 1
+			hotspot2	0,	-1,			unID,	lndLength,	3		: unID = unID + 1
+			hotspot2	0,	lndLength,	unID,	lndLength,	2		: unID = unID + 1
+
+			hotspot2	strWdt,	0,			unID,	lndLength,	1+128	: unID = unID + 1
+			hotspot2	strWdt,	-1,			unID,	lndLength,	3		: unID = unID + 1
+			hotspot2	strWdt,	lndLength,	unID,	lndLength,	2		: unID = unID + 1
+
+	del 1
+
+endif
+
+
+return
+
+
+!-------------------------------------------------------------------------------------------
+"downArrow_":	! DN표시
+!-------------------------------------------------------------------------------------------
+
+	!	화살표 On
+	!-------------------------------------------------------------------------------------------
+	if	bArrow	then
+
+		!	변수정의
+		!-------------------------------------------------------------------------------------------
+		if	iUprFlr = uprFlr_Cut	then
+			arwLctTmp = 0.0027
+			downLineTmp = uprbrkL
+		endif
+	
+		if	iUprFlr = uprFlr_Entire	then
+			arwLctTmp = 0
+			downLineTmp = 0
+		endif
+	
+		!	선+화살표
+		!-------------------------------------------------------------------------------------------
+		add2	strWdt/2,	arwLctTmp*100 + fnsTmpY + downLineTmp
+	
+			! 화살표
+			put	0,				0,
+				0.0012*100,		0.0007*100,
+				0.001*100,		0.001*100,
+				0,				0.0004*100,
+				-0.001*100,		0.001*100,
+				-0.0012*100,	0.0007*100
+	
+			poly2	nsp/2,	1+4,	get(nsp)
+	
+		del 1
+	
+			add2	strWdt/2,	fnsTmpY
+				line2	0,	(arwLctTmp + 0.0004)*100 + downLineTmp,	0,	strTrd*strRsrN
+	
+				add2	0,	strTrd*strRsrN
+					circle2	0,	0,	0.00075*100
+				del 1
+			del 1
+
+	endif
+
+
+	!	텍스트
+	!-------------------------------------------------------------------------------------------
+	if	bTxt	then
+
+		paragraph	"prgDN"	2,	0,	0,	0,1
+					pen	TextPen
+					style	txtSty1
+					"DN"
+		endparagraph
+	
+		textblock	"DN"	0,	5,	txtAng,	1,	1,	0,	"prgDN"
+	
+		add2	strWdt/2,	strTrd*strRsrN + fnsTmpY
+			richtext2	0,	txtLct2 + TextSize*GLOB_SCALE/2000,	"DN"
+		del 1
+
+
+		! hotspot
+		! --------------------------------------------
+		add2	strWdt/2,	strTrd*strRsrN + fnsTmpY
+			hotspot2		0,		0,			unID,	txtLct2,	1	:	unID = unID + 1
+			hotspot2		0,		-1,			unID,	txtLct2,	3	:	unID = unID + 1
+			hotspot2		0,		txtLct2,	unID,	txtLct2,	2	:	unID = unID + 1
+
+			add2	0,	txtLct2 + TextSize*GLOB_SCALE/2000
+					hotspot2		0.200,				0,					unID,	txtAng,	4+128	:	unID = unID + 1
+					hotspot2		0.200*cos(txtAng),	0.200*sin(txtAng),	unID,	txtAng,	5		:	unID = unID + 1
+					hotspot2		0,					0,					unID,	txtAng,	6		:	unID = unID + 1
+			del 1
+		del 1
+
+	endif
+
+return
+
+
+
+!-------------------------------------------------------------------------------------------
+"uprNonSlip_":	! 상부층 논슬립
+!-------------------------------------------------------------------------------------------
+
+	!	상부층 : Cut
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Cut	then
+
+		brkPosY = tan(brkAng)*strWdt/2
+		CstrRsrN = (uprbrkL - brkPosY - 0.050 + fnsTmpY) / strTrd
+
+		add2	0,	strTrd * (int(CstrRsrN) + 1)
+
+			!	잘린 위치 논슬립
+			!-------------------------------------------------------------------------------------------
+			for	i=1	to 	5
+
+				m[i] = strTrd*(int(CstrRsrN) + i) + 0.050 - fnsTmpY
+	
+				y1 = (uprbrkL - brkPosY + fnsTmpY) - int(CstrRsrN)*strTrd
+				y2 = 0.4 * (0.050) - (strTrd*i + 0.050)
+				y3 = 0.4 * (strWdt - 0.150) - (strTrd * i + 0.050)
+				x[i] = 2.5 * (strTrd*i + 0.050 - y1)
+				xx[i] = ((-0.150 + 0.300 * (strWdt) / 2 * 10) - (strTrd * i + 0.050 - y1)) / 2.6
+				xxx[i] = ((0.150 + 0.300 * (strWdt) / 2 * 10) - (strTrd * i + 0.050 - y1)) / 2.6
+
+				if	m[i] >= (uprbrkL - brkPosY) and m[i] <= (uprbrkL + brkPosY + 0.050)	then
+					if	m[i] < (uprbrkL - 0.020)	then
+
+							if	m[i] > (uprbrkL - 0.150)	then
+								if	OhndOff - hndRd < 0.050	then
+									put	OhndOff + hndRd,	0,	1,
+										x[i],				0,	0,
+										xx[i],				0,	1,
+										strWdt/2,			0,	1
+								else
+									put	0.050,				-0.050,	1,
+										0.050,				0,		1,
+										OhndOff - hndRd,	0,		outHndTmp,
+										OhndOff + hndRd,	0,		1,
+										x[i],				0,		0,
+										xx[i],				0,		1,
+										strWdt/2,			0,		1
+								endif
+							else
+								if	OhndOff - hndRd < 0.050	then
+									if	x[i] >= OhndOff + hndRd	then
+										put	OhndOff + hndRd,	0,	1,
+											x[i],				0,	1
+									else
+										put	0,	0,	1
+									endif
+								else
+									if	x[i] >= 0.050	then
+										if	(y1 + y2) > -0.050	then
+											put	0.050,	y1 + y2,	1,
+												0.050,	0,			1
+										else
+											put	0.050,	-0.050,		1,
+												0.050,	0,			1
+										endif
+
+										if	x[i] < OhndOff - hndRd	then
+											put	0.050,	0,	1,
+												x[i],	0,	1
+										else
+											if	x[i] > OhndOff + hndRd	then
+												put	0.050,				0,	1,
+													OhndOff - hndRd,	0,	outHndTmp,
+													OhndOff + hndRd,	0,	1,
+													x[i],				0,	1
+											else
+												put	0.050,				0,	1,
+													OhndOff - hndRd,	0,	1
+											endif
+										endif
+									else
+										put	0,	0,	1	! 오류 방지용
+									endif
+								endif
+							endif
+
+					endif
+
+					if	m[i] >= (uprbrkL - 0.020) and m[i] <= (uprbrkL + 0.020)	then
+
+							if	OhndOff - hndRd < 0.050	then
+								put	OhndOff + hndRd,	0,	1,
+									strWdt/2,			0,	1
+							else
+								put	0.050,				-0.050,	1,
+									0.050,				0,		1,
+									OhndOff - hndRd,	0,		outHndTmp,
+									OhndOff + hndRd,	0,		1,
+									strWdt/2,			0,		1
+							endif
+
+					endif
+
+					if	m[i] > (uprbrkL + 0.020)	then
+
+							if	m[i] < (uprbrkL + 0.150)	then
+								if	OhndOff - hndRd < 0.050	then
+									put	OhndOff + hndRd,	0,	1,
+										strWdt/2,			0,	0,
+										xxx[i],				0,	1,
+										x[i],				0,	1
+								else
+									if	x[i] < (strWdt - 0.150)	then
+										put	0.050,				-0.050,	1,
+											0.050,				0,		1,
+											OhndOff - hndRd,	0,		outHndTmp,
+											OhndOff + hndRd,	0,		1,
+											strWdt/2,			0,		0,
+											xxx[i],				0,		1,
+											x[i],				0,		1
+									else
+										put	OhndOff + hndRd,	0,	1,
+											strWdt - 0.150,		0,	1
+
+										if	(y1 + y3) > -0.050	then
+											put	strWdt - 0.150,	y1 + y3,	1
+										else
+											put	strWdt - 0.150,	-0.050,		1
+										endif
+									endif
+								endif
+							else
+								if	OhndOff - hndRd < 0.050	then
+									if	x[i] < (strWdt - 0.150)	then
+										put	OhndOff + hndRd,	0,		1,
+											x[i],				0,		1
+									else
+										put	OhndOff + hndRd,	0,		1,
+											strWdt - 0.150,		0,		1
+
+										if	y1 + y3 > -0.050	then
+											put	strWdt - 0.150,	y1 + y3,	1
+										else
+											put	strWdt - 0.150,	-0.050,		1
+										endif
+									endif
+								else
+									if	x[i] < (strWdt - 0.150)	then
+										put	0.050,				-0.050,	1,
+											0.050,				0,		1,
+											OhndOff - hndRd,	0,		outHndTmp,
+											OhndOff + hndRd,	0,		1,
+											x[i],				0,		1
+									else
+										put	0.050,				-0.050,	1,
+											0.050,				0,		1,
+											OhndOff - hndRd,	0,		outHndTmp,
+											OhndOff + hndRd,	0,		1,
+											strWdt - 0.150,		0,		1
+
+										if	y1 + y3 > -0.050	then
+											put	strWdt - 0.150,	y1 + y3,	1
+										else
+											put	strWdt - 0.150,	-0.050,		1
+										endif
+									endif
+								endif
+							endif
+
+					endif
+
+						add2	0,	(strTrd * (i - 1)) + 0.050
+
+							poly2_	nsp/3,	1,	get(nsp)
+
+						del 1
+
+				endif
+
+			next i
+
+		del 1
+
+
+			add2	0,	strTrd*int(CstrRsrN2)	
+
+				for	i = 1	to RsrN1
+
+					add2	0,	strTrd
+
+						if	(OhndOff - hndRd) < 0.050	then
+							put	OhndOff + hndRd,	0.050,	1,
+								strWdt - 0.150,		0.050,	1,
+								strWdt - 0.150,		0,		1
+						else
+							put	0.050,				0,		1,
+								0.050,				0.050,	1,
+								OhndOff - hndRd,	0.050,	outHndTmp,
+								OhndOff + hndRd,	0.050,	1,
+								strWdt - 0.150,		0.050,	1,
+								strWdt - 0.150,		0,		1
+						endif
+
+						poly2_	nsp/3,	1,	get(nsp)
+				next i
+	
+				del RsrN1
+
+			del 1
+
+	endif
+
+	!	상부층 : Entire
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Entire	then
+
+		for	i = 1	to	strRsrN
+
+			if	(OhndOff - hndRd) < 0.050	then
+				put	OhndOff + hndRd,	0.050,	1,
+					strWdt - 0.150,		0.050,	1,
+					strWdt - 0.150,		0,		1
+			else
+				put	0.050,				0,		1,
+					0.050,				0.050,	1,
+					OhndOff - hndRd,	0.050,	outHndTmp,
+					OhndOff + hndRd,	0.050,	1,
+					strWdt - 0.150,		0.050,	1,
+					strWdt - 0.150,		0,		1
+			endif
+
+				poly2_	nsp/3,	1,	get(nsp)
+
+			add2	0,	strTrd
+
+		next i
+
+		del	strRsrN
+
+		add2	0,	strTrd*strRsrN
+
+			if	(WhndOff2 + hndRd) - 0.050 < eps	then
+				if	(OhndOff - hndRd) < 0.050	then
+					put	0.050,				WhndOff2 + hndRd,	1,
+						0.050,				0.050,				1,
+						strWdt - 0.150,		0.050,				1,
+						strWdt - 0.150,		0,					1
+				else
+					put	0.050,			0,		1,
+						0.050,			0.050,	1,
+						strWdt - 0.150,	0.050,	1,
+						strWdt - 0.150,	0,		1
+				endif
+			else
+				if	(OhndOff - hndRd) < 0.050	then
+					put	OhndOff + hndRd,	0.050,	1,
+						strWdt - 0.150,		0.050,	1,
+						strWdt - 0.150,		0,		1
+				else				
+					put	0.050,				0,		1,
+						0.050,				0.050,	1,
+						OhndOff - hndRd,	0.050,	outHndTmp,
+						OhndOff + hndRd,	0.050,	1,
+						strWdt - 0.150,		0.050,	1,
+						strWdt - 0.150,		0,		1
+				endif
+			endif
+
+
+			poly2_	nsp/3,	1,	get(nsp)
+
+		del 1
+
+	endif
+
+return
+
+
+
+!-------------------------------------------------------------------------------------------
+"inHnd_":	!	안쪽 핸드레일
+!-------------------------------------------------------------------------------------------
+
+	!	상부층 : Cut
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Cut	then
+
+		y1 = 0.4*x1 + (uprbrkL - brkPosY)
+		y2 = 0.4*x2 + (uprbrkL - brkPosY)
+
+		put	x1,	y1,
+			x2,	y2,
+			x2,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+			x1,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+			x1,	y1
+
+	endif
+
+
+	!	상부층 : Entire
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Entire	then
+
+		put	x1,	-WhndOff1 - hndRd,
+			x2,	-WhndOff1 - hndRd,
+			x2,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+			x1,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+			x1,	-WhndOff1 - hndRd
+
+	endif
+
+return
+
+
+
+!-------------------------------------------------------------------------------------------
+"outHnd_":	!	바깥쪽 핸드레일
+!-------------------------------------------------------------------------------------------
+
+	!	상부층 : Cut
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr = uprFlr_Cut	then
+
+		y1 = 0.4*x1 + (uprbrkL - brkPosY)
+		y2 = 0.4*x2 + (uprbrkL - brkPosY)
+
+		put	x1,	y1,
+			x2,	y2,
+			x2,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+			x1,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+			x1,	y1					
+
+	endif
+
+
+	!	상부층 : Entire
+	!-------------------------------------------------------------------------------------------
+	if	iUprFlr=uprFlr_Entire	then
+
+		put	x1,	-WhndOff1 - hndRd,
+			x2,	-WhndOff1 - hndRd,
+			x2,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+			x1,	strTrd*strRsrN + WhndOff2 + hndRd + lndLength,
+			x1,	-WhndOff1 - hndRd
+
+	endif
+
+return
+
+
+
+!-------------------------------------------------------------------------------------------
+"Dimension":
+!-------------------------------------------------------------------------------------------
+
+	!	치수선 그리기
+	!-------------------------------------------------------------------------------------------
+	pen		dimPen
+	fill	64
+
+	add2	-dimOffset,	0
+		line2	0,	fnsTmpY,	0,	strTrd*strRsrN + fnsTmpY
+	del 1
+
+		! 치수 보조선
+		line2	-dimWitness,	fnsTmpY,					-dimOffset - 0.075,	fnsTmpY
+		line2	-dimWitness,	strTrd*strRsrN + fnsTmpY,	-dimOffset - 0.075,	strTrd*strRsrN + fnsTmpY
+
+		! 치수 보조선 원
+		add2	-dimOffset,	fnsTmpY
+			put		dimCircle,	0,		1,
+					0,			0,		900+1,
+					dimCircle,	359,	4000+1
+
+			poly2_	nsp/3,	1+2+4,	use(nsp)
+
+			add2	0,	strTrd*strRsrN
+
+				poly2_	nsp/3,	1+2+4,	get(nsp)
+
+			del 1
+		del 1
+
+	!	치수
+	!-------------------------------------------------------------------------------------------
+	nr = strTrd*strRsrN
+
+	paragraph	"prgFullLength_2D"	2,	0,	0,	0,	1
+				pen	dimTxtPen
+				style	txtSty2
+				str("%~mm",	nr)
+	endparagraph
+	
+	textblock	"FullLength_2D"	0,	8,	DimTxtAng,	1,	1,	0,	"prgFullLength_2D"
+	
+	paragraph	"prgTrdxN_2D"	2,	0,	0,	0,	1
+				pen	dimTxtPen
+				style	txtSty2
+				"("
+				str("%~mm",	strTrd)
+				"x"
+				str("%~",	strRsrN)
+				"T)"
+	endparagraph
+	
+	textblock	"TrdxN_2D"	0,	2,	DimTxtAng,	1,	1,	0,	"prgTrdxN_2D"
+
+		add2	-dimOffset,	(strTrd*strRsrN)/2 + fnsTmpY
+			richtext2	0,	0,	"FullLength_2D"
+		del 1
+
+		add2	-dimOffset,	(strTrd*strRsrN)/2 + fnsTmpY
+			richtext2	0,	0,	"TrdxN_2D"
+		del 1
+
+	!	2D hotspot
+	!-------------------------------------------------------------------------------------------
+		add2	0,	fnsTmpY
+			hotspot2	0,			0,		unID,	dimOffset,	1	:	unID = unID + 1
+			hotspot2	1,			0,		unID,	dimOffset,	3	:	unID = unID + 1
+			hotspot2	-dimOffset,	0,		unID,	dimOffset,	2	:	unID = unID + 1
+
+			hotspot2	0,				0,		unID,	dimWitness,	1	:	unID = unID + 1
+			hotspot2	1,				0,		unID,	dimWitness,	3	:	unID = unID + 1
+			hotspot2	-dimWitness,	0,		unID,	dimWitness,	2	:	unID = unID + 1
+
+		add2	0,	strTrd*strRsrN
+			hotspot2	0,			0,		unID,	dimOffset,	1	:	unID = unID + 1
+			hotspot2	1,			0,		unID,	dimOffset,	3	:	unID = unID + 1
+			hotspot2	-dimOffset,	0,		unID,	dimOffset,	2	:	unID = unID + 1
+
+			hotspot2	0,				0,		unID,	dimWitness,	1	:	unID = unID + 1
+			hotspot2	1,				0,		unID,	dimWitness,	3	:	unID = unID + 1
+			hotspot2	-dimWitness,	0,		unID,	dimWitness,	2	:	unID = unID + 1
+		del 2
+return
+
+
+!-------------------------------------------------------------------------------------------
+"Blank":
+!-------------------------------------------------------------------------------------------
+
+	!	빈칸 채우기
+	!-------------------------------------------------------------------------------------------
+	strFillPen = 0
+	strFillPenBg = 0
+
+	pen	strPen
+	fill	65
+
+		poly2_B	5,	2+4,	strFillPen,	strFillPenBg,
+			0,		0,				1,
+			strWdt,	0,				1,
+			strWdt,	strTrd*strRsrN,	1,
+			0,		strTrd*strRsrN,	1,
+			0,		0,				1
+
+return

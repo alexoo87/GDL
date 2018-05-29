@@ -1,0 +1,186 @@
+!===============================================================================================
+!	드로잉 타이틀
+!===============================================================================================
+
+!	W.P
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+!	드로잉 사이즈
+_drawingWidth = abs(AC_DrawingRect[1] - AC_DrawingRect[3])
+_drawingHeight = abs(AC_DrawingRect[2] - AC_DrawingRect[4])
+
+!	텍스트 스타일 정의 및 크기 추출
+define style	"textStyle"	AC_TextFont,	AC_TextSize,	7,	AC_TextStyle
+r = request("Height_of_style", "textStyle",	_textHgt,	_descent, _leading)
+_textHalf = AC_TextSize/2 + _descent + _leading
+_textHalf = _textHalf/1000
+_textHgt = (_textHgt - _descent - _leading)/1000
+
+style	"textStyle"
+
+!	Fill
+_mrkFill = ind(FILL,	"Foreground")
+if	_mrkFill < eps	then
+	_mrkFill = ind(FILL,	"전경")
+
+	if	_mrkFill < eps	then
+		_mrkFill = 64
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	드로잉 타이틀
+!-----------------------------------------------------------------------------------------------
+add2	0,	_drawingHeight
+	hotspot2	0,			yPosLabel,	unID,	xPosLabel,	1+128	:	unID = unID + 1
+	hotspot2	-1,			yPosLabel,	unID,	xPosLabel,	3		:	unID = unID + 1
+	hotspot2	xPosLabel,	yPosLabel,	unID,	xPosLabel,	2		:	unID = unID + 1
+
+	hotspot2	xPosLabel,	0,			unID,	yPosLabel,	1+128	:	unID = unID + 1
+	hotspot2	xPosLabel,	-1,			unID,	yPosLabel,	3		:	unID = unID + 1
+	hotspot2	xPosLabel,	yPosLabel,	unID,	yPosLabel,	2		:	unID = unID + 1
+
+	add2	xPosLabel,	yPosLabel
+		!	마커 크기 정의
+		!-----------------------------------------------------------------------------------------------
+		if	bAutoSize	then
+			_mrkWdt = _textHgt
+			_mrkHgt = _textHgt
+			_mrkRad = _textHgt/2
+		else
+			_mrkWdt = mrkWdt
+			_mrkHgt = mrkHgt
+			_mrkRad = mrkRad
+		endif
+
+		!	마커 유형별 마커 그리기
+		!-----------------------------------------------------------------------------------------------
+		fill	_mrkFill
+
+		if	iMarkerShape = MARKER_RECTANGLE	then
+			put	0,			0,			1,
+				0,			_mrkHgt,	1,
+				_mrkWdt,	_mrkHgt,	1,
+				_mrkWdt,	0,			1
+
+			!	Hotspot
+			if	not(bAutoSize)	then
+				hotspot2	0,		0,	unID,	mrkWdt,	1+128	:	unID = unID + 1
+				hotspot2	-1,		0,	unID,	mrkWdt,	3		:	unID = unID + 1
+				hotspot2	mrkWdt,	0,	unID,	mrkWdt,	2		:	unID = unID + 1
+
+				hotspot2	0,	0,		unID,	mrkHgt,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,		unID,	mrkHgt,	3		:	unID = unID + 1
+				hotspot2	0,	mrkHgt,	unID,	mrkHgt,	2		:	unID = unID + 1
+
+				hotspot2	0,		mrkHgt,	unID,	mrkWdt,	1+128	:	unID = unID + 1
+				hotspot2	-1,		mrkHgt,	unID,	mrkWdt,	3		:	unID = unID + 1
+				hotspot2	mrkWdt,	mrkHgt,	unID,	mrkWdt,	2		:	unID = unID + 1
+
+				hotspot2	mrkWdt,	0,		unID,	mrkHgt,	1+128	:	unID = unID + 1
+				hotspot2	mrkWdt,	-1,		unID,	mrkHgt,	3		:	unID = unID + 1
+				hotspot2	mrkWdt,	mrkHgt,	unID,	mrkHgt,	2		:	unID = unID + 1
+			endif
+
+			!	텍스트 원점
+			_xPosText_Origin = _mrkWdt
+			_yPosText_Origin = _mrkHgt/2
+		endif
+
+		if	iMarkerShape = MARKER_CIRCLE	then
+			put	_mrkRad,	_mrkRad,	900,
+				_mrkRad,	360,		4000+1
+
+			!	Hotspot
+			if	not(bAutoSize)	then
+				hotspot2	0,		0,	unID,	mrkRad,	1+128	:	unID = unID + 1
+				hotspot2	-1,		0,	unID,	mrkRad,	3		:	unID = unID + 1
+				hotspot2	mrkRad,	0,	unID,	mrkRad,	2		:	unID = unID + 1
+			endif
+
+			!	텍스트 원점
+			_xPosText_Origin = _mrkRad*2
+			_yPosText_Origin = _mrkRad
+		endif
+
+		if	iMarkerShape = MARKER_TRI_RIGHT	then
+			put	0,					0,					1,
+				0,					_mrkHgt,			1,
+				_mrkHgt*cos(30),	_mrkHgt*sin(30),	1
+
+			!	Hotspot
+			if	not(bAutoSize)	then
+				hotspot2	0,	0,		unID,	mrkHgt,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,		unID,	mrkHgt,	3		:	unID = unID + 1
+				hotspot2	0,	mrkHgt,	unID,	mrkHgt,	2		:	unID = unID + 1
+			endif
+
+			!	텍스트 원점
+			_xPosText_Origin = _mrkHgt*cos(30)
+			_yPosText_Origin = _mrkHgt/2
+		endif
+
+		if	iMarkerShape = MARKER_TRI_UP	then
+			put	0,					0,					1,
+				_mrkWdt*cos(60),	_mrkWdt*sin(60),	1,
+				_mrkWdt,			0,					1
+
+			!	Hotspot
+			if	not(bAutoSize)	then
+				hotspot2	0,		0,	unID,	mrkWdt,	1+128	:	unID = unID + 1
+				hotspot2	-1,		0,	unID,	mrkWdt,	3		:	unID = unID + 1
+				hotspot2	mrkWdt,	0,	unID,	mrkWdt,	2		:	unID = unID + 1
+			endif
+
+			!	텍스트 원점
+			_xPosText_Origin = _mrkWdt
+			_yPosText_Origin = _mrkHgt/2
+		endif
+
+		if	iMarkerShape = MARKER_TRI_DOWN	then
+			put	0,					_mrkWdt*sin(60),	1,
+				_mrkWdt,			_mrkWdt*sin(60),	1,
+				_mrkWdt*cos(60),	0,					1
+
+			!	Hotspot
+			if	not(bAutoSize)	then
+				hotspot2	0,		0,	unID,	mrkWdt,	1+128	:	unID = unID + 1
+				hotspot2	-1,		0,	unID,	mrkWdt,	3		:	unID = unID + 1
+				hotspot2	mrkWdt,	0,	unID,	mrkWdt,	2		:	unID = unID + 1
+
+				if	GLOB_FEEDBACK_MODE	then
+					line2	0,	0,	0,	mrkWdt*sin(60)
+					line2	mrkWdt,	0,	mrkWdt,	mrkWdt*sin(60)
+				endif
+			endif
+
+			!	텍스트 원점
+			_xPosText_Origin = _mrkWdt
+			_yPosText_Origin = _mrkHgt/2
+		endif
+
+		poly2_	nsp/3,	1+2*bMarkerFill+4,	get(nsp)
+
+		!	텍스트
+		!-----------------------------------------------------------------------------------------------
+		pen	AC_TextPen
+
+		_stContent = ""
+		if	iContent = CONTENT_DRAWING_NAME	then
+			_stContent = ac_drawingName
+		endif
+		if	iContent = CONTENT_CUSTOM_TEXT	then
+			_stContent = stCustom
+		endif
+
+		add2	_xPosText_Origin,	_yPosText_Origin
+			hotspot2	0,			0,	unID,	xPosText,	1	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	xPosText,	3	:	unID = unID + 1
+			hotspot2	xPosText,	0,	unID,	xPosText,	2	:	unID = unID + 1
+
+			add2	xPosText,	0
+				text2	0,	-_textHalf,	_stContent
+			del 1
+		del 1
+	del 1
+del 1

@@ -1,0 +1,477 @@
+!===========================================================================================
+!	License Locking Source
+!===========================================================================================
+
+keyflag=0
+dim TmpA[16]
+dim TmpB[8]
+dim TmpC[4]
+
+TmpBMin = 0
+TmpCMin = 0
+
+for	i = 1	to	16
+	TmpA[i] = 0
+next i
+for	i = 1	to	8
+	TmpB[i] = 0
+next i
+for	i = 1	to	4
+	TmpC[i] = 0
+next i
+
+!	Time LLL file reading
+dstr2 = ""
+value01 = 0
+channel = open ("TEXT", "C:\ProgramData\ArchiCAD\DoallPack.lll", "SEPARATOR='\n', mode = ro, FULLPATH")
+if	channel > 0	then
+	ret = input (channel, 1,0, dstr2 )
+	close channel
+endif
+if	channel = 0	then
+	keyflag = 0
+endif
+
+!	Local time reading 
+dstr1 = ""
+ch = OPEN ("DateTime", "", "%H:%M:%S")
+n = INPUT (ch, "", "", dstr1 )
+CLOSE (ch)
+
+!	Time Match
+tmpnum = 0
+
+len = STRLEN(dstr2)
+if	len = 33	then
+	
+	for	i = 18	to	33
+		str00 = strsub(dstr2,	i,	1)
+		if	str00 = "0"	then
+			tmpnum = 2
+		endif
+		if	str00 = "1"	then
+			tmpnum = 3
+		endif
+		if	str00 = "2"	then
+			tmpnum = 8
+		endif
+		if	str00 = "3"	then
+			tmpnum = 0
+		endif
+		if	str00 = "4"	then
+			tmpnum = 4
+		endif
+		if	str00 = "5"	then
+			tmpnum = 9
+		endif
+		if	str00 = "6"	then
+			tmpnum = 5
+		endif
+		if	str00 = "7"	then
+			tmpnum = 1
+		endif
+		if	str00 = "8"	then
+			tmpnum = 6
+		endif
+		if	str00 = "9"	then
+			tmpnum = 7
+		endif
+
+		TmpA[i-18+1] = tmpnum
+	next i
+
+	for	i = 1	to	8
+		TmpB[i] = (TmpA[(i-1)*2+1]+TmpA[(i-1)*2+2])%10
+	next i
+
+	for	i = 1	to	4
+		if	i = 1	then
+			str00 = strsub(dstr1,	1,	1)
+		endif
+		if	i = 2	then
+			str00 = strsub(dstr1,	2,	1)
+		endif
+		if	i = 3	then
+			str00 = strsub(dstr1,	4,	1)
+		endif
+		if	i = 4	then
+			str00 = strsub(dstr1,	5,	1)
+		endif
+
+		if	str00 = "0"	then
+			tmpnum = 0
+		endif
+		if	str00 = "1"	then
+			tmpnum = 1
+		endif
+		if	str00 = "2"	then
+			tmpnum = 2
+		endif
+		if	str00 = "3"	then
+			tmpnum = 3
+		endif
+		if	str00 = "4"	then
+			tmpnum = 4
+		endif
+		if	str00 = "5"	then
+			tmpnum = 5
+		endif
+		if	str00 = "6"	then
+			tmpnum = 6
+		endif
+		if	str00 = "7"	then
+			tmpnum = 7
+		endif
+		if	str00 = "8"	then
+			tmpnum = 8
+		endif
+		if	str00 = "9"	then
+			tmpnum = 9
+		endif
+
+		TmpC[i] = tmpnum
+
+	next i
+
+	TmpBMin = TmpB[1]*600+TmpB[2]*60+TmpB[3]*10+TmpB[4]
+	TmpCMin = TmpC[1]*600+TmpC[2]*60+TmpC[3]*10+TmpC[4]
+
+	diffmin = 9999
+	if	TmpB[5] = 0	then
+		if	TmpB[6] = 1	then
+			if	TmpB[7] = 0	then
+				if	TmpB[8] = 0	then
+					diffmin = TmpCMin - TmpBMin
+				else
+					diffmin = 9999
+				endif
+			else
+				diffmin = 9999
+			endif
+		else
+			diffmin = 9999
+		endif
+	else
+		diffmin = 9999
+	endif
+
+	if	diffmin >= 0	then
+		if	diffmin < 10	then
+			keyflag = 1
+		else
+			keyflag = 0
+		endif
+	else
+		diffmin = TmpCMin+1440 - TmpBMin
+		if	diffmin < 10	then
+			keyflag = 1
+		else
+			keyflag = 0
+		endif
+	endif
+else
+	keyflag = 0
+endif
+
+
+if	keyflag = 0	then
+	hideparameter	all
+	lock	all
+endif
+
+!===========================================================================================
+!	License Locking Source
+!===========================================================================================
+
+!===============================================================================================
+!	기본설정
+!===============================================================================================
+eps = 0.0001
+unID = 100
+
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+
+	!	코너프레임 타입
+	!-----------------------------------------------------------------------------------------------
+	CornerFrame_Boundary = 1
+	CornerFrame_Mullion = 2
+	CornerFrame_Transom = 2
+	CornerFrame_Rect = 3
+	CornerFrame_Corner = 4
+
+	if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+		dim	stCornerFrame_LR[4]
+			stCornerFrame_LR[1] = "Boundary"
+			stCornerFrame_LR[2] = "Mullion"
+			stCornerFrame_LR[3] = "Rectangle"
+			stCornerFrame_LR[4] = "Corner"
+
+		dim	stCornerFrame_UB[2]
+			stCornerFrame_UB[1] = "Boundary"
+			stCornerFrame_UB[2] = "Transom"
+	endif
+
+	!	Corner 유형
+	!-----------------------------------------------------------------------------------------------
+	CORNER_TYPE1 = 1
+	CORNER_TYPE2 = 2
+
+	if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+		dim	stCornerType[]
+			stCornerType[1] = "Corner Type1"
+			stCornerType[2] = "Corner Type2"
+	endif
+
+	!	코너프레임 선택
+	!-----------------------------------------------------------------------------------------------
+	SelectFrame_L = 1
+	SelectFrame_R = 2
+	SelectFrame_U = 3
+	SelectFrame_B = 4
+
+	if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+		dim	stSelectFrame[4]
+			stSelectFrame[1] = "좌측"
+			stSelectFrame[2] = "우측"
+			stSelectFrame[3] = "상부"
+			stSelectFrame[4] = "하부"
+	endif
+
+	!	수직프레임 타입
+	!-----------------------------------------------------------------------------------------------
+	VerticalFrame_Type1 = 1
+	VerticalFrame_Type2 = 2
+
+	if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+		dim	stVerticalFrame[2]
+			stVerticalFrame[1] = "Type1"
+			stVerticalFrame[2] = "Type2"
+	endif
+
+	!	창문 타입
+	!-----------------------------------------------------------------------------------------------
+	Windows_Fix1 = 1
+	Windows_Fix2 = 2
+	Windows_Project1 = 3
+	Windows_Project2 = 4
+	Windows_Spandrel = 5
+	Windows_Grill = 6
+	Windows_Open = 7
+	Windows_Smoke = 8
+	Windows_Fix3 = 9
+	Windows_Spandrel_2 = 10
+	Windows_Spandrel_3 = 11
+	Windows_Spandrel_4 = 12
+
+	if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+		dim	stWindowsType[]
+			stWindowsType[1] = "고정창"
+			stWindowsType[2] = "고정창(2)"
+			stWindowsType[3] = "프로젝트창"
+			stWindowsType[4] = "프로젝트창(2)"
+			stWindowsType[5] = "스팬드럴창(TYPE1)"
+			stWindowsType[6] = "그릴창"
+			stWindowsType[7] = "OPEN"
+			stWindowsType[8] = "프로젝트창(배연)"
+			stWindowsType[9] = "고정창(3)"
+			stWindowsType[10] = "스팬드럴창(TYPE2)"
+			stWindowsType[11] = "스팬드럴창(TYPE3)"
+			stWindowsType[12] = "스팬드럴창(TYPE4)"
+	endif
+
+	!	힌지 방향 변수 정의
+	!-----------------------------------------------------------------------------------------------
+	Hinge_Top = 1
+	Hinge_Bottom = 2
+	Hinge_Left = 3
+	Hinge_Right = 4
+	Hinge_TopLeft = 5
+	Hinge_TopRight = 6
+	Hinge_BottomLeft = 7
+	Hinge_BottomRight = 8
+
+	if GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+		dim stProjectHinge[]
+			stProjectHinge[1] = "상단"
+			stProjectHinge[2] = "하단"
+			stProjectHinge[3] = "좌측"
+			stProjectHinge[4] = "우측"
+			stProjectHinge[5] = "상단 + 좌측"
+			stProjectHinge[6] = "상단 + 우측"
+			stProjectHinge[7] = "하단 + 좌측"
+			stProjectHinge[8] = "하단 + 우측"
+	endif
+
+	!	문 관련 변수 정의
+	!-----------------------------------------------------------------------------------------------
+		!	문 유형 선택
+		!-----------------------------------------------------------------------------------------------
+		DoorType_1panel = 1
+		DoorType_2panel = 2
+	
+		if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+			dim	stDoorType[]
+				stDoorType[1] = "기본형(1 Panel)"
+				stDoorType[2] = "양문형(2 Panel)"
+		endif
+	
+		!	프레임 유형 선택
+		!-----------------------------------------------------------------------------------------------
+		FrameType_1 = 1
+		FrameType_2 = 2
+	
+		if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+			dim	stFrameType[]
+				stFrameType[1] = "상/하"
+				stFrameType[2] = "상/하/좌/우"
+		endif
+		
+		
+		!	문 개폐 유형
+		!-----------------------------------------------------------------------------------------------
+		DoorOpenType_Hinged = 1
+		DoorOpenType_Sliding = 2
+		DoorOpenType_Auto = 3
+	
+		if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+			dim	stDoorOpenType[]
+				stDoorOpenType[1] = "여닫이"
+				stDoorOpenType[2] = "미닫이"
+				stDoorOpenType[3] = "자동문"
+		endif
+		
+		!	손잡이 위치
+		!-----------------------------------------------------------------------------------------------
+		DoorHandle_Right = 1
+		DoorHandle_Left = 2
+	
+		if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+			dim	stDoorHandle[]
+				stDoorHandle[1] = "오른쪽"
+				stDoorHandle[2] = "왼쪽"
+		endif
+		
+		!	2D 심볼 표시 위치 선택
+		!-----------------------------------------------------------------------------------------------
+		SymbolPlace_Front = 1
+		SymbolPlace_Back = 2
+		SymbolPlace_All = 3
+	
+		if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+			dim	stSymbolPlace[]
+				stSymbolPlace[1] = "전면"
+				stSymbolPlace[2] = "후면"
+				stSymbolPlace[3] = "모두"
+		endif
+
+
+!===============================================================================================
+!	변수 설정
+!===============================================================================================
+
+	!	코너프레임 폭/두께
+	!-----------------------------------------------------------------------------------------------
+	if	not(EqualFrameSize)	then
+		frameWidthTmp_L = Matrix_Frame[1][1]
+		frameThickTmp_L = Matrix_Frame[1][2]
+
+		frameWidthTmp_R = Matrix_Frame[2][1]
+		frameThickTmp_R = Matrix_Frame[2][2]
+
+		frameWidthTmp_U = Matrix_Frame[3][1]
+		frameThickTmp_U = Matrix_Frame[3][2]
+
+		frameWidthTmp_B = Matrix_Frame[4][1]
+		frameThickTmp_B = Matrix_Frame[4][2]
+	endif
+
+	if	EqualFrameSize	then
+		frameWidthTmp_L = Matrix_Frame[5][1]
+		frameThickTmp_L = Matrix_Frame[5][2]
+
+		frameWidthTmp_R = Matrix_Frame[5][1]
+		frameThickTmp_R = Matrix_Frame[5][2]
+
+		frameWidthTmp_U = Matrix_Frame[5][1]
+		frameThickTmp_U = Matrix_Frame[5][2]
+
+		frameWidthTmp_B = Matrix_Frame[5][1]
+		frameThickTmp_B = Matrix_Frame[5][2]
+	endif
+
+	!	변수정의
+	!-----------------------------------------------------------------------------------------------
+	dim	WindowsHeight[],	WindowsWidth[],	frameRealDistance_X[],	frameRealDistance_Y[]
+	dim	GrillRemain[],	GrillInt[]
+
+	!	창문 너비 / 실제 프레임 사이 거리
+	!-----------------------------------------------------------------------------------------------
+	for	i = 1	to	frameDivideNum_X
+		if	i = 1	then
+			if	frameDivideNum_X = 1	then
+				WindowsWidth[i] = frameDistance_X[i] - ((frameWidthTmp_L + frameWidthTmp_R)/2 + gasketWidth)
+				frameRealDistance_X[i] = frameDistance_X[i] - (frameWidthTmp_L + frameWidthTmp_R)
+			endif
+
+			if	frameDivideNum_X # 1	then
+				WindowsWidth[i] = frameDistance_X[i] - (frameWidthTmp_L/2 + gasketWidth)
+				frameRealDistance_X[i] = frameDistance_X[i] - (frameWidthTmp_L + VerticalFrameWidth/2)
+			endif
+		endif
+
+		if	i # 1 and i # frameDivideNum_X	then
+			WindowsWidth[i] = frameDistance_X[i] - gasketWidth
+			frameRealDistance_X[i] = frameDistance_X[i]-VerticalFrameWidth
+		endif
+
+		if	i = frameDivideNum_X and frameDivideNum_X # 1	then
+			WindowsWidth[i] = frameDistance_X[i] - (frameWidthTmp_R/2 + gasketWidth)
+			frameRealDistance_X[i] = frameDistance_X[i] - (frameWidthTmp_R + VerticalFrameWidth/2)
+		endif
+	next i
+
+	!	창문 높이 / 실제 프레임 사이 거리
+	!-----------------------------------------------------------------------------------------------
+	for	i = 1	to	frameDivideNum_Y
+		if	i = 1	then
+			if	frameDivideNum_Y = 1	then
+				WindowsHeight[i] = frameDistance_Y[i] - ((frameWidthTmp_U + frameWidthTmp_B)/2 + gasketWidth)
+				frameRealDistance_Y[i] = frameDistance_Y[i] - (frameWidthTmp_B + frameWidthTmp_U)
+
+				GrillRemain[i] = (frameRealDistance_Y[i] MOD grillDistance)
+				GrillInt[i] = int(frameRealDistance_Y[i]/grillDistance)
+			endif
+
+			if	frameDivideNum_Y # 1	then
+				WindowsHeight[i] = frameDistance_Y[i] - (frameWidthTmp_B/2 + gasketWidth)
+				frameRealDistance_Y[i] = frameDistance_Y[i] - (frameWidthTmp_B + HorizontalFrameWidth/2)
+
+				GrillRemain[i] = (frameRealDistance_Y[i] MOD grillDistance)
+				GrillInt[i] = int(frameRealDistance_Y[i]/grillDistance)
+			endif
+		endif
+
+		if	i # 1 and i # frameDivideNum_Y	then
+			WindowsHeight[i] = frameDistance_Y[i] - gasketWidth
+			frameRealDistance_Y[i] = frameDistance_Y[i] - HorizontalFrameWidth
+
+			GrillRemain[i] = (frameRealDistance_Y[i] MOD grillDistance)
+			GrillInt[i] = int(frameRealDistance_Y[i]/grillDistance)
+		endif
+
+		if	i = frameDivideNum_Y and frameDivideNum_Y # 1	then
+			WindowsHeight[i] = frameDistance_Y[i] - (frameWidthTmp_U/2 + gasketWidth)
+			frameRealDistance_Y[i] = frameDistance_Y[i] - (frameWidthTmp_B + HorizontalFrameWidth/2)
+
+			GrillRemain[i] = (frameRealDistance_Y[i] MOD grillDistance)
+			GrillInt[i] = int(frameRealDistance_Y[i]/grillDistance)
+		endif
+	next i
+
+
+
+
+

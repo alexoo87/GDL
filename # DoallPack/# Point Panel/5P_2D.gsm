@@ -1,0 +1,123 @@
+
+hotspot2 0,0
+hotspot2 moX01,0
+hotspot2 moX02,0
+hotspot2 moX03,0
+hotspot2 moX04,0
+
+hotspot2 0,depth
+hotspot2 moX01,depth
+hotspot2 moX02,depth
+hotspot2 moX03,depth
+hotspot2 moX04,depth
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+	!	Height of Plane
+	_cutPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[1]
+	_topPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[2]
+	_btmPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[3]
+	if	iProjectTo = PROJECTTO_ABSOLUTE	then
+		_btmPlaneHgt = GLOB_CUTPLANES_INFO[4]
+	endif
+
+	_bCutPlane = (iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_CUTPLANE)
+
+	!	절단면/하단면
+	if	_bCutPlane	then
+		!	절단면
+		pen			cutPen
+		fill		cutFill
+		line_type	1
+
+			if	not(iDisplay = DISPLAY_CUTPLANE)	then
+				!	선
+				project2{3}	3,	270,	2+16,	2,	cutBackPen,
+					parameters	bSymbol			= 1,
+								iProjectType	= 1,
+								cutPlaneHgt		= _cutPlaneHgt,
+								topPlaneHgt		= _topPlaneHgt,
+								btmPlaneHgt		= _btmPlaneHgt
+
+				!	면
+				project2{3}	3,	270,	3+32,	1,	cutBackPen,
+					parameters	bSymbol			= 1,
+								iProjectType	= 1,
+								cutPlaneHgt		= _cutPlaneHgt,
+								topPlaneHgt		= _topPlaneHgt,
+								btmPlaneHgt		= _btmPlaneHgt
+			else
+				project2{3}	3,	270,	2+16,	2,	cutBackPen,
+					parameters	bSymbol			= 1,
+								iProjectType	= 1,
+								cutPlaneHgt		= _cutPlaneHgt,
+								topPlaneHgt		= _cutPlaneHgt,
+								btmPlaneHgt		= _cutPlaneHgt
+
+				!	면
+				project2{3}	3,	270,	3+32,	1,	cutBackPen,
+					parameters	bSymbol			= 1,
+								iProjectType	= 1,
+								cutPlaneHgt		= _cutPlaneHgt,
+								topPlaneHgt		= _cutPlaneHgt,
+								btmPlaneHgt		= _cutPlaneHgt
+			endif
+
+		!	하단면
+		if	not(iDisplay = DISPLAY_CUTPLANE)	then
+			pen			btmPen
+			fill		btmFill
+			line_type	1
+
+			project2{3}	3,	270,	2+16,	4+8,	btmBackPen,
+				parameters	bSymbol			= 1,
+							iProjectType	= 1,
+							cutPlaneHgt		= _cutPlaneHgt,
+							topPlaneHgt		= _topPlaneHgt,
+							btmPlaneHgt		= _btmPlaneHgt
+		endif
+	endif
+
+
+	!	Overhead
+	if	iDisplay = DISPLAY_WITHOVERHEAD	then
+		pen			overPen
+		line_type	overLT
+
+		project2{3}	3,	270,	2+32,	2+8,
+			parameters	bSymbol			= 1,
+						iProjectType	= 2,
+						cutPlaneHgt		= _cutPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Outlines only
+	if	iDisplay = DISPLAY_OUTLINES	then
+		!	하단면
+		pen			btmPen
+		fill		btmFill
+		line_type	1
+
+		project2{3}	3,	270,	3+32,	2+4+8,	btmBackPen,
+			parameters	bSymbol			= 1,
+						iProjectType	= 1,
+						cutPlaneHgt		= _topPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Overhead all
+	if	iDisplay = DISPLAY_OVERHEAD	then
+		!	하단면
+		pen			overPen
+		line_type	overLT
+
+		project2{3}	3,	270,	2+32,	2+8,
+			parameters	bSymbol			= 1,
+						iProjectType	= 2,
+						cutPlaneHgt		= _btmPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif

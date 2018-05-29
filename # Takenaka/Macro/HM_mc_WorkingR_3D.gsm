@@ -1,0 +1,193 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/11/23 THU
+!	VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot	0, 0, 0
+	model	wire
+	circle	0.1
+	circle	0.2
+	model	solid
+endif
+
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+unID = 2000
+resol	32
+
+call	"HM_Material_Glass.gsm"
+call	"HM_Material_Trans.gsm"
+
+if	not(GLOB_FEEDBACK_MODE)	then
+	HM_3D_guide_show = 0
+endif
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+pen	HM_3D_pen
+
+define style "HM_style_Ruler" HM_2D_textFont,	HM_2D_textSize*100,	7,	0
+define style "HM_style_WorkR" HM_2D_textFont,	HM_2D_textSize*100,	9,	0
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+if	GLOB_VIEW_TYPE <> 2	then
+
+	!	Define Parameter
+	!----------------------------------------------------------------------------------------------------
+	_stWorkLth = 2.800*(HM_2D_textSize/4)
+	_stModLth = 2.000*(HM_2D_textSize/4)
+
+	!	Working Radius
+	!----------------------------------------------------------------------------------------------------
+	!	Hotspot
+	hotspot	HM_WorkingR/2, 						0,									0,	unID,	HM_WorkingAng, 4+128	: unID = unID + 1
+	hotspot	HM_WorkingR/2*cos(HM_WorkingAng),	HM_WorkingR/2*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng, 5		: unID = unID + 1
+	hotspot	0,									0,									0,	unID,	HM_WorkingAng, 6		: unID = unID + 1
+	hotspot	0,									0,									1,	unID,	HM_WorkingAng, 7		: unID = unID + 1
+
+	rotz	HM_WorkingAng
+		hotspot	0,				0,	0,	unID,	HM_WorkingR,	1 + 128		: unID = unID + 1
+		hotspot	HM_WorkingR,	0,	0,	unID,	HM_WorkingR,	2			: unID = unID + 1
+		hotspot	-1,				0,	0,	unID,	HM_WorkingR,	3			: unID = unID + 1
+	del	1
+
+	!	Shape
+	rotz	HM_WorkingAng
+		model	wire
+		circle	HM_WorkingR
+		model	solid
+		lin_	0, 0, 0, HM_WorkingR, 0, 0
+
+		addx	HM_WorkingR
+			lin_	0,	0.250,	0,	0,	-_stWorkLth,	0
+		del 1
+	del	1
+
+	!	Max/Min range
+	material	"HM_matTrans"
+
+	if	_WorkingR_min < eps	then	_WorkingR_min = eps
+
+	put	_WorkingR_max,	0,		0,
+		0,				0,		900,
+		_WorkingR_max,	180,	4000,
+		-_WorkingR_max,	0,		0,
+		0,				0,		900,
+		_WorkingR_max,	180,	4000,
+		_WorkingR_max,	0,		-1,
+		_WorkingR_min,	0,		0,
+		0,				0,		900,
+		_WorkingR_min,	180,	4000,
+		-_WorkingR_min,	0,		0,
+		0,				0,		900,
+		_WorkingR_min,	180,	4000,
+		_WorkingR_min,	0,		-1
+
+	poly_	nsp/3,	get(nsp)
+
+	if	HM_3D_guide_show	then
+		!	5M Module
+		pen	HM_2D_WorkingR_subPen
+
+		_modLth = 5.000
+		_nMod = int(_WorkingR_max/_modLth)
+
+		rotz	HM_WorkingAng
+			for	i = 1	to	_nMod
+				lin_	_modLth*i,	_stModLth,	0,	_modLth*i,	-0.250,	0
+				hotline	_modLth*i,	_stModLth,	0,	_modLth*i,	-0.250,	0,	unID	:	unID = unID + 1
+			next	i
+
+			addx	_WorkingR_min
+				lin_	0,	_stWorkLth,	0,	0,	-0.250,	0
+				hotline	0,	_stWorkLth,	0,	0,	-0.250,	0,	unID	:	unID = unID + 1
+			del 1
+			addx	_WorkingR_max
+				lin_	0,	_stWorkLth,	0,	0,	-0.250,	0
+				hotline	0,	_stWorkLth,	0,	0,	-0.250,	0,	unID	:	unID = unID + 1
+			del 1
+
+			!	Center Line
+			lin_	_WorkingR_min,	0,	0,	_WorkingR_max,	0,	0
+
+		del 1
+	endif
+
+
+	!	Text
+	!----------------------------------------------------------------------------------------------------
+	material	HM_3D_textMat
+
+		!	Working Radius
+		pen	HM_3D_pen
+		_stWorkingR = str(HM_WorkingR,	4,	2) + "m"
+
+		rotz	HM_WorkingAng
+			addx	HM_WorkingR + eps*1000
+				addy	-_stWorkLth
+					rotz	-90
+						style	"HM_style_WorkR"
+						text	0,	0,	_stWorkingR
+					del 1
+				del 1
+			del 1
+		del 1
+
+		if	HM_3D_guide_show	then
+			!	Max/Min
+			pen	HM_2D_WorkingR_subPen
+			_stWorkingR_min = str(_WorkingR_min,	2,	0) + "m(min)"
+			_stWorkingR_max = str(_WorkingR_max,	2,	0) + "m(max)"
+
+			rotz	HM_WorkingAng
+				addy	_stWorkLth
+					addx	_WorkingR_min + eps*1000
+						rotz	-90
+							style	"HM_style_Ruler"
+							text	0,	0,	_stWorkingR_min
+						del 1
+					del 1
+
+					addx	_WorkingR_max + eps*1000
+						rotz	-90
+							style	"HM_style_Ruler"
+							text	0,	0,	_stWorkingR_max
+						del 1
+					del 1
+				del 1
+			del 1
+
+			!	5M Module
+			pen	HM_2D_WorkingR_subPen
+			for	i = 1	to	_nMod
+				if	_WorkingR_max - (_modLth*i) > eps	then
+					_stMod = str(_modLth*i,	2,	0) + "m"
+
+					rotz	HM_WorkingAng
+						addx	_modLth*i + eps*1000
+							addy	_stModLth
+								rotz	-90
+									style	"HM_style_Ruler"
+									text	0,	0,	_stMod
+								del 1
+							del 1
+						del 1
+					del 1
+				endif
+			next	i
+		endif
+
+endif

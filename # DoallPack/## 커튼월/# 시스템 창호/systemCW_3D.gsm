@@ -1,0 +1,3297 @@
+!===============================================================================================
+!	시스템 창호
+!===============================================================================================
+!	텍스트 정의
+define style	FixText	"맑은 고딕",	TextSize,	5,	0
+
+!	Resolution
+resol	12
+
+if	GLOB_FEEDBACK_MODE	then
+	resol	7
+endif
+
+!===============================================================================================
+!	3D hotspot
+!===============================================================================================
+
+	!	좌측
+	if	iCornerFrame_L = CornerFrame_Rect	then
+		hotspot	0,	-frameThickTmp_L,	0,						unID	:	unID = unID + 1
+		hotspot	0,	-frameThickTmp_L,	frameWidthTmp_B/2,		unID	:	unID = unID + 1
+		hotspot	0,	-frameThickTmp_L,	B,						unID	:	unID = unID + 1
+		hotspot	0,	-frameThickTmp_L,	B - frameWidthTmp_U/2,	unID	:	unID = unID + 1
+	else
+		hotspot	0,	-(frameThickTmp_L + gasketThick),	0,						unID	:	unID = unID + 1
+		hotspot	0,	-(frameThickTmp_L + gasketThick),	frameWidthTmp_B/2,		unID	:	unID = unID + 1
+		hotspot	0,	-(frameThickTmp_L + gasketThick),	B,						unID	:	unID = unID + 1
+		hotspot	0,	-(frameThickTmp_L + gasketThick),	B - frameWidthTmp_U/2,	unID	:	unID = unID + 1
+	endif
+
+	hotspot	0,	0,	0,						unID	:	unID = unID + 1
+	hotspot	0,	0,	frameWidthTmp_B/2,		unID	:	unID = unID + 1
+	hotspot	0,	0,	B,						unID	:	unID = unID + 1
+	hotspot	0,	0,	B - frameWidthTmp_U/2,	unID	:	unID = unID + 1
+
+	!	우측
+	addx	A
+		if	iCornerFrame_R = CornerFrame_Rect	then
+			hotspot	0,	-frameThickTmp_R,	0,						unID	:	unID = unID + 1
+			hotspot	0,	-frameThickTmp_R,	frameWidthTmp_B/2,		unID	:	unID = unID + 1
+			hotspot	0,	-frameThickTmp_R,	B,						unID	:	unID = unID + 1
+			hotspot	0,	-frameThickTmp_R,	B - frameWidthTmp_U/2,	unID	:	unID = unID + 1
+		else
+			hotspot	0,	-(frameThickTmp_R + gasketThick),	0,						unID	:	unID = unID + 1
+			hotspot	0,	-(frameThickTmp_R + gasketThick),	frameWidthTmp_B/2,		unID	:	unID = unID + 1
+			hotspot	0,	-(frameThickTmp_R + gasketThick),	B,						unID	:	unID = unID + 1
+			hotspot	0,	-(frameThickTmp_R + gasketThick),	B - frameWidthTmp_U/2,	unID	:	unID = unID + 1
+		endif
+
+		hotspot	0,	0,	0,						unID	:	unID = unID + 1
+		hotspot	0,	0,	frameWidthTmp_B/2,		unID	:	unID = unID + 1
+		hotspot	0,	0,	B,						unID	:	unID = unID + 1
+		hotspot	0,	0,	B - frameWidthTmp_U/2,	unID	:	unID = unID + 1
+	del 1
+
+	!	멀리언 핫스팟
+	for	i = 1	to	frameDivideNum_X
+
+		hotspot	0,					0,	0,	unID,	frameDistance_X[i],	1+128	:	unID = unID + 1
+		hotspot	-1,					0,	0,	unID,	frameDistance_X[i],	3		:	unID = unID + 1
+		hotspot	frameDistance_X[i],	0,	0,	unID,	frameDistance_X[i],	2		:	unID = unID + 1
+		
+		hotspot	0,					0,	B,	unID,	frameDistance_X[i],	1+128	:	unID = unID + 1
+		hotspot	-1,					0,	B,	unID,	frameDistance_X[i],	3		:	unID = unID + 1
+		hotspot	frameDistance_X[i],	0,	B,	unID,	frameDistance_X[i],	2		:	unID = unID + 1
+
+		addx	frameDistance_X[i]
+
+	next i
+
+	del frameDivideNum_X
+	
+	!	트랜섬 핫스팟
+	for	i = 1	to	frameDivideNum_Y - 1
+
+		hotspot	0,	0,	0,					unID,	frameDistance_Y[i],	1+128	:	unID = unID + 1
+		hotspot	0,	0,	-1,					unID,	frameDistance_Y[i],	3		:	unID = unID + 1
+		hotspot	0,	0,	frameDistance_Y[i],	unID,	frameDistance_Y[i],	2		:	unID = unID + 1
+		
+		hotspot	A,	0,	0,					unID,	frameDistance_Y[i],	1+128	:	unID = unID + 1
+		hotspot	A,	0,	-1,					unID,	frameDistance_Y[i],	3		:	unID = unID + 1
+		hotspot	A,	0,	frameDistance_Y[i],	unID,	frameDistance_Y[i],	2		:	unID = unID + 1
+
+		addz	frameDistance_Y[i]
+
+	next i
+
+	del frameDivideNum_Y - 1
+
+
+!===============================================================================================
+!	상/하 프레임 / 수평프레임 좌표
+!===============================================================================================
+
+	!	변수정의
+	!-----------------------------------------------------------------------------------------------
+	Alpha_L = (180 - CornerAngle_L)/2
+	Beta_L = CornerAngle_L/2
+
+	Alpha_R = (180 - CornerAngle_R)/2
+	Beta_R = CornerAngle_R/2
+
+	dim	framePosX1[],	framePosX2[],	framePosX3[],	framePosX4[],	framePosY1[],	framePosY2[]	!	프레임 좌표 1,2 : 좌측프레임 / 3,4 : 우측프레임
+	dim	gasketPosX1[],	gasketPosX2[],	gasketPosX3[],	gasketPosX4[],	gasketPosX5[],	gasketPosX6[],	gasketPosX7[],	gasketPosX8[]	!	개스킷 좌표 1,2,3 : 좌측프레임 / 4,5,6 : 우측프레임 / 7,8 : 트랜섬 타입용 
+	dim	gasketPosY2[],	gasketPosY5[]	!	개스킷 Y좌표
+	dim	hCapPosX1[],	hCapPosX2[],	hCapPosX3[],	hCapPosX4[]	!	수평프레임캡 좌표
+
+	!	좌표 입력
+	!-----------------------------------------------------------------------------------------------
+	for	i = 1	to	frameDivideNum_X
+
+		!	프레임
+		!-----------------------------------------------------------------------------------------------
+			!	좌측프레임 좌표
+			!-----------------------------------------------------------------------------------------------
+			if	iCornerFrame_L = CornerFrame_Boundary | iCornerFrame_L = CornerFrame_Mullion	then
+				framePosX1[i] = frameWidthTmp_L
+				framePosX2[i] = frameWidthTmp_L
+			endif
+
+			if	iCornerFrame_L = CornerFrame_Rect	then
+				framePosX1[i] = frameWidthTmp_L
+				framePosX2[i] = frameWidthTmp_L
+			endif
+
+			if	iCornerFrame_L = CornerFrame_Corner	then
+				framePosX1[i] = (frameWidthTmp_L/2)/cos(Alpha_L) + frameThickTmp_L*tan(Alpha_L)
+				framePosX2[i] = (frameWidthTmp_L/2)/cos(Alpha_L)
+			endif
+
+			!	우측프레임 좌표
+			!-----------------------------------------------------------------------------------------------
+			if	iCornerFrame_R = CornerFrame_Boundary | iCornerFrame_R = CornerFrame_Mullion	then
+				framePosX3[i] = frameDistance_X[i] - frameWidthTmp_R
+				framePosX4[i] = frameDistance_X[i] - frameWidthTmp_R
+			endif
+
+			if	iCornerFrame_R = CornerFrame_Rect	then
+				framePosX3[i] = frameDistance_X[i] - frameWidthTmp_R
+				framePosX4[i] = frameDistance_X[i] - frameWidthTmp_R
+			endif
+
+			if	iCornerFrame_R = CornerFrame_Corner	then
+				framePosX3[i] = frameDistance_X[i] - (frameWidthTmp_R/2)/cos(Alpha_R)
+				framePosX4[i] = frameDistance_X[i] - ((frameWidthTmp_R/2)/cos(Alpha_R) + frameThickTmp_R*tan(Alpha_R))
+			endif
+
+		!	개스킷
+		!-----------------------------------------------------------------------------------------------
+			!	좌측개스킷 좌표
+			!-----------------------------------------------------------------------------------------------
+			if	iCornerFrame_L = CornerFrame_Boundary | iCornerFrame_L = CornerFrame_Mullion	then
+				gasketPosX1[i] = (frameWidthTmp_L + gasketWidth)/2
+				gasketPosX2[i] = (frameWidthTmp_L + gasketWidth)/2
+				gasketPosX3[i] = frameWidthTmp_L
+
+				gasketPosX7[i] = (frameWidthTmp_L + gasketWidth)/2
+
+				gasketPosY2[i] = -gasketThick
+			endif
+
+			if	iCornerFrame_L = CornerFrame_Rect	then
+				gasketPosX1[i] = frameWidthTmp_L
+				gasketPosX2[i] = frameWidthTmp_L
+				gasketPosX3[i] = frameWidthTmp_L
+
+				gasketPosX7[i] = frameWidthTmp_L
+
+				gasketPosY2[i] = -gasketThick
+			endif
+
+			if	iCornerFrame_L = CornerFrame_Corner	then
+				gasketPosX1[i] = (frameThickTmp_L + gasketThick)*tan(Alpha_L)+(gasketWidth/2)/cos(Alpha_L)
+				gasketPosX2[i] = (frameWidthTmp_L/2)/cos(Alpha_L) + frameThickTmp_L*tan(Alpha_L) - (frameWidthTmp_L - gasketWidth)/2*cos(Alpha_L)
+				gasketPosX3[i] = (frameWidthTmp_L/2)/cos(Alpha_L) + frameThickTmp_L*tan(Alpha_L)
+
+				gasketPosX7[i] = (frameThickTmp_L + gasketThick - gasketCapThick + (gasketWidth/2)*sin(Alpha_L))/tan(Beta_L) + (gasketWidth/2)*cos(Alpha_L)
+
+				_dist = (frameWidthTmp_L - gasketWidth)/2
+				gasketPosY2[i] = -gasketThick + _dist*sin(Alpha_L)
+			endif
+
+			!	우측개스킷 좌표
+			!-----------------------------------------------------------------------------------------------
+			if	iCornerFrame_R = CornerFrame_Boundary | iCornerFrame_R = CornerFrame_Mullion	then
+				gasketPosX4[i] = frameDistance_X[i] - frameWidthTmp_R
+				gasketPosX5[i] = frameDistance_X[i] - (frameWidthTmp_R + gasketWidth)/2
+				gasketPosX6[i] = frameDistance_X[i] - (frameWidthTmp_R + gasketWidth)/2
+
+				gasketPosX8[i] = frameDistance_X[i] - (frameWidthTmp_R + gasketWidth)/2
+
+				gasketPosY5[i] = -gasketThick
+			endif
+
+			if	iCornerFrame_R = CornerFrame_Rect	then
+				gasketPosX4[i] = frameDistance_X[i] - frameWidthTmp_R
+				gasketPosX5[i] = frameDistance_X[i] - frameWidthTmp_R
+				gasketPosX6[i] = frameDistance_X[i] - frameWidthTmp_R
+
+				gasketPosX8[i] = frameDistance_X[i] - frameWidthTmp_R
+
+				gasketPosY5[i] = -gasketThick
+			endif
+
+			if	iCornerFrame_R = CornerFrame_Corner	then
+				gasketPosX4[i] = frameDistance_X[i] - ((frameWidthTmp_R/2)/cos(Alpha_R) + frameThickTmp_R*tan(Alpha_R))
+				gasketPosX5[i] = frameDistance_X[i] - ((frameWidthTmp_R/2)/cos(Alpha_R) + frameThickTmp_R*tan(Alpha_R) - (frameWidthTmp_R - gasketWidth)/2*cos(Alpha_R))
+				gasketPosX6[i] = frameDistance_X[i] - ((frameThickTmp_R + gasketThick)*tan(Alpha_R) + (gasketWidth/2)/cos(Alpha_R))
+
+				gasketPosX8[i] = frameDistance_X[i] - ((frameThickTmp_R + gasketThick - gasketCapThick + (gasketWidth/2)*sin(Alpha_R))/tan(Beta_R) + (gasketWidth/2)*cos(Alpha_R))
+
+				_dist = (frameWidthTmp_L - gasketWidth)/2
+				gasketPosY5[i] = -gasketThick + _dist*sin(Alpha_R)
+			endif
+
+		!	수평프레임 캡
+		!-----------------------------------------------------------------------------------------------
+			!	좌측 수평프레임 캡 좌표
+			!-----------------------------------------------------------------------------------------------
+			if	iCornerFrame_L = CornerFrame_Boundary	then
+				hCapPosX1[i] = 0
+				hCapPosX2[i] = 0
+			endif
+
+			if	iCornerFrame_L = CornerFrame_Mullion | iCornerFrame_L = CornerFrame_Rect	then
+				hCapPosX1[i] = frameWidthTmp_L/2
+				hCapPosX2[i] = frameWidthTmp_L/2
+			endif
+
+			if	iCornerFrame_L = CornerFrame_Corner	then
+				hCapPosX1[i] = (frameThickTmp_L + gasketThick)*tan(Alpha_L) + FrameCapThick_H*tan(Alpha_L)
+				hCapPosX2[i] = (frameThickTmp_L + gasketThick)*tan(Alpha_L)
+			endif
+
+			!	우측 수평프레임 캡 좌표
+			!-----------------------------------------------------------------------------------------------
+			if	iCornerFrame_R = CornerFrame_Boundary	then
+				hCapPosX3[i] = frameDistance_X[i]
+				hCapPosX4[i] = frameDistance_X[i]
+			endif
+
+			if	iCornerFrame_R = CornerFrame_Mullion | iCornerFrame_R = CornerFrame_Rect	then
+				hCapPosX3[i] = frameDistance_X[i] - frameWidthTmp_R/2
+				hCapPosX4[i] = frameDistance_X[i] - frameWidthTmp_R/2
+			endif
+
+			if	iCornerFrame_R = CornerFrame_Corner	then
+				hCapPosX3[i] = frameDistance_X[i] - ((frameThickTmp_R + gasketThick)*tan(Alpha_R))
+				hCapPosX4[i] = frameDistance_X[i] - ((frameThickTmp_R + gasketThick)*tan(Alpha_R) + FrameCapThick_H*tan(Alpha_R))
+			endif
+	next i
+
+	!	하단 오프셋 / 수직 프레임 높이
+	!-----------------------------------------------------------------------------------------------
+	_offsetZ = 0
+	_vFrameHgt = B
+
+	if	not(frameSwitch_B)	then
+		_offsetZ = frameWidthTmp_B
+		_vFrameHgt = _vFrameHgt - frameWidthTmp_B
+	endif
+	if	not(frameSwitch_U)	then
+		_vFrameHgt = _vFrameHgt - frameWidthTmp_U
+	endif
+
+
+
+!===============================================================================================
+!	좌/우 코너프레임
+!===============================================================================================
+
+	!	좌측 프레임
+	!-----------------------------------------------------------------------------------------------
+	group	"CornerFrameL_Base"
+		if	frameSwitch_L	then
+			_frmType = iCornerFrame_L
+			_frmWdt = frameWidthTmp_L
+			_frmThk = frameThickTmp_L
+			_aFrm = CornerAngle_L
+
+			gosub	"CornerFrameLR_3D"
+		endif
+	endgroup
+
+	placegroup	"CornerFrameL_Base"
+
+	!	우측 프레임
+	!------------------------------------v-----------------------------------------------------------
+	group	"CornerFrameR_Base"
+		if	frameSwitch_R	then
+			_frmType = iCornerFrame_R
+			_frmWdt = frameWidthTmp_R
+			_frmThk = frameThickTmp_R
+			_aFrm = CornerAngle_R
+
+			addx	A
+				mulx	-1
+					gosub	"CornerFrameLR_3D"
+				del 1
+			del 1
+		endif
+	endgroup
+
+	placegroup	"CornerFrameR_Base"
+
+
+!===============================================================================================
+!	수직프레임
+!===============================================================================================
+
+	!	수직프레임
+	!-----------------------------------------------------------------------------------------------
+	_frmWdt = VerticalFrameWidth
+	_frmThk = VerticalFrameThick
+
+	group	"VerticalFrame_Base"
+		for	i = 1	to	frameDivideNum_X - 1
+			addx	frameDistance_X[i]
+
+			gosub	"VerticalFrame_3D"
+		next i
+
+		del frameDivideNum_X - 1
+	endgroup
+
+	placegroup	"VerticalFrame_Base"
+
+	!	자르기용 수직프레임 모음
+	!-----------------------------------------------------------------------------------------------
+	FrameCutter_1st = addgroup("CornerFrameL_Base",	"CornerFrameR_Base")
+	FrameCutter_2nd = addgroup(FrameCutter_1st,	"VerticalFrame_Base")
+
+
+!===============================================================================================
+!	수직프레임캡
+!===============================================================================================
+pen			frameCapPenElv
+sect_fill	frameCapFill,	frameCapFillPenBg,	frameCapFillPen,	frameCapPen
+material	frameCapMat
+
+	for	i = 1	to	frameDivideNum_X - 1
+		addx	frameDistance_X[i]
+
+		if	bFrameCap_V[i]	then
+			put	-FrameCapWidth_V/2,	0,					15,
+				-FrameCapWidth_V/2,	FrameCapThick_V,	15,
+				FrameCapWidth_V/2,	FrameCapThick_V,	15,
+				FrameCapWidth_V/2,	0,					15,
+				-FrameCapWidth_V/2,	0,					15
+
+			addz	_offsetZ
+				prism_	nsp/3,	_vFrameHgt,	get(nsp)
+			del 1
+		endif
+	next	i
+
+	del frameDivideNum_X - 1
+
+
+!===============================================================================================
+!	상/하 코너프레임
+!===============================================================================================
+
+	!	하부 프레임
+	!-----------------------------------------------------------------------------------------------
+	_frmType = iCornerFrame_B
+	_frmWdt = frameWidthTmp_B
+	_frmThk = frameThickTmp_B
+
+	group	"CornerFrameB_Base"
+		for	i = 1	to	frameDivideNum_X
+			_bDrawFrameB = not(iDoorSwitch[i] | iMatrix_Windows[i][1] = Windows_Open)
+
+			if	_bDrawFrameB	then
+				gosub	"CornerFrame_Type1"
+			endif
+
+			addx	frameDistance_X[i]
+		next i
+
+		del frameDivideNum_X
+	endgroup
+
+	group	"CornerFrameB_Add"
+		for	i = 1	to	frameDivideNum_X
+			_bDrawFrameB = not(iDoorSwitch[i] | iMatrix_Windows[i][1] = Windows_Open)
+
+			if	_bDrawFrameB	then
+				gosub	"CornerFrame_Type2"
+			endif
+
+			addx	frameDistance_X[i]
+		next i
+	endgroup
+
+		!	자르기 및 배치
+		!-----------------------------------------------------------------------------------------------
+		CornerFrameB_Cutted_Type1 = subgroup("CornerFrameB_Base",	FrameCutter_2nd)
+		CornerFrameB_Added = addgroup("CornerFrameB_Base",	"CornerFrameB_Add")
+		CornerFrameB_Cutted_Type2 = subgroup(CornerFrameB_Added,	FrameCutter_2nd)
+
+
+		if	frameSwitch_B	then	
+			if	iHorizontalFrame = VerticalFrame_Type2 & _frmType = CornerFrame_Transom	then
+				placegroup	CornerFrameB_Cutted_Type2
+			else
+				placegroup	CornerFrameB_Cutted_Type1
+			endif
+		endif
+
+
+	!	상부 프레임
+	!-----------------------------------------------------------------------------------------------
+	_frmType = iCornerFrame_U
+	_frmWdt = frameWidthTmp_U
+	_frmThk = frameThickTmp_U
+
+		group	"CornerFrameU_Base"
+			addz	B
+				mulz	-1
+					for	i = 1	to	frameDivideNum_X
+						gosub	"CornerFrame_Type1"
+
+						addx	frameDistance_X[i]
+					next i
+
+					del frameDivideNum_X
+				del 1
+			del 1
+		endgroup
+
+		group	"CornerFrameU_Add"
+			addz	B
+				mulz	-1
+					for	i = 1	to	frameDivideNum_X
+						gosub	"CornerFrame_Type2"
+
+						addx	frameDistance_X[i]
+					next i
+				del 1
+			del 1
+		endgroup
+
+		!	자르기 및 배치
+		!-----------------------------------------------------------------------------------------------
+		CornerFrameU_Cutted_Type1 = subgroup("CornerFrameU_Base",	FrameCutter_2nd)
+		CornerFrameU_Added = addgroup("CornerFrameU_Base",	"CornerFrameU_Add")
+		CornerFrameU_Cutted_Type2 = subgroup(CornerFrameU_Added,	FrameCutter_2nd)
+
+		if	frameSwitch_U	then
+			if	iHorizontalFrame = VerticalFrame_Type2 & _frmType = CornerFrame_Transom	then
+				placegroup	CornerFrameU_Cutted_Type2
+			else
+				placegroup	CornerFrameU_Cutted_Type1
+			endif
+		endif
+
+
+
+!===============================================================================================
+!	수평프레임
+!===============================================================================================
+
+	!	수평프레임
+	!-----------------------------------------------------------------------------------------------
+	group	"HorizontalFrame_Base"
+		for	i = 1	to	frameDivideNum_X
+			for	j = 1	to	frameDivideNum_Y - 1
+				!	자동문인 경우 예외처리
+				_bAuto = (j = 1 & iDoorSwitch[i] & iMatrix_Door[i][3] = DoorOpenType_Auto)
+
+				addz	frameDistance_Y[j]
+
+				if	not(_bAuto)	then
+					gosub	"HorizontalFrame_Type1"
+				endif
+			next j
+
+			del frameDivideNum_Y - 1
+
+			addx	frameDistance_X[i]
+		next i
+
+		del frameDivideNum_X
+	endgroup
+
+	group	"HorizontalFrame_Add"
+		for	i = 1	to	frameDivideNum_X
+			for	j = 1	to	frameDivideNum_Y - 1
+				!	자동문인 경우 예외처리
+				_bAuto = (j = 1 & iDoorSwitch[i] & iMatrix_Door[i][3] = DoorOpenType_Auto)
+
+				addz	frameDistance_Y[j]
+
+				if	not(_bAuto)	then
+					gosub	"HorizontalFrame_Type2"
+				endif
+			next j
+
+			del frameDivideNum_Y - 1
+
+			addx	frameDistance_X[i]
+		next i
+
+		del frameDivideNum_X
+	endgroup
+
+	!	자르기 및 배치
+	!-----------------------------------------------------------------------------------------------
+	HorizontalFrame_Cutted_Type1 = subgroup("HorizontalFrame_Base",	FrameCutter_2nd)
+
+	if	iHorizontalFrame = VerticalFrame_Type2 then
+		HorizontalFrame_Added = addgroup("HorizontalFrame_Base",	"HorizontalFrame_Add")
+		HorizontalFrame_Cutted_Type2 = subgroup(HorizontalFrame_Added,	FrameCutter_2nd)
+
+		placegroup	HorizontalFrame_Cutted_Type2
+	else
+		placegroup	HorizontalFrame_Cutted_Type1
+	endif
+
+!===============================================================================================
+!	수평프레임캡
+!===============================================================================================
+pen			frameCapPenElv
+sect_fill	frameCapFill,	frameCapFillPenBg,	frameCapFillPen,	frameCapPen
+material	frameCapMat
+
+_hCapPosY1 = FrameCapThick_H
+_hCapPosY2 = 0
+_hCapPosY3 = 0
+_hCapPosY4 = FrameCapThick_H
+
+for	j = 1	to	frameDivideNum_Y - 1
+	addz	frameDistance_Y[j]
+
+	if	bFrameCap_H[j]	then
+		for	i = 1	to	frameDivideNum_X
+			if	frameDivideNum_X = 1	then
+				put	hCapPosX1[i],	_hCapPosY1,	15,
+					hCapPosX2[i],	_hCapPosY2,	15,
+					hCapPosX3[i],	_hCapPosY3,	15,
+					hCapPosX4[i],	_hCapPosY4,	15
+			else
+				if	i = 1	then
+					put	hCapPosX1[i],		_hCapPosY1,	15,
+						hCapPosX2[i],		_hCapPosY2,	15,
+						frameDistance_X[i],	_hCapPosY3,	15,
+						frameDistance_X[i],	_hCapPosY4,	15
+				endif
+
+				if	i # 1 & i # frameDivideNum_X	then
+					put	0,					_hCapPosY1,	15,
+						0,					_hCapPosY2,	15,
+						frameDistance_X[i],	_hCapPosY3,	15,
+						frameDistance_X[i],	_hCapPosY4,	15
+				endif
+
+				if	i = frameDivideNum_X	then
+					put	0,				_hCapPosY1,	15,
+						0,				_hCapPosY2,	15,
+						hCapPosX3[i],	_hCapPosY3,	15,
+						hCapPosX4[i],	_hCapPosY4,	15
+				endif
+			endif
+
+			addz	-FrameCapWidth_H/2
+				prism_	nsp/3,	FrameCapWidth_H,	get(nsp)
+			del 1
+
+			addx	frameDistance_X[i]
+		next	i
+
+		del frameDivideNum_X
+	endif
+next	j
+
+del frameDivideNum_Y - 1
+
+
+!===============================================================================================
+!	문
+!===============================================================================================
+group	"DoorBase"
+
+	addy	-gasketThick
+		for	i = 1	to	frameDivideNum_X
+			if	i = 1	then	addx	frameWidthTmp_L
+			if	i # 1	then	addx	VerticalFrameWidth/2
+
+				if	iDoorSwitch[i]	then
+
+					!	1Panel
+					if	iMatrix_Door[i][1] = DoorType_1panel	then
+
+						!	Hinge
+						if	iMatrix_Door[i][3] = DoorOpenType_Hinged	then
+							!	문 너비
+							_doorWdt = Matrix_DoorLength[i][1]
+							_transX = 0
+							if	Matrix_DoorLength[i][4] > eps	then
+								_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[i][4])
+								_transX = VerticalFrameWidth/2 + Matrix_DoorLength[i][4]
+							endif
+							if	Matrix_DoorLength[i][5] > eps	then
+								_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[i][5])
+							endif
+
+							addx	_transX
+								addy	-Matrix_DoorLength[i][7]
+									gosub	"Door"
+								del 1
+							del 1
+
+							gosub	"SldDoorGlass_3D"
+						endif
+
+						!	Sliding
+						if	iMatrix_Door[i][3] = DoorOpenType_Sliding	then
+							!	문 너비
+							_doorWdt = Matrix_DoorLength[i][1]
+							_transX = 0
+							if	Matrix_DoorLength[i][4] > eps	then
+								_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[i][4])
+							endif
+							if	Matrix_DoorLength[i][5] > eps	then
+								_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[i][5])
+							endif
+
+							if	i = 1	then	_frameThick = frameThickTmp_L - gasketThick
+							if	i # 1	then	_frameThick = VerticalFrameThick - gasketThick
+
+							if	iMatrix_Door[i][5] = SymbolPlace_Front	then
+								gosub	"Door"
+							endif
+
+							if	iMatrix_Door[i][5] = SymbolPlace_Back	then
+								addy	-_frameThick
+									muly	-1
+										gosub	"Door"
+									del 1
+								del 1
+							endif
+
+							gosub	"SldDoorGlass_3D"
+						endif
+
+						!	Auto
+						if	iMatrix_Door[i][3] = DoorOpenType_Auto	then
+							if	i = 1	then	_frameThick = frameThickTmp_L + gasketThick
+							if	i # 1	then	_frameThick = VerticalFrameThick + gasketThick
+
+							addy	gasketThick
+								if	iMatrix_Door[i][5] = SymbolPlace_Front	then
+									gosub	"AutomaticDoor_1panel"
+								endif
+
+								if	iMatrix_Door[i][5] = SymbolPlace_Back	then
+									addy	-_frameThick
+										muly	-1
+											gosub	"AutomaticDoor_1panel"
+										del 1
+									del 1
+								endif
+							del 1
+						endif
+					endif
+
+					!	2Panel
+					if	iMatrix_Door[i][1] = DoorType_2panel	then
+
+						!	Hinge
+						if	iMatrix_Door[i][3] = DoorOpenType_Hinged	then
+
+							_transX = 0
+							if	Matrix_DoorLength[i][4] > eps	then	_transX = VerticalFrameWidth/2 + Matrix_DoorLength[i][4]
+
+							addx	_transX
+
+								!	좌측문
+								_doorWdt = Matrix_DoorLength[i][2]
+
+								addy	-Matrix_DoorLength[i][7]
+									gosub	"Door"
+								del 1
+
+								!	우측문
+								_doorWdt = Matrix_DoorLength[i][3]
+
+								addx	Matrix_DoorLength[i][2]+Matrix_DoorLength[i][3]
+									addy	-Matrix_DoorLength[i][7]
+										mulx	-1
+											gosub	"Door"
+										del 1
+									del 1
+								del 1
+
+							del 1
+
+							gosub	"SldDoorGlass_3D"
+						endif
+
+						!	Sliding
+						if	iMatrix_Door[i][3] = DoorOpenType_Sliding	then
+
+							!	문 너비
+							_doorWdt = Matrix_DoorLength[i][1]
+							if	Matrix_DoorLength[i][4] > eps	then
+								_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[i][4])
+							endif
+							if	Matrix_DoorLength[i][5] > eps	then
+								_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[i][5])
+							endif
+
+							if	i = 1	then	_frameThick = frameThickTmp_L - gasketThick
+							if	i # 1	then	_frameThick = VerticalFrameThick - gasketThick
+
+							if	iMatrix_Door[i][5] = SymbolPlace_Front	then
+								gosub	"Door"
+							endif
+
+							if	iMatrix_Door[i][5] = SymbolPlace_Back	then
+								addy	-_frameThick
+									muly	-1
+										gosub	"Door"
+									del 1
+								del 1
+							endif
+
+							gosub	"SldDoorGlass_3D"
+						endif
+
+						!	Auto
+						if	iMatrix_Door[i][3] = DoorOpenType_Auto	then
+							if	i = 1	then	_frameThick = frameThickTmp_L + gasketThick
+							if	i # 1	then	_frameThick = VerticalFrameThick + gasketThick
+
+							addy	gasketThick
+								if	iMatrix_Door[i][5] = SymbolPlace_Front	then
+									gosub	"AutomaticDoor_2panel"
+								endif
+
+								if	iMatrix_Door[i][5] = SymbolPlace_Back	then
+									addy	-_frameThick
+										muly	-1
+											gosub	"AutomaticDoor_2panel"
+										del 1
+									del 1
+								endif
+							del 1
+						endif
+					endif
+				endif
+
+			del 1
+
+			addx	frameDistance_X[i]
+
+		next i
+
+		del frameDivideNum_X
+
+	del 1
+
+
+	!	미닫이문 수직프레임
+	group	"SldDoorVertical_Base"
+		addy	-gasketThick
+			for	i = 1	to	frameDivideNum_X
+				if	iDoorSwitch[i]	then
+					if	iMatrix_Door[i][3] = DoorOpenType_Hinged | iMatrix_Door[i][3] = DoorOpenType_Sliding	then
+						gosub	"SldDoorVertical_3D"
+					endif
+				endif
+
+				addx	frameDistance_X[i]
+			next i
+
+			del frameDivideNum_X
+		del 1
+	endgroup
+
+	!	미닫이문 하부프레임
+	group	"SldDoorBottom_Base"
+		addy	-gasketThick
+			for	i = 1	to	frameDivideNum_X
+				if	iDoorSwitch[i]	then
+					if	iMatrix_Door[i][3] = DoorOpenType_Hinged | iMatrix_Door[i][3] = DoorOpenType_Sliding	then
+						gosub	"SldDoorBottom_3D"
+					endif
+				endif
+
+				addx	frameDistance_X[i]
+			next i
+
+			del frameDivideNum_X
+		del 1
+	endgroup
+
+		!	미닫이문 프레임 배치
+		SldDoorVertical_Cutted_1st = subgroup("SldDoorVertical_Base",	"HorizontalFrame_Add")
+		placegroup	SldDoorVertical_Cutted_1st
+
+		SldDoorBottom_Cutted_1st = subgroup("SldDoorBottom_Base",	"SldDoorVertical_Base")
+		SldDoorBottom_Cutted_2nd = subgroup(SldDoorBottom_Cutted_1st,	FrameCutter_2nd)
+		placegroup	SldDoorBottom_Cutted_2nd
+
+endgroup
+
+placegroup	"DoorBase"
+
+
+!===============================================================================================
+!	창문
+!===============================================================================================
+
+	!	변수정의
+	!-----------------------------------------------------------------------------------------------
+	dim	WindowsWidthPosX1[],	WindowsWidthPosX2[],	WindowsWidthPosX3[],	WindowsWidthPosX4[],	WindowsWidthPosX5[],	WindowsWidthPosX6[]
+
+	for	i = 1	to	frameDivideNum_X
+		!	좌측 유리 좌표
+		!-----------------------------------------------------------------------------------------------
+		if	iCornerFrame_L = CornerFrame_Boundary | iCornerFrame_L = CornerFrame_Mullion	then
+			WindowsWidthPosX1[i] = (frameWidthTmp_L + gasketWidth)/2
+			WindowsWidthPosX2[i] = (frameWidthTmp_L + gasketWidth)/2
+			WindowsWidthPosX3[i] = frameWidthTmp_L
+			Alpha_L = 180
+		endif
+
+		if	iCornerFrame_L = CornerFrame_Rect	then
+			WindowsWidthPosX1[i] = frameWidthTmp_L
+			WindowsWidthPosX2[i] = frameWidthTmp_L
+			WindowsWidthPosX3[i] = frameWidthTmp_L
+			Alpha_L = 180
+		endif
+
+		if	iCornerFrame_L = CornerFrame_Corner	then
+			WindowsWidthPosX1[i] = (frameThickTmp_L + glassThick + (gasketWidth/2)*sin(Alpha_L))/tan(Beta_L) + (gasketWidth/2)*cos(Alpha_L)
+			WindowsWidthPosX2[i] = (frameWidthTmp_L/2)/cos(Alpha_L) + frameThickTmp_L*tan(Alpha_L) - (frameWidthTmp_L - gasketWidth)/2*cos(Alpha_L)
+			WindowsWidthPosX3[i] = (frameWidthTmp_L/2)/cos(Alpha_L) + frameThickTmp_L*tan(Alpha_L)
+		endif
+
+		!	우측 유리 좌표
+		!-----------------------------------------------------------------------------------------------
+		if	iCornerFrame_R = CornerFrame_Boundary | iCornerFrame_R = CornerFrame_Mullion	then
+			WindowsWidthPosX4[i] = frameDistance_X[i] - frameWidthTmp_R
+			WindowsWidthPosX5[i] = frameDistance_X[i] - (frameWidthTmp_R + gasketWidth)/2
+			WindowsWidthPosX6[i] = frameDistance_X[i] - (frameWidthTmp_R + gasketWidth)/2
+			Alpha_R = 180
+		endif
+
+		if	iCornerFrame_R = CornerFrame_Rect	then
+			WindowsWidthPosX4[i] = frameDistance_X[i] - frameWidthTmp_R
+			WindowsWidthPosX5[i] = frameDistance_X[i] - frameWidthTmp_R
+			WindowsWidthPosX6[i] = frameDistance_X[i] - frameWidthTmp_R
+			Alpha_R = 180
+		endif
+
+		if	iCornerFrame_R = CornerFrame_Corner	then
+			WindowsWidthPosX4[i] = frameDistance_X[i] - ((frameWidthTmp_R/2)/cos(Alpha_R) + frameThickTmp_R*tan(Alpha_R))
+			WindowsWidthPosX5[i] = frameDistance_X[i] - ((frameWidthTmp_R/2)/cos(Alpha_R) + frameThickTmp_R*tan(Alpha_R) - (frameWidthTmp_R - gasketWidth)/2*cos(Alpha_R))
+			WindowsWidthPosX6[i] = frameDistance_X[i] - ((frameThickTmp_R + glassThick + (gasketWidth/2)*sin(Alpha_R))/tan(Beta_R) + (gasketWidth/2)*cos(Alpha_R))
+		endif
+	next i
+
+
+		!	프로젝트창 각도
+		!-----------------------------------------------------------------------------------------------
+		_Hinge_Top = 1
+		_Hinge_Bottom = 2
+
+		dim	_aProject[][]
+		dim	_iHinge[][]
+		for	i = 1	to	frameDivideNum_X
+			for	j = 1	to	frameDivideNum_Y
+				if	GLOB_VIEW_TYPE = 4	then	!	단면
+					_aProject[i][j] = 0
+					if	iProjectHinge[i][j] = Hinge_Top | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_TopRight	then
+						_iHinge[i][j] = _Hinge_Top
+						_aProject[i][j] = ProjectAngle
+					endif
+					if	iProjectHinge[i][j] = Hinge_Bottom | iProjectHinge[i][j] = Hinge_BottomLeft | iProjectHinge[i][j] = Hinge_BottomRight	then
+						_iHinge[i][j] = _Hinge_Bottom
+						_aProject[i][j] = -ProjectAngle
+					endif
+				endif
+			next j
+		next i
+
+	!	창문 매트릭스
+	!-----------------------------------------------------------------------------------------------
+	group	"Windows_Base"
+		for	i = 1	to	frameDivideNum_X
+			for	j = 1	to	frameDivideNum_Y
+				!	변수 정의
+				if	i = 1	then	_offsetL = (frameWidthTmp_L + gasketWidth)/2
+				if	i # 1	then	_offsetL = gasketWidth/2
+
+				if	j = 1	then	_offsetB = (frameWidthTmp_B - gasketWidth)/2
+				if	j # 1	then	_offsetB = (HorizontalFrameWidth - gasketWidth)/2
+
+				!	좌표 이동
+				if	j = 1	then	addz	(frameWidthTmp_B + gasketWidth)/2
+				if	j # 1	then	addz	gasketWidth/2
+
+				!	창호
+				if	not(iDoorSwitch[i] & j = 1)	then
+					if	iMatrix_Windows[i][j] = Windows_Fix1		then	gosub	"Windows_Fix(1)"
+					if	iMatrix_Windows[i][j] = Windows_Fix2		then	gosub	"Windows_Fix(2)"
+					if	iMatrix_Windows[i][j] = Windows_Fix3		then	gosub	"Windows_Fix(3)"
+					if	iMatrix_Windows[i][j] = Windows_Project1 \
+						| iMatrix_Windows[i][j] = Windows_Smoke		then	gosub	"Windows_Project(1)"
+					if	iMatrix_Windows[i][j] = Windows_Project2	then	gosub	"Windows_Project(2)"
+					if	iMatrix_Windows[i][j] = Windows_Spandrel \
+						| iMatrix_Windows[i][j] = Windows_Spandrel_2 \
+						| iMatrix_Windows[i][j] = Windows_Spandrel_3 \
+						| iMatrix_Windows[i][j] = Windows_Spandrel_4	then	gosub	"Windows_Spandrel"
+					if	iMatrix_Windows[i][j] = Windows_Grill		then	gosub	"Windows_Grill"
+
+					if	bScreen[i][j]	then	gosub	"Windows_Screen"
+				endif
+
+				del 1
+
+				addz	frameDistance_Y[j]
+			next j
+
+			del frameDivideNum_Y
+
+		addx	frameDistance_X[i]
+
+		next i
+
+		del frameDivideNum_X
+	endgroup
+
+		!	자르기 및 배치
+		!-----------------------------------------------------------------------------------------------
+		if	iHorizontalFrame = VerticalFrame_Type2 then
+			Windows_Cutted_1st = subgroup{2}("Windows_Base",	HorizontalFrame_Cutted_Type2,	framePenElv,	frameMat,	framePenElv)
+			Windows_Cutted_2nd = subgroup{2}(Windows_Cutted_1st,	CornerFrameB_Cutted_Type2,	framePenElv,	frameMat,	framePenElv)
+			Windows_Cutted_3rd = subgroup{2}(Windows_Cutted_2nd,	CornerFrameU_Cutted_Type2,	framePenElv,	frameMat,	framePenElv)
+			Windows_Cutted_4th = subgroup{2}(Windows_Cutted_3rd,	"DoorBase",	framePenElv,	frameMat,	framePenElv)
+			Windows_Cutted_5th = subgroup{2}(Windows_Cutted_4th,	FrameCutter_2nd,	framePenElv,	frameMat,	framePenElv)
+
+			placegroup	Windows_Cutted_5th
+		else
+			Windows_Cutted_1st = subgroup{2}("Windows_Base",	"DoorBase",	framePenElv,	frameMat,	framePenElv)
+			Windows_Cutted_2nd = subgroup{2}(Windows_Cutted_1st,	FrameCutter_2nd,	framePenElv,	frameMat,	framePenElv)
+
+			placegroup	Windows_Cutted_2nd
+		endif
+
+
+
+
+
+
+!===============================================================================================
+!===============================================================================================
+!===============================================================================================
+end 
+!===============================================================================================
+!===============================================================================================
+!===============================================================================================
+
+
+
+
+
+
+
+!===============================================================================================
+!	Sub-routine
+!===============================================================================================
+"CornerFrameLR_3D":	!좌/우 코너프레임
+!-----------------------------------------------------------------------------------------------
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+if	_frmType = CornerFrame_Boundary	then
+	put	0,							-(_frmThk + gasketThick),	15,
+		0,							0,							15,
+		(_frmWdt + gasketWidth)/2,	0,							15,
+		(_frmWdt + gasketWidth)/2,	-gasketThick,				15,
+		_frmWdt,					-gasketThick,				15,
+		_frmWdt,					-(_frmThk + gasketThick),	15,
+		0,							-(_frmThk + gasketThick),	15
+endif
+
+if	_frmType = CornerFrame_Mullion	then
+	if	iVerticalFrame = VerticalFrame_Type1	then
+		put	0,							-(_frmThk + gasketThick),	15,
+			0,							-gasketThick,				15,
+			(_frmWdt - gasketWidth)/2,	-gasketThick,				15,
+			(_frmWdt - gasketWidth)/2,	0,							15,
+			(_frmWdt + gasketWidth)/2,	0,							15,
+			(_frmWdt + gasketWidth)/2,	-gasketThick,				15,
+			_frmWdt,					-gasketThick,				15,
+			_frmWdt,					-(_frmThk + gasketThick),	15,
+			0,							-(_frmThk + gasketThick),	15
+	endif
+
+	if	iVerticalFrame = VerticalFrame_Type2	then
+		put	0,							-(_frmThk + gasketThick),	15,
+			0,							-gasketThick,				15,
+			(_frmWdt - gasketWidth)/2,	-gasketThick,				15,
+			(_frmWdt - gasketWidth)/2,	-gasketCapThick,			15,
+			0,							-gasketCapThick,			15,
+			0,							0,							15,
+			_frmWdt,					0,							15,
+			_frmWdt,					-gasketCapThick,			15,
+			(_frmWdt + gasketWidth)/2,	-gasketCapThick,			15,
+			(_frmWdt + gasketWidth)/2,	-gasketThick,				15,
+			_frmWdt,					-gasketThick,				15,
+			_frmWdt,					-(_frmThk + gasketThick),	15,
+			0,							-(_frmThk + gasketThick),	15
+	endif
+endif
+
+if	_frmType = CornerFrame_Rect	then
+	put	0,			0,			15,
+		0,			-_frmThk,	15,
+		_frmWdt,	-_frmThk,	15,
+		_frmWdt,	0,			15,
+		0,			0,			15
+endif
+
+if	_frmType = CornerFrame_Corner	then
+	!	변수 정의
+	Alpha = (180 - _aFrm)/2
+	Beta = 180 - _aFrm
+	Gamma = 90 - Alpha
+	halfWidth = _frmWdt/2
+	type1_Width = _frmWdt
+	type2_Width = (_frmWdt - gasketWidth)/2
+	type3_Width = gasketWidth
+	type4_Width = gasketWidth/2
+
+	!	투영 좌표
+	type1_projectX = type1_Width*cos(Alpha)
+	type1_projectY = type1_Width*cos(Gamma)
+	type2_projectX = type2_Width*cos(Alpha)
+	type2_projectY = type2_Width*cos(Gamma)
+	type3_projectX = type3_Width*cos(Alpha)
+	type3_projectY = type3_Width*cos(Gamma)
+	type4_projectX = type4_Width/cos(Alpha)
+	type4_projectY = type4_Width*sin(Alpha)
+
+	!	기준점 좌표
+	posX_base1 = halfWidth/cos(Alpha)
+	posX_base2 = halfWidth/cos(Alpha) + _frmThk/tan(Gamma)
+	posX_base3 = (_frmThk + gasketThick)*tan(Alpha) + type4_projectX
+	posY_base1 = -(_frmThk + gasketThick)
+	posY_base2 = -gasketThick
+	posY_base3 = 0
+
+	if	iCornerType = CORNER_TYPE1	then
+		put	posX_base1,										posY_base1,										15,
+			posX_base2,										posY_base2,										15,
+			posX_base2 - type2_projectX,					posY_base2 + type2_projectY,					15,
+			posX_base3,										posY_base3,										15,
+			posX_base3 - type3_projectX,					posY_base3 + type3_projectY,					15,
+			posX_base2 - type1_projectX + type2_projectX,	posY_base2 + type1_projectY - type2_projectY,	15,
+			posX_base2 - type1_projectX,					posY_base2 + type1_projectY,					15,
+			posX_base1 - type1_projectX,					posY_base1 + type1_projectY,					15
+	endif
+
+	if	iCornerType = CORNER_TYPE2	then
+		put	posX_base1,														posY_base1,								15,
+			posX_base2,														posY_base2,								15,
+			posX_base2 - type2_Width/cos(Alpha),							posY_base2,								15,
+			posX_base3,														posY_base3,								15,
+			posX_base3 - type3_projectX,									posY_base3 + type3_projectY,			15,
+			posX_base2 - type2_Width/cos(Alpha) - type3_Width*cos(Alpha),	posY_base2 + type3_Width*sin(Alpha),	15,
+			posX_base2 - type1_projectX,									posY_base2 + type1_projectY,			15,
+			posX_base1 - type1_projectX,									posY_base1 + type1_projectY,			15,
+			posX_base1 - halfWidth/cos(Alpha),								posY_base1,								15
+	endif
+endif
+
+addz	_offsetZ
+	prism_	nsp/3,	_vFrameHgt,	get(nsp)
+del 1
+
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"VerticalFrame_3D":	!	수직프레임
+!-----------------------------------------------------------------------------------------------
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+if	iVerticalFrame = VerticalFrame_Type1	then
+	put	-_frmWdt/2,		-(_frmThk + gasketThick),	15,
+		-_frmWdt/2,		-gasketThick,				15,
+		-gasketWidth/2,	-gasketThick,				15,
+		-gasketWidth/2,	0,							15,
+		gasketWidth/2,	0,							15,
+		gasketWidth/2,	-gasketThick,				15,
+		_frmWdt/2,		-gasketThick,				15,
+		_frmWdt/2,		-(_frmThk + gasketThick),	15,
+		-_frmWdt/2,		-(_frmThk + gasketThick),	15
+endif
+
+if	iVerticalFrame = VerticalFrame_Type2	then
+	put	-_frmWdt/2,		-(_frmThk + gasketThick),	15,
+		-_frmWdt/2,		-gasketThick,				15,
+		-gasketWidth/2,	-gasketThick,				15,
+		-gasketWidth/2,	-gasketCapThick,			15,
+		-_frmWdt/2,		-gasketCapThick,			15,
+		-_frmWdt/2,		0,							15,
+		_frmWdt/2,		0,							15,
+		_frmWdt/2,		-gasketCapThick,			15,
+		gasketWidth/2,	-gasketCapThick,			15,
+		gasketWidth/2,	-gasketThick,				15,
+		_frmWdt/2,		-gasketThick,				15,
+		_frmWdt/2,		-(_frmThk + gasketThick),	15,
+		-_frmWdt/2,		-(_frmThk + gasketThick),	15
+endif
+
+addz	_offsetZ
+	prism_	nsp/3,	_vFrameHgt,	get(nsp)
+del 1
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"CornerFrame_Type1":	!	상/하 코너프레임 Type1
+!-----------------------------------------------------------------------------------------------
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+!	개스킷 Type1
+if	i = 1	then
+	if	frameDivideNum_X = 1	then
+		put	gasketPosX1[1],	0,				15,
+			gasketPosX2[1],	gasketPosY2[i],	15,
+			gasketPosX3[1],	-gasketThick,	15,
+			gasketPosX4[1],	-gasketThick,	15,
+			gasketPosX5[1],	gasketPosY5[i],	15,
+			gasketPosX6[1],	0,				15,
+			gasketPosX1[1],	0,				15
+	endif
+
+	if	frameDivideNum_X # 1	then
+		put	gasketPosX1[1],						0,				15,
+			gasketPosX2[1],						gasketPosY2[i],	15,
+			gasketPosX3[1],						-gasketThick,	15,
+			frameDistance_X[1] - gasketWidth/2,	-gasketThick,	15,
+			frameDistance_X[1] - gasketWidth/2,	0,				15,
+			gasketPosX1[1],						0,				15			
+	endif
+endif
+
+if	i # 1 & i # frameDivideNum_X	then
+	put	gasketWidth/2,						0,				15,
+		gasketWidth/2,						-gasketThick,	15,
+		frameDistance_X[i] - gasketWidth/2,	-gasketThick,	15,
+		frameDistance_X[i] - gasketWidth/2,	0,				15,
+		gasketWidth/2,						0,				15
+endif
+
+if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+	put	gasketWidth/2,	0,				15,
+		gasketWidth/2,	-gasketThick,	15,
+		gasketPosX4[i],	-gasketThick,	15,
+		gasketPosX5[i],	gasketPosY5[i],	15,
+		gasketPosX6[i],	0,				15,
+		gasketWidth/2,	0,				15		
+endif
+
+	!	개스킷
+	if	_frmType = CornerFrame_Boundary	then
+		prism_	nsp/3,	(_frmWdt+gasketWidth)/2,	get(nsp)
+	endif
+
+	if	_frmType = CornerFrame_Transom	then
+		addz	(_frmWdt-gasketWidth)/2
+			prism_	nsp/3,	gasketWidth,	get(nsp)
+		del 1
+	endif
+
+
+!	프레임
+if	i = 1	then
+	if	frameDivideNum_X = 1	then
+		put	framePosX1[1],	-gasketThick,				15,
+			framePosX2[1],	-(_frmThk + gasketThick),	15,
+			framePosX3[1],	-(_frmThk + gasketThick),	15,
+			framePosX4[1],	-gasketThick,				15,
+			framePosX1[1],	-gasketThick,				15			
+	endif
+
+	if	frameDivideNum_X # 1	then
+		put	framePosX1[1],								-gasketThick,				15,
+			framePosX2[1],								-(_frmThk + gasketThick),	15,
+			frameDistance_X[1] - VerticalFrameWidth/2,	-(_frmThk + gasketThick),	15,
+			frameDistance_X[1] - VerticalFrameWidth/2,	-gasketThick,				15,
+			framePosX1[1],								-gasketThick,				15
+	endif
+endif
+
+if	i # 1 & i # frameDivideNum_X	then
+	put	VerticalFrameWidth/2,						-gasketThick,				15,
+		VerticalFrameWidth/2,						-(_frmThk + gasketThick),	15,
+		frameDistance_X[i] - VerticalFrameWidth/2,	-(_frmThk + gasketThick),	15,
+		frameDistance_X[i] - VerticalFrameWidth/2,	-gasketThick,				15,
+		VerticalFrameWidth/2,						-gasketThick,				15
+endif
+
+if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+	put	VerticalFrameWidth/2,	-gasketThick,				15,
+		VerticalFrameWidth/2,	-(_frmThk + gasketThick),	15,
+		framePosX3[i],			-(_frmThk + gasketThick),	15,
+		framePosX4[i],			-gasketThick,				15,
+		VerticalFrameWidth/2,	-gasketThick,				15	
+endif
+
+	!	프레임
+	prism_	nsp/3,	_frmWdt,	get(nsp)
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"CornerFrame_Type2":	!	상/하 코너프레임 Type2
+!-----------------------------------------------------------------------------------------------
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+!	개스킷 Type2
+if	iHorizontalFrame = VerticalFrame_Type2	then
+	if	i = 1	then
+		if	frameDivideNum_X = 1	then
+			put	gasketPosX1[1],	0,					15,
+				gasketPosX7[1],	-gasketCapThick,	15,
+				gasketPosX8[1],	-gasketCapThick,	15,
+				gasketPosX6[1],	0,					15,
+				gasketPosX1[1],	0,					15
+		endif
+	
+		if	frameDivideNum_X # 1	then
+			!	개스킷
+			put	gasketPosX1[1],						0,					15,
+				gasketPosX7[1],						-gasketCapThick,	15,
+				frameDistance_X[1] - gasketWidth/2,	-gasketCapThick,	15,
+				frameDistance_X[1] - gasketWidth/2,	0,					15,
+				gasketPosX1[1],						0,					15
+		endif
+	endif
+	
+	if	i # 1 & i # frameDivideNum_X	then
+		put	gasketWidth/2,						0,					15,
+			gasketWidth/2,						-gasketCapThick,	15,
+			frameDistance_X[i] - gasketWidth/2,	-gasketCapThick,	15,
+			frameDistance_X[i] - gasketWidth/2,	0,					15,
+			gasketWidth/2,						0,					15
+	endif
+	
+	if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+		put	gasketWidth/2,	0,					15,
+			gasketWidth/2,	-gasketCapThick,	15,
+			gasketPosX8[i],	-gasketCapThick,	15,
+			gasketPosX6[i],	0,					15,
+			gasketWidth/2,	0,					15		
+	endif
+	
+		!	개스킷
+		prism_	nsp/3,	_frmWdt,	get(nsp)
+endif
+
+
+return
+ 
+
+!-----------------------------------------------------------------------------------------------
+"HorizontalFrame_Type1":	!	수평프레임 Type1
+!-----------------------------------------------------------------------------------------------
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+!	수평프레임 Type1
+if	i = 1	then
+	if	frameDivideNum_X = 1	then
+		put	gasketPosX1[1],	0,				15,
+			gasketPosX2[1],	gasketPosY2[i],	15,
+			gasketPosX3[1],	-gasketThick,	15,
+			gasketPosX4[1],	-gasketThick,	15,
+			gasketPosX5[1],	gasketPosY5[i],	15,
+			gasketPosX6[1],	0,				15,
+			gasketPosX1[1],	0,				15
+	endif
+
+	if	frameDivideNum_X # 1	then
+		put	gasketPosX1[1],						0,				15,
+			gasketPosX2[1],						gasketPosY2[i],	15,
+			gasketPosX3[1],						-gasketThick,	15,
+			frameDistance_X[1] - gasketWidth/2,	-gasketThick,	15,
+			frameDistance_X[1] - gasketWidth/2,	0,				15,
+			gasketPosX1[1],						0,				15			
+	endif
+endif
+
+if	i # 1 & i # frameDivideNum_X	then
+	put	gasketWidth/2,						0,				15,
+		gasketWidth/2,						-gasketThick,	15,
+		frameDistance_X[i] - gasketWidth/2,	-gasketThick,	15,
+		frameDistance_X[i] - gasketWidth/2,	0,				15,
+		gasketWidth/2,						0,				15
+endif
+
+if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+	put	gasketWidth/2,	0,				15,
+		gasketWidth/2,	-gasketThick,	15,
+		gasketPosX4[i],	-gasketThick,	15,
+		gasketPosX5[i],	gasketPosY5[i],	15,
+		gasketPosX6[i],	0,				15,
+		gasketWidth/2,	0,				15		
+endif
+
+	!	개스킷
+	addz	-gasketWidth/2
+		prism_	nsp/3,	gasketWidth,	get(nsp)
+	del 1
+
+!	프레임
+if	i = 1	then
+	if	frameDivideNum_X = 1	then
+		put	framePosX1[1],	-gasketThick,							15,
+			framePosX2[1],	-(HorizontalFrameThick + gasketThick),	15,
+			framePosX3[1],	-(HorizontalFrameThick + gasketThick),	15,
+			framePosX4[1],	-gasketThick,							15,
+			framePosX1[1],	-gasketThick,							15			
+	endif
+
+	if	frameDivideNum_X # 1	then
+		put	framePosX1[1],								-gasketThick,							15,
+			framePosX2[1],								-(HorizontalFrameThick + gasketThick),	15,
+			frameDistance_X[1] - VerticalFrameWidth/2,	-(HorizontalFrameThick + gasketThick),	15,
+			frameDistance_X[1] - VerticalFrameWidth/2,	-gasketThick,							15,
+			framePosX1[1],								-gasketThick,							15
+	endif
+endif
+
+if	i # 1 & i # frameDivideNum_X	then
+	put	VerticalFrameWidth/2,						-gasketThick,							15,
+		VerticalFrameWidth/2,						-(HorizontalFrameThick + gasketThick),	15,
+		frameDistance_X[i] - VerticalFrameWidth/2,	-(HorizontalFrameThick + gasketThick),	15,
+		frameDistance_X[i] - VerticalFrameWidth/2,	-gasketThick,							15,
+		VerticalFrameWidth/2,						-gasketThick,							15
+endif
+
+if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+	put	VerticalFrameWidth/2,	-gasketThick,							15,
+		VerticalFrameWidth/2,	-(HorizontalFrameThick + gasketThick),	15,
+		framePosX3[i],			-(HorizontalFrameThick + gasketThick),	15,
+		framePosX4[i],			-gasketThick,							15,
+		VerticalFrameWidth/2,	-gasketThick,							15	
+endif
+
+
+	!	프레임
+	addz	-HorizontalFrameWidth/2
+		prism_	nsp/3,	HorizontalFrameWidth,	get(nsp)
+	del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"HorizontalFrame_Type2":	!	수평프레임 Type2
+!-----------------------------------------------------------------------------------------------
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+!	수평프레임 Type2
+if	iHorizontalFrame = VerticalFrame_Type2	then
+	if	i = 1	then
+		if	frameDivideNum_X = 1	then
+			put	gasketPosX1[1],	0,					15,
+				gasketPosX7[1],	-gasketCapThick,	15,
+				gasketPosX8[1],	-gasketCapThick,	15,
+				gasketPosX6[1],	0,					15,
+				gasketPosX1[1],	0,					15
+		endif
+	
+		if	frameDivideNum_X # 1	then
+			!	개스킷
+			put	gasketPosX1[1],						0,					15,
+				gasketPosX7[1],						-gasketCapThick,	15,
+				frameDistance_X[1]-gasketWidth/2,	-gasketCapThick,	15,
+				frameDistance_X[1]-gasketWidth/2,	0,					15,
+				gasketPosX1[1],						0,					15
+		endif
+	endif
+	
+	if	i # 1 & i # frameDivideNum_X	then
+		put	gasketWidth/2,						0,					15,
+			gasketWidth/2,						-gasketCapThick,	15,
+			frameDistance_X[i]-gasketWidth/2,	-gasketCapThick,	15,
+			frameDistance_X[i]-gasketWidth/2,	0,					15,
+			gasketWidth/2,						0,					15
+	endif
+	
+	if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+		put	gasketWidth/2,	0,					15,
+			gasketWidth/2,	-gasketCapThick,	15,
+			gasketPosX8[i],	-gasketCapThick,	15,
+			gasketPosX6[i],	0,					15,
+			gasketWidth/2,	0,					15		
+	endif
+	
+		!	프레임
+		addz	-HorizontalFrameWidth/2
+			prism_	nsp/3,	HorizontalFrameWidth,	get(nsp)
+		del 1
+endif
+
+
+return
+
+
+!===============================================================================================
+!	창호
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+"coorWinGls":	!	창호 좌표
+!-----------------------------------------------------------------------------------------------
+	if	i = 1	then
+		if	frameDivideNum_X = 1	then
+			put	WindowsWidthPosX1[1],	-gasketThick + glassThick,										15,
+				WindowsWidthPosX2[1],	-gasketThick + (frameWidthTmp_L - gasketWidth)/2*sin(Alpha_L),	15,
+				WindowsWidthPosX3[1],	-gasketThick,													15,
+				WindowsWidthPosX4[1],	-gasketThick,													15,
+				WindowsWidthPosX5[1],	-gasketThick + (frameWidthTmp_R - gasketWidth)/2*sin(Alpha_R),	15,
+				WindowsWidthPosX6[1],	-gasketThick + glassThick,										15,
+				WindowsWidthPosX1[1],	-gasketThick + glassThick,										15
+		endif
+
+		if	frameDivideNum_X # 1	then
+			put	WindowsWidthPosX1[1],				-gasketThick + glassThick,										15,
+				WindowsWidthPosX2[1],				-gasketThick + (frameWidthTmp_L - gasketWidth)/2*sin(Alpha_L),	15,
+				WindowsWidthPosX3[1],				-gasketThick,													15,
+				frameDistance_X[1] - gasketWidth/2,	-gasketThick,													15,
+				frameDistance_X[1] - gasketWidth/2,	-gasketThick + glassThick,										15,
+				WindowsWidthPosX1[1],				-gasketThick + glassThick,										15
+		endif
+	endif
+
+	if	i # 1 & i # frameDivideNum_X	then
+		put	gasketWidth/2,						-gasketThick + glassThick,	15,
+			gasketWidth/2,						-gasketThick,				15,
+			frameDistance_X[i] - gasketWidth/2,	-gasketThick,				15,
+			frameDistance_X[i] - gasketWidth/2,	-gasketThick + glassThick,	15,
+			gasketWidth/2,						-gasketThick + glassThick,	15
+	endif
+
+	if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+		put	gasketWidth/2,			-gasketThick + glassThick,										15,
+			gasketWidth/2,			-gasketThick,													15,
+			WindowsWidthPosX4[i],	-gasketThick,													15,
+			WindowsWidthPosX5[i],	-gasketThick + (frameWidthTmp_R - gasketWidth)/2*sin(Alpha_R),	15,
+			WindowsWidthPosX6[i],	-gasketThick + glassThick,										15,
+			gasketWidth/2,			-gasketThick + glassThick,										15
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"coorWinFrm":
+!-----------------------------------------------------------------------------------------------
+	put	-VerticalFrameWidth/2,	-gasketThick,							15,
+		-VerticalFrameWidth/2,	-(HorizontalFrameThick + gasketThick),	15,
+		VerticalFrameWidth/2,	-(HorizontalFrameThick + gasketThick),	15,
+		VerticalFrameWidth/2,	-gasketThick,							15,
+		-VerticalFrameWidth/2,	-gasketThick,							15
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"coorWinGsk":
+!-----------------------------------------------------------------------------------------------
+	if	iVerticalFrame = VerticalFrame_Type1	then
+		put	-gasketWidth/2,	0,				15,
+			-gasketWidth/2,	-gasketThick,	15,
+			gasketWidth/2,	-gasketThick,	15,
+			gasketWidth/2,	0,				15,
+			-gasketWidth/2,	0,				15
+	endif
+	if	iVerticalFrame = VerticalFrame_Type2	then
+		put	-gasketWidth/2,			-gasketThick,		15,
+			-gasketWidth/2,			-gasketCapThick,	15,
+			-VerticalFrameWidth/2,	-gasketCapThick,	15,
+			-VerticalFrameWidth/2,	0,					15,
+			VerticalFrameWidth/2,	0,					15,
+			VerticalFrameWidth/2,	-gasketCapThick,	15,
+			gasketWidth/2,			-gasketCapThick,	15,
+			gasketWidth/2,			-gasketThick,		15,
+			-gasketWidth/2,			-gasketThick,		15
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"cutWin":
+!-----------------------------------------------------------------------------------------------
+	put	-gasketWidth/2,	0,
+		-gasketWidth/2,	-gasketThick,
+		gasketWidth/2,	-gasketThick,
+		gasketWidth/2,	0,
+		-gasketWidth/2,	0
+
+	cutpoly	nsp/2,	get(nsp)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Fix(1)":	!	고정창(1)
+!-----------------------------------------------------------------------------------------------
+pen			glassPenElv
+sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+material	glassMat
+
+!	유리창
+gosub	"coorWinGls"
+
+prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+
+!	텍스트
+addx	_offsetL
+	add	WindowsWidth[i]/2,	0,	WindowsHeight[j]/2
+		gosub	"Windows_Text"
+	del 1
+del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Fix(2)":	!	고정창(2)
+!-----------------------------------------------------------------------------------------------
+pen			glassPenElv
+sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+material	glassMat
+
+!	유리창
+addx	_offsetL
+	addx	WindowsWidth[i]/2
+		gosub	"cutWin"
+	del 1
+del 1
+
+	gosub	"coorWinGls"
+
+	prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+
+cutend
+
+!	프레임
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+gosub	"coorWinFrm"
+
+addx	_offsetL
+	addx	WindowsWidth[i]/2
+		addz	_offsetB
+			prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth,	get(nsp)
+		del 1
+	del 1
+del 1
+
+!	개스킷
+gosub	"coorWinGsk"
+
+addx	_offsetL
+	addx	WindowsWidth[i]/2
+		prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+	del 1
+
+del 1
+
+!	텍스트
+addx	_offsetL
+	add	(WindowsWidth[i]/2 - gasketWidth/2)/2,	0,	WindowsHeight[j]/2
+		gosub	"Windows_Text"
+
+		addx	WindowsWidth[i]/2 + gasketWidth/2
+			gosub	"Windows_Text"
+		del 1
+	del 1
+del 1
+
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Fix(3)":	!	고정창(3)
+!-----------------------------------------------------------------------------------------------
+pen			glassPenElv
+sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+material	glassMat
+
+!	유리창
+addx	_offsetL
+	addx	matrixFix3_widthL[i][j]
+		gosub	"cutWin"
+	del 1
+
+	addx	WindowsWidth[i] - matrixFix3_widthR[i][j]
+		gosub	"cutWin"
+	del 1
+del 1
+
+	gosub	"coorWinGls"
+
+	prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+
+cutend
+cutend
+
+!	프레임
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+gosub	"coorWinFrm"
+
+add	_offsetL,	0,	_offsetB
+	addx	matrixFix3_widthL[i][j]
+		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth,	use(nsp)
+	del 1
+
+	addx	WindowsWidth[i] - matrixFix3_widthR[i][j]
+		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth,	get(nsp)
+	del 1
+del 1
+
+!	개스킷
+gosub	"coorWinGsk"
+
+addx	_offsetL
+	addx	matrixFix3_widthL[i][j]
+		prism_	nsp/3,	WindowsHeight[j],	use(nsp)
+	del 1
+
+	addx	WindowsWidth[i] - matrixFix3_widthR[i][j]
+		prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+	del 1
+del 1
+
+!	Hotspot
+addx	_offsetL
+	addz	WindowsHeight[j]/2
+		hotspot	0,							0,	0,	unID,	matrixFix3_widthL[i][j],	1+128	:	unID = unID + 1
+		hotspot	-1,							0,	0,	unID,	matrixFix3_widthL[i][j],	3		:	unID = unID + 1
+		hotspot	matrixFix3_widthL[i][j],	0,	0,	unID,	matrixFix3_widthL[i][j],	2		:	unID = unID + 1
+
+		addx	WindowsWidth[i]
+			hotspot	0,							0,	0,	unID,	matrixFix3_widthR[i][j],	1+128	:	unID = unID + 1
+			hotspot	1,							0,	0,	unID,	matrixFix3_widthR[i][j],	3		:	unID = unID + 1
+			hotspot	-matrixFix3_widthR[i][j],	0,	0,	unID,	matrixFix3_widthR[i][j],	2		:	unID = unID + 1
+		del 1
+	del 1
+del 1
+
+!	텍스트
+addx	_offsetL
+	addz	WindowsHeight[j]/2
+
+		!	좌측
+		addx	(matrixFix3_widthL[i][j] - gasketWidth/2)/2
+			gosub	"Windows_Text"
+		del 1
+
+		!	사이
+		addx	matrixFix3_widthL[i][j] + _btwWidth/2
+			gosub	"Windows_Text"
+		del 1
+
+		!	우측
+		addx	WindowsWidth[i] - (matrixFix3_widthR[i][j] - gasketWidth/2)/2
+			gosub	"Windows_Text"
+		del 1
+
+	del 1
+del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Project(1)":	!	프로젝트창(1)
+!-----------------------------------------------------------------------------------------------
+pen			glassPenElv
+sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+material	glassMat
+
+!	유리창
+	gosub	"coorWinGls"
+
+	_nTrans = 0
+	if	_iHinge[i][j] = _Hinge_Top	then
+		add	0,	-gasketThick + glassThick,	WindowsHeight[j]	:	_nTrans = _nTrans + 1
+			rotx	_aProject[i][j]	:	_nTrans = _nTrans + 1
+		add	0,	gasketThick - glassThick,	-WindowsHeight[j]	:	_nTrans = _nTrans + 1
+	endif
+	if	_iHinge[i][j] = _Hinge_Bottom	then
+		add	0,	-gasketThick + glassThick,	0	:	_nTrans = _nTrans + 1
+			rotx	_aProject[i][j]	:	_nTrans = _nTrans + 1
+		add	0,	gasketThick - glassThick,	0	:	_nTrans = _nTrans + 1
+	endif
+			prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+
+	del _nTrans
+
+!	Openline
+if	GLOB_VIEW_TYPE # 4	then
+	pen	OpenlinePen
+
+		addx	_offsetL
+
+			if	iProjectHinge[i][j] = Hinge_Top | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_TopRight	then
+				lin_	0,					-gasketThick,	0,
+						WindowsWidth[i]/2,	-gasketThick,	WindowsHeight[j]
+				lin_	WindowsWidth[i]/2,	-gasketThick,	WindowsHeight[j],
+						WindowsWidth[i],	-gasketThick,	0
+
+				lin_	0,					-gasketThick + glassThick,	0,
+						WindowsWidth[i]/2,	-gasketThick + glassThick,	WindowsHeight[j]
+				lin_	WindowsWidth[i]/2,	-gasketThick + glassThick,	WindowsHeight[j],
+						WindowsWidth[i],	-gasketThick + glassThick,	0
+			endif
+
+			if	iProjectHinge[i][j] = Hinge_Bottom | iProjectHinge[i][j] = Hinge_BottomLeft | iProjectHinge[i][j] = Hinge_BottomRight	then
+				lin_	0,					-gasketThick,	WindowsHeight[j],
+						WindowsWidth[i]/2,	-gasketThick,	0
+				lin_	WindowsWidth[i]/2,	-gasketThick,	0,
+						WindowsWidth[i],	-gasketThick,	WindowsHeight[j]
+
+				lin_	0,					-gasketThick + glassThick,	WindowsHeight[j],
+						WindowsWidth[i]/2,	-gasketThick + glassThick,	0
+				lin_	WindowsWidth[i]/2,	-gasketThick + glassThick,	0,
+						WindowsWidth[i],	-gasketThick + glassThick,	WindowsHeight[j]
+			endif
+	
+			if	iProjectHinge[i][j] = Hinge_Left | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_BottomLeft	then
+				lin_	0,					-gasketThick,	0,
+						WindowsWidth[i],	-gasketThick,	WindowsHeight[j]/2
+				lin_	WindowsWidth[i],	-gasketThick,	WindowsHeight[j]/2,
+						0,					-gasketThick,	WindowsHeight[j]
+
+				lin_	0,					-gasketThick + glassThick,	0,
+						WindowsWidth[i],	-gasketThick + glassThick,	WindowsHeight[j]/2
+				lin_	WindowsWidth[i],	-gasketThick + glassThick,	WindowsHeight[j]/2,
+						0,					-gasketThick + glassThick,	WindowsHeight[j]
+			endif
+	
+			if	iProjectHinge[i][j] = Hinge_Right | iProjectHinge[i][j] = Hinge_TopRight | iProjectHinge[i][j] = Hinge_BottomRight	then
+				lin_	WindowsWidth[i],	-gasketThick,	0,
+						0,					-gasketThick,	WindowsHeight[j]/2
+				lin_	0,					-gasketThick,	WindowsHeight[j]/2,
+						WindowsWidth[i],	-gasketThick,	WindowsHeight[j]
+
+				lin_	WindowsWidth[i],	-gasketThick + glassThick,	0,
+						0,					-gasketThick + glassThick,	WindowsHeight[j]/2
+				lin_	0,					-gasketThick + glassThick,	WindowsHeight[j]/2,
+						WindowsWidth[i],	-gasketThick + glassThick,	WindowsHeight[j]
+			endif
+
+		del 1
+endif
+
+!	textSmoke
+if	iMatrix_Windows[i][j] = Windows_Smoke	then
+
+	addx	_offsetL
+
+		add	WindowsWidth[i]/2,	0,	WindowsHeight[j]/2
+			if	TextScale > GLOB_SCALE	then
+				if	bSmokeText & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
+					style		FixText
+					pen			TextPen
+					material	TextMat
+
+					if	TextMirror = 1	then	mulx	1
+					if	TextMirror = 0	then	mulx	-1
+
+						addy	-gasketThick
+							rotx	90
+								text	eps,	0,	"배"
+
+								model	wire
+									circle	textSize/1000
+								model	solid
+							del 1
+						del 1
+
+						addy	-gasketThick + glassThick  
+							rotx	90
+								text	-eps,	0,	"배"
+
+								model	wire
+									circle	textSize/1000
+								model	solid
+							del 1
+						del 1
+					del 1
+				endif
+			endif
+		del 1
+	del 1
+endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Project(2)":	!	프로젝트창(2)
+!-----------------------------------------------------------------------------------------------
+pen			glassPenElv
+sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+material	glassMat
+
+!	유리창
+addx	_offsetL
+	addx	WindowsWidth[i]/2
+		gosub	"cutWin"
+	del 1
+del 1
+
+	gosub	"coorWinGls"
+
+	prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+
+cutend
+
+addx	_offsetL
+	!	Openline
+	pen OpenlinePen
+
+	if	iProjectHinge[i][j] = Hinge_Top | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_TopRight	then
+		lin_	0,										-gasketThick,	0,
+				(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	WindowsHeight[j]
+		lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	WindowsHeight[j],
+				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	0
+
+		lin_	0,										-gasketThick + glassThick,	0,
+				(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	WindowsHeight[j]
+		lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	WindowsHeight[j],
+				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	0
+
+		addx	WindowsWidth[i]/2 + gasketWidth/2
+			lin_	0,										-gasketThick,	0,
+					(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	WindowsHeight[j]
+			lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	WindowsHeight[j],
+					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	0
+
+			lin_	0,										-gasketThick + glassThick,	0,
+					(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	WindowsHeight[j]
+			lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	WindowsHeight[j],
+					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	0
+		del 1
+	endif
+
+	if	iProjectHinge[i][j] = Hinge_Bottom | iProjectHinge[i][j] = Hinge_BottomLeft | iProjectHinge[i][j] = Hinge_BottomRight	then
+		lin_	0,										-gasketThick,	WindowsHeight[j],
+				(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	0
+		lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	0,
+				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]
+
+		lin_	0,										-gasketThick + glassThick,	WindowsHeight[j],
+				(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	0
+		lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	0,
+				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]
+
+		addx	WindowsWidth[i]/2 + gasketWidth/2
+			lin_	0,										-gasketThick,	WindowsHeight[j],
+					(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	0
+			lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	0,
+					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]
+
+			lin_	0,										-gasketThick + glassThick,	WindowsHeight[j],
+					(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	0
+			lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	0,
+					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]
+		del 1
+	endif
+
+	if	iProjectHinge[i][j] = Hinge_Left | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_BottomLeft	then
+		lin_	0,										-gasketThick,	0,
+				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]/2
+		lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]/2,
+				0,										-gasketThick,	WindowsHeight[j]
+
+		lin_	0,										-gasketThick + glassThick,	0,
+				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]/2
+		lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]/2,
+				0,										-gasketThick + glassThick,	WindowsHeight[j]
+
+		addx	WindowsWidth[i]/2 + gasketWidth/2
+			lin_	0,										-gasketThick,	0,
+					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]/2
+			lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]/2,
+					0,										-gasketThick,	WindowsHeight[j]
+
+			lin_	0,										-gasketThick + glassThick,	0,
+					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]/2
+			lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]/2,
+					0,										-gasketThick + glassThick,	WindowsHeight[j]
+		del 1
+	endif
+
+	if	iProjectHinge[i][j] = Hinge_Right | iProjectHinge[i][j] = Hinge_TopRight | iProjectHinge[i][j] = Hinge_BottomRight	then
+		lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	0,
+				0,										-gasketThick,	WindowsHeight[j]/2
+		lin_	0,										-gasketThick,	WindowsHeight[j]/2,
+				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]
+
+		lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	0,
+				0,										-gasketThick + glassThick,	WindowsHeight[j]/2
+		lin_	0,										-gasketThick + glassThick,	WindowsHeight[j]/2,
+				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]
+
+		addx	WindowsWidth[i]/2 + gasketWidth/2
+			lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	0,
+					0,										-gasketThick,	WindowsHeight[j]/2
+			lin_	0,										-gasketThick,	WindowsHeight[j]/2,
+					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]
+
+			lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	0,
+					0,										-gasketThick + glassThick,	WindowsHeight[j]/2
+			lin_	0,										-gasketThick + glassThick,	WindowsHeight[j]/2,
+					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]
+		del 1
+	endif
+del 1
+
+!	프레임
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+gosub	"coorWinFrm"
+
+addx	_offsetL
+	addx	WindowsWidth[i]/2
+		addz	_offsetB
+			prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth,	get(nsp)
+		del 1
+	del 1
+del 1
+
+!	개스킷
+gosub	"coorWinGsk"
+
+addx	_offsetL
+	addx	WindowsWidth[i]/2
+		prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+	del 1
+del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Spandrel":	!	스팬드럴창
+!-----------------------------------------------------------------------------------------------
+pen			glassPenElv
+sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+if	iMatrix_Windows[i][j] = Windows_Spandrel	then	material	spdGlsMat_1
+if	iMatrix_Windows[i][j] = Windows_Spandrel_2	then	material	spdGlsMat_2
+if	iMatrix_Windows[i][j] = Windows_Spandrel_3	then	material	spdGlsMat_3
+if	iMatrix_Windows[i][j] = Windows_Spandrel_4	then	material	spdGlsMat_4
+
+!	유리창
+gosub	"coorWinGls"
+
+prism_	nsp/3,	WindowsHeight[j],	get(nsp)
+
+!	단열재
+pen			spandPenElv
+sect_fill	spandFill,	spandFillPenBg,	spandFillPen,	spandPen
+if	iMatrix_Windows[i][j] = Windows_Spandrel	then
+	material	spdMat_1
+	_spdThk = spdThk_1
+endif
+if	iMatrix_Windows[i][j] = Windows_Spandrel_2	then
+	material	spdMat_2
+	_spdThk = spdThk_2
+endif
+if	iMatrix_Windows[i][j] = Windows_Spandrel_3	then
+	material	spdMat_3
+	_spdThk = spdThk_3
+endif
+if	iMatrix_Windows[i][j] = Windows_Spandrel_4	then
+	material	spdMat_4
+	_spdThk = spdThk_4
+endif
+
+	!	단열 철판 두께 변수 정의
+	_offsetIns = 0
+	_spdFrmThk = 0
+	if	bSpdFrm	then
+		_offsetIns = 0.006
+		_spdFrmThk = spdFrmThk
+	endif
+
+if	i = 1	then
+	if	frameDivideNum_X = 1	then
+		_xPosInsL = frameWidthTmp_L
+		_xPosInsR = frameDistance_X[i] - frameWidthTmp_R
+	endif
+
+	if	frameDivideNum_X # 1	then
+		_xPosInsL = frameWidthTmp_L
+		_xPosInsR = frameDistance_X[i] - VerticalFrameWidth/2
+	endif
+endif
+if	i # 1 & i # frameDivideNum_X	then
+	_xPosInsL = VerticalFrameWidth/2
+	_xPosInsR = frameDistance_X[i] - VerticalFrameWidth/2
+endif
+
+if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+	_xPosInsL = VerticalFrameWidth/2
+	_xPosInsR = frameDistance_X[i] - frameWidthTmp_R
+endif
+
+_yPosInsF = -(gasketThick + VerticalFrameThick) + _spdThk
+_yPosInsB = -(gasketThick + VerticalFrameThick)
+
+	put	_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15,
+		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk,	15,
+		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk,	15,
+		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15,
+		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15
+
+	addz	_offsetB + (_offsetIns + _spdFrmThk)
+		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - (_offsetIns + _spdFrmThk)*2,	get(nsp)
+	del 1
+
+!	단열 철판
+sect_fill	65,	spandFillPenBg,	spandFillPen,	spandPen
+material	spdFrmMat
+
+if	bSpdFrm	then
+	!	Cut
+	roty	-90
+		put	_offsetB + (_offsetIns + _spdFrmThk),							_yPosInsB + _spdFrmThk,
+			_offsetB + (_offsetIns + _spdFrmThk),							_yPosInsF - _spdFrmThk,
+			_offsetB + frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,
+			_offsetB + frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk
+
+		poly	nsp/2,	use(nsp)
+		cutpoly	nsp/2,	get(nsp)
+	del 1
+
+	!	본체
+	put	_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB,	15,
+		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
+		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
+		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB,	15
+
+	addz	_offsetB + _offsetIns
+		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
+	del 1
+
+	!	Cutend
+	cutend
+
+	!	옆 덮개
+	put	_xPosInsL + _offsetIns,					_yPosInsB,	15,
+		_xPosInsL + _offsetIns,					_yPosInsF,	15,
+		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
+		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB,	15
+
+	addz	_offsetB + _offsetIns
+		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
+	del 1
+
+	put	_xPosInsR - _offsetIns,					_yPosInsB,	15,
+		_xPosInsR - _offsetIns,					_yPosInsF,	15,
+		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
+		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB,	15
+
+	addz	_offsetB + _offsetIns
+		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
+	del 1
+endif
+
+!	텍스트
+addx	_offsetL
+	add	WindowsWidth[i]/2,	0,	WindowsHeight[j]/2
+		gosub	"Windows_Text"
+	del 1
+del 1
+
+!	단열재 해치
+sect_fill	spandFill,	spandFillPenBg,	spandFillPen,	spandPenHatch
+
+	!	변수 정의
+	dim	ModuleInt[][],	ModuleRemain[][]
+
+	ModuleWidth = ((_spdThk - _spdFrmThk*2) - eps*2)/2
+	ModuleUnit = ModuleWidth/2
+	ModuleInt[i][j] = int(frameRealDistance_Y[j]/ModuleWidth)
+	ModuleRemain[i][j] = (frameRealDistance_Y[j] MOD ModuleWidth)
+	ModuleNum = ModuleInt[i][j]
+
+	if	ModuleRemain[i][j] > 0	then	ModuleNum = ModuleNum + 1
+
+	!	해치
+	if	GLOB_VIEW_TYPE = 4	then
+		if	i = 1	then	addx	frameWidthTmp_L
+		if	i # 1	then	addx	VerticalFrameWidth/2
+
+			addz	_offsetB
+				addx	frameRealDistance_X[i]
+					addy	-(VerticalFrameThick + gasketThick)
+
+							!	해치 For
+							roty	-90
+								addx	(_offsetIns + _spdFrmThk)
+									roty	90
+										cutplane	1,	1,	0,	1
+									del 1
+								del 1
+
+								addx	frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk)
+									roty	90
+										cutplane	1,	1,	0,	0
+									del 1
+								del 1
+
+									for	m = 1	to	ModuleNum
+										put	0,				0,				15,
+											0,				ModuleUnit,		900,
+											0,				90,				4000+15,
+											ModuleUnit,		ModuleUnit,		15,
+											0,				ModuleUnit*3,	15,
+											ModuleUnit,		ModuleUnit*3,	900,
+											0,				-180,			4000+15,
+											ModuleUnit*2,	ModuleUnit*3,	15,
+											ModuleUnit,		ModuleUnit,		15,
+											ModuleUnit*2,	ModuleUnit,		900,
+											0,				90,				4000+15
+
+											addy	_spdFrmThk + eps
+												extrude	nsp/3,	0,	0,	frameRealDistance_X[i],	0,	get(nsp)
+											del 1
+
+											addx	ModuleWidth
+									next	m
+
+									del ModuleNum
+
+								cutend
+								cutend
+							del 1
+
+					del 1
+				del 1
+
+
+			del 1
+		del 1
+	endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Grill":	!	그릴창
+!-----------------------------------------------------------------------------------------------
+pen			grillPenElv
+sect_fill	grillFill,	grillFillPenBg,	grillFillPen,	grillPen
+material	grillMat
+
+!	index
+if	i = 1 & iCornerFrame_L = CornerFrame_Corner	then
+	_statusL = 1
+else
+	_statusL = 2
+endif
+
+if	i = frameDivideNum_X & iCornerFrame_R = CornerFrame_Corner	then
+	_statusR = 1
+else
+	_statusR = 2
+endif
+
+!	상태변수에 따른 그릴창 길이 값/위치
+_grlDist = frameRealDistance_X[i]
+_xPosGrl = 0
+
+if	_statusL = 1	then
+	_xPosGrl = -frameWidthTmp_L/2 + frameThickTmp_L*tan(Alpha_L) - (frameWidthTmp_L/2 - (frameWidthTmp_L/2)/cos(Alpha_L))
+
+	if	Alpha_L < 180	then
+		_xPosGrl = _xPosGrl - grillDistance*tan(Alpha_L)
+	endif
+
+	_grlDist = _grlDist - _xPosGrl
+endif
+
+if	_statusR = 1	then
+	_grlDist = _grlDist + frameWidthTmp_R/2 - frameThickTmp_R*tan(Alpha_R) + (frameWidthTmp_R/2 - (frameWidthTmp_R/2)/cos(Alpha_R))
+
+	if	Alpha_R < 180	then
+		_grlDist = _grlDist + grillDistance*tan(Alpha_R)
+	endif
+endif
+
+
+if	i = 1	then	addx	frameWidthTmp_L
+if	i # 1	then	addx	VerticalFrameWidth/2
+
+	addz	_offsetB
+		addx	_xPosGrl
+			addy	-grillDistance/2 - gasketThick
+				!	그릴창 날개
+				addz	grillDistance/2 + GrillRemain[j]/2
+					roty	90
+
+						for	m = 1	to	GrillInt[j]
+							if	GLOB_VIEW_TYPE = 5	then
+								lin_	0,	0,	0,
+										0,	0,	_grlDist
+							else
+								rotz	-grillAngle
+									put	-grillThick/2,	grillDistance/2,	15,
+										-grillThick/2,	-grillDistance/2,	15,
+										grillThick/2,	-grillDistance/2,	15,
+										grillThick/2,	grillDistance/2,	15,
+										-grillThick/2,	grillDistance/2,	15
+
+									prism_	nsp/3,	_grlDist,	get(nsp)
+								del 1
+							endif
+
+							addx	-grillDistance
+						next	m
+
+						del GrillInt[j]
+
+					del 1
+				del 1
+
+				!	그릴창 틈 막음새
+				roty	90
+					if	GLOB_VIEW_TYPE = 5	then
+					else
+						put	0,					grillThick/2,	15,
+							-GrillRemain[j]/2,	grillThick/2,	15,
+							-GrillRemain[j]/2,	-grillThick/2,	15,
+							0,					-grillThick/2,	15,
+							0,					grillThick/2,	15
+
+						prism_	nsp/3,	_grlDist,	use(nsp)
+
+						addx	-grillDistance*GrillInt[j] - GrillRemain[j]/2
+							prism_	nsp/3,	_grlDist,	get(nsp)
+						del 1
+					endif
+				del 1
+			del 1
+		del 1
+
+	del 1
+del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Screen":	!	방충망
+!-----------------------------------------------------------------------------------------------
+
+_ScreenWidth = 0.050
+_ScreenThick = 0.050
+
+!	창문 너비 계산
+if	i = 1	then
+	if	frameDivideNum_X = 1	then
+		_WindowWidth = frameDistance_X[i] - (frameWidthTmp_L + frameWidthTmp_R)
+	endif
+	if	frameDivideNum_X # 1	then
+		_WindowWidth = frameDistance_X[i] - (frameWidthTmp_L + VerticalFrameWidth/2)
+	endif
+endif
+if	i # 1 & i # frameDivideNum_X	then
+	_WindowWidth = frameDistance_X[i] - VerticalFrameWidth
+endif
+if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+	_WindowWidth = frameDistance_X[i] - (frameWidthTmp_R + VerticalFrameWidth/2)
+endif
+
+!	창호 높이 및 개구부 높이 계산
+if	j = 1	then
+	if	frameDivideNum_Y = 1	then
+		_ScreenHeight = frameDistance_Y[j] - (frameWidthTmp_U + frameWidthTmp_B)
+	endif
+	if	frameDivideNum_Y # 1	then
+		_ScreenHeight = frameDistance_Y[j] - (frameWidthTmp_B + HorizontalFrameWidth/2)
+	endif
+endif
+if	j # 1 & j # frameDivideNum_Y	then
+	_ScreenHeight = frameDistance_Y[j] - HorizontalFrameWidth
+endif
+if	j = frameDivideNum_Y & frameDivideNum_Y # 1	then
+	_ScreenHeight = frameDistance_Y[j] - (frameWidthTmp_U + HorizontalFrameWidth/2)
+endif
+_HoleHeight = _ScreenHeight - _ScreenWidth*2
+
+!	형상 그리기
+if	i = 1	then	addx	frameWidthTmp_L
+if	i # 1	then	addx	VerticalFrameWidth/2
+
+	addz	_offsetB
+		addy	-gasketThick
+
+			!	3D형상
+			if	GLOB_VIEW_TYPE = 3	then
+				!	프레임
+				material	frameMat
+
+				put	0,								0,								15,
+					0,								-_ScreenHeight,					15,
+					_WindowWidth,					-_ScreenHeight,					15,
+					_WindowWidth,					0,								15,
+					0,								0,								-1,
+
+					_ScreenWidth,					-_ScreenWidth,					15,
+					_ScreenWidth,					-_ScreenHeight + _ScreenWidth,	15,
+					_WindowWidth - _ScreenWidth,	-_ScreenHeight + _ScreenWidth,	15,
+					_WindowWidth - _ScreenWidth,	-_ScreenWidth,					15,
+					_ScreenWidth,					-_ScreenWidth,					-1
+
+				rotx	-90
+					prism_	nsp/3,	-_ScreenThick,	get(nsp)
+				del 1
+
+				!	망
+				material	screenMat
+
+				put	_ScreenWidth,					-_ScreenWidth,					15,
+					_ScreenWidth,					-_ScreenHeight + _ScreenWidth,	15,
+					_WindowWidth - _ScreenWidth,	-_ScreenHeight + _ScreenWidth,	15,
+					_WindowWidth - _ScreenWidth,	-_ScreenWidth,					15,
+					_ScreenWidth,					-_ScreenWidth,					15
+
+				addy	-(_ScreenThick - eps)/2
+					rotx	-90
+						prism_	nsp/3,	-eps,	get(nsp)
+					del 1
+				del 1
+			endif
+
+			!	단면라인
+			if	GLOB_VIEW_TYPE = 4	then
+				sect_fill	65,	0,	0,	screenPen
+
+				addy	-_ScreenThick/2
+
+					put	0,				0,	0,
+						0,				0,	_ScreenHeight,
+						_WindowWidth,	0,	_ScreenHeight,
+						_WindowWidth,	0,	0
+
+					plane	nsp/3,	get(nsp)
+
+				del 1
+			endif
+
+		del 1
+	del 1
+del 1
+
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Windows_Text":	!	텍스트
+!-----------------------------------------------------------------------------------------------
+if	TextScale > GLOB_SCALE	then
+	if	TextSwitch = 1 & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
+		style		FixText
+		pen			TextPen
+		material	TextMat
+
+		if	TextMirror = 1	then	mulx	1
+		if	TextMirror = 0	then	mulx	-1
+
+			addy	-gasketThick
+				rotx	90
+					text	eps,	0,	"F"
+				del 1
+			del 1
+
+			addy	-gasketThick + glassThick  
+				rotx	90
+					text	-eps,	0,	"F"
+				del 1
+			del 1
+		del 1
+	endif
+endif
+
+
+return
+
+
+!===============================================================================================
+!	문
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+"Door":	!	문
+!-----------------------------------------------------------------------------------------------
+	!	프레임 타입 : 상/하
+	!-----------------------------------------------------------------------------------------------
+	if	iMatrix_Door[i][2] = FrameType_1	then
+
+		!	여닫이문
+		!-----------------------------------------------------------------------------------------------
+		if	iMatrix_Door[i][3] = DoorOpenType_Hinged	then
+
+			!	프레임
+			pen			framePenElv
+			sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+			material	frameMat
+
+				!	하단 프레임
+				block	_doorWdt,	Matrix_DoorLength[i][7],	Matrix_DoorFrame[i][4]
+
+
+				!	상단 프레임
+				addz	Matrix_DoorLength[i][6] - Matrix_DoorFrame[i][3]
+					block	_doorWdt,	Matrix_DoorLength[i][7],	Matrix_DoorFrame[i][3]
+				del 1
+
+			!	손잡이
+			if	iMatrix_Door[i][4] = DoorHandle_Right	then
+				add	Matrix_Handle[i][1],	(Matrix_DoorLength[i][7] + glassThick)/2,	Matrix_Handle[i][2]
+					block	Matrix_Handle[i][3],	Matrix_Handle[i][5],	Matrix_Handle[i][4]
+
+					addy	-(glassThick + Matrix_Handle[i][5])
+						block	Matrix_Handle[i][3],	Matrix_Handle[i][5],	Matrix_Handle[i][4]
+					del 1
+				del 1
+			endif
+
+			if	iMatrix_Door[i][4] = DoorHandle_Left	then
+				add	_doorWdt-(Matrix_Handle[i][1] + Matrix_Handle[i][3]),	(Matrix_DoorLength[i][7] + glassThick)/2,	Matrix_Handle[i][2]
+					block	Matrix_Handle[i][3],	Matrix_Handle[i][5],	Matrix_Handle[i][4]
+
+					addy	-(glassThick + Matrix_Handle[i][5])
+						block	Matrix_Handle[i][3],	Matrix_Handle[i][5],	Matrix_Handle[i][4]
+					del 1
+				del 1
+			endif
+
+			!	유리
+			pen			glassPenElv
+			sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+			material	glassMat
+
+			addy	(Matrix_DoorLength[i][7] - glassThick)/2
+				addz	Matrix_DoorFrame[i][4]
+					block	_doorWdt,	glassThick,	Matrix_DoorLength[i][6] - (Matrix_DoorFrame[i][3] + Matrix_DoorFrame[i][4])
+				del 1
+			del 1
+
+			!	오픈라인
+			pen	OpenlinePen
+
+				if	GLOB_VIEW_TYPE # 4	then
+					!	손잡이 오른쪽
+					if	iMatrix_Door[i][4] = DoorHandle_Right	then
+						lin_	0,			0,	0,							_doorWdt,	0,	Matrix_DoorLength[i][6]/2
+						lin_	_doorWdt,	0,	Matrix_DoorLength[i][6]/2,	0,			0,	Matrix_DoorLength[i][6]
+			
+						addy	Matrix_DoorLength[i][7]
+							lin_	0,			0,	0,							_doorWdt,	0,	Matrix_DoorLength[i][6]/2
+							lin_	_doorWdt,	0,	Matrix_DoorLength[i][6]/2,	0,			0,	Matrix_DoorLength[i][6]
+						del 1
+					endif
+		
+					!	손잡이 왼쪽
+					if	iMatrix_Door[i][4] = DoorHandle_Left	then
+						lin_	_doorWdt,	0,	0,							0,			0,	Matrix_DoorLength[i][6]/2
+						lin_	0,			0,	Matrix_DoorLength[i][6]/2,	_doorWdt,	0,	Matrix_DoorLength[i][6]
+			
+						addy	Matrix_DoorLength[i][7]
+							lin_	_doorWdt,	0,	0,							0,			0,	Matrix_DoorLength[i][6]/2
+							lin_	0,			0,	Matrix_DoorLength[i][6]/2,	_doorWdt,	0,	Matrix_DoorLength[i][6]
+						del 1
+					endif
+				endif
+
+		endif
+
+		!	미닫이문
+		!-----------------------------------------------------------------------------------------------
+		if	iMatrix_Door[i][3] = DoorOpenType_Sliding	then
+
+			!	문
+			!-----------------------------------------------------------------------------------------------
+			if	Matrix_DoorLength[i][4] > eps	then	addx	Matrix_DoorLength[i][4] + VerticalFrameWidth/2
+			if	Matrix_DoorLength[i][4] < eps	then	addx	Matrix_DoorLength[i][4]
+
+				addy	gasketThick + 0.030
+
+					!	프레임
+					pen			framePenElv
+					sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+					material	frameMat
+
+					if	iMatrix_Door[i][1] = DoorType_1panel	then
+						!	하단
+						block	_doorWdt,	Matrix_DoorLength[i][7],	Matrix_DoorFrame[i][4]
+
+						!	상단
+						addz	Matrix_DoorLength[i][6] - Matrix_DoorFrame[i][3]
+							block	_doorWdt,	Matrix_DoorLength[i][7],	Matrix_DoorFrame[i][3]
+						del 1
+					endif
+
+					if	iMatrix_Door[i][1] = DoorType_2panel	then
+						!	하단
+						block	_doorWdt/2,	Matrix_DoorLength[i][7],	Matrix_DoorFrame[i][4]
+
+						addx	_doorWdt/2
+							block	_doorWdt/2,	Matrix_DoorLength[i][7],	Matrix_DoorFrame[i][4]
+						del 1
+
+						!	상단
+						addz	Matrix_DoorLength[i][6] - Matrix_DoorFrame[i][3]
+							block	_doorWdt/2,	Matrix_DoorLength[i][7],	Matrix_DoorFrame[i][3]
+
+							addx	_doorWdt/2
+								block	_doorWdt/2,	Matrix_DoorLength[i][7],	Matrix_DoorFrame[i][3]
+							del 1
+						del 1
+					endif
+
+					!	유리
+					pen			glassPenElv
+					sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+					material	glassMat
+
+					if	iMatrix_Door[i][1] = DoorType_1panel	then
+						addy	(Matrix_DoorLength[i][7] - glassThick)/2
+							addz	Matrix_DoorFrame[i][4]
+								block	_doorWdt,	glassThick,	Matrix_DoorLength[i][6] - (Matrix_DoorFrame[i][3] + Matrix_DoorFrame[i][4])
+							del 1
+						del 1
+					endif
+
+					if	iMatrix_Door[i][1] = DoorType_2panel	then
+						addy	(Matrix_DoorLength[i][7] - glassThick)/2
+							addz	Matrix_DoorFrame[i][4]
+								block	_doorWdt/2,	glassThick,	Matrix_DoorLength[i][6] - (Matrix_DoorFrame[i][3] + Matrix_DoorFrame[i][4])
+
+								addx	_doorWdt/2
+									block	_doorWdt/2,	glassThick,	Matrix_DoorLength[i][6] - (Matrix_DoorFrame[i][3] + Matrix_DoorFrame[i][4])
+								del 1
+							del 1
+						del 1
+					endif
+
+					!	오픈라인
+					pen	OpenlinePen
+
+					if	GLOB_VIEW_TYPE # 4	then
+						if	iMatrix_Door[i][1] = DoorType_1panel	then
+							!	손잡이 오른쪽
+							if	iMatrix_Door[i][4] = DoorHandle_Right	then
+								addy	(Matrix_DoorLength[i][7] + glassThick)/2
+									lin_	_doorWdt*0.25,	0,	Matrix_DoorLength[i][6]*0.50,	_doorWdt*0.75,	0,	Matrix_DoorLength[i][6]*0.50
+									lin_	_doorWdt*0.75,	0,	Matrix_DoorLength[i][6]*0.50,	_doorWdt*0.65,	0,	Matrix_DoorLength[i][6]*0.50 + _doorWdt*0.1
+								del 1
+
+								addy	(Matrix_DoorLength[i][7] - glassThick)/2
+									lin_	_doorWdt*0.25,	0,	Matrix_DoorLength[i][6]*0.50,	_doorWdt*0.75,	0,	Matrix_DoorLength[i][6]*0.50
+									lin_	_doorWdt*0.75,	0,	Matrix_DoorLength[i][6]*0.50,	_doorWdt*0.65,	0,	Matrix_DoorLength[i][6]*0.50 + _doorWdt*0.1
+								del 1
+							endif
+
+							!	손잡이 왼쪽
+							if	iMatrix_Door[i][4] = DoorHandle_Left	then
+								addy	(Matrix_DoorLength[i][7] + glassThick)/2
+									lin_	_doorWdt*0.25,	0,	Matrix_DoorLength[i][6]*0.50,	_doorWdt*0.75,	0,	Matrix_DoorLength[i][6]*0.50
+									lin_	_doorWdt*0.25,	0,	Matrix_DoorLength[i][6]*0.50,	_doorWdt*0.35,	0,	Matrix_DoorLength[i][6]*0.50 + _doorWdt*0.1
+								del 1
+
+								addy	(Matrix_DoorLength[i][7] - glassThick)/2
+									lin_	_doorWdt*0.25,	0,	Matrix_DoorLength[i][6]*0.50,	_doorWdt*0.75,	0,	Matrix_DoorLength[i][6]*0.50
+									lin_	_doorWdt*0.25,	0,	Matrix_DoorLength[i][6]*0.50,	_doorWdt*0.35,	0,	Matrix_DoorLength[i][6]*0.50 + _doorWdt*0.1
+								del 1
+							endif
+						endif
+
+						if	iMatrix_Door[i][1] = DoorType_2panel	then
+							addx	_doorWdt/2
+								addy	(Matrix_DoorLength[i][7] + glassThick)/2
+									lin_	(_doorWdt/2)*0.15,	0,	Matrix_DoorLength[i][6]*0.50,	(_doorWdt/2)*0.7,	0,	Matrix_DoorLength[i][6]*0.50
+									lin_	(_doorWdt/2)*0.7,	0,	Matrix_DoorLength[i][6]*0.50,	(_doorWdt/2)*0.6,	0,	Matrix_DoorLength[i][6]*0.50+(_doorWdt/2)*0.1
+
+										mulx	-1
+											lin_	(_doorWdt/2)*0.15,	0,	Matrix_DoorLength[i][6]*0.50,	(_doorWdt/2)*0.7,	0,	Matrix_DoorLength[i][6]*0.50
+											lin_	(_doorWdt/2)*0.7,	0,	Matrix_DoorLength[i][6]*0.50,	(_doorWdt/2)*0.6,	0,	Matrix_DoorLength[i][6]*0.50+(_doorWdt/2)*0.1
+										del 1
+								del 1
+
+								addy	(Matrix_DoorLength[i][7] - glassThick)/2
+									lin_	(_doorWdt/2)*0.15,	0,	Matrix_DoorLength[i][6]*0.50,	(_doorWdt/2)*0.7,	0,	Matrix_DoorLength[i][6]*0.50
+									lin_	(_doorWdt/2)*0.7,	0,	Matrix_DoorLength[i][6]*0.50,	(_doorWdt/2)*0.6,	0,	Matrix_DoorLength[i][6]*0.50+(_doorWdt/2)*0.1
+
+										mulx	-1
+											lin_	(_doorWdt/2)*0.15,	0,	Matrix_DoorLength[i][6]*0.50,	(_doorWdt/2)*0.7,	0,	Matrix_DoorLength[i][6]*0.50
+											lin_	(_doorWdt/2)*0.7,	0,	Matrix_DoorLength[i][6]*0.50,	(_doorWdt/2)*0.6,	0,	Matrix_DoorLength[i][6]*0.50+(_doorWdt/2)*0.1
+										del 1
+								del 1
+							del 1
+						endif
+					endif
+
+				del 1
+			del 1
+
+		endif
+
+	endif	!	if	iMatrix_Door[i][2] = FrameType_1
+
+	!	프레임 타입 : 상/하/좌/우
+	if	iMatrix_Door[i][2] = FrameType_2	then
+
+		!	프레임
+		pen			framePenElv
+		sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+		material	frameMat
+
+		rotx	90
+			addz	-Matrix_DoorLength[i][7]
+				put	0,			0,							15,
+					_doorWdt,	0,							15,
+					_doorWdt,	Matrix_DoorLength[i][6],	15,
+					0,			Matrix_DoorLength[i][6],	15,
+					0,			0,							-1,
+			
+					Matrix_DoorFrame[i][1],				Matrix_DoorFrame[i][4],								15,
+					_doorWdt - Matrix_DoorFrame[i][2],	Matrix_DoorFrame[i][4],								15,
+					_doorWdt - Matrix_DoorFrame[i][2],	Matrix_DoorLength[i][6] - Matrix_DoorFrame[i][3],	15,
+					Matrix_DoorFrame[i][1],				Matrix_DoorLength[i][6] - Matrix_DoorFrame[i][3],	15,
+					Matrix_DoorFrame[i][1],				Matrix_DoorFrame[i][4],								-1
+	
+				prism_	nsp/3,	Matrix_DoorLength[i][7],	get(nsp)
+			del	1
+		del	1
+
+		!	손잡이
+		if	iMatrix_Door[i][4] = DoorHandle_Right	then
+			add	Matrix_Handle[i][1],	(Matrix_DoorLength[i][7] + glassThick)/2,	Matrix_Handle[i][2]
+				block	Matrix_Handle[i][3],	Matrix_Handle[i][5],	Matrix_Handle[i][4]
+
+				addy	-(glassThick + Matrix_Handle[i][5])
+					block	Matrix_Handle[i][3],	Matrix_Handle[i][5],	Matrix_Handle[i][4]
+				del 1
+			del 1
+		endif
+
+		if	iMatrix_Door[i][4] = DoorHandle_Left	then
+			add	_doorWdt-(Matrix_Handle[i][1] + Matrix_Handle[i][3]),	(Matrix_DoorLength[i][7] + glassThick)/2,	Matrix_Handle[i][2]
+				block	Matrix_Handle[i][3],	Matrix_Handle[i][5],	Matrix_Handle[i][4]
+
+				addy	-(glassThick + Matrix_Handle[i][5])
+					block	Matrix_Handle[i][3],	Matrix_Handle[i][5],	Matrix_Handle[i][4]
+				del 1
+			del 1
+		endif
+
+		!	유리
+		pen			glassPenElv
+		sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+		material	glassMat
+
+		addx	Matrix_DoorFrame[i][1]
+			addy	(Matrix_DoorLength[i][7] - glassThick)/2
+				addz	Matrix_DoorFrame[i][4]
+					block	_doorWdt - (Matrix_DoorFrame[i][1] + Matrix_DoorFrame[i][2]),	glassThick,	Matrix_DoorLength[i][6] - (Matrix_DoorFrame[i][3] + Matrix_DoorFrame[i][4])
+				del 1
+			del 1
+		del 1
+
+		!	오픈라인
+		pen	OpenlinePen
+
+			if	GLOB_VIEW_TYPE # 4	then
+				!	손잡이 오른쪽
+				if	iMatrix_Door[i][4] = DoorHandle_Right	then
+					lin_	0,			0,	0,							_doorWdt,	0,	Matrix_DoorLength[i][6]/2
+					lin_	_doorWdt,	0,	Matrix_DoorLength[i][6]/2,	0,			0,	Matrix_DoorLength[i][6]
+		
+					addy	Matrix_DoorLength[i][7]
+						lin_	0,			0,	0,							_doorWdt,	0,	Matrix_DoorLength[i][6]/2
+						lin_	_doorWdt,	0,	Matrix_DoorLength[i][6]/2,	0,			0,	Matrix_DoorLength[i][6]
+					del 1
+				endif
+	
+				!	손잡이 왼쪽
+				if	iMatrix_Door[i][4] = DoorHandle_Left	then
+					lin_	_doorWdt,	0,	0,							0,			0,	Matrix_DoorLength[i][6]/2
+					lin_	0,			0,	Matrix_DoorLength[i][6]/2,	_doorWdt,	0,	Matrix_DoorLength[i][6]
+		
+					addy	Matrix_DoorLength[i][7]
+						lin_	_doorWdt,	0,	0,							0,			0,	Matrix_DoorLength[i][6]/2
+						lin_	0,			0,	Matrix_DoorLength[i][6]/2,	_doorWdt,	0,	Matrix_DoorLength[i][6]
+					del 1
+				endif
+			endif
+
+	endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"SldDoorVertical_3D":	!	미닫이문 수직프레임
+!-----------------------------------------------------------------------------------------------
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+!	좌측 수직프레임
+if	Matrix_DoorLength[i][4] > eps	then
+	if	i = 1	then	addx	frameWidthTmp_L
+	if	i # 1	then	addx	VerticalFrameWidth/2
+
+		hotspot	0,							0,	0,	unID,	Matrix_DoorLength[i][4],	1+128	:	unID = unID + 1
+		hotspot	-1,							0,	0,	unID,	Matrix_DoorLength[i][4],	3		:	unID = unID + 1
+		hotspot	Matrix_DoorLength[i][4],	0,	0,	unID,	Matrix_DoorLength[i][4],	2		:	unID = unID + 1
+
+		addx	Matrix_DoorLength[i][4]
+			!	프레임
+			gosub	"coorWinFrm"
+
+			addy	gasketThick
+				prism_	nsp/3,	Matrix_DoorLength[i][6],	get(nsp)
+			del 1
+
+			!	개스킷
+			gosub	"coorWinGsk"
+
+			addy	gasketThick
+				prism_	nsp/3,	Matrix_DoorLength[i][6] + (HorizontalFrameWidth - gasketWidth)/2,	get(nsp)
+			del 1
+		del 1
+	del 1
+endif
+
+!	우측 수직프레임
+if	Matrix_DoorLength[i][5] > eps	then
+	if	i = 1	then	addx	Matrix_DoorLength[i][1] + frameWidthTmp_L
+	if	i # 1	then	addx	Matrix_DoorLength[i][1] + VerticalFrameWidth/2
+
+		hotspot	0,							0,	0,	unID,	Matrix_DoorLength[i][5],	1+128	:	unID = unID + 1
+		hotspot	1,							0,	0,	unID,	Matrix_DoorLength[i][5],	3		:	unID = unID + 1
+		hotspot	-Matrix_DoorLength[i][5],	0,	0,	unID,	Matrix_DoorLength[i][5],	2		:	unID = unID + 1
+
+		addx	-Matrix_DoorLength[i][5]
+			!	프레임
+			gosub	"coorWinFrm"
+
+			addy	gasketThick
+				prism_	nsp/3,	Matrix_DoorLength[i][6],	get(nsp)
+			del 1
+
+			!	개스킷
+			gosub	"coorWinGsk"
+
+			addy	gasketThick
+				prism_	nsp/3,	Matrix_DoorLength[i][6] + (HorizontalFrameWidth - gasketWidth)/2,	get(nsp)
+			del 1
+		del 1
+	del 1
+endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"SldDoorBottom_3D":	!	미닫이문 하부프레임
+!-----------------------------------------------------------------------------------------------
+pen			framePenElv
+sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+material	frameMat
+
+!	좌측 하부프레임
+if	Matrix_DoorLength[i][4] > 0	then
+	if	i = 1	then	addx	frameWidthTmp_L
+	if	i # 1	then	addx	VerticalFrameWidth/2
+		addy	-VerticalFrameThick
+			if	Matrix_DoorLength[i][4] - VerticalFrameWidth/2>0	then
+				block	Matrix_DoorLength[i][4] - VerticalFrameWidth/2,	VerticalFrameThick,	frameWidthTmp_B
+			endif
+		del 1
+	
+		if	i = 1	then	addx	-(frameWidthTmp_L - gasketWidth)/2
+		if	i # 1	then	addx	-(VerticalFrameWidth - gasketWidth)/2
+			block	Matrix_DoorLength[i][4] + (VerticalFrameWidth/2 - gasketWidth),	gasketThick,	(frameWidthTmp_B + gasketWidth)/2
+		del 1
+	del 1
+endif
+
+!	우측 하부프레임
+if	Matrix_DoorLength[i][5] > 0	then
+	if	i = 1	then	addx	frameWidthTmp_L
+	if	i # 1	then	addx	VerticalFrameWidth/2
+		addx	Matrix_DoorLength[i][1] - Matrix_DoorLength[i][5] + VerticalFrameWidth/2
+			addy	-VerticalFrameThick
+				if	Matrix_DoorLength[i][5] - VerticalFrameWidth/2 > 0	then
+					block	Matrix_DoorLength[i][5] - VerticalFrameWidth/2,	VerticalFrameThick,	frameWidthTmp_B
+				endif
+			del 1
+	
+			addx	-(VerticalFrameWidth - gasketWidth)/2
+				block	Matrix_DoorLength[i][5] + (VerticalFrameWidth/2 - gasketWidth),	gasketThick,	(frameWidthTmp_B + gasketWidth)/2
+			del 1
+		del 1
+	del 1
+endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"SldDoorGlass_3D":	:	!	미닫이문 유리
+!-----------------------------------------------------------------------------------------------
+pen			glassPenElv
+sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+material	glassMat
+
+
+if	frameDivideNum_Y = 1	then	_cutOffset = (frameWidthTmp_U + gasketWidth)/2
+if	frameDivideNum_Y # 1	then	_cutOffset = gasketWidth/2
+
+addz	frameDistance_Y[1] - _cutOffset
+	cutplane
+del 1
+
+	if	Matrix_DoorLength[i][4] > 0	then
+		!	유리
+		if	i = 1	then	addx	-(frameWidthTmp_L - gasketWidth)/2
+		if	i # 1	then	addx	-(VerticalFrameWidth - gasketWidth)/2
+			addz	(frameWidthTmp_B + gasketWidth)/2
+				block	Matrix_DoorLength[i][4] + (VerticalFrameWidth/2 - gasketWidth),	glassThick,	Matrix_DoorLength[i][6]
+			del 1
+
+			!	텍스트
+			addx	(Matrix_DoorLength[i][4] + (VerticalFrameWidth/2 - gasketWidth))/2
+				addy	gasketThick
+					addz	(frameWidthTmp_B + gasketWidth)/2 + (Matrix_DoorLength[i][6] - gasketWidth)/2
+						gosub	"Windows_Text"
+					del 1
+				del 1
+			del 1
+		del 1
+	endif
+
+	if	Matrix_DoorLength[i][5] > 0	then
+		addx	Matrix_DoorLength[i][1] - Matrix_DoorLength[i][5] + VerticalFrameWidth/2
+			!	유리
+			if	i = 1	then	addx	-(frameWidthTmp_L - gasketWidth)/2
+			if	i # 1	then	addx	-(VerticalFrameWidth - gasketWidth)/2
+				addz	(frameWidthTmp_B + gasketWidth)/2
+					block	Matrix_DoorLength[i][5] + (VerticalFrameWidth/2 - gasketWidth),	glassThick,	Matrix_DoorLength[i][6]
+				del 1
+
+				!	텍스트
+				addx	(Matrix_DoorLength[i][5] + (VerticalFrameWidth/2 - gasketWidth))/2
+					addy	gasketThick
+						addz	(frameWidthTmp_B + gasketWidth)/2 + (Matrix_DoorLength[i][6] - gasketWidth)/2
+							gosub	"Windows_Text"
+						del 1
+					del 1
+				del 1
+			del 1
+		del 1
+	endif
+
+cutend
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"AutomaticDoor_1panel":	!	자동문(1Panel)
+!-----------------------------------------------------------------------------------------------
+
+	!	변수정의
+	!-----------------------------------------------------------------------------------------------
+	!	자동문 열림 방향에 따른 수직프레임 위치
+	if	iMatrix_Door[i][4] = DoorHandle_Right	then
+		_xPosFrameL = Matrix_DoorFrame[i][5]
+		_xPosFrameR = 0
+	endif
+	if	iMatrix_Door[i][4] = DoorHandle_Left	then
+		_xPosFrameL = 0
+		_xPosFrameR = Matrix_DoorFrame[i][5]
+	endif
+
+	!	열림문 너비
+	_openDoorWdt = Matrix_DoorLength[i][1] - (Matrix_DoorLength[i][4] + Matrix_DoorLength[i][5] + Matrix_DoorFrame[i][5])
+
+	!	문 사이 간격
+	_gap = 0.010
+
+	!	수직프레임
+	!-----------------------------------------------------------------------------------------------
+	pen			framePenElv
+	sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+	material	frameMat
+
+	addx	Matrix_DoorLength[i][4]
+		gosub	"AutomaticDoor_vFrame"
+
+		add	_xPosFrameL,	-(Matrix_DoorLength[i][7] + _gap),	0
+			gosub	"AutomaticDoor_vFrame"
+
+			addx	_openDoorWdt
+				gosub	"AutomaticDoor_vFrame"
+
+				add	_xPosFrameR,	Matrix_DoorLength[i][7] + _gap,	0
+					gosub	"AutomaticDoor_vFrame"
+				del 1
+			del 1
+		del 1
+	del 1
+
+	!	좌측마개
+	add	-eps,	-Matrix_DoorLength[i][7],	0
+		block	eps,	Matrix_DoorLength[i][7],	Matrix_DoorLength[i][6]
+	del 1
+
+	!	우측마개
+	addx	Matrix_DoorLength[i][1]
+		mulx	-1
+			add	-eps,	-Matrix_DoorLength[i][7],	0
+				block	eps,	Matrix_DoorLength[i][7],	Matrix_DoorLength[i][6]
+			del 1
+		del 1
+	del 1
+
+	!	수평프레임
+	!-----------------------------------------------------------------------------------------------
+	pen			framePenElv
+	sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+	material	frameMat
+
+	_hFrameLength = Matrix_DoorLength[i][4] - Matrix_DoorFrame[i][5]/2
+	gosub	"AutomaticDoor_hFrame"
+
+	add	_hFrameLength + Matrix_DoorFrame[i][5] + _xPosFrameL,	-(Matrix_DoorLength[i][7] + _gap),	0
+		_hFrameLength = _openDoorWdt - Matrix_DoorFrame[i][5]
+		gosub	"AutomaticDoor_hFrame"
+
+		add	_hFrameLength + Matrix_DoorFrame[i][5] + _xPosFrameR,	Matrix_DoorLength[i][7] + _gap,	0
+			_hFrameLength = Matrix_DoorLength[i][5] - Matrix_DoorFrame[i][5]/2
+			gosub	"AutomaticDoor_hFrame"
+		del 1
+	del 1
+
+	!	유리
+	!-----------------------------------------------------------------------------------------------
+	pen			glassPenElv
+	sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+	material	glassMat
+
+	add	0,	-Matrix_DoorLength[i][7]/2 + glassThick/2,	frameWidthTmp_B
+
+		!	유리 높이
+		_glassHeight = Matrix_DoorLength[i][6] - frameWidthTmp_B
+
+		_glassLength = Matrix_DoorLength[i][4] - Matrix_DoorFrame[i][5]/2
+		gosub	"AutomaticDoor_glass"
+
+		add	_glassLength + Matrix_DoorFrame[i][5] + _xPosFrameL,	-(Matrix_DoorLength[i][7] + _gap),	0
+			_glassLength = _openDoorWdt - Matrix_DoorFrame[i][5]
+			gosub	"AutomaticDoor_glass"
+
+			add	_glassLength + Matrix_DoorFrame[i][5] + _xPosFrameR,	Matrix_DoorLength[i][7] + _gap,	0
+				_glassLength = Matrix_DoorLength[i][5] - Matrix_DoorFrame[i][5]/2
+				gosub	"AutomaticDoor_glass"
+			del 1
+		del 1
+	del 1
+
+	!	오픈라인
+	!-----------------------------------------------------------------------------------------------
+	pen	OpenlinePen
+
+	if	GLOB_VIEW_TYPE # 4	then
+		!	유리 높이
+		_glassHeight = Matrix_DoorLength[i][6] - frameWidthTmp_B
+		_glassLength = _openDoorWdt - Matrix_DoorFrame[i][5]
+
+		addy	-(Matrix_DoorLength[i][7] + _gap + Matrix_DoorLength[i][7]/2 - glassThick/2)
+			if	iMatrix_Door[i][4] = DoorHandle_Right	then
+				addx	Matrix_DoorLength[i][4] + Matrix_DoorFrame[i][5]*1.5
+					gosub	"AutomaticDoor_openline"
+				del 1
+			endif
+
+			if	iMatrix_Door[i][4] = DoorHandle_Left	then
+				addx	Matrix_DoorLength[i][4] + Matrix_DoorFrame[i][5]/2 + _glassLength
+					mulx	-1
+						gosub	"AutomaticDoor_openline"
+					del 1
+				del 1
+			endif
+		del 1
+	endif
+
+	!	자동문 기계(상부 프레임)
+	!-----------------------------------------------------------------------------------------------
+	gosub	"AutomaticDoor_Mach"
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"AutomaticDoor_2panel":	!	자동문(2Panel)
+!-----------------------------------------------------------------------------------------------
+
+	!	변수정의
+	!-----------------------------------------------------------------------------------------------
+	_gap = -0.010
+
+	!	수직프레임
+	!-----------------------------------------------------------------------------------------------
+	pen			framePenElv
+	sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+	material	frameMat
+
+		!	좌측
+		add	-eps,	-Matrix_DoorLength[i][7],	0
+			block	eps,	Matrix_DoorLength[i][7],	Matrix_DoorLength[i][6]
+		del 1
+
+		_openDoorWdt = Matrix_DoorLength[i][1] - (Matrix_DoorLength[i][4] + Matrix_DoorLength[i][5])
+
+		addx	Matrix_DoorLength[i][4]
+			gosub	"AutomaticDoor_vFrame"
+
+			addy	-Matrix_DoorLength[i][7] + _gap
+				gosub	"AutomaticDoor_vFrame"
+
+				addx	_openDoorWdt/2 - Matrix_DoorFrame[i][5]/2
+					gosub	"AutomaticDoor_vFrame"
+
+				del 1
+			del 1
+		del 1
+
+		!	우측
+		addx	Matrix_DoorLength[i][1]
+			mulx	-1
+
+				add	-eps,	-Matrix_DoorLength[i][7],	0
+					block	eps,	Matrix_DoorLength[i][7],	Matrix_DoorLength[i][6]
+				del 1
+
+				addx	Matrix_DoorLength[i][5]
+					gosub	"AutomaticDoor_vFrame"
+
+					addy	-Matrix_DoorLength[i][7] + _gap
+						gosub	"AutomaticDoor_vFrame"
+
+						addx	_openDoorWdt/2 - Matrix_DoorFrame[i][5]/2
+							gosub	"AutomaticDoor_vFrame"
+
+						del 1
+					del 1
+				del 1
+
+			del 1
+		del 1
+
+	!	수평프레임
+	!-----------------------------------------------------------------------------------------------
+	pen			framePenElv
+	sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+	material	frameMat
+
+		!	좌측
+		_hFrameLength = Matrix_DoorLength[i][4] - Matrix_DoorFrame[i][5]/2
+		gosub	"AutomaticDoor_hFrame"
+
+		add	Matrix_DoorLength[i][4] + Matrix_DoorFrame[i][5]/2,	-Matrix_DoorLength[i][7] + _gap,	0
+			_hFrameLength = _openDoorWdt/2 - Matrix_DoorFrame[i][5]*1.5
+			gosub	"AutomaticDoor_hFrame"
+		del 1
+
+		!	우측
+		addx	Matrix_DoorLength[i][1]
+			mulx	-1
+
+				_hFrameLength = Matrix_DoorLength[i][5] - Matrix_DoorFrame[i][5]/2
+				gosub	"AutomaticDoor_hFrame"
+
+				add	Matrix_DoorLength[i][5] + Matrix_DoorFrame[i][5]/2,	-Matrix_DoorLength[i][7] + _gap,	0
+					_hFrameLength = _openDoorWdt/2 - Matrix_DoorFrame[i][5]*1.5
+					gosub	"AutomaticDoor_hFrame"
+				del 1
+
+			del 1
+		del 1
+
+	!	유리
+	!-----------------------------------------------------------------------------------------------
+	pen			glassPenElv
+	sect_fill	glassFill,	glassFillPenBg,	glassFillPen,	glassPen
+	material	glassMat
+
+	add	0,	-Matrix_DoorLength[i][7]/2 + glassThick/2,	frameWidthTmp_B
+
+		!	유리 높이
+		_glassHeight = Matrix_DoorLength[i][6] - frameWidthTmp_B
+
+		!	좌측
+		_glassLength = Matrix_DoorLength[i][4] - Matrix_DoorFrame[i][5]/2
+		gosub	"AutomaticDoor_glass"
+
+		add	Matrix_DoorLength[i][4] + Matrix_DoorFrame[i][5]/2,	-Matrix_DoorLength[i][7] + _gap,	0
+			_glassLength = _openDoorWdt/2 - Matrix_DoorFrame[i][5]*1.5
+			gosub	"AutomaticDoor_glass"
+		del 1
+
+		!	우측
+		addx	Matrix_DoorLength[i][1]
+			mulx	-1
+
+				_glassLength = Matrix_DoorLength[i][5] - Matrix_DoorFrame[i][5]/2
+				gosub	"AutomaticDoor_glass"
+
+				add	Matrix_DoorLength[i][5] + Matrix_DoorFrame[i][5]/2,	-Matrix_DoorLength[i][7] + _gap,	0
+					_glassLength = _openDoorWdt/2 - Matrix_DoorFrame[i][5]*1.5
+					gosub	"AutomaticDoor_glass"
+				del 1
+
+			del 1
+		del 1
+	del 1
+
+	!	오픈라인
+	!-----------------------------------------------------------------------------------------------
+	pen	OpenlinePen
+
+	if	GLOB_VIEW_TYPE # 4	then
+
+		!	유리 높이
+		_glassHeight = Matrix_DoorLength[i][6] - frameWidthTmp_B
+		_glassLength = Matrix_DoorLength[i][1]/4 - Matrix_DoorFrame[i][5]*1.5
+
+		add	Matrix_DoorLength[i][4] + _openDoorWdt/2,	-Matrix_DoorLength[i][7] + _gap - Matrix_DoorLength[i][7]/2 + glassThick/2,	0
+			addx	Matrix_DoorFrame[i][5]
+				gosub	"AutomaticDoor_openline"
+			del 1
+
+			mulx	-1
+				addx	Matrix_DoorFrame[i][5]
+					gosub	"AutomaticDoor_openline"
+				del 1
+			del 1
+		del 1
+
+	endif
+
+	!	자동문 기계(상부 프레임)
+	!-----------------------------------------------------------------------------------------------
+	gosub	"AutomaticDoor_Mach"
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"AutomaticDoor_vFrame":	!	자동문 수직 프레임
+!-----------------------------------------------------------------------------------------------
+	put	-Matrix_DoorFrame[i][5]/2,	0,							15,
+		-Matrix_DoorFrame[i][5]/2,	-Matrix_DoorLength[i][7],	15,
+		Matrix_DoorFrame[i][5]/2,	-Matrix_DoorLength[i][7],	15,
+		Matrix_DoorFrame[i][5]/2,	0,							15
+
+	prism_	nsp/3,	Matrix_DoorLength[i][6],	get(nsp)
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"AutomaticDoor_hFrame":	!	자동문 수평 프레임
+!-----------------------------------------------------------------------------------------------
+	put	0,				0,							15,
+		0,				-Matrix_DoorLength[i][7],	15,
+		_hFrameLength,	-Matrix_DoorLength[i][7],	15,
+		_hFrameLength,	0,							15
+
+	prism_	nsp/3,	frameWidthTmp_B,	get(nsp)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"AutomaticDoor_glass":	!	자동문 유리
+!-----------------------------------------------------------------------------------------------
+	put	0,				0,				15,
+		0,				-glassThick,	15,
+		_glassLength,	-glassThick,	15,
+		_glassLength,	0,				15
+
+	prism_	nsp/3,	_glassHeight,	get(nsp)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"AutomaticDoor_openline":	!	자동문 오픈라인
+!-----------------------------------------------------------------------------------------------
+	lin_	_glassLength*0.10,	0,	_glassHeight*0.50,
+			_glassLength*0.50,	0,	_glassHeight*0.50
+	lin_	_glassLength*0.50,	0,	_glassHeight*0.50,
+			_glassLength*0.40,	0,	_glassHeight*0.50 + _glassLength*0.10
+
+	addy	-glassThick
+		lin_	_glassLength*0.10,	0,	_glassHeight*0.50,
+				_glassLength*0.50,	0,	_glassHeight*0.50
+		lin_	_glassLength*0.50,	0,	_glassHeight*0.50,
+				_glassLength*0.40,	0,	_glassHeight*0.50 + _glassLength*0.10
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"AutomaticDoor_Mach":
+!-----------------------------------------------------------------------------------------------
+	pen			framePenElv
+	sect_fill	frameFill,	frameFillPenBg,	frameFillPen,	framePen
+	material	frameMat
+
+	addz	Matrix_DoorLength[i][6]
+
+		!	Hotspot
+		hotspot	0,	0,	0,				unID,	machHeight_A,	1 + 128	:	unID = unID + 1
+		hotspot	0,	0,	-1,				unID,	machHeight_A,	3		:	unID = unID + 1
+		hotspot	0,	0,	machHeight_A,	unID,	machHeight_A,	2		:	unID = unID + 1
+
+		hotspot	Matrix_DoorLength[i][1],	0,	0,				unID,	machHeight_A,	1 + 128	:	unID = unID + 1
+		hotspot	Matrix_DoorLength[i][1],	0,	-1,				unID,	machHeight_A,	3		:	unID = unID + 1
+		hotspot	Matrix_DoorLength[i][1],	0,	machHeight_A,	unID,	machHeight_A,	2		:	unID = unID + 1
+
+		!	기계 몸통
+		put	0,							0,										15,
+			0,							-(HorizontalFrameThick + gasketThick),	15,
+			Matrix_DoorLength[i][1],	-(HorizontalFrameThick + gasketThick),	15,
+			Matrix_DoorLength[i][1],	0,										15
+
+		prism_	nsp/3,	machHeight_A,	get(nsp)
+
+		!	센서
+		material	sensorMat
+
+		_sensorWidth = 0.400
+		_sensorHeight = 0.105
+		_sensorOffset = 0.030
+
+		add	Matrix_DoorLength[i][1]/2,	0,	_sensorOffset
+			put	-_sensorWidth/2,	0,		15,
+				-_sensorWidth/2,	eps,	15,
+				_sensorWidth/2,		eps,	15,
+				_sensorWidth/2,		0,		15
+
+			prism_	nsp/3,	_sensorHeight,	use(nsp)
+
+			addy	-(HorizontalFrameThick + gasketThick)
+				muly	-1
+					prism_	nsp/3,	_sensorHeight,	get(nsp)
+				del 1
+			del 1
+		del 1
+	del 1
+
+return

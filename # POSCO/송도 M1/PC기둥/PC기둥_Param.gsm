@@ -1,0 +1,39 @@
+!===============================================================================================
+!	PC기둥
+!===============================================================================================
+
+!	보 받침 하단부
+!-----------------------------------------------------------------------------------------------
+values	"hWdt_B"	range	(0,	)
+values	"vWdt_B"	range	(0,	)
+
+values	"hgt_B"	range	(0,	)
+values	"hgt_M"	range	(0,	)
+values	"hgt_T"	range	(0,	)
+
+values	"addLth_T"	range	[0,	)
+values	"addLth_B"	range	[0,	)
+values	"addLth_L"	range	[0,	)
+values	"addLth_R"	range	[0,	)
+
+
+!	보 받침 상단부
+!-----------------------------------------------------------------------------------------------
+values	"step1_hWdt"	range	(0,	)
+values	"step1_vWdt"	range	(0,	)
+values	"step1_hgt"		range	(0,	)
+
+if	not(bDrawStep1)	then
+	lock	"xPosStep1", "yPosStep1", "step1_hWdt", "step1_vWdt", "step1_hgt"
+
+	parameters	bDrawStep2 = 0
+	lock	"bDrawStep2"
+endif
+
+values	"step2_hWdt"	range	(0,	)
+values	"step2_vWdt"	range	(0,	)
+values	"step2_hgt"		range	(0,	)
+
+if	not(bDrawStep2)	then
+	lock	"xPosStep2", "yPosStep2", "step2_hWdt", "step2_vWdt", "step2_hgt"
+endif

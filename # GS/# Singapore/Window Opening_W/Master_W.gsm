@@ -1,0 +1,298 @@
+
+
+!======================================================================================================
+!	Window Maker(Opening) 20 
+!======================================================================================================
+!   DATE : 2017/4/12 WED
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+
+!----------------------------------------------------------------------------------------------
+!  General
+!----------------------------------------------------------------------------------------------
+EPS = 0.00001
+
+! 	Cutting Level
+m2Dcut_level = GLOB_CUTPLANES_INFO[1] - mOpening_posy
+
+if	GLOB_VIEW_TYPE = 2	then	iCont_pen_3d = iSash_pen_2D
+
+	!	2D Representation
+	!------------------------------------------------------------------------------------------------------
+	!	2D Detail Index (iDetail_2D, iDetail_2D_callvalue)
+	DETAIL_2D_MVO = 1
+	DETAIL_2D_SIMPLE = 2
+	DETAIL_2D_MIDDLE = 3
+	DETAIL_2D_DETAIL = 4
+	DETAIL_2D_OFF = 5
+
+	!	Opening Type
+	!------------------------------------------------------------------------------------------------------
+	Type_FixedGlass = 1
+	Type_Frameless = 2
+	Type_SideHung = 3
+	Type_SideHung_M = 4
+	Type_TiltTurn = 5
+	Type_TiltTurn_M = 6
+	Type_BottomHung = 7
+	Type_TopHung = 8
+	Type_HorPivot = 9
+	Type_VerPivot = 10
+	Type_Sliding3 = 11
+	Type_Sliding4 = 12
+	Type_Sliding6 = 13
+	Type_Grill = 14
+	Type_VerPivot_M = 16
+	Type_DoubleSideHung = 18
+	Type_DoubleTiltTurn = 19
+	Type_DoubleTiltTurn_M = 20
+	Type_SlidingHor = 21
+	Type_SlidingHor_M = 22
+	Type_DoubleSlidingHor = 23
+	Type_DoubleSlidingHor_M = 24
+	Type_SlidingVer = 25
+	Type_DoubleSlidingVer = 26
+	Type_Double_GS = 27
+	Type_Double_GS_M = 28
+
+	if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3	then
+		dim	stOpeningType[]
+			stOpeningType[1] = "Fixed Glass"
+			stOpeningType[2] = "Frameless Glass"
+			stOpeningType[3] = "Side Hung"
+			stOpeningType[4] = "Side Hung Mirrored"
+			stOpeningType[5] = "Tilt and Turn"
+			stOpeningType[6] = "Tilt and Turn Mirrored"
+			stOpeningType[7] = "Bottom Hung"
+			stOpeningType[8] = "Top Hung"
+			stOpeningType[9] = "Horizontal Pivot Hung"
+			stOpeningType[10] = "Vertical Pivotted"
+			stOpeningType[11] = "Sliding(3)"
+			stOpeningType[12] = "Sliding(4)"
+			stOpeningType[13] = "Sliding(6)"
+			stOpeningType[14] = "Grill"
+			stOpeningType[15] = ""
+			stOpeningType[16] = "Vertical Pivotted Mirrored"
+			stOpeningType[17] = ""
+			stOpeningType[18] = "Double Sash"
+			stOpeningType[19] = "Double Tilt and Turn"
+			stOpeningType[20] = "Double Tilt and Turn Mirrored"
+			stOpeningType[21] = "Sliding"
+			stOpeningType[22] = "Sliding Mirrored"
+			stOpeningType[23] = "Double Sliding"
+			stOpeningType[24] = "Double Sliding Mirrored"
+			stOpeningType[25] = "Single Hung"
+			stOpeningType[26] = "Double Hung"
+			stOpeningType[27] = "Double Window(GS)"
+			stOpeningType[28] = "Double Window(GS) Mirrored"
+	endif
+
+!	Door Direction
+Direct_Normal = 1
+Direct_Reversed = 2
+
+	if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3	then
+		dim	stDirect[]
+			stDirect[1] = "Normal"
+			stDirect[2] = "Reversed"
+	endif
+
+
+!----------------------------------------------------------------------------------------------
+!  General Caculation
+!----------------------------------------------------------------------------------------------
+
+	!	Coordinate
+	!----------------------------------------------------------------------------------------------
+	dim	mOffsetTmp[],	mOpening_Coordinate[][]
+
+	for	i = 1	to	iCoordinate_num
+
+		!	Define and Insert Values
+		if	i = 1	then
+			mOffsetTmp[i] = mLayout_Offset[1]
+			mOffsetTmp[iCoordinate_num] = mLayout_Offset[iCoordinate_num]
+
+			mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[i]
+			mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[iCoordinate_num]
+		else
+			if	i # iCoordinate_num	then	numTmp = i + 1
+			if	i = iCoordinate_num	then	numTmp = 1
+
+				if	mLayout_Coordinate[i][1] > mLayout_Coordinate[numTmp][1] and mLayout_Coordinate[i-1][2] < mLayout_Coordinate[i][2]	then
+					mOffsetTmp[i] = mLayout_Offset[i-1]
+					mOffsetTmp[numTmp] = mLayout_Offset[i]
+
+					mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[i]
+					mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[numTmp]
+				endif
+				if	mLayout_Coordinate[i][1] > mLayout_Coordinate[numTmp][1] and mLayout_Coordinate[i-1][2] > mLayout_Coordinate[i][2]	then
+					mOffsetTmp[i] = -mLayout_Offset[i-1]
+					mOffsetTmp[numTmp] = mLayout_Offset[i]
+
+					mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[i]
+					mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[numTmp]
+				endif
+
+				if	mLayout_Coordinate[i][1] < mLayout_Coordinate[numTmp][1] and mLayout_Coordinate[i-1][2] < mLayout_Coordinate[i][2]	then
+					mOffsetTmp[i] = mLayout_Offset[i-1]
+					mOffsetTmp[numTmp] = -mLayout_Offset[i]
+
+					mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[i]
+					mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[numTmp]
+				endif
+				if	mLayout_Coordinate[i][1] < mLayout_Coordinate[numTmp][1] and mLayout_Coordinate[i-1][2] > mLayout_Coordinate[i][2]	then
+					mOffsetTmp[i] = -mLayout_Offset[i-1]
+					mOffsetTmp[numTmp] = -mLayout_Offset[i]
+
+					mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[i]
+					mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[numTmp]
+				endif
+
+				if	mLayout_Coordinate[i-1][1] > mLayout_Coordinate[i][1] and mLayout_Coordinate[i][2] < mLayout_Coordinate[numTmp][2]	then
+					mOffsetTmp[i] = mLayout_Offset[i-1]
+					mOffsetTmp[numTmp] = mLayout_Offset[i]
+
+					mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[numTmp]
+					mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[i]
+				endif
+				if	mLayout_Coordinate[i-1][1] > mLayout_Coordinate[i][1] and mLayout_Coordinate[i][2] > mLayout_Coordinate[numTmp][2]	then
+					mOffsetTmp[i] = mLayout_Offset[i-1]
+					mOffsetTmp[numTmp] = -mLayout_Offset[i]
+
+					mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[numTmp]
+					mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[i]
+				endif
+
+				if	mLayout_Coordinate[i-1][1] < mLayout_Coordinate[i][1] and mLayout_Coordinate[i][2] < mLayout_Coordinate[numTmp][2]	then
+					mOffsetTmp[i] = -mLayout_Offset[i-1]
+					mOffsetTmp[numTmp] = mLayout_Offset[i]
+
+					mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[numTmp]
+					mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[i]
+				endif
+				if	mLayout_Coordinate[i-1][1] < mLayout_Coordinate[i][1] and mLayout_Coordinate[i][2] > mLayout_Coordinate[numTmp][2]	then
+					mOffsetTmp[i] = -mLayout_Offset[i-1]
+					mOffsetTmp[numTmp] = -mLayout_Offset[i]
+
+					mOpening_Coordinate[i][1] = mLayout_Coordinate[i][1] + mOffsetTmp[numTmp]
+					mOpening_Coordinate[i][2] = mLayout_Coordinate[i][2] + mOffsetTmp[i]
+				endif
+
+		endif
+
+	next i
+
+
+	!	Opening Width / Height
+	!----------------------------------------------------------------------------------------------
+	if	iCoordinate_num = 4	then
+		_OpeningWidth = mOpening_Coordinate[4][1] - mOpening_Coordinate[1][1]
+		_OpeningHeight = mOpening_Coordinate[2][2] - mOpening_Coordinate[1][2]
+
+		mOpeningWidth = _OpeningWidth
+		mOpeningHeight = _OpeningHeight
+	else
+		!	Type =  Type_FixedGlass or Type_Frameless	(2017-05-02 비정형 타입 2D표현을 위한 추가 연산)
+		if	iOpening_type = Type_FixedGlass | iOpening_type = Type_Frameless 	then	
+
+			!	Position Indext
+			POS_X = 1
+			POS_Y = 2
+
+			bOpeningWidth_start = 0
+			bOpeningWidth_end = 0
+
+			_OpeningWidth_start = 0
+			_OpeningWidth_end = 0
+
+			for i = 1	to	iCoordinate_num
+				if	i = 1	then
+					ptPre = iCoordinate_num
+					ptNow = 1
+					ptNext = 2
+				endif
+				if	i > 1 and i < iCoordinate_num	then
+					ptPre = i-1
+					ptNow = i
+					ptNext = i+1
+				endif
+				if	i = iCoordinate_num	then
+					ptPre = iCoordinate_num-1
+					ptNow = iCoordinate_num
+					ptNext = 1
+				endif
+
+				mSub = mOpening_Coordinate[ptNext][POS_Y] - mOpening_Coordinate[ptNow][POS_Y]
+	
+				if	not(bOpeningWidth_start)	then
+					if	mSub > EPS	then
+						if	mOpening_Coordinate[ptNext][POS_Y] - m2Dcut_level > -EPS	then
+							if	mOpening_Coordinate[ptNow][POS_Y] - m2Dcut_level < EPS	 then
+								_OpeningWidth_start = mOpening_Coordinate[ptNow][POS_X]
+								bOpeningWidth_start = 1 
+							endif
+						endif
+					endif
+				endif
+				if	not(bOpeningWidth_end)	then
+					if	mSub < EPS	then
+						if	mOpening_Coordinate[ptNow][POS_Y] - m2Dcut_level > -EPS then
+							if	mOpening_Coordinate[ptNext][POS_Y] - m2Dcut_level < EPS	then
+								_OpeningWidth_end = mOpening_Coordinate[ptNow][POS_X]
+								bOpeningWidth_end = 1 
+							endif
+						endif
+					endif
+				endif
+			next i
+
+			_OpeningWidth = _OpeningWidth_end - _OpeningWidth_start
+			mOpeningWidth = _OpeningWidth
+
+		endif
+	endif
+
+
+
+!----------------------------------------------------------------------------------------------
+!  MVO
+!----------------------------------------------------------------------------------------------
+	!	2D Representation
+	!------------------------------------------------------------------------------------------------------
+	!	2D Detail Transfer in MVO
+	if	iDetail_2D_callvalue = 0	then
+		success = LIBRARYGLOBAL ("LG_DWSymbSettings", "iWindowMVODetlevel2D", reqWindowMVODetlevel2D)
+		if success > 0 then
+			iMVODetlevel2D = reqWindowMVODetlevel2D
+		endif
+
+		!	'iMVODetlevel2D' Index
+		! 31 = `Detailed`
+		! 22 = `Middle 2`
+		! 21 = `Middle 1`
+		! 13 = `Simple 2 (Wall Centerline)`
+		! 11 = `Simple 1`
+
+		!	Value Transfer
+		if	iMVODetlevel2D = 31 | iMVODetlevel2D = 22	then	iDetail_2D = DETAIL_2D_DETAIL
+		if	iMVODetlevel2D = 21							then	iDetail_2D = DETAIL_2D_MIDDLE
+		if	iMVODetlevel2D = 13 | iMVODetlevel2D = 11	then	iDetail_2D = DETAIL_2D_SIMPLE
+	else
+		!	메인 객체에서 콜 받을때에는 콜값을 적용한다.
+		iDetail_2D = iDetail_2D_callvalue
+	endif
+
+
+!----------------------------------------------------------------------------------------------
+!  Definition of Parameter
+!----------------------------------------------------------------------------------------------
+
+	!	Status
+	!------------------------------------------------------------------------------------------------------
+	aSymbol_rotangle = SYMB_ROTANGLE
+	stSymbol_orientation = WIDO_ORIENTATION
+	iSymbol_reveal_side = WIDO_REVEAL_SIDE
+	iSymbol_mirrored = SYMB_MIRRORED

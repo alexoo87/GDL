@@ -1,0 +1,264 @@
+!===============================================================================================
+!	Custom H형 철골보
+!===============================================================================================
+! project2	3,	270,	3
+
+!	Partial Structure Display
+if	GLOB_STRUCTURE_DISPLAY = 0	then
+	_iDisplay = iDisplay
+else
+	_iDisplay = iDisplayCore
+endif
+
+!	W.P
+hotspot2	0,	0
+
+symSize = symSize*GLOB_SCALE
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+
+!	beamLth
+!-----------------------------------------------------------------------------------------------
+hotspot2	0,			0,	unID,	beamLth,	1+256	:	unID = unID + 1
+hotspot2	-1,			0,	unID,	beamLth,	3		:	unID = unID + 1
+hotspot2	beamLth,	0,	unID,	beamLth,	2		:	unID = unID + 1
+
+if	aRotY < eps & not(_iDisplay = Display_Symbolic)	then
+
+	!	OffsetL/R
+	!-----------------------------------------------------------------------------------------------
+	_yCutPlaneL = beamBL/2
+	_yCutPlaneR = beamBR/2
+
+	add2	0,	-(beamBL/2 + 0.050)
+		hotspot2	0,			0,	unID,	offsetL,	1+128	:	unID = unID + 1
+		hotspot2	-1,			0,	unID,	offsetL,	3		:	unID = unID + 1
+		hotspot2	offsetL,	0,	unID,	offsetL,	2		:	unID = unID + 1
+	del 1
+
+	add2	beamLth,	-(beamBR/2 + 0.050)
+		hotspot2	0,			0,	unID,	offsetR,	1+128	:	unID = unID + 1
+		hotspot2	1,			0,	unID,	offsetR,	3		:	unID = unID + 1
+		hotspot2	-offsetR,	0,	unID,	offsetR,	2		:	unID = unID + 1
+	del 1
+
+
+	!	Cut Length 1,2
+	!-----------------------------------------------------------------------------------------------
+	if	iCutPlaneL = CutPlane_vert	then
+		add2	offsetL,	0
+			hotspot2	0,	0,			unID,	cutCenL,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	cutCenL,	3		:	unID = unID + 1
+			hotspot2	0,	cutCenL,	unID,	cutCenL,	2		:	unID = unID + 1
+
+			add2	0,	-_yCutPlaneL
+				hotspot2	0,			0,	unID,	cutLthL1,	1+128	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	cutLthL1,	3		:	unID = unID + 1
+				hotspot2	cutLthL1,	0,	unID,	cutLthL1,	2		:	unID = unID + 1	
+			del 1
+
+			add2	0,	_yCutPlaneL
+				hotspot2	0,			0,	unID,	cutLthL2,	1+128	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	cutLthL2,	3		:	unID = unID + 1
+				hotspot2	cutLthL2,	0,	unID,	cutLthL2,	2		:	unID = unID + 1	
+			del 1
+		del 1
+	endif
+
+	if	iCutPlaneR = CutPlane_vert	then
+		add2	beamLth - offsetR,	0
+			hotspot2	0,	0,			unID,	cutCenR,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	cutCenR,	3		:	unID = unID + 1
+			hotspot2	0,	cutCenR,	unID,	cutCenR,	2		:	unID = unID + 1
+
+			add2	0,	-_yCutPlaneR
+				hotspot2	0,			0,	unID,	cutLthR1,	1+128	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	cutLthR1,	3		:	unID = unID + 1
+				hotspot2	cutLthR1,	0,	unID,	cutLthR1,	2		:	unID = unID + 1	
+			del 1
+
+			add2	0,	_yCutPlaneR
+				hotspot2	0,			0,	unID,	cutLthR2,	1+128	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	cutLthR2,	3		:	unID = unID + 1
+				hotspot2	cutLthR2,	0,	unID,	cutLthR2,	2		:	unID = unID + 1	
+			del 1
+		del 1
+	endif
+endif
+
+!===============================================================================================
+!	Center Line
+!===============================================================================================
+if	bCenLine	then
+	pen			cenLinePen
+	line_type	cenLineLT
+
+	line2		0,	0,	beamLth*cos(aRotY),	0
+	hotline2	0,	0,	beamLth*cos(aRotY),	0
+else
+	if	_iDisplay = Display_Symbolic	then
+		pen	symPen
+
+		if	iAttachL = Attach_Moment	then
+			_symSizeL = symSize*sin(60)
+		else
+			_symSizeL = 0
+		endif
+		if	iAttachR = Attach_Moment	then
+			_symSizeR = symSize*sin(60)
+		else
+			_symSizeR = 0
+		endif
+
+		line2		symOffsetL + _symSizeL,	0,	beamLth*cos(aRotY) - (symOffsetR + _symSizeR),	0
+		hotline2	symOffsetL + _symSizeL,	0,	beamLth*cos(aRotY) - (symOffsetR + _symSizeR),	0
+	endif
+endif
+
+
+!===============================================================================================
+!	2D Display
+!===============================================================================================
+
+!	Symbolic
+if	_iDisplay = Display_Symbolic	then
+	pen			symPen
+	fill		symFill
+	line_type	1
+
+	!	symOffsetL
+	_yPosSymL = 0
+	if	symOffsetL < eps	then	_yPosSymL = 0.025
+	hotspot2	0,			_yPosSymL,	unID,	symOffsetL,	1+128	:	unID = unID + 1
+	hotspot2	-1,			_yPosSymL,	unID,	symOffsetL,	3		:	unID = unID + 1
+	hotspot2	symOffsetL,	_yPosSymL,	unID,	symOffsetL,	2		:	unID = unID + 1
+
+	add2	symOffsetL,	0
+
+		if	iAttachL = Attach_Moment	then
+			put	0,					-symSize/2,	1,
+				0,					symSize/2,	1,
+				symSize*sin(60),	0,			1
+
+			poly2_b	nsp/3,	1+2+4,	symFillPen,	symBackPen,	get(nsp)
+		endif
+
+		if	iAttachL = Attach_PIN	then
+			line2		0,	-symSize/2,	0,	symSize/2
+			hotline2	0,	-symSize/2,	0,	symSize/2
+		endif
+
+	del 1
+
+	add2	beamLth,	0
+
+		!	symOffsetR
+		_yPosSymR = 0
+		if	symOffsetR < eps	then	_yPosSymR = 0.025
+		hotspot2	0,				_yPosSymR,	unID,	symOffsetR,	1+128	:	unID = unID + 1
+		hotspot2	1,				_yPosSymR,	unID,	symOffsetR,	3		:	unID = unID + 1
+		hotspot2	-symOffsetR,	_yPosSymR,	unID,	symOffsetR,	2		:	unID = unID + 1
+
+		add2	-symOffsetR,	0
+
+			if	iAttachR = Attach_Moment	then
+				put	0,					-symSize/2,	1,
+					0,					symSize/2,	1,
+					-symSize*sin(60),	0,			1
+
+				poly2_b	nsp/3,	1+2+4,	symFillPen,	symBackPen,	get(nsp)
+			endif
+
+			if	iAttachR = Attach_PIN	then
+				line2		0,	-symSize/2,	0,	symSize/2
+				hotline2	0,	-symSize/2,	0,	symSize/2
+			endif
+
+		del 1
+
+	del 1
+
+
+!	Not Symbolic
+else
+	!	Height of Plane
+	_cutPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[1]
+	_topPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[2]
+	_btmPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[3]
+	if	not(iProjectTo = ProjectTo_FloorPlan)	then
+		_btmPlaneHgt = GLOB_CUTPLANES_INFO[4]
+	endif
+
+	_bCutPlane = (_iDisplay = Display_Projected | _iDisplay = Display_WithOverhead)
+
+	!	절단면/하단면
+	if	_bCutPlane	then
+		!	절단면
+		pen			cutPen
+		fill		cutFill
+		line_type	1
+
+		project2{3}	3,	270,	3+32,	1+2,	cutBackPen,
+			parameters	bSymbol			= 1,
+						iProjectType	= 1,
+						cutPlaneHgt		= _cutPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+
+		!	하단면
+		pen			btmPen
+		fill		btmFill
+		line_type	1
+
+		project2{3}	3,	270,	3+32,	4+8,	btmBackPen,
+			parameters	bSymbol			= 1,
+						iProjectType	= 1,
+						cutPlaneHgt		= _cutPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Overhead
+	if	_iDisplay = Display_WithOverhead	then
+		pen			overPen
+		line_type	overLT
+
+		project2{3}	3,	270,	2+32,	2+8,
+			parameters	bSymbol			= 1,
+						iProjectType	= 2,
+						cutPlaneHgt		= _cutPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Outlines only
+	if	_iDisplay = Display_Outlines	then
+		!	하단면
+		pen			btmPen
+		fill		btmFill
+		line_type	1
+
+		project2{3}	3,	270,	3+32,	2+8,	btmBackPen,
+			parameters	bSymbol			= 1,
+						iProjectType	= 1,
+						cutPlaneHgt		= _topPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Overhead all
+	if	_iDisplay = Display_Overhead	then
+		!	하단면
+		pen			overPen
+		line_type	overLT
+
+		project2{3}	3,	270,	2+32,	2+8,
+			parameters	bSymbol			= 1,
+						iProjectType	= 2,
+						cutPlaneHgt		= _btmPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+endif

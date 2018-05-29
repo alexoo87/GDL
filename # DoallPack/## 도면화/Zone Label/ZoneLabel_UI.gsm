@@ -1,0 +1,110 @@
+
+ui_dialog	"실내재료마감 정보 입력"
+
+ui_current_page		gs_ui_current_page
+
+startX = 10
+startY = 7
+
+x1 = startX
+x2 = 75
+x3 = 110
+x4 = 165
+x5 = 296
+x6 = 355
+
+!!------------------------------------------------------------------------------------------------------------
+!!	Page 1. 실내재료마감 정보
+!!------------------------------------------------------------------------------------------------------------
+UI_PAGE	1,	-1,	"실내재료마감 정보"
+
+dim	elementName[][]
+	elementName[1][1] = "바닥"
+	elementName[2][1] = "걸레받이"
+	elementName[3][1] = "벽"
+	elementName[4][1] = "천정"
+
+	elementName[1][2] = "slab"
+	elementName[2][2] = "board"
+	elementName[3][2] = "wall"
+	elementName[4][2] = "ceil"
+
+dim	gubunName[]
+	gubunName[1] = "바탕"
+	gubunName[2] = "마감"
+	gubunName[3] = "상세번호"
+	gubunName[4] = "두께"
+
+
+posy = startY
+a = 20
+
+!	실내재료마감표 정보 입력
+for	r = 1	to	4
+	if	board_switch = 1	then
+		if	r <> 2	then
+			gosub	"finish_ui"
+		endif
+	else
+		gosub	"finish_ui"
+	endif
+next	r
+
+
+!	걸레받이 입력 생략 스위치
+posy = 250
+posx = 300
+ui_infield		"board_switch",	posx ,	posy,	15,	15
+ui_outfield		"걸레받이 입력 생략",		posx +20,	posy,	120,	15
+
+
+
+end
+
+
+!!------------------------------------------------------------------------------------------------------------
+!!	sub-routine
+!!------------------------------------------------------------------------------------------------------------
+
+"finish_ui"	:
+
+
+	ui_style	1,	0
+	ui_outfield		elementName[r][1],		x1,	posy,	60,	15
+
+	ui_style	0,	0
+
+	!	두께 / 상세번호
+	if	r <> 2	then
+		ui_outfield		gubunName[4],		x2,	posy,	30,	15
+	else
+		ui_outfield		"높이",		x2,	posy,	30,	15
+	endif
+	ui_infield		elementName[r][2] + "_thk",	x3,	posy,	50,	15
+
+	ui_outfield		gubunName[3],		x5,	posy,	55,	15
+	ui_infield		elementName[r][2] + "_num",	x6,	posy,	75,	15
+	if	r = 4	then
+		ui_outfield	"타입",		x4 + 5,	posy
+		ui_infield	"ceil_type",	x4 + 35,	posy,	70,	15
+	endif
+	posy = posy + a
+
+	!	바탕
+	ui_outfield		gubunName[1],		x2,	posy,	30,	15
+	ui_infield		elementName[r][2] + "_baseT",	x3,	posy,	50,	15
+	ui_infield		elementName[r][2] + "_base",		x4,	posy,	265,	15
+	posy = posy + a
+
+	!	마감
+	ui_outfield		gubunName[2],		x2,	posy,	30,	15
+	ui_infield		elementName[r][2] + "_finishT",	x3,	posy,	50,	15
+	ui_infield		elementName[r][2] + "_finish",		x4,	posy,	265,	15
+	posy = posy + a
+
+
+return
+
+
+
+

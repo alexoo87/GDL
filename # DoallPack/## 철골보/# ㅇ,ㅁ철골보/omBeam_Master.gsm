@@ -1,0 +1,145 @@
+!===============================================================================================
+!	ㅇ,ㅁ형 철골보
+!===============================================================================================
+eps = 0.0001
+unID = 100
+
+!	철골보 유형
+!-----------------------------------------------------------------------------------------------
+BeamType_Circle = 1
+BeamType_Rectangle = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stBeamType[]
+		stBeamType[1] = "ㅇ형"
+		stBeamType[2] = "ㅁ형"
+endif
+
+!	Cutting Plan Type
+!-----------------------------------------------------------------------------------------------
+CutPlane_vert = 1
+CutPlane_horz = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stCutPlane[]
+		stCutPlane[1] = "Vertical Plane"
+		stCutPlane[2] = "Horizontal Plane"
+endif
+
+!	접합 형태
+!-----------------------------------------------------------------------------------------------
+Attach_Moment = 1
+Attach_PIN = 2
+Attach_None = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stAttach[]
+		stAttach[1] = "Moment"
+		stAttach[2] = "PIN"
+		stAttach[3] = "None"
+endif
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+Display_Projected = 1
+Display_WithOverhead = 2
+Display_Symbolic = 3
+Display_Outlines = 4
+Display_Overhead = 5
+Display_MVO = 6
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDisplay[]
+		stDisplay[1] = "Projected"
+		stDisplay[2] = "Projected with Overhead"
+		stDisplay[3] = "Symbolic View"
+		stDisplay[4] = "Outlines Only"
+		stDisplay[5] = "Overhead All"
+		stDisplay[6] = "by MVO"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+ProjectTo_FloorPlan = 1
+ProjectTo_Absolute = 2
+ProjectTo_Entire = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stProjectTo[]
+		stProjectTo[1] = "To Floor Plan Range"
+		stProjectTo[2] = "Absolute Display Limit"
+		stProjectTo[3] = "Entire Element"
+endif
+
+!	Y축 회전 기준점
+!-----------------------------------------------------------------------------------------------
+Rotation_Top = 1
+Rotation_Center = 2
+Rotation_Bottom = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stRotation[]
+		stRotation[1] = "Top"
+		stRotation[2] = "Center"
+		stRotation[3] = "Bottom"
+endif
+
+!	3D Detail Level
+!-----------------------------------------------------------------------------------------------
+DetailLevel_Detailed = 1
+DetailLevel_Simple = 2
+DetailLevel_None = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDetailLevel[]
+		stDetailLevel[1] = "Detailed"
+		stDetailLevel[2] = "Simple"
+		stDetailLevel[3] = "None"
+endif
+
+!	Partial Structure Display
+!-----------------------------------------------------------------------------------------------
+if	GLOB_STRUCTURE_DISPLAY = 0	then
+	if	iDisplay = Display_MVO	then
+		success = LIBRARYGLOBAL("MVO_BeamView",	"iDisplayEntire",	_iDisplayEntire)
+
+		if	success > eps	then
+			_iDisplay = _iDisplayEntire
+		else
+			print	"철골보 2D View 옵션 MVO파일이 없습니다."
+			_iDisplay = iDisplay
+		endif
+	else
+		_iDisplay = iDisplay
+	endif
+else
+	if	iDisplayCore = Display_MVO	then
+		success = LIBRARYGLOBAL("MVO_BeamView",	"iDisplayCore",	_iDisplayCore)
+
+		if	success > eps	then
+			_iDisplay = _iDisplayCore
+		else
+			print	"철골보 2D View 옵션 MVO파일이 없습니다."
+			_iDisplay = iDisplayCore
+		endif
+	else
+		_iDisplay = iDisplayCore
+	endif
+endif
+
+!	편집용 View On/Off
+!-----------------------------------------------------------------------------------------------
+_bEditView = 0
+_iEditView = 0
+
+success = LIBRARYGLOBAL("MVO_BeamView",	"bEditView",	_bEditView)
+
+if	success > eps	then
+	if	_bEditView	then
+		if	_iDisplay = Display_Symbolic	then
+			_iEditView = Display_Projected
+		else
+			_iEditView = Display_Symbolic
+		endif
+	endif
+endif

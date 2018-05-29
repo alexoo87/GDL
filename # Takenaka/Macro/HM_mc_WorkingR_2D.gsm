@@ -1,0 +1,228 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/11/23 THU
+!	VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot2	0, 0
+	circle2	0, 0, 0.1
+	circle2	0, 0, 0.2
+endif
+
+if	bTest	then
+
+
+endif
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+define style{2}	"HM_style" HM_2D_textFont, HM_2D_textSize/1000*100,	0
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Symbol
+!----------------------------------------------------------------------------------------------------
+
+	!	Define Parameter
+	!----------------------------------------------------------------------------------------------------
+	_stWorkLth = 2.800*(HM_2D_textSize/4)
+	_stModLth = 2.000*(HM_2D_textSize/4)
+
+	!	Working Radius
+	!----------------------------------------------------------------------------------------------------
+	!	Hotspot
+	hotspot2 	HM_WorkingR/2, 						0, 									unID, HM_WorkingAng, 4+128	: unID = unID + 1
+	hotspot2 	HM_WorkingR/2*cos(HM_WorkingAng), HM_WorkingR/2*sin(HM_WorkingAng), 	unID, HM_WorkingAng, 5		: unID = unID + 1
+	hotspot2 	0, 									0, 									unID, HM_WorkingAng, 6		: unID = unID + 1
+
+	rot2	HM_WorkingAng
+		hotspot2 	0, 				0, 	unID, HM_WorkingR, 1 + 128		: unID = unID + 1
+		hotspot2 	HM_WorkingR, 	0, 	unID, HM_WorkingR, 2			: unID = unID + 1
+		hotspot2 	-1, 			0, 	unID, HM_WorkingR, 3			: unID = unID + 1
+	del	1
+
+	!	Symbol
+	pen		HM_2D_WorkingR_pen
+	fill	HM_2D_fillType	
+
+	put	0,				0,		900,
+		HM_WorkingR,	360,	4000+1
+
+	poly2_b	nsp/3, 1+4, HM_2D_fillPen, HM_2D_fillBackPen,
+			get(nsp)
+
+	rot2	HM_WorkingAng
+		line2	0, 0, HM_WorkingR, 0
+
+		add2	HM_WorkingR,	0
+			line2	0,	0.250,	0,	-_stWorkLth
+		del 1
+	del	1
+
+	!	Max/Min range
+	pen	HM_2D_WorkingR_subPen
+
+	if	_WorkingR_min < eps	then	_WorkingR_min = eps
+
+	put	_WorkingR_max,	0,		1,
+		0,				0,		900,
+		_WorkingR_max,	180,	4000+1,
+		-_WorkingR_max,	0,		1,
+		0,				0,		900,
+		_WorkingR_max,	180,	4000+1,
+		_WorkingR_max,	0,		-1,
+		_WorkingR_min,	0,		1,
+		0,				0,		900,
+		_WorkingR_min,	180,	4000+1,
+		-_WorkingR_min,	0,		1,
+		0,				0,		900,
+		_WorkingR_min,	180,	4000+1
+
+	poly2_b	nsp/3,	2+4,	 HM_2D_fillPen,	 HM_2D_fillBackPen,
+			get(nsp)
+
+		!	Dot
+		_aModMax = 10
+		_aModMin = _aModMax*(_WorkingR_max/_WorkingR_min)
+		_nModMax = int(360/_aModMax)
+		_nModMin = int(360/_aModMin)
+		if	(360 - _nModMin*_aModMin) - _aModMin*0.75 > eps	then
+			_nModMin = _nModMin + 1
+		endif
+
+		for	i = 1	to	_nModMax
+			rot2	_aModMax*(i - 1)
+				arc2	0,	0,	_WorkingR_max,	_aModMax*0.25,	_aModMax*0.75
+			del 1
+		next	i
+		for	i = 1	to	_nModMin
+			rot2	_aModMin*(i - 1)
+				arc2	0,	0,	_WorkingR_min,	_aModMin*0.25,	_aModMin*0.75
+			del 1
+		next	i
+
+	if	HM_2D_guide_show	then
+		!	5M Module
+		_modLth = 5.000
+		_nMod = int(_WorkingR_max/_modLth)
+
+		rot2	HM_WorkingAng
+			!	Ruler
+			for	i = 1	to	_nMod
+				line2		_modLth*i,	_stModLth,	_modLth*i,	-0.250
+				hotline2	_modLth*i,	_stModLth,	_modLth*i,	-0.250
+			next	i
+
+			add2	_WorkingR_min,	0
+				line2		0,	_stWorkLth,	0,	-0.250
+				hotline2	0,	_stWorkLth,	0,	-0.250
+			del 1
+			add2	_WorkingR_max,	0
+				line2		0,	_stWorkLth,	0,	-0.250
+				hotline2	0,	_stWorkLth,	0,	-0.250
+			del 1
+
+			!	Center Line
+			line2		_WorkingR_min,	0,	_WorkingR_max,	0
+			hotline2	_WorkingR_min,	0,	_WorkingR_max,	0
+		del 1
+	endif
+
+
+	!	Text
+	!----------------------------------------------------------------------------------------------------
+		!	Working Radius
+		pen		HM_2D_WorkingR_pen
+
+		_stWorkingR = str(HM_WorkingR,	4,	2) + "m"
+
+		paragraph	"prgWorkingR"	2,	0,	0,	0,	1
+					style	"HM_style"
+					_stWorkingR
+		endparagraph
+
+		textblock	"tbWorkingR"	0,	9,	0,	1,	1,	0,	"prgWorkingR"
+
+		rot2	HM_WorkingAng
+			add2	HM_WorkingR,	-_stWorkLth
+				rot2	-90
+					richtext2	0,	0,	"tbWorkingR"
+				del 1
+			del 1
+		del 1
+
+		if	HM_2D_guide_show	then
+			!	5M Module & Min/Max
+			pen	HM_2D_WorkingR_subPen
+
+				!	Min/Max
+				_stWorkingR_min = str(_WorkingR_min,	2,	0) + "m(min)"
+				_stWorkingR_max = str(_WorkingR_max,	2,	0) + "m(max)"
+
+				paragraph	"prgWorkingR_min"	2,	0,	0,	0,	1
+							style	"HM_style"
+							_stWorkingR_min
+				endparagraph
+
+				textblock	"tbWorkingR_min"	0,	7,	0,	1,	1,	0,	"prgWorkingR_min"
+
+				paragraph	"prgWorkingR_max"	2,	0,	0,	0,	1
+							style	"HM_style"
+							_stWorkingR_max
+				endparagraph
+
+				textblock	"tbWorkingR_max"	0,	7,	0,	1,	1,	0,	"prgWorkingR_max"
+
+				rot2	HM_WorkingAng
+					add2	_WorkingR_min,	_stWorkLth
+						rot2	-90
+							richtext2	0,	0,	"tbWorkingR_min"
+						del 1
+					del 1
+
+					add2	_WorkingR_max,	_stWorkLth
+						rot2	-90
+							richtext2	0,	0,	"tbWorkingR_max"
+						del 1
+					del 1
+				del 1
+
+				!	5M Module
+				for	i = 1	to	_nMod
+					if	_WorkingR_max - (_modLth*i) > eps	then
+						paragraph	"prgWorkingR_mod"	2,	0,	0,	0,	1
+									style	"HM_style"
+									str(_modLth*i,	2,	0) + "m"
+						endparagraph
+
+						textblock	"tbWorkingR_mod"	0,	7,	0,	1,	1,	0,	"prgWorkingR_mod"
+
+						rot2	HM_WorkingAng
+							add2	_modLth*i,	_stModLth
+								rot2	-90
+									richtext2	0,	0,	"tbWorkingR_mod"
+								del 1
+							del 1
+						del 1
+					endif
+				next	i
+		endif

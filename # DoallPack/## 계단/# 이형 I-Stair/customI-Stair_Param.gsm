@@ -1,0 +1,261 @@
+!===============================================================================================
+!	이형 I-Stair
+!===============================================================================================
+lock	"A", "B"
+hideparameter	"A", "B"
+
+
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+
+!	계단 높이
+!-----------------------------------------------------------------------------------------------
+lock	"strHgt"
+
+_strHgt = strRsr*nRsr
+
+parameters	strHgt = _strHgt
+
+
+!	층 보이기 설정
+!-----------------------------------------------------------------------------------------------
+values{2}	"iWrkFlr"	View_Cut,		stView[View_Cut],
+						View_Entire,	stView[View_Entire],
+						View_None,		stView[View_None]
+
+	if	iWrkFlr # View_Cut	then
+		lock	"bWrkBrk", "iWrkBrkLct"
+	endif
+
+values{2}	"iUprFlr"	View_Cut,		stView[View_Cut],
+						View_Entire,	stView[View_Entire],
+						View_None,		stView[View_None]
+
+	if	iUprFlr # View_Cut	then
+		lock	"bUprBrk", "iUprBrkLct"
+	endif
+
+!	좌/우 계단 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iStairType_L"	stairType_Straight,	stStairType[stairType_Straight],
+							stairType_Curve,	stStairType[stairType_Curve]
+
+values{2}	"iStairType_R"	stairType_Straight,	stStairType[stairType_Straight],
+							stairType_Curve,	stStairType[stairType_Curve]
+
+if	iStairType_L = stairType_Straight	then
+	lock			"xCenter_L"
+	hideparameter	"xCenter_L"
+else
+	lock			"xStart_L", "xEnd_L"
+	hideparameter	"xStart_L", "xEnd_L"
+endif
+
+if	iStairType_R = stairType_Straight	then
+	lock			"xCenter_R"
+	hideparameter	"xCenter_R"
+else
+	lock			"xStart_R", "xEnd_R"
+	hideparameter	"xStart_R", "xEnd_R"
+endif
+
+!	단 방향
+!-----------------------------------------------------------------------------------------------
+values{2}	"iTreadType"	treadType_Parallel,	stTreadType[treadType_Parallel],
+							treadType_Center,	stTreadType[treadType_Center]
+
+if	iTreadType = treadType_Parallel	then
+	!	계단 길이 계산
+	_strLth = strTrd*nRsr
+	parameters	strLth = _strLth
+	lock	"strLth"
+
+	!	반지름 계산
+	_radius_L = sqr(xCenter_L^2 + yCenter_L^2)
+	_radius_R = sqr(xCenter_R^2 + yCenter_R^2)
+	parameters	radius_L = _radius_L
+	parameters	radius_R = _radius_R
+	lock	"radius_L",	"radius_R"
+
+	!	단 방향 : 원점 관련 변수
+	lock			"strRad", "aStr", "iCalcTrd"
+	hideparameter	"strRad", "aStr", "iCalcTrd"
+
+	!	하부 보
+	lock			"nBeam", "beamLct1", "beamLct2",  "beamWdt1", "beamWdt2", "beamHgt1", "beamHgt2"
+	hideparameter	"nBeam", "beamLct1", "beamLct2",  "beamWdt1", "beamWdt2", "beamHgt1", "beamHgt2"
+endif
+
+if	iTreadType = treadType_Center	then
+	lock			"xTextWrk", "xTextUpr", "xCenter_L", "xStart_L", "xEnd_L",	\
+					"xCenter_R", "xStart_R", "xEnd_R", "radius_L",	"radius_R", "strLth", "iStairType_L", "iStairType_R"
+	hideparameter	"xTextWrk", "xTextUpr", "xCenter_L", "xStart_L", "xEnd_L",	\
+					"xCenter_R", "xStart_R", "xEnd_R", "radius_L",	"radius_R", "strLth", "iStairType_L", "iStairType_R"
+endif
+
+!	단 방향 : `원점` - 디딤판 너비 계산 방법
+!-----------------------------------------------------------------------------------------------
+values{2}	"iCalcTrd"	calcTrd_trdnRsr,	stCalcTrd[calcTrd_trdnRsr],
+						calcTrd_AngnRsr,	stCalcTrd[calcTrd_AngnRsr]
+
+if	iCalcTrd = calcTrd_trdnRsr	then
+	lock	"aStr"
+
+	!	각도 계산
+	_aStr = ((strTrd*nRsr)/(PI*strRad))*180
+	parameters	aStr = _aStr
+endif
+
+if	iCalcTrd = calcTrd_AngnRsr	then
+	lock	"strTrd"
+
+	!	디딤판 너비 계산
+	_strTrd = (aStr/180)*PI*strRad
+	_strTrd = _strTrd/nRsr
+	parameters	strTrd = _strTrd
+endif
+
+!	HandRail
+!-----------------------------------------------------------------------------------------------
+values{2}	"iRailSect"	RailSect_Line,	stRailSect[RailSect_Line],
+						RailSect_3D,	stRailSect[RailSect_3D],
+						RailSect_MVO,	stRailSect[RailSect_MVO]
+
+if	not(bHnd_In)	then
+	lock	"bBaluster_In"
+endif
+if	not(bHnd_Out)	then
+	lock	"bBaluster_Out"
+endif
+
+!	Text
+!-----------------------------------------------------------------------------------------------
+dim	fontnames[]
+r = request("FONTNAMES_LIST", "", fontnames)
+values	"stFontType"	fontnames
+
+!===============================================================================================
+!	변수 범위
+!===============================================================================================
+
+!	Stair Type
+values	"xStart_L"	range	[0,	]
+values	"xEnd_L"	range	[0,	]
+
+values	"xStart_R"	range	[0,	]
+values	"xEnd_R"	range	[0,	]
+
+!	Stair
+values	"strWdt"	range	[0.600,	]
+values	"strTrd"	range	[0.200,	1.000]
+values	"strRsr"	range	[0.100,	0.500]
+
+_aStair = atn(strRsr/strTrd)
+_minValue = strRsr*cos(_aStair)
+values	"strThk"	range	[_minValue,	]
+values	"strLth"	range	(0,	)
+
+values	"nRsr"	range	[3,	]
+
+if	iTreadType = treadType_Parallel	then
+	values	"bLndThk"	range	[0,	]
+	values	"uLndThk"	range	[0,	]
+endif
+
+if	iTreadType = treadType_Center	then
+	_uFnsThk = 0
+	_hFnsThk = 0
+	if	bFns	then
+		_uFnsThk = uFnsThk
+		_hFnsThk = hFnsThk
+	endif
+
+	!	계단 기울기
+	_aStair = atn(strRsr/strTrd)
+	_aSubStair = 90 - _aStair
+
+	!	계단 수직 두께
+	_strThk = strThk/cos(_aStair)
+
+	values	"bLndThk"	range	[0,	]
+	values	"uLndThk"	range	[0,	(strRsr*2 + _strThk + _hFnsThk - _uFnsThk)]
+endif
+
+!	Finish
+values	"hFnsThk"	range	(0,	0.150]
+values	"vFnsThk"	range	(0,	0.150]
+values	"bFnsThk"	range	[0,	0.150]
+values	"uFnsThk"	range	[0,	0.150]
+values	"fnsNosing"	range	[0,	0.150]
+
+!	Handrail
+values	"hndOff_Out"	range	[0.050,	0.200]
+values	"hndOff_In"		range	[0.050,	0.200]
+values	"hndRd"			range	(0,	)
+values	"hndWrk_Out"	range	[-hndRd,	]
+values	"hndWrk_In"		range	[-hndRd,	]
+values	"hndUpr_Out"	range	[-hndRd,	]
+values	"hndUpr_In"		range	[-hndRd,	]
+values	"hndHgt"		range	[0.800,	1.600]
+
+!	Break Line
+values	"brkLine_L"	range	[0,	]
+values	"brkLine_R"	range	[0,	]
+
+values	"iWrkBrkLct"	range	[1,	nRsr - 2]
+values	"iUprBrkLct"	range	[1,	nRsr - 2]
+
+!	Text
+values	"textSize"	range	(0,	)
+
+values	"xTextWrk"	range	(0,	strWdt)
+values	"xTextUpr"	range	(0,	strWdt)
+values	"yTextWrk"	range	[0,	]
+values	"yTextUpr"	range	[0,	]
+
+!	내부 곡선 펴기
+values	"exCntWrk"	range	(0,	)
+values	"exCntUpr"	range	(0,	)
+
+values	"exTrdLth"	range	[0,	]
+
+if	vardim1(exTrdLth) < 100 - eps	then
+	for	i = 1	to	100
+		parameters	exTrdLth[i] = 0
+	next	i
+endif
+
+!	하부 보
+values	"nBeam"	0,	1,	2
+
+if	nBeam < 1	then
+	lock			"beamLct1", "beamWdt1", "beamHgt1"
+	hideparameter	"beamLct1", "beamWdt1", "beamHgt1"
+endif
+if	nBeam < 2	then
+	lock			"beamLct2", "beamWdt2", "beamHgt2"
+	hideparameter	"beamLct2", "beamWdt2", "beamHgt2"
+endif
+
+values	"beamLct1"	range	[beamWdt1/2,	strWdt - beamWdt1/2]
+values	"beamLct2"	range	[beamWdt2/2,	strWdt - beamWdt2/2]
+
+values	"beamWdt1"	range	(0,	)
+values	"beamWdt2"	range	(0,	)
+values	"beamHgt1"	range	(0,	)
+values	"beamHgt2"	range	(0,	)
+
+	!	기본값
+	if	vardim1(aExBeamWrk) - 1 < eps	then
+		for	i = 1	to	4
+			parameters	aExBeamWrk[i] = 0
+		next	i
+	endif
+
+	if	vardim1(aExBeamUpr) - 1 < eps	then
+		for	i = 1	to	4
+			parameters	aExBeamUpr[i] = 0
+		next	i
+	endif

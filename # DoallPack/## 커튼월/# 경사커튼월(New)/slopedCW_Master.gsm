@@ -1,0 +1,168 @@
+!===============================================================================================
+!	경사커튼월
+!===============================================================================================
+
+unID = 100
+eps = 0.0001
+
+
+!	코너프레임 유형
+!-----------------------------------------------------------------------------------------------
+FRAME_BOUNDARY = 1
+FRAME_MULLION = 2
+FRAME_TRANSOM = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stFrmType[]
+		stFrmType[1] = "Boundary"
+		stFrmType[2] = "Mullion"
+		stFrmType[3] = "Transom"
+endif
+
+!	멀리언 유형
+!-----------------------------------------------------------------------------------------------
+MLN_TYPE1 = 1
+MLN_TYPE2 = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stMlnType[]
+		stMlnType[1] = "Non-Cap(TYPE1)"
+		stMlnType[2] = "Cap(TYPE2)"
+endif
+
+!	트랜섬 유형
+!-----------------------------------------------------------------------------------------------
+TRS_TYPE1 = 1
+TRS_TYPE2 = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stTrsType[]
+		stTrsType[1] = "Non-Cap(TYPE1)"
+		stTrsType[2] = "Cap(TYPE2)"
+endif
+
+!	 패널 유형
+!-----------------------------------------------------------------------------------------------
+PNL_FIX = 1
+PNL_PROJECT = 2
+PNL_PROJECT_SMOKE = 3
+PNL_SPANDREL = 4
+PNL_GRILL = 5
+PNL_OPEN = 6
+
+PNL_SPANDREL_SUB = 7
+PNL_SPANDREL_SUB2 = 8
+PNL_SPANDREL_SUB3 = 9
+
+PNL_SEP2_HORIZON = 10
+PNL_SEP3_HORIZON = 11
+
+PNL_SEP2_VERTICAL = 12
+PNL_SEP3_VERTICAL = 13
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stPnlType[]
+		stPnlType[1] = "고정창"
+		stPnlType[2] = "프로젝트창"
+		stPnlType[3] = "프로젝트창(배연)"
+		stPnlType[4] = "스팬드럴창(TYPE1)"
+		stPnlType[5] = "그릴창"
+		stPnlType[6] = "OPEN"
+		stPnlType[7] = "스팬드럴창(TYPE2)"
+		stPnlType[8] = "스팬드럴창(TYPE3)"
+		stPnlType[9] = "스팬드럴창(TYPE4)"
+		stPnlType[10] = "2분할 패널(가로)"
+		stPnlType[11] = "3분할 패널(가로)"
+		stPnlType[12] = "2분할 패널(세로)"
+		stPnlType[13] = "3분할 패널(세로)"
+endif
+
+!	 프로젝트창 힌지 위치
+!-----------------------------------------------------------------------------------------------
+HINGE_TOP = 1
+HINGE_BOTTOM = 2
+HINGE_LEFT = 3
+HINGE_RIGHT = 4
+HINGE_TOP_LEFT = 5
+HINGE_TOP_RIGHT = 6
+HINGE_BOTTOM_LEFT = 7
+HINGE_BOTTOM_RIGHT = 8
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stHingeType[]
+		stHingeType[1] = "상단"
+		stHingeType[2] = "하단"
+		stHingeType[3] = "좌측"
+		stHingeType[4] = "우측"
+		stHingeType[5] = "상단+좌측"
+		stHingeType[6] = "상단+우측"
+		stHingeType[7] = "하단+좌측"
+		stHingeType[8] = "하단+우측"
+endif
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+DISPLAY_PROJECTED = 1
+DISPLAY_WITHOVERHEAD = 2
+DISPLAY_OUTLINES = 3
+DISPLAY_OVERHEAD = 4
+DISPLAY_CUTPLANE = 5
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDisplay[]
+		stDisplay[1] = "Projected"
+		stDisplay[2] = "Projected with Overhead"
+		stDisplay[3] = "Outlines Only"
+		stDisplay[4] = "Overhead All"
+		stDisplay[5] = "Cut Plane"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+PROJECTTO_FLOORPLAN = 1
+PROJECTTO_ABSOLUTE = 2
+PROJECTTO_ENTIRE = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stProjectTo[]
+		stProjectTo[1] = "To Floor Plan Range"
+		stProjectTo[2] = "Absolute Display Limit"
+		stProjectTo[3] = "Entire Element"
+endif
+
+!	창호입면도
+!-----------------------------------------------------------------------------------------------
+WINELEV_ON = 1
+WINELEV_OFF = 2
+WINELEV_MVO = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stWinElev[]
+		stWinElev[1] = "ON"
+		stWinElev[2] = "OFF"
+		stWinElev[3] = "by MVO"
+endif
+
+_iWinElev = iWinElev
+
+if	iWinElev = WINELEV_MVO	then
+	_reqWinElevMVO = 0
+	_bSuccess = LIBRARYGLOBAL ("cwMVO",	"iWinElevMVO",	_reqWinElevMVO)
+	if	_bSuccess	then
+		if	_reqWinElevMVO = WINELEV_ON	then
+			_iWinElev = WINELEV_ON
+		endif
+		if	_reqWinElevMVO = WINELEV_OFF	then
+			_iWinElev = WINELEV_OFF
+		endif
+	else
+		print	"Error. There isn't the MVO Library"
+	endif
+else
+	if	iWinElev = WINELEV_ON	then
+		_iWinElev = WINELEV_ON
+	endif
+	if	iWinElev = WINELEV_OFF	then
+		_iWinElev = WINELEV_OFF
+	endif
+endif

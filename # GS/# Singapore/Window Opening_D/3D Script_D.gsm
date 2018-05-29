@@ -1,0 +1,212 @@
+
+
+!======================================================================================================
+!	Window Maker(Opening_D) 20 
+!======================================================================================================
+!   DATE : 2017/4/12 WED
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------
+!  Genaral
+!----------------------------------------------------------------------------------------------
+unID = 1000
+resol	12
+
+	!	3D Text Define
+	!----------------------------------------------------------------------------------------------
+	font_type = "Arial"
+	font_size = 50
+	anchor = 5
+	face_code = 0
+	define style 	"textStyle_3D" font_type, font_size, anchor, face_code
+	set	style	"textStyle_3D"
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  3D Shape
+!----------------------------------------------------------------------------------------------
+addz	mOpening_posy_insert + mOpening_posy_reveal
+
+	!----------------------------------------------------------------------------------------------
+	!  Test Script
+	!----------------------------------------------------------------------------------------------
+	pen	iText_pen
+	material iText_mat
+!	sphere 0.02					!	W.P.
+
+
+	!----------------------------------------------------------------------------------------------
+	!	Definition of Parameters
+	!----------------------------------------------------------------------------------------------
+
+
+	!----------------------------------------------------------------------------------------------
+	!	Opening - Door
+	!----------------------------------------------------------------------------------------------
+	pen	iCont_pen_3d
+	
+	add		mOpening_posX, mOpening_posY, 0
+
+		add	mOpeningWidth/2 + mOpening_Coordinate[1][1],	mOpening_Coordinate[1][2],	0
+
+
+			! 	Opening Index
+			!----------------------------------------------------------------------------------------------
+			if	bOpening_index	then
+				gosub	"Opening_index"
+			endif
+
+
+			if	iSymbol_reveal_side = 0	then
+				addz	0
+			else
+				addz	-gs_sash_thk
+			endif
+
+				gs_trim_outside = 0
+				gs_trim_inside = 0
+				
+				if	iOpening_type = Type_Door | iOpening_type = Type_Door_M	then
+					gs_leaf_optype_m = 1
+					gs_iLeavesConfig = 1
+					MacroName		= "Door 20"
+
+					if	iOpening_type = Type_Door_M	then
+						mulx	-1
+					endif
+						gosub	"callDoor"
+
+					if	iOpening_type = Type_Door_M	then
+						del	1
+					endif
+				endif
+
+				if	iOpening_type = Type_DoubleDoor	then
+					gs_leaf_optype_m = 5
+					gs_iLeavesConfig = 1
+					MacroName		= "Double Door 20"
+
+					gosub	"callDoor"
+				endif
+
+				if	iOpening_type = Type_DoubleDoor_A	then
+					gs_leaf_optype_m = 5
+					gs_iLeavesConfig = 2
+					MacroName		= "Double Door Asymmetric 20"
+
+					gosub	"callDoor"
+				endif
+
+				if	iOpening_type = Type_SlidingDoor	then
+					gs_leaf_optype_m = 11
+					MacroName		= "Sliding Door 20"
+
+					gosub	"callDoor"
+				endif
+
+			del 1
+
+		del 1
+
+	del	1
+
+
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+
+"callDoor"	:	!	Call Macro of Door
+!----------------------------------------------------------------------------------------------
+
+	!	MVO
+	_bMVO = libraryglobal("LibraryGlobals13",	"W_showBOpLine3D",	bMVO)
+	_bOplineStyle = libraryglobal("LibraryGlobals13",	"gs_opline_style_m",	or_iOplineStyle)
+	_bOplineIn = libraryglobal("LibraryGlobals13",	"gs_opline_type_m",	_opLineIn)
+	_bOplineOut = libraryglobal("LibraryGlobals13",	"gs_opline_type_m_out",	_opLineOut)
+
+	if	bMVO	then
+		or_iOplineStyle = or_iOplineStyle
+		if	iDirect = Direct_Normal	then
+			if	_bOplineIn > 0	then	or_iOpLineType3dIn = _opLineIn - 1
+			if	_bOplineOut > 0	then	or_iOpLineType3dOut = _opLineOut - 1
+		else
+			if	_bOplineIn > 0	then	or_iOpLineType3dIn = _opLineOut - 1
+			if	_bOplineOut > 0	then	or_iOpLineType3dOut = _opLineIn - 1
+		endif
+	else
+		or_iOplineStyle = 2
+		or_iOpLineType3dIn = 1
+		or_iOpLineType3dOut = 1
+	endif
+
+	call	MacroName	parameters all	ac_leaf_width		= mOpeningWidth,
+										ac_wallhole_width	= mOpeningWidth,
+										ac_reveal_width		= mOpeningWidth,
+										ac_unit_width		= mOpeningWidth,
+										ac_leaf_height		= mOpeningHeight,
+										ac_wallhole_height	= mOpeningHeight,
+										ac_reveal_height	= mOpeningHeight,
+										ac_unit_height		= mOpeningHeight,
+										gs_SecondLeaf_w		= mOpening_sub,
+										gs_frame_thk		= 0,
+										gs_frame_width		= 0,
+										gs_leaf_optype_m	= gs_leaf_optype_m,
+										gs_trim_outside		= gs_trim_outside,
+										gs_trim_inside		= gs_trim_inside,
+										gs_leaf_mat			= gs_leaf_mat,
+										gs_leaf_matin		= gs_leaf_mat,
+										gs_leaf_grill_mat	= gs_leaf_mat,
+										gs_leaf_grill_mat2	= gs_leaf_mat,
+										gs_leaf_glass_mat	= gs_glass_mat,
+										iDoorPanelType2		= iDoorPanelType,
+										gs_rebate_width		= 0,
+										AC_show2DHotspotsIn3D = 0,
+										gs_fillLeaf			= iWindow_fill_type,
+										gs_penLeaf_fg		= iWindow_fill_pen,
+										gs_penLeaf_bg		= iWindow_back_pen,
+										bOverride_MVO_3D	= 1,
+										or_bOplines3d		= 1,
+										or_iOplineStyle		= or_iOplineStyle,
+										or_iOpLineType3dIn	= or_iOpLineType3dIn,
+										or_iOpLineType3dOut	= or_iOpLineType3dOut,
+										or_opLinePen		= gs_opLinePen,
+										gs_cust_panel2		= gs_cust_panel
+
+
+
+return
+
+
+
+
+!----------------------------------------------------------------------------------------------
+"Opening_index"	:	
+!----------------------------------------------------------------------------------------------
+
+	pen			iText_pen
+	material	iText_mat
+	mTextT = 0.002
+
+	if	iSymbol_mirrored = 0	then	
+		addz	-mTextT
+		mulx	-1
+	else
+		addz	-mTextT
+		mulx	1
+	endif		
+		text	mTextT, 0, iOpening_index
+	del	2
+
+return
+
+
+
+
+

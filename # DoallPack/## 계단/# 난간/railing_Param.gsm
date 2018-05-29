@@ -1,0 +1,539 @@
+!===============================================================================================
+!	난간(직/곡선)
+!===============================================================================================
+
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+!	난간
+!-----------------------------------------------------------------------------------------------
+	!	난간 유형
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iRailType"	Rail_Straight,	stRailType[Rail_Straight],
+							Rail_Curved,	stRailType[Rail_Curved]
+
+	if	not(iRailType = Rail_Curved & iBalusterPlace = Place_Custom)	then
+		parameters	iDistMethod = DistMethod_Length
+		lock	"iDistMethod"
+	endif
+
+	if	not(iRailType = Rail_Straight)	then
+		lock			"xRailPos", "yRailPos"
+		hideparameter	"xRailPos", "yRailPos"
+	endif
+
+	if	not(iRailType = Rail_Curved)	then
+		lock			"aRailPos", "rRailPos"
+		hideparameter	"aRailPos", "rRailPos"
+	endif
+
+	!	난간 단면 형태
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iRailShape"	Shape_Rectangle,	stShape[Shape_Rectangle],
+								Shape_Circle,		stShape[Shape_Circle]
+
+	if	iRailShape = Shape_Rectangle	then
+		lock			"shapeRad"
+		hideparameter	"shapeRad"
+	else
+		lock			"shapeWdt", "shapeHgt"
+		hideparameter	"shapeWdt", "shapeHgt"
+	endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	난간 동자
+!-----------------------------------------------------------------------------------------------
+	!	난간 동자 전체 끄기
+	!-----------------------------------------------------------------------------------------------
+	if	bBalusterOff	then
+		lock	"iBalusterShape", "shapeSubRad", "shapeSubWdt", "shapeSubHgt", "iBalusterPlace", "bBaluster_SP", "bBaluster_EP",	\
+				"iBalusterNum", "bPlus_Baluster", "bMinus_Baluster", "modWdt", "iDistMethod", "eachLth", "eachAng", "exBtmLth"
+	endif
+
+	!	난간 동자 단면 형태
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iBalusterShape"	Shape_Rectangle,	stShape[Shape_Rectangle],
+									Shape_Circle,		stShape[Shape_Circle]
+
+	if	iBalusterShape = Shape_Rectangle	then
+		lock			"shapeSubRad"
+		hideparameter	"shapeSubRad"
+	else
+		lock			"shapeSubWdt", "shapeSubHgt"
+		hideparameter	"shapeSubWdt", "shapeSubHgt"
+	endif
+
+	!	난간 동자 배치 방법
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iBalusterPlace"	Place_Length,	stBalusterPlace[Place_Length],
+									Place_Custom,	stBalusterPlace[Place_Custom]
+
+	if	iBalusterPlace = Place_Length	then
+		lock			"bPlus_Baluster", "bMinus_Baluster", "eachLth"
+		hideparameter	"bPlus_Baluster", "bMinus_Baluster", "eachLth"
+	else
+		lock			"modWdt"
+		hideparameter	"modWdt"
+	endif
+
+	lock	"iBalusterNum"	!	자동계산
+
+	! if	iBalusterNum < eps	then
+	! 	lock	"bBaluster_SP", "bBaluster_EP"
+	! 	parameters	bBaluster_SP = 1,
+	! 				bBaluster_EP = 1
+	! endif
+
+	!	간격 설정 방법
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iDistMethod"	DistMethod_Length,	stDistMethod[DistMethod_Length],
+								DistMethod_Angle,	stDistMethod[DistMethod_Angle]
+
+	if	iDistMethod = DistMethod_Length	then
+		lock			"eachAng"
+		hideparameter	"eachAng"
+	endif
+
+	if	iDistMethod = DistMethod_Angle	then
+		lock			"eachLth"
+		hideparameter	"eachLth"
+	endif
+
+!-----------------------------------------------------------------------------------------------
+!	수평재
+!-----------------------------------------------------------------------------------------------
+	!	수평재 전체 끄기
+	!-----------------------------------------------------------------------------------------------
+	if	bHRailOff	then
+		lock	"hRailRad", "iHRailPlace", "iHRailNum", "bPlus_HRail", "bMinus_HRail", "eachDist"
+	endif
+
+	!	배치 방법
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iHRailPlace"	HRailPlace_Equal,	stHRailPlace[HRailPlace_Equal],
+								HRailPlace_Unequal,	stHRailPlace[HRailPlace_Unequal]
+
+	if	iHRailPlace = HRailPlace_Equal	then
+		lock			"eachDist"
+		hideparameter	"eachDist"
+	endif
+
+	!	개수
+	!-----------------------------------------------------------------------------------------------
+	dim	_HRailNum[]
+	_nHRail = 11
+	for	i = 1	to	_nHRail
+		_HRailNum[i] = i - 1
+	next	i
+
+	values	"iHRailNum"	_HRailNum
+	lock	"iHRailNum"	!	자동계산
+
+!-----------------------------------------------------------------------------------------------
+!	난간 단면 표현 방법
+!-----------------------------------------------------------------------------------------------
+values{2}	"iRailSect"	RailSect_Line,	stRailSect[RailSect_Line],
+						RailSect_3D,	stRailSect[RailSect_3D],
+						RailSect_MVO,	stRailSect[RailSect_MVO]
+
+!===============================================================================================
+!	변수 계산
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+!	난간
+!-----------------------------------------------------------------------------------------------
+	!	난간 전체 길이(평면)
+	!-----------------------------------------------------------------------------------------------
+	_calcLth_2D = 0
+	if	iRailType = Rail_Straight	then
+		_calcLth_2D = sqr(xRailPos^2 + yRailPos^2)
+	endif
+	if	iRailType = Rail_Curved	then
+		_calcLth_2D = (aRailPos/180)*PI*rRailPos
+	endif
+
+	parameters	calcLth_2D = _calcLth_2D
+	lock	"calcLth_2D"
+
+	!	난간 전체 길이(3D)
+	!-----------------------------------------------------------------------------------------------
+	_calcLth_3D = 0
+	_calcLth_3D = sqr(_calcLth_2D^2 + zRailPos^2)
+
+	parameters	calcLth_3D = _calcLth_3D
+	lock	"calcLth_3D"
+
+!-----------------------------------------------------------------------------------------------
+!	난간 동자
+!-----------------------------------------------------------------------------------------------
+	!	난간 동자 개별 길이
+	!-----------------------------------------------------------------------------------------------
+	dim	_eachLth[],	_eachAng[]
+
+	!	난간 동자 배치 방법 : 일정한 간격
+	if	iBalusterPlace = Place_Length	then
+
+		_countNum = int(calcLth_2D/modWdt)
+
+		if	fra(calcLth_2D/modWdt) < eps	then
+			_countNum = _countNum - 1
+		endif
+
+		if	_countNum > eps	then
+			if	iRailType = Rail_Straight	then
+				for	i = 1	to	_countNum
+					_eachLth[i] = modWdt*i
+				next	i
+
+				parameters	eachLth = _eachLth
+			endif
+
+			if	iRailType = Rail_Curved	then
+				for	i = 1	to	_countNum
+					_eachLth[i] = modWdt*i
+					_eachAng[i] = ((modWdt*i)/(PI*rRailPos))*180
+				next	i
+
+				parameters	eachLth = _eachLth
+				parameters	eachAng = _eachAng
+			endif
+		endif
+
+		parameters	iBalusterNum = _countNum
+	endif
+
+	!	난간 동자 배치 방법 : 사용자 정의
+	if	iBalusterPlace = Place_Custom	then
+		if	iRailType = Rail_Curved	then
+			if	iBalusterNum > eps	then
+				if	iDistMethod = DistMethod_Length	then
+					for	i = 1	to	iBalusterNum
+						_eachAng[i] = (eachLth[i]/(PI*rRailPos))*180
+					next	i
+
+					parameters	eachAng = _eachAng
+				endif
+
+				if	iDistMethod = DistMethod_Angle	then
+					for	i = 1	to	iBalusterNum
+						_eachLth[i] = (eachAng[i]/180)*PI*rRailPos
+					next	i
+
+					parameters	eachLth = _eachLth
+				endif
+			endif
+		endif
+	endif
+
+	!	난간 동자 개수 +/-
+	!-----------------------------------------------------------------------------------------------
+	if	iBalusterNum = 0	then
+		lock	"bMinus_Baluster"
+	endif
+	if	iBalusterNum = 100	then
+		lock	"bPlus_Baluster"
+	endif
+
+	!	개수 +
+	if	bPlus_Baluster	then
+		_idxNow = iBalusterNum
+		_idxNext = _idxNow + 1
+
+		if	_idxNow = 0	then
+			if	iRailType = Rail_Straight	then
+				parameters	eachLth[_idxNext] = calcLth_2D/2
+			endif
+
+			if	iRailType = Rail_Curved	then
+				if	iDistMethod = DistMethod_Length	then
+					parameters	eachLth[_idxNext] = calcLth_2D/2
+					parameters	eachAng[_idxNext] = (eachLth[_idxNext]/(PI*rRailPos))*180
+				endif
+
+				if	iDistMethod = DistMethod_Angle	then
+					parameters	eachAng[_idxNext] = aRailPos/2
+					parameters	eachLth[_idxNext] = (eachAng[_idxNext]/180)*PI*rRailPos
+				endif
+			endif
+		else
+			if	iRailType = Rail_Straight	then
+				parameters	eachLth[_idxNext] = eachLth[_idxNow] + (calcLth_2D - eachLth[_idxNow])/2
+			endif
+
+			if	iRailType = Rail_Curved	then
+				if	iDistMethod = DistMethod_Length	then
+					parameters	eachLth[_idxNext] = eachLth[_idxNow] + (calcLth_2D - eachLth[_idxNow])/2
+					parameters	eachAng[_idxNext] = (eachLth[_idxNext]/(PI*rRailPos))*180
+				endif
+
+				if	iDistMethod = DistMethod_Angle	then
+					parameters	eachAng[_idxNext] = eachAng[_idxNow] + (aRailPos - eachAng[_idxNow])/2
+					parameters	eachLth[_idxNext] = (eachAng[_idxNext]/180)*PI*rRailPos
+				endif
+			endif
+		endif
+
+		parameters	iBalusterNum = _idxNext
+		parameters	bPlus_Baluster = 0
+	endif
+
+	!	개수 -
+	if	bMinus_Baluster	then
+		_idxNow = iBalusterNum
+		_idxPrev = _idxNow - 1
+
+		if	iRailType = Rail_Straight	then
+			parameters	eachLth[_idxNow] = 0
+		endif
+
+		if	iRailType = Rail_Curved	then
+			parameters	eachLth[_idxNow] = 0
+			parameters	eachAng[_idxNow] = 0
+		endif
+
+		parameters	iBalusterNum = _idxPrev
+		parameters	bMinus_Baluster = 0
+	endif
+
+	!	난간 동자 개별 길이 제한값
+	!-----------------------------------------------------------------------------------------------
+	!	난간 동자 배치 방법 : 사용자 정의
+	if	iBalusterPlace = Place_Custom	then
+		if	iBalusterNum > eps	then
+			if	iRailType = Rail_Straight	then
+				! if	eachLth[1] < eps	then
+				! 	parameters	eachLth[1] = 0.010
+				! endif
+
+				for	i = 1	to	iBalusterNum - 1
+					if	eachLth[i + 1] - eachLth[i] < -eps	then
+						parameters	eachLth[i] = eachLth[i + 1] - 0.010
+					endif
+				next	i
+
+				! if	calcLth_2D - eachLth[iBalusterNum] < -eps	then
+				! 	parameters	eachLth[iBalusterNum] = calcLth_2D - 0.010
+				! endif
+			endif
+
+			if	iRailType = Rail_Curved	then
+				if	iDistMethod = DistMethod_Length	then
+					! if	eachLth[1] < eps	then
+					! 	parameters	eachLth[1] = 0.010
+					! endif
+
+					for	i = 1	to	iBalusterNum - 1
+						if	eachLth[i + 1] - eachLth[i] < -eps	then
+							parameters	eachLth[i] = eachLth[i + 1] - 0.010
+						endif
+					next	i
+
+					! if	calcLth_2D - eachLth[iBalusterNum] < -eps	then
+					! 	parameters	eachLth[iBalusterNum] = calcLth_2D - 0.010
+					! endif
+				endif
+
+				if	iDistMethod = DistMethod_Angle	then
+					! if	eachAng[1] < eps	then
+					! 	parameters	eachAng[1] = 0.100
+					! endif
+
+					for	i = 1	to	iBalusterNum - 1
+						if	eachAng[i + 1] - eachAng[i] < -eps	then
+							parameters	eachAng[i] = eachAng[i + 1] - 0.100
+						endif
+					next	i
+
+					! if	aRailPos - eachAng[iBalusterNum] < -eps	then
+					! 	parameters	eachAng[iBalusterNum] = aRailPos - 0.100
+					! endif
+				endif
+			endif
+		endif
+	endif
+
+	!	난간 동자 하부 연장 길이 개수
+	!-----------------------------------------------------------------------------------------------
+	_nExBtmLth = vardim1(exBtmLth)
+
+	if	(_nExBtmLth - (iBalusterNum + 2)) < -eps	then
+		for	i = 1	to	(iBalusterNum + 2)
+			parameters	exBtmLth[i] = 0
+		next	i
+	endif
+
+!-----------------------------------------------------------------------------------------------
+!	수평재
+!-----------------------------------------------------------------------------------------------
+	!	수평재 높이
+	!-----------------------------------------------------------------------------------------------
+	dim	_eachDist[]
+
+	if	iHRailPlace = HRailPlace_Equal	then
+		_equalDist = railHgt/(iHRailNum + 1)
+
+		for	i = 1	to	iHRailNum
+			_eachDist[i] = _equalDist*i
+		next	i
+
+		parameters	eachDist = _eachDist
+	endif
+
+	!	수평재 개수 +/-
+	!-----------------------------------------------------------------------------------------------
+	if	iHRailNum = 0	then
+		lock	"bMinus_HRail"
+	endif
+	if	iHRailNum = 10	then
+		lock	"bPlus_HRail"
+	endif
+
+	!	개수 +
+	if	bPlus_HRail	then
+		_idxNow = iHRailNum
+		_idxNext = _idxNow + 1
+
+		if	_idxNow = 0	then
+			parameters	eachDist[_idxNext] = railHgt/2
+		else
+			parameters	eachDist[_idxNext] = eachDist[_idxNow] + (railHgt - eachDist[_idxNow])/2
+		endif
+
+		parameters	iHRailNum = _idxNext
+		parameters	bPlus_HRail = 0
+	endif
+
+	!	개수 -
+	if	bMinus_HRail	then
+		_idxNow = iHRailNum
+		_idxPrev = _idxNow - 1
+
+		parameters	eachDist[_idxNow] = 0
+
+		parameters	iHRailNum = _idxPrev
+		parameters	bMinus_HRail = 0
+	endif
+
+
+	!	수평재 높이 제한값
+	!-----------------------------------------------------------------------------------------------
+	if	iHRailPlace = HRailPlace_Unequal	then
+		if	iHRailNum > 1	then
+			! if	eachDist[1] < eps	then
+			! 	parameters	eachDist[1] = 0.010
+			! endif
+
+			for	i = 1	to	iHRailNum - 1
+				if	eachDist[i + 1] - eachDist[i] < -eps	then
+					parameters	eachDist[i] = eachDist[i + 1] - 0.010
+				endif
+			next	i
+
+			if	calcLth_2D - eachDist[iHRailNum] < -eps	then
+				parameters	eachDist[iHRailNum] = railHgt - 0.010
+			endif
+		endif
+	endif
+
+!===============================================================================================
+!	변수 제한값
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+!	난간
+!-----------------------------------------------------------------------------------------------
+	!	난간 생성 길이/각도
+	!-----------------------------------------------------------------------------------------------
+	values	"rRailPos"	range	(0,	)
+	values	"aRailPos"	range	(0,	360)
+
+	values	"railHgt"	range	(0,	)
+
+	!	난간 연장 길이
+	!-----------------------------------------------------------------------------------------------
+	values	"exLth_SP"	range	[0,	]
+	values	"exLth_EP"	range	[0,	]
+
+	!	난간 단면
+	!-----------------------------------------------------------------------------------------------
+	values	"shapeWdt"	range	(0,	)
+	values	"shapeHgt"	range	(0,	)
+	values	"shapeRad"	range	(0,	)
+
+	!	난간 Cut 각도
+	!-----------------------------------------------------------------------------------------------
+		!	시작점
+		_aRange_SP = 90
+
+		repeat
+			_referRange_SP = _halfRail/tan(_aRange_SP)
+
+			_aRange_SP = _aRange_SP - 0.1
+
+		until	(_halfRail + exLth_SP) - _referRange_SP < eps
+		
+		values	"aCutRail_SP"	range	[_aRange_SP,	180 - _aRange_SP]
+
+		!	끝점
+		_aRange_EP = 90
+
+		repeat
+			_referRange_EP = _halfRail/tan(_aRange_EP)
+
+			_aRange_EP = _aRange_EP - 0.1
+
+		until	(_halfRail + exLth_EP) - _referRange_EP < eps
+		
+		values	"aCutRail_EP"	range	[_aRange_EP,	180 - _aRange_EP]
+
+!-----------------------------------------------------------------------------------------------
+!	난간 동자
+!-----------------------------------------------------------------------------------------------
+	!	난간 동자 단면
+	!-----------------------------------------------------------------------------------------------
+	if	iRailShape = Shape_Rectangle	then
+		_rangeWdt = shapeWdt
+		_rangeRad = shapeWdt/2
+	endif
+	if	iRailShape = Shape_Circle	then
+		_rangeWdt = shapeRad*2
+		_rangeRad = shapeRad
+	endif
+
+	values	"shapeSubWdt"	range	(0,	]
+	values	"shapeSubHgt"	range	(0,	_rangeWdt]
+	values	"shapeSubRad"	range	(0,	_rangeRad]
+
+	!	난간 동자 간격
+	!-----------------------------------------------------------------------------------------------
+	values	"modWdt"	range	(0,	calcLth_2D)
+
+	!	난간 동자 위치(길이/각도)
+	!-----------------------------------------------------------------------------------------------
+	values	"eachLth"	range	[0,	calcLth_2D]
+	values	"eachAng"	range	[0,	aRailPos]
+
+	!	난간 동자 하부 연장 길이
+	!-----------------------------------------------------------------------------------------------
+	values	"exBtmLth"	range	[0,	)
+
+
+!-----------------------------------------------------------------------------------------------
+!	수평재
+!-----------------------------------------------------------------------------------------------
+	!	수평재 단면 반지름
+	!-----------------------------------------------------------------------------------------------
+	if	iBalusterShape = Shape_Rectangle	then
+		_rangeRadH = shapeSubHgt/2
+	endif
+	if	iBalusterShape = Shape_Circle	then
+		_rangeRadH = shapeSubRad
+	endif
+
+	values	"hRailRad"	range	(0,	_rangeRadH]
+
+	!	수평재 높이
+	!-----------------------------------------------------------------------------------------------
+	values	"eachDist"	range	[0,	railHgt)

@@ -1,0 +1,629 @@
+!-----------------------------------------------------------------------------------------------
+!	공통 
+!-----------------------------------------------------------------------------------------------
+
+!	중심점
+hotspot2	0,	0,	unID	:	unID = unID + 1
+! circle2	0,	0,	0.01
+
+!	스탬프 끄기
+if	not(bDrawStamp)	then	end
+
+!-----------------------------------------------------------------------------------------------
+!	텍스트 설정
+!-----------------------------------------------------------------------------------------------
+
+	!	글꼴 정의
+	!-----------------------------------------------------------------------------------------------
+	textStyles = textBold + 2 * textItalic + 4 * textUnder
+	define style	"textStyle_name"		AC_TextFont_1,		nameSize,	8,	textStyles
+	define style	"textStyle_ceil"		AC_TextFont_1,		ceilSize,	8,	textStyles
+	define style	"textStyle_calc"		AC_TextFont_1,		calcSize,	8,	textStyles
+	define style	"textStyle_fLev"		AC_TextFont_1,		fLevSize,	8,	textStyles
+	define style	"textStyle_sLev"		AC_TextFont_1,		sLevSize,	8,	textStyles
+	set style	"textStyle_name"
+	pen	textPen
+
+	!	글꼴 특성
+	!-----------------------------------------------------------------------------------------------
+		!	실명
+		r = request("Height_of_style",	"textStyle_name",	_textHgt,	_descent,	_leading)
+		_textHgt_name = _textHgt/1000*GLOB_SCALE
+		_textHalf_name = nameSize/2 + _descent + _leading
+		_textHalf_name = _textHalf_name/1000*GLOB_SCALE
+
+		!	천정고
+		r = request("Height_of_style",	"textStyle_ceil",	_textHgt,	_descent,	_leading)
+		_textHalf_ceil = ceilSize/2 + _descent + _leading
+		_textHalf_ceil = _textHalf_ceil/1000*GLOB_SCALE
+
+		!	실크기
+		r = request("Height_of_style",	"textStyle_calc",	_textHgt,	_descent,	_leading)
+		_textHalf_calc = calcSize/2 + _descent + _leading
+		_textHalf_calc = _textHalf_calc/1000*GLOB_SCALE
+
+		!	F.L
+		r = request("Height_of_style",	"textStyle_fLev",	_textHgt,	_descent,	_leading)
+		_textHalf_flev = fLevSize/2 + _descent + _leading
+		_textHalf_flev = _textHalf_flev/1000*GLOB_SCALE
+
+		!	S.L
+		r = request("Height_of_style",	"textStyle_sLev",	_textHgt,	_descent,	_leading)
+		_textHalf_sLev = sLevSize/2 + _descent + _leading
+		_textHalf_sLev = _textHalf_sLev/1000*GLOB_SCALE
+
+
+	!	텍스트_Paragraph
+	!-----------------------------------------------------------------------------------------------
+		!	실명
+		if	abs(_nTextLine - 1) < eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	1
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1]
+			endparagraph
+			paragraph	"pg_NAME_Refer"	textPos,	0,	0,	0,	1
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1]
+			endparagraph
+		endif
+
+		if	abs(_nTextLine - 2) < eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2]
+			endparagraph
+			paragraph	"pg_NAME_Refer"	textPos,	0,	0,	0,	1
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2]
+			endparagraph
+		endif
+
+		if	abs(_nTextLine - 3) < eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2] + "\n"
+				enterText[3]
+			endparagraph
+			paragraph	"pg_NAME_Refer"	textPos,	0,	0,	0,	1
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2] + "\n"
+				enterText[3]
+			endparagraph
+		endif
+
+		if	abs(_nTextLine - 4) < eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2] + "\n"
+				enterText[3] + "\n"
+				enterText[4]
+			endparagraph
+			paragraph	"pg_NAME_Refer"	textPos,	0,	0,	0,	1
+				pen		textPen
+				style	"textStyle_name"
+				enterText[1] + "\n"
+				enterText[2] + "\n"
+				enterText[3] + "\n"
+				enterText[4]
+			endparagraph
+		endif
+
+		if	_nTextLine - 5 > -eps	then
+			paragraph	"pg_NAME"	textPos,	0,	0,	0,	enterTextSpace
+				pen		textPen
+				style	"textStyle_name"
+				"\n"
+				"\n"
+				"실명이 5줄 이상 넘어갈 수 없습니다."
+				"\n"
+				"\n"
+			endparagraph
+			paragraph	"pg_NAME_Refer"	textPos,	0,	0,	0,	1
+				pen		textPen
+				style	"textStyle_name"
+				"\n"
+				"\n"
+				"실명이 5줄 이상 넘어갈 수 없습니다."
+				"\n"
+				"\n"
+			endparagraph
+		endif
+
+		!	천정고
+		if	not(bCustomCeil)	then
+			_stCeil = "CH:" + str("%.0m", ROOM_HEIGHT*1000)
+		else
+			_stCeil = stCustomCeil
+		endif
+
+		paragraph	"pg_CEIL"	2,	0,	0,	0,	1
+			pen		textPen
+			style	"textStyle_ceil"
+			_stCeil
+		endparagraph
+
+		!	실크기
+		paragraph	"pg_CALC"	2,	0,	0,	0,	1
+			pen		textPen
+			style	"textStyle_calc"
+			stCalc
+		endparagraph
+
+		!	마감레벨
+		if	not(bCustomFLev)	then
+			_stFLev = (ROOM_BASELEV + ROOM_FL_THICK)*1000
+				if	abs(_stFLev) < eps	then
+					_subTxt = "±"
+				endif
+				if	_stFLev > 0	then
+					_subTxt = "+"
+				endif
+				if	_stFLev < 0	then
+					_subTxt = ""
+				endif
+			_stFLev = _subTxt + str(_stFLev,	1,	0)
+		else
+			_stFLev = stCustomFLev
+		endif
+
+		paragraph	"pg_FLEV"	2,	0,	0,	0,	1
+			pen		textPen
+			style	"textStyle_fLev"
+			_stFLev
+		endparagraph
+
+		!	골조레벨
+		if	not(bCustomSLev)	then
+			_stSLev = (ROOM_BASELEV)*1000
+				if	abs(_stSLev) < eps	then
+					_subTxt = "±"
+				endif
+				if	_stSLev > 0	then
+					_subTxt = "+"
+				endif
+				if	_stSLev < 0	then
+					_subTxt = ""
+				endif
+			_stSLev = "SL" + _subTxt + str(_stSLev,	1,	0)
+		else
+			_stSLev = stCustomSLev
+		endif
+
+		paragraph	"pg_SLEV"	2,	0,	0,	0,	1
+			pen		textPen
+			style	"textStyle_sLev"
+			_stSLev
+		endparagraph
+
+	!	텍스트_Textblock
+	!-----------------------------------------------------------------------------------------------
+		!	textblock 속성값 정의
+		blockWidth = 0
+		blockAnchor = 8
+		blockAngle = 0
+		blockFixedHeight = 1
+
+		!	실명
+		textblock	"tbName"	blockWidth, blockAnchor, blockAngle, nameWF, nameSCF, blockFixedHeight,
+								"pg_NAME"
+
+			r = request("TEXTBLOCK_INFO",	"tbName",	_tbNameWidth,	_tbNameHeight)
+
+			_tbNameWidth = _tbNameWidth/1000*GLOB_SCALE
+			_tbNameHeight = _tbNameHeight/1000*GLOB_SCALE
+
+		textblock	"tbName_Refer"	blockWidth, blockAnchor, blockAngle, nameWF, nameSCF, blockFixedHeight,
+								"pg_NAME_Refer"
+
+			r = request("TEXTBLOCK_INFO",	"tbName_Refer",	_tbNameWidth_Refer,	_tbNameHeight_Refer)
+
+			_tbNameWidth_Refer = _tbNameWidth_Refer/1000*GLOB_SCALE
+			_tbNameHeight_Refer = _tbNameHeight_Refer/1000*GLOB_SCALE
+
+			_distRefer = ((_tbNameHeight_Refer - _tbNameHeight)/_nTextLine)
+			if	_distRefer > eps	then
+				_distRefer = _distRefer/2
+			else
+				_distRefer = _distRefer
+			endif
+
+		!	천정고
+		textblock	"tbCeil"	blockWidth, blockAnchor, blockAngle, ceilWF, ceilSCF, blockFixedHeight,
+								"pg_CEIL"
+
+			r = request("TEXTBLOCK_INFO",	"tbCeil",	_tbCeilWidth,	_tbCeilHeight)
+
+			_tbCeilWidth = _tbCeilWidth/1000*GLOB_SCALE
+			_tbCeilHeight = _tbCeilHeight/1000*GLOB_SCALE
+
+		!	실크기
+		textblock	"tbCalc"	blockWidth, blockAnchor, blockAngle, calcWF, calcSCF, blockFixedHeight,
+								"pg_CALC"
+
+			r = request("TEXTBLOCK_INFO",	"tbCalc",	_tbCalcWidth,	_tbCalcHeight)
+
+			_tbCalcWidth = _tbCalcWidth/1000*GLOB_SCALE
+			_tbCalcHeight = _tbCalcHeight/1000*GLOB_SCALE
+
+		!	마감레벨
+		textblock	"tbFLev"	blockWidth, blockAnchor, blockAngle, fLevWF, fLevSCF, blockFixedHeight,
+								"pg_FLEV"
+
+			r = request("TEXTBLOCK_INFO",	"tbFLev",	_tbFLevWidth,	_tbFLevHeight)
+
+			_tbFLevWidth = _tbFLevWidth/1000*GLOB_SCALE
+			_tbFLevHeight = _tbFLevHeight/1000*GLOB_SCALE
+
+		!	골조레벨
+		textblock	"tbSLev"	blockWidth, blockAnchor, blockAngle, sLevWF, sLevSCF, blockFixedHeight,
+								"pg_SLEV"
+
+			r = request("TEXTBLOCK_INFO",	"tbSLev",	_tbSLevWidth,	_tbSLevHeight)
+
+			_tbSLevWidth = _tbSLevWidth/1000*GLOB_SCALE
+			_tbSLevHeight = _tbSLevHeight/1000*GLOB_SCALE
+
+!-----------------------------------------------------------------------------------------------
+!	스탬프 크기
+!-----------------------------------------------------------------------------------------------
+
+	!	스탬프 자동 크기 ON
+	!-----------------------------------------------------------------------------------------------
+	if	bAutoSize	then
+		!	변수정의
+		_nDivide_2nd = 1
+		if	_iStampType = STAMP_TYPE4	then
+			_nDivide_2nd = 2
+		endif
+		_nDivide_3rd = 2
+
+		!	여백
+		_spaceX = stampSpaceX
+		_spaceY = stampSpaceY
+
+		!	실명
+		_nameWidth = _tbNameWidth*(1 + _spaceX)
+		_nameHeight = _tbNameHeight + ((_tbNameHeight_Refer/2)/_nTextLine)*_spaceY
+
+		!	천정고
+		_ceilWidth = _tbCeilWidth*(1 + _spaceX/_nDivide_2nd)
+		_ceilHeight = _tbCeilHeight*(1 + _spaceY)
+
+		!	실크기
+		_calcWidth = _tbCalcWidth*(1 + _spaceX/_nDivide_2nd)
+		_calcHeight = _tbCalcHeight*(1 + _spaceY)
+
+		!	마감레벨
+		_fLevWidth = _tbFLevWidth*(1 + _spaceX/_nDivide_3rd)
+		_fLevHeight = _tbFLevHeight*(1 + _spaceY)
+
+		!	골조레벨
+		_sLevWidth = _tbSLevWidth*(1 + _spaceX/_nDivide_3rd)
+		_sLevHeight = _tbSLevHeight*(1 + _spaceY)
+
+		!	스탬프 크기
+		if	_iStampType = STAMP_TYPE1	then
+			_stampWidth = _nameWidth
+			_stampHeight = _nameHeight
+		endif
+
+		if	_iStampType = STAMP_TYPE2	then
+			_cellWidth_3rd = max(_fLevWidth, _sLevWidth)*2
+			_stampWidth = max(_nameWidth, _cellWidth_3rd)
+			_stampHeight = _nameHeight + max(_fLevHeight, _sLevHeight)
+		endif
+
+		if	_iStampType = STAMP_TYPE3	then
+			_cellWidth_3rd = max(_fLevWidth, _sLevWidth)*2
+			_stampWidth = max(_nameWidth, _ceilWidth, _cellWidth_3rd)
+			_stampHeight = _nameHeight + _ceilHeight + max(_fLevHeight, _sLevHeight)
+		endif
+
+		if	_iStampType = STAMP_TYPE4	then
+			_cellWidth_2nd = max(_ceilWidth, _calcWidth)*2
+			_cellWidth_3rd = max(_fLevWidth, _sLevWidth)*2
+			_stampWidth = max(_nameWidth, _cellWidth_2nd, _cellWidth_3rd)
+			_stampHeight = _nameHeight + max(_ceilHeight, _calcHeight) + max(_fLevHeight, _sLevHeight)
+		endif
+	endif
+
+	!	스탬프 자동 크기 OFF
+	!-----------------------------------------------------------------------------------------------
+	if	not(bAutoSize)	then
+		_customWidth = customWidth*GLOB_SCALE
+		_customHeight = customHeight*GLOB_SCALE
+
+		!	실명
+		_nameWidth = _customWidth
+		_nameHeight = _customHeight + _customHeight*(_nTextLine - 1)*enterTextSpace
+
+		!	천정고
+		if	_iStampType = STAMP_TYPE3	then
+			_ceilWidth = _customWidth
+		endif
+		if	_iStampType = STAMP_TYPE4	then
+			_ceilWidth = _customWidth/2
+		endif
+		_ceilHeight = _customHeight
+
+		!	실크기
+		_calcWidth = _customWidth/2
+		_calcHeight = _customHeight
+
+		!	마감레벨
+		_fLevWidth = _customWidth/2
+		_fLevHeight = _customHeight
+
+		!	골조레벨
+		_sLevWidth = _customWidth/2
+		_sLevHeight = _customHeight
+
+		!	스탬프 크기
+		_stampWidth = _nameWidth
+
+		if	_iStampType = STAMP_TYPE1	then
+			_stampHeight = _nameHeight
+		endif
+
+		if	_iStampType = STAMP_TYPE2	then
+			_stampHeight = _nameHeight + max(_fLevHeight, _sLevHeight)
+		endif
+
+		if	_iStampType = STAMP_TYPE3	then
+			_stampHeight = _nameHeight + _ceilHeight + max(_fLevHeight, _sLevHeight)
+		endif
+
+		if	_iStampType = STAMP_TYPE4	then
+			_stampHeight = _nameHeight + max(_ceilHeight, _calcHeight) + max(_fLevHeight, _sLevHeight)
+		endif
+	endif
+
+!-----------------------------------------------------------------------------------------------
+!	2D 요소
+!-----------------------------------------------------------------------------------------------
+
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+	hotspot2	-_stampWidth/2,	-_stampHeight/2,	unID	:	unID = unID + 1
+	hotspot2	-_stampWidth/2,	_stampHeight/2,		unID	:	unID = unID + 1
+	hotspot2	_stampWidth/2,	_stampHeight/2,		unID	:	unID = unID + 1
+	hotspot2	_stampWidth/2,	-_stampHeight/2,	unID	:	unID = unID + 1
+
+	if	not(_iStampType = STAMP_TYPE1)	then
+		hotspot2	-_stampWidth/2,	-_stampHeight/2 + _fLevHeight,	unID	:	unID = unID + 1
+		hotspot2	_stampWidth/2,	-_stampHeight/2 + _fLevHeight,	unID	:	unID = unID + 1
+	endif
+
+	if	_iStampType = STAMP_TYPE3 | _iStampType = STAMP_TYPE4	then
+		hotspot2	-_stampWidth/2,	-_stampHeight/2 + _fLevHeight + _ceilHeight,	unID	:	unID = unID + 1
+		hotspot2	_stampWidth/2,	-_stampHeight/2 + _fLevHeight + _ceilHeight,	unID	:	unID = unID + 1
+	endif
+
+		!	스탬프 크기
+		if	not(bAutoSize)	then
+			halfWidth = halfWidth*GLOB_SCALE
+			customWidth = customWidth*GLOB_SCALE
+
+			entireHeight = entireHeight*GLOB_SCALE
+			halfHeight = halfHeight*GLOB_SCALE
+			customHeight = customHeight*GLOB_SCALE
+			
+			add2	0,	-_stampHeight/2
+				gosub	"hsp_halfWidth"
+			del 1
+
+			add2	0,	_stampHeight/2
+				gosub	"hsp_halfWidth"
+			del 1
+
+			if	_nTextLine = 1	then
+				add2	-_stampWidth/2,	0
+					gosub	"hsp_halfHeight"
+				del 1
+
+				add2	_stampWidth/2,	0
+					gosub	"hsp_halfHeight"
+				del 1
+			endif
+		endif
+
+	!	텍스트
+	!-----------------------------------------------------------------------------------------------
+	pen	textPen
+	
+	add2	-_stampWidth/2,	-_stampHeight/2
+		if	_iStampType = STAMP_TYPE1	then
+			add2	_stampWidth/2,	_stampHeight/2
+				gosub	"textName"
+			del 1
+		endif
+
+		if	_iStampType = STAMP_TYPE2	then
+			add2	_stampWidth/2,	_fLevHeight + _nameHeight/2
+				gosub	"textName"
+			del 1
+			add2	_stampWidth/4,	_fLevHeight/2
+				gosub	"textFLev"
+			del 1
+			add2	_stampWidth/2 + _stampWidth/4,	_sLevHeight/2
+				gosub	"textSLev"
+			del 1
+		endif
+
+		if	_iStampType = STAMP_TYPE3	then
+			add2	_stampWidth/2,	_fLevHeight + _ceilHeight + _nameHeight/2
+				gosub	"textName"
+			del 1
+			add2	_stampWidth/2,	_fLevHeight + _ceilHeight/2
+				gosub	"textCeil"
+			del 1
+			add2	_stampWidth/4,	_fLevHeight/2
+				gosub	"textFLev"
+			del 1
+			add2	_stampWidth/2 + _stampWidth/4,	_sLevHeight/2
+				gosub	"textSLev"
+			del 1
+		endif
+
+		if	_iStampType = STAMP_TYPE4	then
+			add2	_stampWidth/2,	_fLevHeight + _ceilHeight + _nameHeight/2
+				gosub	"textName"
+			del 1
+			add2	_stampWidth/4,	_fLevHeight + _ceilHeight/2
+				gosub	"textCeil"
+			del 1
+			add2	_stampWidth/2 + _stampWidth/4,	_fLevHeight + _calcHeight/2
+				gosub	"textCalc"
+			del 1
+			add2	_stampWidth/4,	_fLevHeight/2
+				gosub	"textFLev"
+			del 1
+			add2	_stampWidth/2 + _stampWidth/4,	_sLevHeight/2
+				gosub	"textSLev"
+			del 1
+		endif
+	del 1
+
+	!	스탬프
+	!-----------------------------------------------------------------------------------------------
+	pen		stampPen
+	fill	65
+
+	add2	-_stampWidth/2,	-_stampHeight/2
+		!	공통 사각형틀
+		put	0,				0,				1,
+			0,				_stampHeight,	1,
+			_stampWidth,	_stampHeight,	1,
+			_stampWidth,	0,				1,
+			0,				0,				1
+
+		poly2_b	nsp/3,	1+2+4,	0,	0,	get(nsp)
+
+		if	_iStampType = STAMP_TYPE1	then
+		endif
+
+		if	_iStampType = STAMP_TYPE2	then
+			add2	0,	_fLevHeight
+				line2		0,	0,	_stampWidth,	0
+			del 1
+			add2	_stampWidth/2,	0
+				line2	0,	0,	0,	_fLevHeight
+			del 1
+		endif
+
+		if	_iStampType = STAMP_TYPE3	then
+			add2	0,	_fLevHeight + _ceilHeight
+				line2	0,	0,	_stampWidth,	0
+			del 1
+			add2	0,	_fLevHeight
+				line2		0,	0,	_stampWidth,	0
+			del 1
+			add2	_stampWidth/2,	0
+				line2	0,	0,	0,	_fLevHeight
+			del 1
+		endif
+
+		if	_iStampType = STAMP_TYPE4	then
+			add2	0,	_fLevHeight + _ceilHeight
+				line2	0,	0,	_stampWidth,	0
+			del 1
+			add2	0,	_fLevHeight
+				line2		0,	0,	_stampWidth,	0
+			del 1
+			add2	_stampWidth/2,	0
+				line2	0,	0,	0,	_fLevHeight + _ceilHeight
+			del 1
+		endif
+	del 1
+
+
+end
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	Sub-routine
+!-----------------------------------------------------------------------------------------------
+
+!-----------------------------------------------------------------------------------------------
+"textName":
+!-----------------------------------------------------------------------------------------------
+	if	bTextName	then
+		richtext2	0,	-_textHalf_name - (_textHgt_name*(_nTextLine - 1)*enterTextSpace)/2 + _distRefer,	"tbName"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"textCeil":
+!-----------------------------------------------------------------------------------------------
+	if	bTextCeil	then
+		richtext2	0,	-_textHalf_ceil,	"tbCeil"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"textCalc":
+!-----------------------------------------------------------------------------------------------
+	if	bTextCalc	then
+		richtext2	0,	-_textHalf_calc,	"tbCalc"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"textFLev":
+!-----------------------------------------------------------------------------------------------
+	if	bTextFLev	then
+		richtext2	0,	-_textHalf_fLev,	"tbFLev"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"textSLev":
+!-----------------------------------------------------------------------------------------------
+	if	bTextSLev	then
+		richtext2	0,	-_textHalf_sLev,	"tbSLev"
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"hsp_halfWidth":
+!-----------------------------------------------------------------------------------------------
+	hotspot2	0,			0,	unID,	halfWidth,	1+128+1024,	customWidth	:	unID = unID + 1
+	hotspot2	-1,			0,	unID,	halfWidth,	3						:	unID = unID + 1
+	hotspot2	halfWidth,	0,	unID,	halfWidth,	2,	customWidth			:	unID = unID + 1
+
+	hotspot2	0,			0,	unID,	halfWidth,	1+128+1024,	customWidth	:	unID = unID + 1
+	hotspot2	1,			0,	unID,	halfWidth,	3						:	unID = unID + 1
+	hotspot2	-halfWidth,	0,	unID,	halfWidth,	2,	customWidth			:	unID = unID + 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"hsp_halfHeight":
+!-----------------------------------------------------------------------------------------------
+	hotspot2	0,	0,			unID,	halfHeight,	1+128+1024,	entireHeight	:	unID = unID + 1
+	hotspot2	0,	-1,			unID,	halfHeight,	3							:	unID = unID + 1
+	hotspot2	0,	halfHeight,	unID,	halfHeight,	2,	entireHeight			:	unID = unID + 1
+
+	hotspot2	0,	0,				unID,	halfHeight,	1+128+1024,	entireHeight	:	unID = unID + 1
+	hotspot2	0,	1,				unID,	halfHeight,	3							:	unID = unID + 1
+	hotspot2	0,	-halfHeight,	unID,	halfHeight,	2,	entireHeight			:	unID = unID + 1
+
+return

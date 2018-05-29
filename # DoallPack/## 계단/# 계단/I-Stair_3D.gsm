@@ -1,0 +1,1169 @@
+
+!===========================================================================================
+!	기본설정
+!===========================================================================================
+eps = 0.0001
+
+!	기준점 이동
+!-----------------------------------------------------------------------------------------------
+if	bFns	then	add	0,	vFnsThk + basThk,	-(fnsThk + basThk)
+
+
+!	텍스트 정의
+!-------------------------------------------------------------------------------------------
+define style{2}	txtSty3	stFontType,	sectDimTxtSize*GLOB_SCALE,		0
+
+
+!	마감재 두께
+!-------------------------------------------------------------------------------------------
+fnsTmp = fnsThk
+vFnsTmp = vFnsThk
+basTmp = basThk
+bFnsTmp = bFnsThk
+uFnsTmp = uFnsThk
+
+if	not(bFns)	then
+	fnsTmp = 0
+	vFnsTmp = 0
+	basTmp = 0
+	bFnsTmp = 0
+	uFnsTmp = 0
+else
+	if	lndLength > eps	then
+		uFnsTmp = fnsThk
+	endif
+endif
+
+
+!	Resol값 정의 (Feedback모드시 최소값)
+!-------------------------------------------------------------------------------------------
+resol	32
+
+if	GLOB_FEEDBACK_MODE = 1	then
+	resol	3
+endif
+
+
+
+!===========================================================================================
+!	3D hotspot
+!===========================================================================================
+unID = 300
+
+!	계단 너비
+!-------------------------------------------------------------------------------------------
+hotspot	0,		0,	0,	unID,	strWdt,	1	:	unID = unID + 1
+hotspot	-1,		0,	0,	unID,	strWdt,	3	:	unID = unID + 1
+hotspot	strWdt,	0,	0,	unID,	strWdt,	2	:	unID = unID + 1
+
+
+!	단높이
+!-------------------------------------------------------------------------------------------
+if	iCalcHgt = Calc_RsrRsrN	then
+	hotspot	0,	0,	0,		unID,	strRsr,	1	:	unID = unID + 1
+	hotspot	0,	0,	-1,		unID,	strRsr,	3	:	unID = unID + 1
+	hotspot	0,	0,	strRsr,	unID,	strRsr,	2	:	unID = unID + 1
+	
+	hotspot	strWdt,	0,	0,		unID,	strRsr,	1	:	unID = unID + 1
+	hotspot	strWdt,	0,	-1,		unID,	strRsr,	3	:	unID = unID + 1
+	hotspot	strWdt,	0,	strRsr,	unID,	strRsr,	2	:	unID = unID + 1
+endif
+
+if	iCalcHgt = Calc_HgtRsrN	then
+	add	0,	strTrd*(strRsrN - 1),	fnsTmp + basTmp
+		hotspot	0,	0,	0,		unID,	ZZYZX,	1	:	unID = unID + 1
+		hotspot	0,	0,	-1,		unID,	ZZYZX,	3	:	unID = unID + 1
+		hotspot	0,	0,	ZZYZX,	unID,	ZZYZX,	2	:	unID = unID + 1
+	del 1
+endif
+
+
+!	단너비
+!-------------------------------------------------------------------------------------------
+addz	strRsr
+	hotspot	0,	0,		0,	unID,	strTrd,	1	:	unID = unID + 1
+	hotspot	0,	-1,		0,	unID,	strTrd,	3	:	unID = unID + 1
+	hotspot	0,	strTrd,	0,	unID,	strTrd,	2	:	unID = unID + 1
+
+	hotspot	strWdt,	0,		0,	unID,	strTrd,	1	:	unID = unID + 1
+	hotspot	strWdt,	-1,		0,	unID,	strTrd,	3	:	unID = unID + 1
+	hotspot	strWdt,	strTrd,	0,	unID,	strTrd,	2	:	unID = unID + 1
+del 1
+
+
+!	하부 슬래브
+!-------------------------------------------------------------------------------------------
+if	not(bLowFlr)	then
+	addz	fnsTmp + basTmp - bFnsTmp
+		hotspot	0,	0,	0,			unID,	bLndThk,	1	:	unID = unID + 1
+		hotspot	0,	0,	1,			unID,	bLndThk,	3	:	unID = unID + 1
+		hotspot	0,	0,	-bLndThk,	unID,	bLndThk,	2	:	unID = unID + 1
+	del 1
+endif
+
+	!	마감재 ON
+	if	bFns	then
+		!	마감재_수직판 두께 핫스팟
+		add	0,	-(basThk + vFnsThk),	basThk + fnsThk
+			hotspot	0,	0,			0,	unID,	vFnsThk,	1	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	vFnsThk,	3	:	unID = unID + 1
+			hotspot	0,	vFnsThk,	0,	unID,	vFnsThk,	2	:	unID = unID + 1
+
+			hotspot	strWdt,	0,			0,	unID,	vFnsThk,	1	:	unID = unID + 1
+			hotspot	strWdt,	-1,			0,	unID,	vFnsThk,	3	:	unID = unID + 1
+			hotspot	strWdt,	vFnsThk,	0,	unID,	vFnsThk,	2	:	unID = unID + 1
+		del 1
+
+		!	마감재_마감재 두께 핫스팟
+		addz	strRsr + basThk + fnsThk
+			hotspot	0,	0,	0,			unID,	fnsThk,	1	:	unID = unID + 1
+			hotspot	0,	0,	1,			unID,	fnsThk,	3	:	unID = unID + 1
+			hotspot	0,	0,	-fnsThk,	unID,	fnsThk,	2	:	unID = unID + 1
+
+			hotspot	strWdt,	0,	0,			unID,	fnsThk,	1	:	unID = unID + 1
+			hotspot	strWdt,	0,	1,			unID,	fnsThk,	3	:	unID = unID + 1
+			hotspot	strWdt,	0,	-fnsThk,	unID,	fnsThk,	2	:	unID = unID + 1
+		del 1
+
+		!	마감재_ 하부슬라브 마감 두께 핫스팟
+		add	0,	-(vFnsThk + basThk),	fnsThk + basThk
+			hotspot	0,	0,	0,			unID,	bFnsThk,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,			unID,	bFnsThk,	3		:	unID = unID + 1
+			hotspot	0,	0 ,	-bFnsThk,	unID,	bFnsThk,	2		:	unID = unID + 1
+
+			hotspot	strWdt,	0,	0,			unID,	bFnsThk,	1+128	:	unID = unID + 1
+			hotspot	strWdt,	0,	1,			unID,	bFnsThk,	3		:	unID = unID + 1
+			hotspot	strWdt,	0 ,	-bFnsThk,	unID,	bFnsThk,	2		:	unID = unID + 1
+		del 1
+
+		!	마감재_코 길이
+		add	0,	-(vFnsThk + basThk),	strRsr + basThk + fnsThk/2
+			hotspot	0,	0,				0,	unID,	fnsNosing,	1+128	:	unID = unID + 1
+			hotspot	0,	1,				0,	unID,	fnsNosing,	3		:	unID = unID + 1
+			hotspot	0,	-fnsNosing ,	0,	unID,	fnsNosing,	2		:	unID = unID + 1
+
+			hotspot	strWdt,	0,				0,	unID,	fnsNosing,	1+128	:	unID = unID + 1
+			hotspot	strWdt,	1,				0,	unID,	fnsNosing,	3		:	unID = unID + 1
+			hotspot	strWdt,	-fnsNosing ,	0,	unID,	fnsNosing,	2		:	unID = unID + 1
+		del 1
+	endif
+
+
+!	상부 슬래브
+!-------------------------------------------------------------------------------------------
+add	0,	strTrd*(strRsrN - 1),	zzyzx + fnsTmp + basTmp
+
+	!	계단참 ON
+	!-------------------------------------------------------------------------------------------
+	if	lndLength > eps	then
+		addz	-fnsTmp
+			addy	lndLength
+				hotspot	0,	0,	0,			unID,	uLndThk,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	1,			unID,	uLndThk,	3		:	unID = unID + 1
+				hotspot	0,	0,	-uLndThk,	unID,	uLndThk,	2		:	unID = unID + 1
+		
+				hotspot	strWdt,	0,	0,			unID,	uLndThk,	1+128	:	unID = unID + 1
+				hotspot	strWdt,	0,	1,			unID,	uLndThk,	3		:	unID = unID + 1
+				hotspot	strWdt,	0,	-uLndThk,	unID,	uLndThk,	2		:	unID = unID + 1
+			del 1
+		del 1
+
+	!	계단참 OFF
+	!-------------------------------------------------------------------------------------------
+	else
+		!	마감재 ON
+		if	bFns	then
+			!	상부슬래브 마감재 두께
+			hotspot	0,	0,	0,			unID,	uFnsThk,	1	:	unID = unID + 1
+			hotspot	0,	0,	1,			unID,	uFnsThk,	3	:	unID = unID + 1
+			hotspot	0,	0,	-uFnsThk,	unID,	uFnsThk,	2	:	unID = unID + 1
+
+			hotspot	strWdt,	0,	0,			unID,	uFnsThk,	1	:	unID = unID + 1
+			hotspot	strWdt,	0,	1,			unID,	uFnsThk,	3	:	unID = unID + 1
+			hotspot	strWdt,	0,	-uFnsThk,	unID,	uFnsThk,	2	:	unID = unID + 1
+
+			addz	-uFnsThk
+		endif
+
+		hotspot	0,	0,	0,			unID,	uLndThk,	1	:	unID = unID + 1
+		hotspot	0,	0,	1,			unID,	uLndThk,	3	:	unID = unID + 1
+		hotspot	0,	0,	-uLndThk,	unID,	uLndThk,	2	:	unID = unID + 1
+
+		hotspot	strWdt,	0,	0,			unID,	uLndThk,	1	:	unID = unID + 1
+		hotspot	strWdt,	0,	1,			unID,	uLndThk,	3	:	unID = unID + 1
+		hotspot	strWdt,	0,	-uLndThk,	unID,	uLndThk,	2	:	unID = unID + 1
+
+		if	bFns	then
+			del 1
+		endif
+	endif
+del 1
+
+
+!	계단참 폭
+!-------------------------------------------------------------------------------------------
+add	strWdt/2,	strTrd*(strRsrN - 1),	zzyzx
+	hotspot	0,	0,			0,	unID,	lndLength,	1+128	:	unID = unID + 1
+	hotspot	0,	-1,			0,	unID,	lndLength,	3		:	unID = unID + 1
+	hotspot	0,	lndLength,	0,	unID,	lndLength,	2		:	unID = unID + 1
+del 1
+
+
+!	최하층 바닥
+!-------------------------------------------------------------------------------------------
+if	bLowFlr	then
+	hotspot	0,	0,	0,			unID,	lowFlrThk,	1+128	:	unID = unID + 1
+	hotspot	0,	0,	1,			unID,	lowFlrThk,	3		:	unID = unID + 1
+	hotspot	0,	0,	-lowFlrThk,	unID,	lowFlrThk,	2		:	unID = unID + 1
+
+	addz	-lowFlrThk
+		hotspot	0,	0,			0,	unID,	lowFlrWdt,	1	:	unID = unID + 1
+		hotspot	0,	-1,			0,	unID,	lowFlrWdt,	3	:	unID = unID + 1
+		hotspot	0,	lowFlrWdt,	0,	unID,	lowFlrWdt,	2	:	unID = unID + 1	
+	del 1
+
+	addx	strWdt
+		hotspot	0,	0,	0,			unID,	lowFlrThk,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	1,			unID,	lowFlrThk,	3		:	unID = unID + 1
+		hotspot	0,	0,	-lowFlrThk,	unID,	lowFlrThk,	2		:	unID = unID + 1
+
+		addz	-lowFlrThk
+			hotspot	0,	0,			0,	unID,	lowFlrWdt,	1	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	lowFlrWdt,	3	:	unID = unID + 1
+			hotspot	0,	lowFlrWdt,	0,	unID,	lowFlrWdt,	2	:	unID = unID + 1	
+		del 1
+	del 1
+endif
+
+
+
+!===========================================================================================
+!	계단
+!===========================================================================================
+
+
+!-------------------------------------------------------------------------------------------
+!	계단 형상 베이스 만들기
+!-------------------------------------------------------------------------------------------
+group	"RsrBase"
+
+	pen			strPen
+	sect_fill	strFill,	strFillPen,	strFillPenBg,	strPenS
+	material	strMat
+
+	!	계단_1st
+	!-------------------------------------------------------------------------------------------
+	for	i = 1	to	strRsrN
+		if	i = 1	then
+			a1_addvalue = (-(bLndThk + bFnsTmp - fnsTmp - basTmp) + y1)/tan(slpAng) + x1
+			a1_max = (-Rng_bLndThk + y1)/tan(slpAng) + x1
+			b1 = (strTrd - x1)*tan(slpAng) - y1
+			c1 = (a1_addvalue - x1)*tan(slpAng) - y1
+
+			if	(bLndThk + bFnsTmp - fnsTmp - basTmp > Rng_bLndThk)	then
+				a1_tmp = a1_max
+				bLndThk_tmp = Rng_bLndThk
+
+				if	a1_addvalue < -eps	then
+					put	fnsTmp + basTmp - bFnsTmp,				0,
+						-Rng_bLndThk,							0,
+						-(bLndThk + bFnsTmp - fnsTmp - basTmp),	a1_addvalue,
+						fnsTmp + basTmp - bFnsTmp,				a1_addvalue
+
+					roty	-90
+						prism	nsp/2,	-strWdt,	get(nsp)
+					del 1
+				endif
+			else
+				a1_tmp = a1_addvalue
+				bLndThk_tmp = bLndThk + bFnsTmp - fnsTmp - basTmp
+			endif
+
+			if	c1 < b1	then
+				put	-bLndThk_tmp,	0,
+					-bLndThk_tmp,	a1_tmp,
+					b1,				strTrd,
+					strRsr,			strTrd,
+					strRsr,			0
+			else
+				put	c1,		0,
+					strRsr,	0,
+					strRsr,	strTrd,
+					c1,		strTrd
+			endif
+		endif
+	
+		if	1 < i and i <= strRsrN - 1	then
+			a1 = (0 - x1)*tan(slpAng) - y1
+			b1 = (strTrd - x1)*tan(slpAng) - y1
+			c1 = (-(bLndThk + bFnsTmp - fnsTmp - basTmp) + y1)/tan(slpAng) + x1
+			d1 = (c1 - x1)*tan(slpAng) - y1
+			e1 = (-strRsr + d1 + y1)/tan(slpAng) + x1
+			f1 = (e1 - x1)*tan(slpAng) - y1
+
+			if	b1 < e1 and e1 > -eps and i = 2	then
+				put	f1,		0,
+					f1,		e1,
+					b1,		strTrd,
+					strRsr,	strTrd,
+					strRsr,	0
+			else
+				put	a1,		0,
+					b1,		strTrd,
+					strRsr,	strTrd,
+					strRsr,	0
+			endif
+		endif
+	
+		if	i = strRsrN	then
+			a1 = (0 - x1)*tan(slpAng) - y1
+			b1 = (strTrd + c1 - x1)*tan(slpAng) - y1
+			c1 = (fnsTmp + basTmp - (uFnsTmp + uLndThk) + y1)/tan(slpAng) + x1
+
+			put	a1,												0,
+				fnsTmp + basTmp + strRsr - (uFnsTmp + uLndThk),	strTrd + c1,
+				fnsTmp + basTmp + strRsr - (uFnsTmp + uLndThk),	0
+		endif
+
+			roty	-90
+				prism	nsp/2,	-strWdt,	get(nsp)
+			del 1
+
+		add	0,	strTrd,	strRsr
+	next i
+
+	del strRsrN
+
+	!	계단참
+	!-------------------------------------------------------------------------------------------
+	if	lndLength > eps	then
+		addy	strTrd*(strRsrN - 1)
+			addz	zzyzx
+				put	0,		0,
+					strWdt,	0,
+					strWdt,	lndLength,
+					0,		lndLength
+
+				prism	nsp/2,	-(uLndThk - basTmp),	get(nsp)
+			del 1
+		del 1
+	endif
+
+endgroup
+
+
+!-------------------------------------------------------------------------------------------
+!	최하층 바닥
+!-------------------------------------------------------------------------------------------
+group	"_lowFlr"
+	if	bLowFlr	then
+		addz	-lowFlrThk
+			block	strWdt,	lowFlrWdt,	lowFlrThk + strRsr
+		del 1
+	endif
+endgroup
+
+
+
+!-------------------------------------------------------------------------------------------
+!	계단 합치기(Group)
+!-------------------------------------------------------------------------------------------
+
+	!	합치기용 박스
+	!-------------------------------------------------------------------------------------------
+	group	"box1"
+		add	-20,	-20,	-20
+			block	40,	40,	40
+		del 1
+	endgroup
+	
+	group	"box2"
+		pen			strPen
+		sect_fill	strFill,	strFillPenBg,	strFillPen,	strPenS
+	
+		add	-20,	-20,	-20
+			block	40,	40,	40
+		del 1
+	endgroup
+	
+	!	박스 작업
+	!-------------------------------------------------------------------------------------------
+	Rsrform_1st = addgroup("_lowFlr",	"RsrBase")
+	Rsrform_2nd = subgroup("box1",	Rsrform_1st)
+	Rsr = subgroup("box2",	Rsrform_2nd)
+	
+	killgroup	"box1"
+	killgroup	"box2"
+
+
+
+!===========================================================================================
+!	바탕재
+!===========================================================================================
+
+!-------------------------------------------------------------------------------------------
+!	바탕_형상베이스
+!-------------------------------------------------------------------------------------------
+group	"BasBase"
+
+	pen			etcPen
+	sect_fill	basFill,	basFillPenBg,	basFillPen,	basPenS
+	material	basMat
+
+	if	basThk > eps	then
+
+		!	변수정의
+		!-------------------------------------------------------------------------------------------
+		if	lndLength > eps	then
+			uBasThkTmp = basThk
+		else
+			uBasThkTmp = uFnsThk
+		endif
+		!-------------------------------------------------------------------------------------------
+	
+		!	바탕_단
+		!-------------------------------------------------------------------------------------------
+		for	i = 1	to	strRsrN
+			if	i = 1	then
+				put	fnsThk + basThk,	0,
+					fnsThk + basThk,	-basThk,
+					strRsr + basThk,	-basThk,
+					strRsr + basThk,	strTrd,
+					strRsr,				strTrd,
+					strRsr,				0
+			endif
+
+			if	i # 1 and i # strRsrN	then
+				put	0,					0,
+					0,					-basThk,
+					strRsr + basThk,	-basThk,
+					strRsr + basThk,	strTrd,
+					strRsr,				strTrd,
+					strRsr,				0
+			endif
+		
+			if	i =	strRsrN	then
+				if	lndLength > eps	then
+					put	0,					0,
+						0,					-basThk,
+						strRsr + basThk,	-basThk,
+						strRsr + basThk,	0
+				else
+					put	0,										0,
+						0,										-basThk,
+						strRsr + basThk - (uFnsThk - fnsThk),	-basThk,
+						strRsr + basThk - (uFnsThk - fnsThk),	0
+				endif
+			endif
+		
+				roty	-90
+					prism	nsp/2,	-strWdt,	get(nsp)
+				del 1
+		
+			add	0,	strTrd,	strRsr
+		next i
+		
+		del strRsrN
+		
+		!	바탕_참
+		!-------------------------------------------------------------------------------------------
+		add	0,	strTrd*(strRsrN - 1),	zzyzx
+		
+			if	lndLength > eps	then
+				put	0,	0,
+					strWdt,	0,
+					strWdt,	lndLength,
+					0,		lndLength
+		
+				prism	nsp/2,	basThk,	get(nsp)
+			endif
+		
+		del 1
+	
+	endif
+endgroup
+
+
+!-------------------------------------------------------------------------------------------
+!	바탕_합치기
+!-------------------------------------------------------------------------------------------
+
+	!	합치기용 박스
+	!-------------------------------------------------------------------------------------------
+	group	"box3"
+		add	-20,	-20,	-20
+			block	40,	40,	40
+		del 1
+	endgroup
+	
+	group	"box4"
+		pen			etcPen
+		sect_fill	basFill,	basFillPenBg,	basFillPen,	basPenS
+	
+		add	-20,	-20,	-20
+			block	40,	40,	40
+		del 1
+	endgroup
+	
+	!	박스 작업
+	!-------------------------------------------------------------------------------------------
+	_BasForm = subgroup("box3",	"BasBase")
+	_Bas = subgroup("box4",	_BasForm)
+	
+	killgroup	"box3"
+	killgroup	"box4"
+
+
+
+!===========================================================================================
+!	마감재
+!===========================================================================================
+
+!-------------------------------------------------------------------------------------------
+!	마감재_형상베이스
+!-------------------------------------------------------------------------------------------
+group	"FnsBase"
+
+	pen			fnsPen
+	sect_fill	fnsFill,	fnsFillPenBg,	fnsFillPen,	fnsPenS
+
+	add	0,	-basThk,	basThk
+	
+		!	변수정의
+		!-------------------------------------------------------------------------------------------
+		if	lndLength > eps	then
+			uFnsThkTmp = fnsThk
+			uBasThkTmp = 0
+		else
+			uFnsThkTmp = uFnsThk
+			uBasThkTmp = uBasThk - basThk
+		endif
+		!-------------------------------------------------------------------------------------------
+	
+		!	수평마감
+		!-------------------------------------------------------------------------------------------
+		material	fnsMat
+	
+		for	i = 1	to strRsrN
+			if	i # strRsrN	then
+				put	strRsr,				-(vFnsThk + fnsNosing),
+					strRsr + fnsThk,	-(vFnsThk + fnsNosing),
+					strRsr + fnsThk,	strTrd,
+					strRsr,				strTrd,
+					strRsr,				0
+			endif
+
+			if	i = strRsrN	then
+				put	strRsr,				-(vFnsThk + fnsNosing),
+					strRsr + fnsThk,	-(vFnsThk + fnsNosing),
+					strRsr + fnsThk,	basThk,
+					strRsr,				basThk
+			endif
+
+				roty	-90
+					prism	nsp/2,	-strWdt,	get(nsp)
+				del 1
+		
+			add	0,	strTrd,	strRsr
+		next i
+
+		del strRsrN
+
+		!	수직마감
+		!-------------------------------------------------------------------------------------------
+		material	vFnsMat
+
+		for	i = 1	to	strRsrN
+			if	i = 1	then
+				put	fnsThk,	0,
+					fnsThk,	-vFnsThk,
+					strRsr,	-vFnsThk,
+					strRsr,	0
+			endif
+
+			if	i # 1 and i # strRsrN	then
+				put	fnsThk,	0,
+					fnsThk,	-vFnsThk,
+					strRsr,	-vFnsThk,
+					strRsr,	0
+			endif
+
+			if	i = strRsrN	then
+				if	lndLength > eps	then
+					put	fnsThk,	0,
+						fnsThk,	-vFnsThk,
+						strRsr,	-vFnsThk,
+						strRsr,	0
+				else
+					put	fnsThk,						0,
+						fnsThk,						-vFnsThk,
+						strRsr,						-vFnsThk,
+						strRsr,						basThk,
+						strRsr + fnsThk - uFnsThk,	basThk,
+						strRsr + fnsThk - uFnsThk,	0
+				endif
+			endif
+
+			sphere 0.001
+
+				roty	-90
+					prism	nsp/2,	-strWdt,	get(nsp)
+				del 1
+
+			add	0,	strTrd,	strRsr
+		next i
+
+		del strRsrN
+
+		!	계단참 마감재
+		!-------------------------------------------------------------------------------------------
+		material	fnsMat
+
+		addy	strTrd*(strRsrN - 1)
+			addz	zzyzx
+				if	lndLength > eps	then
+					put	0,		0,
+						strWdt,	0,
+						strWdt,	lndLength + basThk,
+						0,		lndLength + basThk
+
+					prism	nsp/2,	fnsThk,	get(nsp)
+				endif
+			del 1
+		del 1
+	
+	del 1
+
+endgroup
+
+
+!-------------------------------------------------------------------------------------------
+!	마감재_합치기
+!-------------------------------------------------------------------------------------------
+	!	합치기용 박스
+	!-------------------------------------------------------------------------------------------
+	group	"box5"
+		add	-20,	-20,	-20
+			block	40,	40,	40
+		del 1
+	endgroup
+
+	group	"box6"
+		pen			fnsPen
+		sect_fill	fnsFill,	fnsFillPenBg,	fnsFillPen,	fnsPenS
+
+		add	-20,	-20,	-20
+			block	40,	40,	40
+		del 1
+	endgroup
+
+	!	박스 작업
+	!-------------------------------------------------------------------------------------------
+	FnsForm = subgroup("box5","FnsBase")
+	Fns = subgroup("box6",	FnsForm)
+
+	killgroup	"box5"
+	killgroup	"box6"
+
+!===========================================================================================
+!	계단 최종결과물 출력
+!===========================================================================================
+if	bStr	then
+	placegroup	Rsr	!	구조체 배치
+endif
+
+if	bFns and GLOB_STRUCTURE_DISPLAY = 0	then
+	placegroup	_Bas	!	바탕재 배치
+	placegroup	Fns		!	마감재 배치
+endif
+
+!===========================================================================================
+!	난간
+! 		단면 : 라인으로만 표현
+!		3D : 기본형태의 난간
+!===========================================================================================
+
+	!	MVO
+	!-------------------------------------------------------------------------------------------
+	success = LIBRARYGLOBAL("MVO_StairSettings",	"iRailSect",	_iRailSect)
+
+	if	success & iRailSect = RailSect_MVO	then
+		_iRailSect = _iRailSect
+	else
+		_iRailSect = iRailSect
+	endif
+
+	!	2D 난간(입면/단면용)
+	!-------------------------------------------------------------------------------------------
+	if	GLOB_STRUCTURE_DISPLAY = 0 and ((GLOB_VIEW_TYPE = 4 or GLOB_VIEW_TYPE = 5) & _iRailSect = RailSect_Line)	then
+		pen 		hndPen
+		material	1
+
+		hndLct1 = vFnsTmp + basTmp + strTrd/2
+		hndLct2 = -(vFnsTmp + basTmp) + strTrd/2
+
+		addx	IhndOff
+			rotz	90
+				rotx	90
+
+					if	bBalusterIn	then
+						lin_	-hndLct1,						fnsTmp + basTmp,							0,
+								-hndLct1,						fnsTmp + basTmp + hndHgt,					0
+						lin_	strTrd*(strRsrN - 1) + hndLct2,	fnsTmp + basTmp + strRsr*strRsrN,			0,
+								strTrd*(strRsrN - 1) + hndLct2,	fnsTmp + basTmp + strRsr*strRsrN + hndHgt,	0
+					endif
+
+					lin_	-hndLct1,						fnsTmp + basTmp + hndHgt,					0,
+							strTrd*(strRsrN - 1) + hndLct2,	fnsTmp + basTmp + strRsr*strRsrN + hndHgt,	0
+				del 1
+			del 1
+		del 1
+
+		addx	strWdt - IhndOff
+			rotz	90
+				rotx	90
+
+					if	bBalusterOut	then
+						lin_	-hndLct1,						fnsTmp + basTmp,							0,
+								-hndLct1,						fnsTmp + basTmp + hndHgt,					0
+						lin_	strTrd*(strRsrN - 1) + hndLct2,	fnsTmp + basTmp + strRsr*strRsrN,			0,
+								strTrd*(strRsrN - 1) + hndLct2,	fnsTmp + basTmp + strRsr*strRsrN + hndHgt,	0
+					endif
+
+					lin_	-hndLct1,						fnsTmp + basTmp + hndHgt,					0,
+							strTrd*(strRsrN - 1) + hndLct2,	fnsTmp + basTmp + strRsr*strRsrN + hndHgt,	0
+				del 1
+			del 1
+		del 1
+	endif
+
+
+	!-------------------------------------------------------------------------------------------
+	!	3D 난간
+	!-------------------------------------------------------------------------------------------
+	group	"HndBase"
+
+		if	GLOB_STRUCTURE_DISPLAY = 0 and GLOB_VIEW_TYPE = 3 | ((GLOB_VIEW_TYPE = 4 or GLOB_VIEW_TYPE = 5) & _iRailSect = RailSect_3D)	then
+
+			pen			hndPen
+			material	hndMat
+
+			!	3D 난간_외측
+			!-------------------------------------------------------------------------------------------
+			if	bHandOut	then
+	
+				X_tmp = OhndOff
+				_bBaluster = bBalusterOut
+				gosub	"Hnd"
+	
+			endif
+	
+			!	3D 난간_내측
+			!-------------------------------------------------------------------------------------------
+			if	 bHandIn	then
+	
+				X_tmp = strWdt - IhndOff
+				_bBaluster = bBalusterIn
+				gosub	"Hnd"
+	
+			endif
+
+		endif
+
+	endgroup
+
+
+	!-------------------------------------------------------------------------------------------
+	!	3D 난간_합치기
+	!-------------------------------------------------------------------------------------------
+
+		!	합치기용 박스
+		!-------------------------------------------------------------------------------------------
+		group	"box7"
+			add	-20,	-20,	-20
+				block	40,	40,	40
+			del 1
+		endgroup
+	
+		group	"box8"
+			add	-20,	-20,	-20
+				block	40,	40,	40
+			del 1
+		endgroup
+
+		!	박스 작업
+		!-------------------------------------------------------------------------------------------
+		HndForm = subgroup("box7",	"HndBase")
+		Hnd = subgroup("box8",	HndForm)
+
+		placegroup	Hnd
+
+
+
+!===========================================================================================
+!	법규체크
+!===========================================================================================
+pen			lawCheckPen
+sect_fill	65,	0,	0,	lawCheckPen
+
+
+if	GLOB_VIEW_TYPE = 4	then
+	if	bLawCheck	then
+		addy	strTrd/2 - (vFnsTmp + basTmp)
+			addz	strRsr + (fnsTmp + basTmp)
+
+				!	계단 법규체크 Line
+				!-------------------------------------------------------------------------------------------
+				for	i = 1	to	strRsrN - 1
+
+					if	i # (strRsrN - 1)	then
+						put	0,									0,		1,
+							lawCheckHgt,						0,		1,
+							lawCheckHgt + strTrd*tan(slpAng),	strTrd,	1
+					endif
+					if	i = (strRsrN - 1)	then
+						put	0,									0,		1,
+							lawCheckHgt,						0,		1,
+							lawCheckHgt + strTrd*tan(slpAng),	strTrd,	1,
+							strTrd*tan(slpAng),					strTrd,	1
+					endif
+
+						roty	-90
+							extrude	nsp/3,	0,	0,	-strWdt,	16,
+									get(nsp)
+						del 1
+
+					add	0,	strTrd,	strRsr
+
+				next i
+
+				del strRsrN - 1
+
+				!	계단참 법규체크 Line
+				!-------------------------------------------------------------------------------------------
+				if	lndLength > eps	then
+					add	0,	strTrd*(strRsrN - 1),	strRsr*(strRsrN - 1)
+						put	0,				0,						1,
+							lawCheckHgt,	0,						1,
+							lawCheckHgt,	lndLength - strTrd/2,	1,
+							0,				lndLength - strTrd/2,	1
+
+							roty	-90
+								extrude	nsp/3,	0,	0,	-strWdt,	16+32,
+										get(nsp)
+							del 1
+					del 1
+				endif
+
+			del 1
+		del 1
+	endif
+endif
+
+
+
+!===========================================================================================
+!	단면치수
+!===========================================================================================
+pen			dimPen
+sect_fill	65,	dimPen,	0,	dimPen
+
+!	치수 채우기용 재질 정의
+!-------------------------------------------------------------------------------------------
+define material	"Dimension_Section" 10,
+				0.878294, 0.398199, 0.109468,
+				0.58, 0.85, 0.0, 0.0,
+				0,
+				0.0,
+				0.878401, 0.513481, 0.412253,
+				0.0, 0.0, 0.0,
+				0,
+				IND(FILL, "Foreground")
+
+material	"Dimension_Section"
+
+!	모델뷰옵션 불러오기
+!-------------------------------------------------------------------------------------------
+success = LIBRARYGLOBAL("MVO_StairSettings",	"iDimSection",	dimSettingValue)
+
+
+if	GLOB_VIEW_TYPE = 4	then
+
+	!	단면치수 ON
+	!-------------------------------------------------------------------------------------------	
+	if	iSectDim = SectDim_On or (iSectDim = SectDim_MVO and dimSettingValue = 2)	then
+		if	GLOB_STRUCTURE_DISPLAY = 0	then	addy	-(basTmp + vFnsTmp)
+		if	GLOB_STRUCTURE_DISPLAY # 0	then	addy	0
+
+			!	치수선 좌
+			!-------------------------------------------------------------------------------------------
+			put	sectDimWitness,			0,	1,
+				sectDimOffset,			0,	1,
+				sectDimOffset + 0.075,	0,	1
+
+			roty	-90
+				extrude	nsp/3,	0,	0,	-strWdt,	16+32,
+						get(nsp)
+			del 1
+
+				addx	strWdt
+					addz	sectDimOffset
+						roty	-90
+							cylind	strWdt,	sectDimCircle
+						del 1
+					del 1
+				del 1
+
+			!	치수선 우
+			!-------------------------------------------------------------------------------------------
+			addy	strTrd*(strRsrN - 1)
+				put	sectDimWitness,			0,	1,
+					sectDimOffset,			0,	1,
+					sectDimOffset + 0.075,	0,	1
+
+				roty	-90
+					extrude	nsp/3,	0,	0,	-strWdt,	16+32,
+							get(nsp)
+				del 1
+
+					addx	strWdt
+						addz	sectDimOffset
+							roty	-90
+								cylind	strWdt,	sectDimCircle
+							del 1
+						del 1
+					del 1
+			del 1
+
+			!	중간 치수선
+			!-------------------------------------------------------------------------------------------
+			put	sectDimWitness,	0,						1,
+				sectDimOffset,	0,						1,
+				sectDimOffset,	strTrd*(strRsrN - 1),	1,
+				sectDimWitness,	strTrd*(strRsrN - 1),	1
+
+			roty	-90
+				extrude	nsp/3,	0,	0,	-strWdt,	16+32,
+						get(nsp)
+			del 1
+
+
+			!	치수
+			!-------------------------------------------------------------------------------------------
+			nr = strTrd*strRsrN
+	
+			paragraph	"prgFullLength"	1,	0,	0,	0,	1
+						pen		dimTxtPen
+						style	txtSty3
+						str("%~mm",	nr)
+			endparagraph
+			
+			textblock	"FullLength"	0,	8,	0,	1,	1,	1,	"prgFullLength"
+			
+			paragraph	"prgTrdxN"	1,	0,	0,	0,	1
+						pen		dimTxtPen
+						style	txtSty3
+						"("
+						str("%~mm",	strTrd)
+						"x"
+						str("%~",	strRsrN)
+						"T)"
+			endparagraph
+			
+			textblock	"TrdxN"	0,	2,	0,	1,	1,	1,	"prgTrdxN"
+	
+			add	strWdt,	(strTrd*(strRsrN - 1))/2,	sectDimOffset
+	
+				if	sectDimMul = 1	then	muly	-1
+				if	sectDimMul = 0	then	muly	1
+	
+					rotz	-90
+						rotx	90
+								richtext	0,	0,	strWdt,	0,	"FullLength"
+								richtext	0,	0,	strWdt,	0,	"TrdxN"
+						del 1
+					del 1
+
+				del 1
+	
+			del 1
+	
+	
+			!	hotspot
+			!-------------------------------------------------------------------------------------------
+			hotspot	0,	0,	0,				unID,	sectDimWitness,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,				unID,	sectDimWitness,	3		:	unID = unID + 1
+			hotspot	0,	0,	sectDimWitness,	unID,	sectDimWitness,	2		:	unID = unID + 1
+	
+			hotspot	0,	0,	0,				unID,	sectDimOffset,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,				unID,	sectDimOffset,	3		:	unID = unID + 1
+			hotspot	0,	0,	sectDimOffset,	unID,	sectDimOffset,	2		:	unID = unID + 1
+	
+			addy	strTrd*(strRsrN - 1)
+				hotspot	0,	0,	0,				unID,	sectDimWitness,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,				unID,	sectDimWitness,	3		:	unID = unID + 1
+				hotspot	0,	0,	sectDimWitness,	unID,	sectDimWitness,	2		:	unID = unID + 1
+		
+				hotspot	0,	0,	0,				unID,	sectDimOffset,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,				unID,	sectDimOffset,	3		:	unID = unID + 1
+				hotspot	0,	0,	sectDimOffset,	unID,	sectDimOffset,	2		:	unID = unID + 1
+			del 1
+	
+			addx	strWdt
+				hotspot	0,	0,	0,				unID,	sectDimWitness,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,				unID,	sectDimWitness,	3		:	unID = unID + 1
+				hotspot	0,	0,	sectDimWitness,	unID,	sectDimWitness,	2		:	unID = unID + 1
+		
+				hotspot	0,	0,	0,				unID,	sectDimOffset,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,				unID,	sectDimOffset,	3		:	unID = unID + 1
+				hotspot	0,	0,	sectDimOffset,	unID,	sectDimOffset,	2		:	unID = unID + 1
+		
+				addy	strTrd*(strRsrN - 1)
+					hotspot	0,	0,	0,				unID,	sectDimWitness,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,				unID,	sectDimWitness,	3		:	unID = unID + 1
+					hotspot	0,	0,	sectDimWitness,	unID,	sectDimWitness,	2		:	unID = unID + 1
+			
+					hotspot	0,	0,	0,				unID,	sectDimOffset,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,				unID,	sectDimOffset,	3		:	unID = unID + 1
+					hotspot	0,	0,	sectDimOffset,	unID,	sectDimOffset,	2		:	unID = unID + 1
+				del 1
+			del 1
+				
+	
+		del 1
+	endif
+endif
+
+
+
+
+
+
+!===========================================================================================
+!===========================================================================================
+end
+!===========================================================================================
+!===========================================================================================
+
+
+  
+
+
+
+!===========================================================================================
+!	Sub-routine
+!===========================================================================================
+
+!-------------------------------------------------------------------------------------------
+"Hnd":	!	핸드레일
+!-------------------------------------------------------------------------------------------
+
+	!	수직바
+	!-------------------------------------------------------------------------------------------
+		addz	fnsThkTmp + strRsr
+			addx	X_tmp
+				addy	strTrd/2 - (vFnsThk + basThk)
+
+					if	_bBaluster	then
+						!	계단 단에 맞춰 수직바
+						!-------------------------------------------------------------------------------------------
+						for	i = 1	to	strRsrN
+
+							cylind	hndHgt - hndRd,	hndRd*0.8
+							add	0,	strTrd,	strRsr
+
+						next i
+
+						del strRsrN
+
+						!	계단참 있을때
+						!-------------------------------------------------------------------------------------------
+						if	lndLength > strTrd	then
+							add	0,	strTrd*(strRsrN - 2),	strRsr*(strRsrN - 1)
+								addy	lndLength
+
+									cylind	hndHgt - hndRd,	hndRd*0.8
+
+								del 1
+							del 1
+						endif
+					endif
+
+				del 1
+			del 1
+		del 1
+
+	!	수평바
+	!-------------------------------------------------------------------------------------------
+
+		!	첫번째 수평바
+		!-------------------------------------------------------------------------------------------
+		railX = (strTrd*(strRsrN - 1)) + WhndOffTmp
+		railY = (strRsr*(strRsrN - 1)) + WhndOffTmp*tan(slpAng)
+
+		railLengthTmp = sqr(railX^2 + railY^2)
+
+			if	bAttachBtm	then
+				addz	fnsThkTmp + strRsr + hndHgt - hndRd - strTrd*tan(slpAng)
+					addx	X_tmp
+						addy	-(vFnsThk + basThk) - strTrd/2
+			else
+				addz	fnsThkTmp + strRsr + hndHgt - hndRd - (WhndOff1 + strTrd/2)*tan(slpAng)
+					addx	X_tmp
+						addy	-WhndOff1 - (vFnsThk + basThk)
+			endif
+
+						rotx	-railAng
+							cylind	railLengthTmp,	hndRd
+						del 1
+
+					del 1
+				del 1
+			del 1
+
+		!	두번째 수평바(계단참 있을때)
+		!-------------------------------------------------------------------------------------------
+		if	lndLength > eps	then
+			addz	fnsThkTmp + strRsr*strRsrN + hndHgt - hndRd
+				addx	X_tmp
+					addy	strTrd*strRsrN - strTrd/2 - (vFnsThk + basThk)
+
+						sphere	hndRd
+
+						rotx	-90
+							cylind	lndLength - strTrd/2 + WhndOff2 + hndRd,	hndRd
+						del 1
+
+					del 1
+				del 1
+			del 1
+		endif
+
+		!	상부 결합
+		!-------------------------------------------------------------------------------------------
+		if	bAttachTop	then
+			addz	fnsThkTmp + strRsr*strRsrN + hndHgt - hndRd
+				addx	X_tmp
+					addy	strTrd*strRsrN - strTrd/2 - (vFnsThk + basThk)
+
+						sphere	hndRd
+
+					del 1
+				del 1
+			del 1
+		endif
+
+		!	하부 결합
+		!-------------------------------------------------------------------------------------------
+		if	bAttachBtm	then
+			addz	fnsThkTmp + hndHgt - hndRd
+				addx	X_tmp
+					addy	-(vFnsThk + basThk) - strTrd/2
+
+						sphere	hndRd
+
+					del 1
+				del 1
+			del 1
+		endif
+return

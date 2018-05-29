@@ -1,0 +1,97 @@
+!===============================================================================================
+!	철골계단
+!===============================================================================================
+
+unID = 100
+eps = 0.0001
+
+!	계단 기울기
+_aStr_1 = atn(stepHgt_1/stepDpt)
+_aCutStg_B1 = (90 - _aStr_1)/2
+_aCutStg_T1 = 90 - (180 - _aStr_1)/2
+
+_aStr_2 = atn(stepHgt_2/stepDpt)
+_aCutStg_B2 = (90 - _aStr_2)/2
+_aCutStg_T2 = 90 - (180 - _aStr_2)/2
+
+! text2	0,	0,	_aStr_1
+! text2	0,	-1,	_aCutStg_B1
+! text2	0,	-2,	_aCutStg_T1
+
+! text2	0,	-3,	_aStr_2
+! text2	0,	-4,	_aCutStg_B2
+! text2	0,	-5,	_aCutStg_T2
+
+!	VIEW
+!-----------------------------------------------------------------------------------------------
+VIEW_A = 1
+VIEW_S = 2
+if	GLOB_SCRIPT_TYPE = 2 | GLOB_SCRIPT_TYPE = 3	then
+	if	GLOB_STRUCTURE_DISPLAY < eps	then
+		iPlanView = VIEW_A
+	else
+		iPlanView = VIEW_S
+	endif
+endif
+
+
+!	계단 형상
+!-----------------------------------------------------------------------------------------------
+STRSHAPE_I = 1
+STRSHAPE_L = 2
+STRSHAPE_U = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stStrShape[]
+		stStrShape[1] = "I형"
+		stStrShape[2] = "L형"
+		stStrShape[3] = "U형"
+endif
+
+!	스트링거 유형
+!-----------------------------------------------------------------------------------------------
+STRINGER_C = 1
+STRINGER_I = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stStringerType[]
+		stStringerType[1] = "C형강"
+		stStringerType[2] = "I형강"
+endif
+
+!	계단 높이 산정 방법
+!-----------------------------------------------------------------------------------------------
+RISER_NUMBER = 1
+HEIGHT_NUMBER = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stCalculation[]
+		stCalculation[1] = "(단 높이)+(단 개수)"
+		stCalculation[2] = "(전체 높이)+(단 개수)"
+endif
+
+!	2D표현
+!-----------------------------------------------------------------------------------------------
+PLANVIEW_NONE = 1
+PLANVIEW_CUT = 2
+PLANVIEW_ENTIRE = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stPlanView[]
+		stPlanView[1] = "끄기"
+		stPlanView[2] = "Cut"
+		stPlanView[3] = "Entire"
+endif
+
+!	구조 접합 유형
+!-----------------------------------------------------------------------------------------------
+ATTACH_MOMENT = 1
+ATTACH_PIN = 2
+ATTACH_NONE = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stAttach[]
+		stAttach[1] = "Moment"
+		stAttach[2] = "PIN"
+		stAttach[3] = "None"
+endif

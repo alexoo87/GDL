@@ -1,0 +1,202 @@
+!===============================================================================================
+!	PC기둥
+!===============================================================================================
+!	W.P
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+!	구조 외곽선
+!-----------------------------------------------------------------------------------------------
+pen		penCol
+fill	65
+
+put	-hWdt_B/2,	-vWdt_B/2,	1,
+	-hWdt_B/2,	vWdt_B/2,	1,
+	hWdt_B/2,	vWdt_B/2,	1,
+	hWdt_B/2,	-vWdt_B/2,	1,
+	-hWdt_B/2,	-vWdt_B/2,	1
+
+poly2_b	nsp/3,	1+2,	0,	0,	use(nsp)
+
+	!	Hotline
+	for	h = 1	to	(nsp/3) - 2
+		hotline2	get(2) + (use(1) - get(1)),	use(2)
+	next	h
+		hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+	!	Hotspot
+	hotspot2	-hWdt_B/2,	-vWdt_B/2,	unID	:	unID = unID + 1
+	hotspot2	-hWdt_B/2,	vWdt_B/2,	unID	:	unID = unID + 1
+	hotspot2	hWdt_B/2,	vWdt_B/2,	unID	:	unID = unID + 1
+	hotspot2	hWdt_B/2,	-vWdt_B/2,	unID	:	unID = unID + 1
+
+!	X표
+!-----------------------------------------------------------------------------------------------
+pen	penEtc
+
+line2	-hWdt_B/2,	-vWdt_B/2,	hWdt_B/2,	vWdt_B/2
+line2	-hWdt_B/2,	vWdt_B/2,	hWdt_B/2,	-vWdt_B/2
+
+!	가이드라인
+!-----------------------------------------------------------------------------------------------
+if	bGuide	then
+	!	Define Line-Type
+	define line_type	"long-dashsed"		1,	4,	0.0005,	0.0003,	0.0005,	0.0003
+	define line_type	"short-dashsed"		1,	4,	0.0003,	0.0001,	0.0003,	0.0001
+	define line_type	"very-short-dashed"	1,	4,	0.0002,	0.0003,	0.0002,	0.0003
+
+	!	Define Style
+	define style	"guide_style"	"맑은 고딕",	0.75,	1,	0
+	style	"guide_style"
+
+	pen			penEtc
+
+	!	상부 추가 길이
+	line_type	"long-dashsed"
+
+		put	-(hWdt_B/2 + addLth_L),	-(vWdt_B/2 + addLth_B),	1,
+			-(hWdt_B/2 + addLth_L),	(vWdt_B/2 + addLth_T),	1,
+			(hWdt_B/2 + addLth_R),	(vWdt_B/2 + addLth_T),	1,
+			(hWdt_B/2 + addLth_R),	-(vWdt_B/2 + addLth_B),	1,
+			-(hWdt_B/2 + addLth_L),	-(vWdt_B/2 + addLth_B),	1
+
+		poly2_	nsp/3,	1,	use(nsp)
+
+		!	Hotline
+		for	h = 1	to	(nsp/3) - 2
+			hotline2	get(2) + (use(1) - get(1)),	use(2)
+		next	h
+			hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+		!	Hotspot
+		add2	-hWdt_B/2,	0
+			hotspot2	0,			0,	unID,	addLth_L,	1+128	:	unID = unID + 1
+			hotspot2	1,			0,	unID,	addLth_L,	3		:	unID = unID + 1
+			hotspot2	-addLth_L,	0,	unID,	addLth_L,	2		:	unID = unID + 1
+		del 1
+
+		add2	hWdt_B/2,	0
+			hotspot2	0,			0,	unID,	addLth_R,	1+128	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	addLth_R,	3		:	unID = unID + 1
+			hotspot2	addLth_R,	0,	unID,	addLth_R,	2		:	unID = unID + 1
+		del 1
+
+		add2	0,	-vWdt_B/2
+			hotspot2	0,	0,			unID,	addLth_B,	1+128	:	unID = unID + 1
+			hotspot2	0,	1,			unID,	addLth_B,	3		:	unID = unID + 1
+			hotspot2	0,	-addLth_B,	unID,	addLth_B,	2		:	unID = unID + 1
+		del 1
+
+		add2	0,	vWdt_B/2
+			hotspot2	0,	0,			unID,	addLth_T,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	addLth_T,	3		:	unID = unID + 1
+			hotspot2	0,	addLth_T,	unID,	addLth_T,	2		:	unID = unID + 1
+		del 1
+
+	!	1단
+	if	bDrawStep1	then
+		!	Hotspot
+		hotspot2	0,			yPosStep1,	unID,	xPosStep1,	1+128	:	unID = unID + 1
+		hotspot2	-1,			yPosStep1,	unID,	xPosStep1,	3		:	unID = unID + 1
+		hotspot2	xPosStep1,	yPosStep1,	unID,	xPosStep1,	2		:	unID = unID + 1
+
+		hotspot2	xPosStep1,	0,			unID,	yPosStep1,	1+128	:	unID = unID + 1
+		hotspot2	xPosStep1,	-1,			unID,	yPosStep1,	3		:	unID = unID + 1
+		hotspot2	xPosStep1,	yPosStep1,	unID,	yPosStep1,	2		:	unID = unID + 1
+
+		!	Draw Line
+		add2	xPosStep1,	yPosStep1
+			line_type	1
+			circle2	0,	0,	eps*100
+			circle2	0,	0,	eps*150
+
+			line_type	"short-dashsed"
+			put	0,			0,			1,
+				0,			step1_vWdt,	1,
+				step1_hWdt,	step1_vWdt,	1,
+				step1_hWdt,	0,			1,
+				0,			0,			1
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+			!	Hotspot
+			hotspot2	0,			0,	unID,	step1_hWdt,	1+128	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	step1_hWdt,	3		:	unID = unID + 1
+			hotspot2	step1_hWdt,	0,	unID,	step1_hWdt,	2		:	unID = unID + 1
+
+			hotspot2	0,			step1_vWdt,	unID,	step1_hWdt,	1+128	:	unID = unID + 1
+			hotspot2	-1,			step1_vWdt,	unID,	step1_hWdt,	3		:	unID = unID + 1
+			hotspot2	step1_hWdt,	step1_vWdt,	unID,	step1_hWdt,	2		:	unID = unID + 1
+
+			hotspot2	0,	0,			unID,	step1_vWdt,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	step1_vWdt,	3		:	unID = unID + 1
+			hotspot2	0,	step1_vWdt,	unID,	step1_vWdt,	2		:	unID = unID + 1
+
+			hotspot2	step1_hWdt,	0,			unID,	step1_vWdt,	1+128	:	unID = unID + 1
+			hotspot2	step1_hWdt,	-1,			unID,	step1_vWdt,	3		:	unID = unID + 1
+			hotspot2	step1_hWdt,	step1_vWdt,	unID,	step1_vWdt,	2		:	unID = unID + 1
+
+			!	Text
+			text2	0,	0,	"1단"
+		del 1
+	endif
+
+	!	2단
+	if	bDrawStep2	then
+		!	Hotspot
+		hotspot2	0,			yPosStep2,	unID,	xPosStep2,	1+128	:	unID = unID + 1
+		hotspot2	-1,			yPosStep2,	unID,	xPosStep2,	3		:	unID = unID + 1
+		hotspot2	xPosStep2,	yPosStep2,	unID,	xPosStep2,	2		:	unID = unID + 1
+
+		hotspot2	xPosStep2,	0,			unID,	yPosStep2,	1+128	:	unID = unID + 1
+		hotspot2	xPosStep2,	-1,			unID,	yPosStep2,	3		:	unID = unID + 1
+		hotspot2	xPosStep2,	yPosStep2,	unID,	yPosStep2,	2		:	unID = unID + 1
+
+		!	Draw Line
+		add2	xPosStep2,	yPosStep2
+			line_type	1
+			circle2	0,	0,	eps*100
+			circle2	0,	0,	eps*150
+
+			line_type	"very-short-dashed"
+			put	0,			0,			1,
+				0,			step2_vWdt,	1,
+				step2_hWdt,	step2_vWdt,	1,
+				step2_hWdt,	0,			1,
+				0,			0,			1
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+			!	Hotspot
+			hotspot2	0,			0,	unID,	step2_hWdt,	1+128	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	step2_hWdt,	3		:	unID = unID + 1
+			hotspot2	step2_hWdt,	0,	unID,	step2_hWdt,	2		:	unID = unID + 1
+
+			hotspot2	0,			step2_vWdt,	unID,	step2_hWdt,	1+128	:	unID = unID + 1
+			hotspot2	-1,			step2_vWdt,	unID,	step2_hWdt,	3		:	unID = unID + 1
+			hotspot2	step2_hWdt,	step2_vWdt,	unID,	step2_hWdt,	2		:	unID = unID + 1
+
+			hotspot2	0,	0,			unID,	step2_vWdt,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	step2_vWdt,	3		:	unID = unID + 1
+			hotspot2	0,	step2_vWdt,	unID,	step2_vWdt,	2		:	unID = unID + 1
+
+			hotspot2	step2_hWdt,	0,			unID,	step2_vWdt,	1+128	:	unID = unID + 1
+			hotspot2	step2_hWdt,	-1,			unID,	step2_vWdt,	3		:	unID = unID + 1
+			hotspot2	step2_hWdt,	step2_vWdt,	unID,	step2_vWdt,	2		:	unID = unID + 1
+
+			!	Text
+			text2	0,	0,	"2단"
+		del 1
+	endif
+endif

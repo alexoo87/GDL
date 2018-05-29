@@ -1,0 +1,549 @@
+!===============================================================================================
+!	콘센트 21
+!===============================================================================================
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	콘센트 형태
+!-----------------------------------------------------------------------------------------------
+group	"gSocketBase"
+	material	matSocket
+
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+	_hillThk = 0.005
+
+	!	콘센트 형태 : 매입형
+	!-----------------------------------------------------------------------------------------------
+	if	iSocketType = SOCKET_MOUNTED	then
+		gosub	"coordinate_Socket"
+
+		hprism_	matSocket,	matSocket,	matSocket,	matSocket,
+				nsp/3,	socketThk,	0,	_hillThk,	1,	get(nsp)
+
+		_hgt_220V = 0.008
+		_zPosContent = socketThk - (_hgt_220V + 0.002)
+		if	_zPosContent < eps	then
+			_zPosContent = eps
+		endif
+		_zPosSolid = socketThk
+	endif
+
+	!	콘센트 형태 : 노출형
+	!-----------------------------------------------------------------------------------------------
+	if	iSocketType = SOCKET_PROJECTED	then
+		gosub	"coordinate_Socket"
+
+		hprism_	matSocket,	matSocket,	matSocket,	matSocket,
+				nsp/3,	boxThk,	0,	_hillThk,	1,	get(nsp)
+
+		_hgt_220V = 0.0275
+		_zPosContent = boxThk - (_hgt_220V + 0.002)
+		_zPosSolid = boxThk
+	endif
+endgroup
+
+!-----------------------------------------------------------------------------------------------
+!	콘센트 유형
+!-----------------------------------------------------------------------------------------------
+
+!	더하기
+group	"gSocketSolid"
+	material	matSocket
+
+	add	socketWdt/2,	socketHgt/2,	0
+		!	변수 정의
+		!-----------------------------------------------------------------------------------------------
+		_solidThk = 0.001
+
+		_solidWdt_12 = 0.030
+		_solidHgt_12 = 0.022
+
+		_solidWdt_34 = 0.050
+		_solidHgt_34 = 0.049
+
+		_solidWdt_56 = 0.050
+		_solidHgt_56 = 0.100
+
+		_yPos_Lan_12 = 0.035
+		_yPos_Lan_34 = 0.0255
+
+		!	콘센트 유형 : LAN
+		!-----------------------------------------------------------------------------------------------
+		if	iSocketContent = SOCKET_CONTENT_LAN	then
+			if	nSocket = 1	then
+				gosub	"shape_Lan_Solid"
+			endif
+
+			if	nSocket = 2	then
+				addy	_yPos_Lan_12
+					gosub	"shape_Lan_Solid"
+				del 1
+
+				addy	-_yPos_Lan_12
+					gosub	"shape_Lan_Solid"
+				del 1
+			endif
+
+			if	nSocket = 3 | nSocket = 4	then
+				addy	_yPos_Lan_34
+					gosub	"shape_Lan_Solid"
+				del 1
+
+				addy	-_yPos_Lan_34
+					gosub	"shape_Lan_Solid"
+				del 1
+			endif
+
+			if	nSocket = 5 | nSocket = 6	then
+				gosub	"shape_Lan_Solid"
+			endif
+		endif
+	del 1
+
+endgroup
+
+
+!	빼기
+group	"gSocketVoid"
+	material	matSocket
+
+	add	socketWdt/2,	socketHgt/2,	0
+		!	변수 정의
+		!-----------------------------------------------------------------------------------------------
+		_yPos_220V = 0.035
+		_yPos_Shutdown = 0.035
+
+		_yPos_Lan_12 = 0.035
+		_yPos_Lan_34 = 0.0255
+		_yPos_Lan_56 = 0.0255
+
+		!	콘센트 유형 : 220V
+		!-----------------------------------------------------------------------------------------------
+		if	iSocketContent = SOCKET_CONTENT_ELEC	then
+			if	nSocket = 1	then
+				_aRot = 0
+				gosub	"shape_220V"
+			endif
+			if	nSocket = 2	then
+				_aRot = -35
+				addy	socketHgt/2 - _yPos_220V
+					gosub	"shape_220V"
+				del 1
+
+				addy	-(socketHgt/2 - _yPos_220V)
+					gosub	"shape_220V"
+				del 1
+			endif
+			if	nSocket = 4	then
+				_aRot = -35
+				addx	socketWdt/2 - 0.036
+					addy	socketHgt/2 - _yPos_220V
+						gosub	"shape_220V"
+					del 1
+
+					addy	-(socketHgt/2 - _yPos_220V)
+						gosub	"shape_220V"
+					del 1
+				del 1
+
+				addx	-(socketWdt/2 - 0.036)
+					addy	socketHgt/2 - _yPos_220V
+						gosub	"shape_220V"
+					del 1
+
+					addy	-(socketHgt/2 - _yPos_220V)
+						gosub	"shape_220V"
+					del 1
+				del 1
+			endif
+		endif
+
+		!	콘센트 유형 : 220V(대기전력차단)
+		!-----------------------------------------------------------------------------------------------
+		if	iSocketContent = SOCKET_CONTENT_ELEC_SHUTDOWN	then
+			if	nSocket = 1	then
+				_aRot = -35
+				addy	socketHgt/2 - _yPos_Shutdown
+					gosub	"shape_Shutdown"
+				del 1
+
+				addy	-(socketHgt/2 - _yPos_220V)
+					gosub	"shape_220V"
+				del 1
+			endif
+
+			if	nSocket = 3	then
+				_aRot = -35
+				addx	socketWdt/2 - 0.036
+					addy	socketHgt/2 - _yPos_Shutdown
+						gosub	"shape_Shutdown"
+					del 1
+
+					addy	-(socketHgt/2 - _yPos_220V)
+						gosub	"shape_220V"
+					del 1
+				del 1
+
+				addx	-(socketWdt/2 - 0.036)
+					addy	socketHgt/2 - _yPos_220V
+						gosub	"shape_220V"
+					del 1
+
+					addy	-(socketHgt/2 - _yPos_220V)
+						gosub	"shape_220V"
+					del 1
+				del 1
+			endif
+		endif
+
+		!	콘센트 유형 : LAN
+		!-----------------------------------------------------------------------------------------------
+		if	iSocketContent = SOCKET_CONTENT_LAN	then
+			if	nSocket = 1	then
+				gosub	"shape_Lan"
+			endif
+
+			if	nSocket = 2	then
+				addy	_yPos_Lan_12
+					gosub	"shape_Lan"
+				del 1
+
+				addy	-_yPos_Lan_12
+					gosub	"shape_Lan"
+				del 1
+			endif
+
+			if	nSocket = 3	then
+				addy	_yPos_Lan_34
+					gosub	"shape_Lan"
+				del 1
+
+				addy	-_yPos_Lan_34
+					addx	0.0112
+						gosub	"shape_Lan"
+					del 1
+
+					addx	-0.0112
+						gosub	"shape_Lan"
+					del 1
+				del 1
+			endif
+
+			if	nSocket = 4	then
+				addy	_yPos_Lan_34
+					addx	0.0112
+						gosub	"shape_Lan"
+					del 1
+
+					addx	-0.0112
+						gosub	"shape_Lan"
+					del 1
+				del 1
+
+				addy	-_yPos_Lan_34
+					addx	0.0112
+						gosub	"shape_Lan"
+					del 1
+
+					addx	-0.0112
+						gosub	"shape_Lan"
+					del 1
+				del 1
+			endif
+
+			if	nSocket = 5	then
+				addy	_yPos_Lan_56
+					gosub	"shape_Lan"
+				del 1
+
+				addx	0.0112
+					gosub	"shape_Lan"
+				del 1
+
+				addx	-0.0112
+					gosub	"shape_Lan"
+				del 1
+
+				addy	-_yPos_Lan_56
+					addx	0.0112
+						gosub	"shape_Lan"
+					del 1
+
+					addx	-0.0112
+						gosub	"shape_Lan"
+					del 1
+				del 1
+			endif
+
+			if	nSocket = 6	then
+				addy	_yPos_Lan_56
+					addx	0.0112
+						gosub	"shape_Lan"
+					del 1
+
+					addx	-0.0112
+						gosub	"shape_Lan"
+					del 1
+				del 1
+
+				addx	0.0112
+					gosub	"shape_Lan"
+				del 1
+
+				addx	-0.0112
+					gosub	"shape_Lan"
+				del 1
+
+				addy	-_yPos_Lan_56
+					addx	0.0112
+						gosub	"shape_Lan"
+					del 1
+
+					addx	-0.0112
+						gosub	"shape_Lan"
+					del 1
+				del 1
+			endif
+		endif
+
+		!	콘센트 유형 : LAN(모자이크형)
+		!-----------------------------------------------------------------------------------------------
+		if	iSocketContent = SOCKET_CONTENT_LAN_MOSAIC	then
+			if	nSocket = 4	then
+				!	큰 박스
+				_bBoxWdt = 0.039
+				_bBoxHgt = 0.080
+				_gap = 0.0005
+
+				addz	_zPosContent + 0.002
+					put	-_bBoxWdt/2,	_bBoxHgt/2,		15,
+						-_bBoxWdt/2,	-_bBoxHgt/2,	15,
+						_bBoxWdt/2,		-_bBoxHgt/2,	15,
+						_bBoxWdt/2,		_bBoxHgt/2,		15,
+						-_bBoxWdt/2,	_bBoxHgt/2,		-1,
+
+						-(_bBoxWdt/2 - _gap),	_bBoxHgt/2 - _gap,		15,
+						-(_bBoxWdt/2 - _gap),	-(_bBoxHgt/2 - _gap),	15,
+						_bBoxWdt/2 - _gap,		-(_bBoxHgt/2 - _gap),	15,
+						_bBoxWdt/2 - _gap,		_bBoxHgt/2 - _gap,		15,
+						-(_bBoxWdt/2 - _gap),	_bBoxHgt/2 - _gap,		-1
+
+					addx	0.0205
+						prism_	nsp/3,	_hgt_220V,	use(nsp)
+					del 1
+					addx	-0.0205
+						prism_	nsp/3,	_hgt_220V,	get(nsp)
+					del 1
+				del 1
+
+
+				!	수구 박스
+				_sBoxWdt = 0.018
+				_sBoxHgt = 0.014
+
+				addz	_zPosContent + 0.002
+					put	-_sBoxWdt/2,	_sBoxHgt/2,		15,
+						-_sBoxWdt/2,	-_sBoxHgt/2,	15,
+						_sBoxWdt/2,		-_sBoxHgt/2,	15,
+						_sBoxWdt/2,		_sBoxHgt/2,		15,
+						-_sBoxWdt/2,	_sBoxHgt/2,		-1,
+
+						-(_sBoxWdt/2 - _gap),	_sBoxHgt/2 - _gap,		15,
+						-(_sBoxWdt/2 - _gap),	-(_sBoxHgt/2 - _gap),	15,
+						_sBoxWdt/2 - _gap,		-(_sBoxHgt/2 - _gap),	15,
+						_sBoxWdt/2 - _gap,		_sBoxHgt/2 - _gap,		15,
+						-(_sBoxWdt/2 - _gap),	_sBoxHgt/2 - _gap,		-1
+
+					addy	0.0225
+						addx	0.0205
+							prism_	nsp/3,	_hgt_220V,	use(nsp)
+						del 1
+						addx	-0.0205
+							prism_	nsp/3,	_hgt_220V,	use(nsp)
+						del 1
+					del 1
+
+					addy	-0.0225
+						addx	0.0205
+							prism_	nsp/3,	_hgt_220V,	use(nsp)
+						del 1
+						addx	-0.0205
+							prism_	nsp/3,	_hgt_220V,	get(nsp)
+						del 1
+					del 1
+				del 1
+
+				!	Lan 포트
+				addy	0.0245
+					addx	0.0205
+						gosub	"shape_Lan"
+					del 1
+					addx	-0.0205
+						gosub	"shape_Lan"
+					del 1
+				del 1
+
+				addy	-0.0205
+					addx	0.0205
+						gosub	"shape_Lan"
+					del 1
+					addx	-0.0205
+						gosub	"shape_Lan"
+					del 1
+				del 1
+			endif
+		endif
+
+
+
+	del 1
+endgroup
+
+
+!-----------------------------------------------------------------------------------------------
+!	콘센트 배치
+!-----------------------------------------------------------------------------------------------
+_SocketShape_1 = addgroup("gSocketBase",	"gSocketSolid")
+_SocketShape_2 = subgroup(_SocketShape_1,	"gSocketVoid")
+
+rotx	90
+	placegroup	_SocketShape_2
+del 1
+
+
+
+
+ end
+
+
+!-----------------------------------------------------------------------------------------------
+"coordinate_Socket":	!	콘센트 좌표
+!-----------------------------------------------------------------------------------------------
+	put	0,			0,			13,
+		socketWdt,	0,			13,
+		socketWdt,	socketHgt,	13,
+		0,			socketHgt,	13,
+		0,			0,			13
+
+
+	gosub	"common_Hotspot"
+return
+
+!-----------------------------------------------------------------------------------------------
+"common_Hotspot":	!	공통 핫스팟
+!-----------------------------------------------------------------------------------------------
+	hotspot	0,			0,			0
+	hotspot	socketWdt,	0,			0
+	hotspot	socketWdt,	socketHgt,	0
+	hotspot	0,			socketHgt,	0
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"shape_220V":	!	220V
+!-----------------------------------------------------------------------------------------------
+	addz	_zPosContent
+		rotz	_aRot
+			addx	0.010
+				cylind	0.002,	0.0025
+			del 1
+
+			addx	-0.010
+				cylind	0.002,	0.0025
+			del 1
+		del 1
+
+		addz	0.002
+			cylind	_hgt_220V,	0.020
+		del 1
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"shape_Shutdown":	!	대기전력차단
+!-----------------------------------------------------------------------------------------------
+	addz	_zPosContent
+		cylind	0.002,	0.0025
+
+		addz	0.002
+			put	-0.003,	0.005,	13,
+				-0.003,	0.003,	900,
+				0.002,	90,		4000+13,
+				-0.005,	-0.003,	13,
+				-0.003,	-0.003,	900,
+				0.002,	90,		4000+13,
+				0.003,	-0.005,	13,
+				0.003,	-0.003,	900,
+				0.002,	90,		4000+13,
+				0.005,	0.003,	13,
+				0.003,	0.003,	900,
+				0.002,	90,		4000+13
+
+			prism_	nsp/3,	_hgt_220V,	get(nsp)
+		del 1
+
+
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"shape_Lan_Solid":	!	Lan 포트 돌출 부분
+!-----------------------------------------------------------------------------------------------
+	addz	_zPosSolid
+		if	nSocket = 1 | nSocket = 2	then
+			put	-_solidWdt_12/2,	_solidHgt_12/2,		15,
+				-_solidWdt_12/2,	-_solidHgt_12/2,	15,
+				_solidWdt_12/2,		-_solidHgt_12/2,	15,
+				_solidWdt_12/2,		_solidHgt_12/2,		15
+		endif
+
+		if	nSocket = 3 | nSocket = 4	then
+			put	-_solidWdt_34/2,	_solidHgt_34/2,		15,
+				-_solidWdt_34/2,	-_solidHgt_34/2,	15,
+				_solidWdt_34/2,		-_solidHgt_34/2,	15,
+				_solidWdt_34/2,		_solidHgt_34/2,		15
+		endif
+
+		if	nSocket = 5 | nSocket = 6	then
+			put	-_solidWdt_56/2,	_solidHgt_56/2,		15,
+				-_solidWdt_56/2,	-_solidHgt_56/2,	15,
+				_solidWdt_56/2,		-_solidHgt_56/2,	15,
+				_solidWdt_56/2,		_solidHgt_56/2,		15
+		endif
+
+			prism_	nsp/3,	_solidThk,	get(nsp)
+
+	del 1
+return
+
+!-----------------------------------------------------------------------------------------------
+"shape_Lan":	!	Lan 포트
+!-----------------------------------------------------------------------------------------------
+	addz	_zPosContent + 0.002
+		addy	0.0023
+			put	-0.0015,	0,			15,
+				-0.0015,	-0.0008,	15,
+				-0.0050,	-0.0008,	15,
+				-0.0050,	-0.0068,	15,
+				-0.0024,	-0.0068,	15,
+				-0.0024,	-0.0083,	15,
+				-0.0015,	-0.0083,	15,
+				-0.0015,	-0.0093,	15,
+				0.0015,		-0.0093,	15,
+				0.0015,		-0.0083,	15,
+				0.0024,		-0.0083,	15,
+				0.0024,		-0.0068,	15,
+				0.0050,		-0.0068,	15,
+				0.0050,		-0.0008,	15,
+				0.0015,		-0.0008,	15,
+				0.0015,		0,			15
+
+			prism_	nsp/3,	_hgt_220V + _solidThk,	get(nsp)
+		del 1
+	del 1
+
+return

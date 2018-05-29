@@ -1,0 +1,536 @@
+
+!===============================================================================================
+!	제목
+!===============================================================================================
+
+ui_dialog	"CurtainWall Settings"
+
+!===============================================================================================
+!	공통요소
+!===============================================================================================
+
+
+!===============================================================================================
+!	기본설정
+!===============================================================================================
+ui_page	1,	-1,	"기본 설정",	"uiTab_WindowSizes_flat(1)"
+!-----------------------------------------------------------------------------------------------
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"프레임 분할",	20, 10, 200, 250
+
+	!	outfield
+	ui_style	0,	0
+	ui_outfield	"커튼월 너비",	35, 45, 80, 20
+	ui_outfield	"커튼월 높이",	35, 80, 80, 20
+	ui_outfield	"수직분할개수",	40,	115, 80, 20
+	ui_outfield	"프레임 간격",	45, 150, 80, 20
+	ui_outfield	"수평분할개수",	40, 185, 80, 20
+	ui_outfield	"프레임 간격",	45, 220, 80, 20
+
+	!	infield
+	ui_infield	"A",	125, 40, 70, 20
+	ui_infield	"B",	125, 75, 70, 20
+
+	ui_infield	"frameDivideNum_X",	125, 110, 70, 20
+	ui_infield	"frameDivideNum_Y",	125, 180, 70, 20
+
+	ui_infield	"frameDistance_X",	125, 145, 70, 20
+	ui_infield	"frameDistance_Y",	125, 215, 70, 20
+
+	!	그림
+	ui_pict	"ui_1_cw_2",	220, 40, 205, 205, 1
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	2,	-1,	"코너프레임 설정",	"uiTab_StorefrontFrame_flat(1)"
+!-----------------------------------------------------------------------------------------------
+
+	ui_style	0,	1
+	ui_outfield	"코너 프레임 켜기/끄기",	30, 20, 190, 20
+
+	!	상/하/좌/우 체크박스
+	ui_style 0, 0
+	ui_infield{3}	"frameSwitch_U", 40, 40, 50, 20,
+					7, "", 2, 1, 0, 0, 0, 0,
+					"", `상부`, 0,
+					"", `상부`, 1
+
+	ui_infield{3}	"frameSwitch_B", 100, 40, 50, 20,
+					7, "", 2, 1, 0, 0, 0, 0,
+					"", `하부`, 0,
+					"", `하부`, 1
+
+	ui_infield{3}	"frameSwitch_L", 160, 40, 50, 20,
+					7, "", 2, 1, 0, 0, 0, 0,
+					"", `좌측`, 0,
+					"", `좌측`, 1
+
+	ui_infield{3}	"frameSwitch_R", 220, 40, 50, 20,
+					7, "", 2, 1, 0, 0, 0, 0,
+					"", `우측`, 0,
+					"", `우측`, 1
+
+	!	대분류 텍스트
+	ui_style 0, 1
+	ui_groupbox	"세부 설정",	30, 70, 380, 125
+
+	!	세부설정 텍스트
+	ui_style 0, 0
+	ui_radiobutton	"iSelectFrame",	SelectFrame_U,	'상부',	45,	90,		50,	20
+	ui_radiobutton	"iSelectFrame",	SelectFrame_B,	'하부',	45,	115,	50,	20
+	ui_radiobutton	"iSelectFrame",	SelectFrame_L,	'좌측',	45,	140,	50,	20
+	ui_radiobutton	"iSelectFrame",	SelectFrame_R,	'우측',	45,	165,	50,	20
+
+	!	세부설정 우측 구분선
+	ui_separator	100,	92,	100,	185
+
+	!	중분류 텍스트
+	ui_style 0, 1
+	ui_outfield	"유형",		115, 93, 	50, 20
+
+	ui_outfield	"사이즈",	115, 143, 	50, 20
+
+	!	사용자 설정
+	ui_style 0, 0
+	
+	ui_radiobutton	"EqualFrameSize",	0,	'개별',	170,	140,	50,	20
+	ui_radiobutton	"EqualFrameSize",	1,	'일괄',	220,	140,	50,	20
+
+	!	개별 프레임 유형, 폭, 두께
+	if	iSelectFrame = SelectFrame_U	then
+		ui_infield	"iCornerFrame_U", 	120, 	110, 	120,	25
+	endif
+
+	if	iSelectFrame = SelectFrame_B	then
+		ui_infield	"iCornerFrame_B", 	120, 	110, 	120,	25
+	endif
+
+	if	iSelectFrame = SelectFrame_L	then
+		ui_infield	"iCornerFrame_L", 	120, 	110, 	120,	25
+
+		if	iCornerFrame_L = CornerFrame_Corner	then
+			ui_infield	"iCornerType",	250,	110,	140,	25
+
+			ui_infield	"CornerAngle_L",	330,	160,	60,	25
+			ui_outfield	"각도",	300, 167, 30, 20
+		endif
+	endif
+
+	if	iSelectFrame = SelectFrame_R	then
+		ui_infield	"iCornerFrame_R", 	120, 	110, 	120,	25
+
+		if	iCornerFrame_R = CornerFrame_Corner	then
+			ui_infield	"iCornerType",	250,	110,	140,	25
+
+			ui_infield	"CornerAngle_R",	330,	160,	60,	25
+			ui_outfield	"각도",	300, 167, 30, 20
+		endif
+	endif
+
+	!	일괄
+	ui_infield		"frameWidth", 	140, 	160, 	60,		25
+	ui_infield		"frameThick", 	235, 	160, 	60,		25
+
+	!	텍스트
+	ui_outfield	"폭",	120, 167, 15, 20
+	ui_outfield	"두께",	205, 167, 30, 20
+
+	!	3D 표현
+	ui_style 0, 1
+	ui_outfield	`3D 표현`, 30, 205, 100, 15
+
+
+	ui_style 0, 0	
+	ui_outfield	`프레임 색상`, 35, 225, 70, 15
+
+	ui_infield	"frameMat", 	110, 220, 160, 25
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	3,	-1,	"멀리언/트랜섬 설정",	"uiTab_StorefrontMullion_flat(1)"
+!-----------------------------------------------------------------------------------------------
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"멀리언/트랜섬 형태",	20, 10, 200, 255
+
+	!	outfield
+	ui_style	0,	0
+	ui_outfield	"멀리언 유형",		35, 35, 80, 20
+	ui_outfield	"(1)멀리언 폭",		40, 60, 90, 20
+	ui_outfield	"(2)멀리언 두께",	40,	85, 90, 20
+	ui_outfield	"트랜섬 유형",		35, 115, 80, 20
+	ui_outfield	"(1)트랜섬 폭",		40, 140, 90, 20
+	ui_outfield	"(2)트랜섬 두께",	40, 165, 90, 20
+	ui_outfield	"(3)개스킷 폭",		40, 190, 90, 20
+	ui_outfield	"(4)개스킷 두께",	40, 215, 90, 20
+	ui_outfield	"개스킷 캡 두께",	40, 240, 90, 20
+
+	!	infield
+	ui_infield	"iVerticalFrame",		135, 30, 70, 20
+	ui_infield	"VerticalFrameWidth",	135, 55, 70, 20
+	ui_infield	"VerticalFrameThick",	135, 80, 70, 20
+	ui_infield	"iHorizontalFrame",		135, 110, 70, 20
+	ui_infield	"HorizontalFrameWidth",	135, 135, 70, 20
+	ui_infield	"HorizontalFrameThick",	135, 160, 70, 20
+	ui_infield	"gasketWidth",			135, 185, 70, 20
+	ui_infield	"gasketThick",			135, 210, 70, 20
+	ui_infield	"gasketCapThick",		135, 235, 70, 20	ui_tooltip	"Type2 선택시 개스킷 캡 두께"
+
+
+	!	그림
+	if	iVerticalFrame=VerticalFrame_Type1	then
+		ui_pict	"frame_ui_100",	240,	15,	180,	250,	1+2
+	else
+		ui_pict	"frame_ui_200",	240,	15,	180,	250,	1+2
+	endif
+
+!-----------------------------------------------------------------------------------------------
+ui_page	4,	-1,	"프레임 캡 설정"
+!-----------------------------------------------------------------------------------------------
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"프레임 캡 설정",	20, 10, 230, 255
+
+	!	수직프레임 캡
+		!	outfield
+		posY = 40
+		dy = 26
+		ui_style	0,	1
+		ui_outfield	"수직프레임 캡",		35, posY, 110, 15		:	posY = posY + dy
+		ui_style	0,	0
+		ui_outfield	"프레임 캡 On/Off",		40, posY, 110, 15		:	posY = posY + dy
+		ui_outfield	"(1)프레임 캡 폭",		40, posY, 110, 15		:	posY = posY + dy
+		ui_outfield	"(2)프레임 캡 두께",	40,	posY, 110, 15	:	posY = posY + dy
+
+		!	infield
+		posY = 36 + dy
+		ui_infield	"bFrameCap_V",		150, posY, 70, 19		:	posY = posY + dy
+		ui_infield	"FrameCapWidth_V",	150, posY, 70, 19		:	posY = posY + dy
+		ui_infield	"FrameCapThick_V",	150, posY, 70, 19	:	posY = posY + dy
+
+	!	수평프레임 캡
+		!	outfield
+		posY = 148
+		dy = 26
+		ui_style	0,	1
+		ui_outfield	"수평프레임 캡",		35, posY, 110, 15		:	posY = posY + dy
+		ui_style	0,	0
+		ui_outfield	"프레임 캡 On/Off",		40, posY, 110, 15		:	posY = posY + dy
+		ui_outfield	"(1)프레임 캡 폭",		40, posY, 110, 15		:	posY = posY + dy
+		ui_outfield	"(2)프레임 캡 두께",	40,	posY, 110, 15	:	posY = posY + dy
+
+		!	infield
+		posY = 144 + dy
+		ui_infield	"bFrameCap_H",		150, posY, 70, 19		:	posY = posY + dy
+		ui_infield	"FrameCapWidth_H",	150, posY, 70, 19		:	posY = posY + dy
+		ui_infield	"FrameCapThick_H",	150, posY, 70, 19	:	posY = posY + dy
+
+
+	!	그림
+	ui_pict	"ui_5_cap",	295,	30,	102,	205,	1+2
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	5,	1,	"창호 설정",	"uiTab_WindowSettings_flat(1)"
+!-----------------------------------------------------------------------------------------------
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"창호 설정",	20, 10, 220, 175
+
+	!	outfield
+	ui_style	0,	0
+	ui_outfield	"창호 설정 표",			35, 35, 120, 20
+	ui_outfield	"텍스트 On/Off",		40, 60, 115, 15
+	ui_outfield	'"F"',					135, 60
+	ui_outfield	'"배"',					180, 60
+	ui_outfield	"텍스트 반전",			40,	85, 115, 20
+	ui_outfield	"텍스트 사이즈",		40, 110, 115, 20
+	ui_outfield	"텍스트 숨김 스케일",	40, 135, 115, 20	ui_tooltip	"해당 스케일 이상에서 텍스트 숨기기"
+	ui_outfield	"유리 두께",			40, 160, 115, 20
+
+	!	창호 세부설정(창 별로)
+	ui_outfield	"열림각도",	100, 195
+	ui_outfield	"힌지위치",	200, 195
+
+	ui_outfield	"TYPE1",	100, 245	ui_tooltip	"단열재 두께"
+	ui_outfield	"TYPE2",	185, 245	ui_tooltip	"단열재 두께"
+	ui_outfield	"TYPE3",	270, 245	ui_tooltip	"단열재 두께"
+	ui_outfield	"TYPE4",	355, 245	ui_tooltip	"단열재 두께"
+
+
+	ui_outfield	"두께",	100, 220
+	ui_outfield	"간격",	200, 220
+	ui_outfield	"각도",	300, 220
+
+	ui_style	0,	1
+	ui_outfield	"프로젝트창",	35, 195
+	ui_outfield	"그릴창",		35, 220
+	ui_outfield	"스팬드럴창",	35, 245
+	ui_outfield	"방충망",		300, 195
+
+	!	infield
+	ui_style 	0,	0
+	ui_infield	"iMatrix_Windows",	160, 30, 40, 20
+	ui_infield	"TextSwitch",		160, 55, 20, 20	ui_tooltip	"고정창 `F` 텍스트 On/Off"
+	ui_infield	"bSmokeText",		205, 55, 20, 20	ui_tooltip	"배연창 `배` 텍스트 On/Off"
+	ui_infield	"TextMirror",		160, 80, 20, 20
+	ui_infield	"TextSize",			160, 105, 60, 20
+	ui_infield	"TextScale",		160, 130, 60, 20	ui_tooltip	"해당 스케일 이하에서는 텍스트 숨김"
+	ui_infield	"glassThick",		160, 155, 60, 20
+
+	ui_infield	"ProjectAngle",		150, 190, 40, 20
+	ui_infield	"iProjectHinge",	250, 190, 40, 20
+	ui_infield	"bScreen",			340, 190, 40, 20
+
+	ui_infield	"grillThick",		150, 215, 40, 20
+	ui_infield	"grillDistance",	250, 215, 40, 20
+	ui_infield	"grillAngle",		340, 215, 40, 20
+
+	ui_infield	"spdThk_1",	135, 240, 45, 20
+	ui_infield	"spdThk_2",	220, 240, 45, 20
+	ui_infield	"spdThk_3",	305, 240, 45, 20
+	ui_infield	"spdThk_4",	390, 240, 45, 20
+
+	!	그림
+	ui_pict	"ui_4_wdw",	260, 20, 160, 160, 2
+
+!-----------------------------------------------------------------------------------------------
+ui_page	6,	1,	"문 설정",	"uiTab_DoorSettings_flat(1)"
+!-----------------------------------------------------------------------------------------------
+
+	!	문 On/Off
+	ui_style	0,	1
+	ui_outfield	"문 On/Off",	20, 10, 55, 20
+	ui_infield	"iDoorSwitch",	85, 6, 20, 20
+
+	!	문 선택
+	ui_outfield	"편집할 문 선택",	130, 10, 80, 20
+	ui_infield	"selectX",			210, 5, 60, 20
+
+	ui_separator	0,	32,	444,	32
+
+	!	문 유형 선택
+	ui_groupbox	"유형 선택",	15, 50, 185, 190
+
+		!	Outfield
+		ui_style	0,	0
+		ui_outfield	"문 유형",		30, 80, 70, 20
+		ui_outfield	"열림방향",		30, 110, 70, 20
+		ui_outfield	"프레임유형",	30, 140, 70, 20
+		ui_outfield	"개폐유형",		30, 170, 70, 20
+		if	iDoorOpenType = DoorOpenType_Hinged	then
+			ui_outfield	"심볼위치",		30, 200, 70, 20
+		else
+			ui_outfield	"문 위치",	30, 200, 70, 20
+		endif
+
+		!	infield
+		ui_infield	"iDoorType",		100, 75, 85, 20
+		ui_infield	"iDoorHandle",		100, 105, 85, 20
+		ui_infield	"iFrameType",		100, 135, 85, 20
+		ui_infield	"iDoorOpenType",	100, 165, 85, 20
+		ui_infield	"iSymbolPlace",		100, 195, 85, 20
+
+	!	문 세부 설정 UI button
+	if	iDoorOpenType = DoorOpenType_Hinged	then
+		ui_radiobutton	"iDoorUI",	1,	'Door',		220, 50, 50, 20
+		ui_radiobutton	"iDoorUI",	2,	'Frame',	280, 50, 60, 20
+		ui_radiobutton	"iDoorUI",	3,	'Handle',	350, 50, 60, 20
+	else
+		ui_radiobutton	"iDoorUI",	1,	'Door',		220, 50, 50, 20
+		ui_radiobutton	"iDoorUI",	2,	'Frame',	280, 50, 60, 20
+	endif
+
+		!	문 관련 너비 설정
+		if	iDoorUI = 1	then
+
+			!	Outfield
+			ui_outfield	"문 너비",			220, 85, 100, 20
+			if	not(iDoorOpenType = DoorOpenType_Auto)	then
+				ui_outfield	"좌측문 너비",		220, 110, 100, 20
+				ui_outfield	"우측문 너비",		220, 135, 100, 20
+			else
+				ui_outfield	"좌측 고정문 너비",		220, 110, 100, 20
+				ui_outfield	"우측 고정문 너비",		220, 135, 100, 20
+			endif
+			ui_outfield	"문 높이",			220, 160, 100, 20
+			ui_outfield	"문 두께",			220, 185, 100, 20
+			if	not(iDoorOpenType = DoorOpenType_Auto)	then
+				ui_outfield	"좌측 고정문 너비",	220, 210, 100, 20
+				ui_outfield	"우측 고정문 너비",	220, 235, 100, 20
+			else
+				ui_outfield	"자동문 프레임 너비",	220, 210, 100, 20
+				ui_outfield	"자동문 기계 높이",		220, 235, 100, 20
+			endif
+
+			!	Infield
+			ui_infield	"DoorWidth",		335, 80, 66, 20
+			ui_infield	"EqualDoorWidth",	407, 80, 20, 20	ui_tooltip	"좌/우측 문 너비 대칭"
+			if	not(iDoorOpenType = DoorOpenType_Auto)	then
+				ui_infield	"DoorWidth_L",		335, 105, 85, 20
+				ui_infield	"DoorWidth_R",		335, 130, 66, 20
+			else
+				ui_infield	"SldDoorWidth_L",		335, 105, 85, 20
+				ui_infield	"SldDoorWidth_R",		335, 130, 85, 20
+			endif
+			ui_infield	"DoorHeight",		335, 155, 66, 20
+			ui_infield	"DoorThick",		335, 180, 85, 20
+			if	not(iDoorOpenType = DoorOpenType_Auto)	then
+				ui_infield	"SldDoorWidth_L",	335, 205, 85, 20
+				ui_infield	"SldDoorWidth_R",	335, 230, 85, 20
+			else
+				ui_infield	"DoorFrame_A",	335, 205, 85, 20
+				ui_infield	"machHeight_A",	335, 230, 85, 20
+			endif
+
+		endif
+
+		!	프레임 너비 설정
+		if	iDoorUI = 2	then
+
+			!	Outfield
+			ui_style	0,	1
+			ui_outfield	"프레임 두께",	220, 85, 100, 20
+
+			ui_style	0,	0
+
+			posY = 110
+			dy = 30
+
+			ui_outfield	"좌측",		220, posY, 30, 20	:	posY = posY + dy
+			ui_outfield	"우측",		220, posY, 30, 20	:	posY = posY + dy
+			ui_outfield	"상단",		220, posY, 30, 20	:	posY = posY + dy
+			ui_outfield	"하단",		220, posY, 30, 20	:	posY = posY + dy
+
+			!	Infield
+			posY = 105
+			ui_infield	"DoorFrame_L",	260, posY, 60, 20	:	posY = posY + dy
+			ui_infield	"DoorFrame_R",	260, posY, 60, 20	:	posY = posY + dy
+			ui_infield	"DoorFrame_U",	260, posY, 60, 20	:	posY = posY + dy
+			ui_infield	"DoorFrame_B",	260, posY, 60, 20	:	posY = posY + dy
+
+
+			if	iFrameType=FrameType_1	then
+				ui_pict	"door_ui_200",	340, 105, 60, 120, 1
+			else
+				ui_pict	"door_ui_100",	340, 105, 60, 120, 1
+			endif
+
+		endif
+
+		!	손잡이 너비 설정
+		if	iDoorUI = 3	then
+
+			!	Outfield
+			ui_style	0,	1
+			ui_outfield	"손잡이 위치",	220, 85, 100, 20
+
+			ui_style	0,	0
+			ui_outfield	"(1) X",	220, 110, 30, 20
+			ui_outfield	"(2) Y",	220, 135, 30, 20
+
+			ui_style	0,	1
+			ui_outfield	"손잡이 설정",	220, 165, 100, 20
+
+			ui_style	0,	0
+			ui_outfield	"너비",		220, 190, 30, 20
+			ui_outfield	"높이",		220, 215, 30, 20
+			ui_outfield	"두께",		220, 240, 30, 20
+
+			!	Infield
+			ui_infield	"HandlePosX",	260, 105, 60, 20
+			ui_infield	"HandlePosY",	260, 130, 60, 20
+
+			ui_infield	"HandleWidth",	260, 185, 60, 20
+			ui_infield	"HandleHeight",	260, 210, 60, 20
+			ui_infield	"HandleThick",	260, 235, 60, 20
+
+			ui_pict	"door_ui_300",	340, 105, 80, 150, 1
+
+		endif	
+
+		!	자동문 설정
+		if	iDoorUI = 4	then
+
+		endif
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	7,	-1,	"2D/3D 설정",	"ui_list_3DPen_flat(1)"
+!-----------------------------------------------------------------------------------------------
+fieldID = 100
+
+ui_listfield	1,	5,	5,	425,	259,	0,	"title",	"value"	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"공통"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"b2Doff",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"ceilPen",			1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"bSpdFrm",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdFrmThk",		1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"프레임"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"framePen",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameFill",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameFillPen",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameFillPenBg",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"framePenElv",		1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"유리"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"glassPen",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"glassFill",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"glassFillPen",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"glassFillPenBg",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"glassPenElv",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"OpenlinePen",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"OpenlineType",		1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"스팬드럴"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spandPen",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spandFill",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spandFillPen",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spandFillPenBg",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spandPenHatch",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spandPenElv",		1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"프레임 캡"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameCapPen",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameCapFill",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameCapFillPen",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameCapFillPenBg",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameCapPenElv",		1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"그릴"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"grillPen",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"grillFill",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"grillFillPen",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"grillFillPenBg",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"grillPenElv",		1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"방충망"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"screenPen",		1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"배연창 2D Symbol"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"bSymbol2D",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"symbolPen",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"symbolOffset",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"symbolSize",		1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"재질설정"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameMat",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"frameCapMat",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"glassMat",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdFrmMat",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdGlsMat_1",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdMat_1",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdGlsMat_2",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdMat_2",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdGlsMat_3",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdMat_3",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdGlsMat_4",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"spdMat_4",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"grillMat",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"sensorMat",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"screenMat",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"TextMat",			1	:	fieldID = fieldID + 1

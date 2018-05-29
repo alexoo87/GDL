@@ -1,0 +1,112 @@
+!===============================================================================================
+!	창호라벨
+!===============================================================================================
+
+!	심볼 타입
+!-----------------------------------------------------------------------------------------------
+values{2}	"iSymbolType"	SYMBOL_CIRCLE_ID,	stSymbolType[SYMBOL_CIRCLE_ID],
+							SYMBOL_CIRCLE_DIM,	stSymbolType[SYMBOL_CIRCLE_DIM],
+							SYMBOL_STADIUM,		stSymbolType[SYMBOL_STADIUM]
+
+!	Marker Size
+if	GLOB_MODPAR_NAME = "AC_MarkerSize"	then
+	parameters	markerSize = AC_MarkerSize/1000,
+				halfSize = (AC_MarkerSize/1000)/2
+else
+	if	GLOB_MODPAR_NAME = "markerSize"	then
+		parameters	AC_MarkerSize = markerSize*1000,
+					halfSize = markerSize/2
+	else
+		if	GLOB_MODPAR_NAME = "halfSize"	then
+			parameters	AC_MarkerSize = (halfSize*2)*1000,
+						markerSize = halfSize*2
+		endif
+	endif
+endif
+
+if	not(iSymbolType = SYMBOL_CIRCLE_ID | iSymbolType = SYMBOL_CIRCLE_DIM)	then
+	lock	"bChangeContent"
+endif
+
+!	소수점 최대자리수 표기
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDemiPoint"	demiPoint_Zero,		stDemiPoint[demiPoint_Zero],
+							demiPoint_First,	stDemiPoint[demiPoint_First],
+							demiPoint_Second,	stDemiPoint[demiPoint_Second]
+
+
+!	ID 표기 방법
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDispID"	dispID_Full,	stDispID[dispID_Full],
+						dispID_Name,	stDispID[dispID_Name]
+
+if	iSymbolType <> SYMBOL_CIRCLE_DIM	then
+	lock			"iDemiPoint", "iDispID"
+	hideparameter	"iDemiPoint", "iDispID"
+endif
+
+
+!	지시선 방향
+!-----------------------------------------------------------------------------------------------
+values{2}	"iLineWay"	LineWay_UP,	stLineWay[LineWay_Up],
+						LineWay_DN,	stLineWay[LineWay_DN],
+						LineWay_LT,	stLineWay[LineWay_LT],
+						LineWay_RT,	stLineWay[LineWay_RT]
+
+!	지시선 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iLineType"	LineType_Type1,	stLineType[LineType_Type1],
+						LineType_Type2,	stLineType[LineType_Type2]
+
+values	"nType2"	1,	2,	3
+
+if	iLineType <> LineType_Type1	then
+	lock			"bPointSpot", "linePosX1_T1", "linePosY1_T1", "linePosX2_T1", "linePosY2_T1"
+	hideparameter	"bPointSpot", "linePosX1_T1", "linePosY1_T1", "linePosX2_T1", "linePosY2_T1"
+endif
+
+
+if	iLineType <> LineType_Type2	then
+	lock			"nType2", "OriginPosX_T2", "lineLth_T2", "linePosX1_T2", "linePosY1_T2", \
+					"linePosX2_T2", "linePosY2_T2", "linePosX3_T2", "linePosY3_T2"
+	hideparameter	"nType2", "OriginPosX_T2", "lineLth_T2", "linePosX1_T2", "linePosY1_T2", \
+					"linePosX2_T2", "linePosY2_T2", "linePosX3_T2", "linePosY3_T2"
+endif
+
+if	iLineType = LineType_Type2	then
+	values	"lineLth_T2"	range	[0,	]
+	values	"linePosY1_T2"	range	[0,	]
+	values	"linePosY2_T2"	range	[0,	]
+	values	"linePosY3_T2"	range	[0,	]
+	
+	if	nType2 = 1	then
+		lock			"linePosX2_T2", "linePosY2_T2", "linePosX3_T2", "linePosY3_T2"
+		hideparameter	"linePosX2_T2", "linePosY2_T2", "linePosX3_T2", "linePosY3_T2"
+	endif
+	
+	if	nType2 = 2	then
+		values	"linePosX1_T2"	range	[,	linePosX2_T2)
+		values	"linePosX2_T2"	range	(linePosX1_T2,	]
+	
+		lock			"linePosX3_T2", "linePosY3_T2"
+		hideparameter	"linePosX3_T2", "linePosY3_T2"
+	endif
+	
+	if	nType2 = 3	then
+		values	"linePosX1_T2"	range	[,	linePosX2_T2)
+		values	"linePosX2_T2"	range	(linePosX1_T2,	linePosX3_T2)
+		values	"linePosX3_T2"	range	(linePosX2_T2,	]
+	endif
+endif
+
+if	iSymbolType <> SYMBOL_STADIUM	then
+	parameters	linePosX1_T1 = 0,	OriginPosX_T2 = 0
+	lock	"linePosX1_T1", "OriginPosX_T2"
+else
+	if	iLineWay = LineWay_UP or iLineWay = LineWay_DN	then
+
+	else
+		parameters	linePosX1_T1 = 0,	OriginPosX_T2 = 0
+		lock	"linePosX1_T1", "OriginPosX_T2"
+	endif
+endif

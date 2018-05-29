@@ -1,0 +1,177 @@
+!===============================================================================================
+!	제목
+!===============================================================================================
+ui_dialog	"계단참 설정"
+
+
+
+!===============================================================================================
+!	Page
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+ui_page	1,	-1,	"계단참 설정(1)",	"uiTab_Stair2DSymb(1)"
+!-----------------------------------------------------------------------------------------------
+
+	!	그룹박스
+	!-----------------------------------------------------------------------------------------------
+	ui_style	0,	1
+	ui_groupbox	"길이 설정",	20, 20, 404, 226
+
+	!	변수들
+	!-----------------------------------------------------------------------------------------------
+	ui_style	0,	0
+	
+		ui_outfield	"(1) :",	40, 55, 30, 20
+		ui_outfield	"(2) :",	40, 85, 30, 20
+		ui_outfield	"(3) :",	40, 115, 30, 20
+		ui_outfield	"(4) :",	40, 145, 30, 20
+		ui_outfield	"(5) :",	40, 175, 30, 20
+		ui_outfield	"(6) :",	40, 205, 30, 20
+
+		ui_infield		"B",			70, 50, 80, 20	ui_tooltip	"계단참 세로 너비"
+		ui_infield		"strWdtL",	70, 80, 80, 20	ui_tooltip	"계단너비 : 좌측"
+		ui_infield		"strWell",	70, 110, 80, 20	ui_tooltip	"계단너비 : Stairwell"
+		ui_infield		"strWdtR",	70, 140, 80, 20	ui_tooltip	"계단너비 : 우측"
+		ui_infield		"strOffsetL",	70, 170, 80, 20	ui_tooltip	"오프셋 길이 : 좌측"
+		ui_infield		"strOffsetR",	70, 200, 80, 20	ui_tooltip	"오프셋 길이 : 좌측"
+
+	ui_separator	170, 45, 170, 226
+
+	!	ui_image
+	!-----------------------------------------------------------------------------------------------
+	ui_pict	"landing_ui_1",	180, 35, 240, 200, 1+2
+
+		!	가로 전체 길이
+		!-----------------------------------------------------------------------------------------------
+		ui_infield		"A",			265, 50, 60, 20
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	2,	-1,	"계단참 설정(2)",	"uiTab_Stair2DSymb(1)"
+!-----------------------------------------------------------------------------------------------
+
+	!	그룹박스
+	!-----------------------------------------------------------------------------------------------
+	ui_style	0,	1
+	ui_groupbox	"두께 설정",		20, 5, 404, 115
+	ui_groupbox	"핸드레일 설정",	20, 125, 404, 136
+
+	!	변수들
+	!-----------------------------------------------------------------------------------------------
+	ui_style	0,	0
+
+		!	두께 설정
+		!-----------------------------------------------------------------------------------------------
+		ui_outfield	"(1) 구조체 두께 :",	35, 30, 100, 20
+		ui_outfield	"(2) 바탕재 두께 :",	35, 52, 100, 20
+		ui_outfield	"(3) 마감재 두께 :",	35, 74, 90, 20
+		ui_outfield	"- 수직재 두께 :",		45, 96, 90, 20
+
+		ui_infield		"ZZYZX",		125, 25, 60, 20
+		ui_infield		"basThk",		125, 47, 60, 20
+		ui_infield		"fnsThk",		125, 69, 60, 20
+		ui_infield		"bFns",			190, 68, 20, 20	ui_tooltip	"마감재 ON/OFF"
+		ui_infield		"vfnsThk",		125, 91, 60, 20	ui_tooltip	"계단참과 만나는 계단의 수직마감재 두께"
+
+		!	라디오버튼
+		!-----------------------------------------------------------------------------------------------
+		ui_outfield	"2D",	30, 155, 20, 20
+		ui_outfield	"3D",	30, 205, 20, 20
+
+		ui_radiobutton	"uiPage_hand",	1,	"",	32, 170, 20, 20	ui_tooltip	"핸드레일 2D설정"
+		ui_radiobutton	"uiPage_hand",	2,	"",	32, 220, 20, 20	ui_tooltip	"핸드레일 3D설정"
+
+		ui_separator	55, 145, 55, 251
+
+		!	핸드레일 설정
+		!-----------------------------------------------------------------------------------------------
+		if	uiPage_hand=1	then
+
+			if	bHandOut	then
+				ui_style	0,	1
+			else
+				ui_style	0,	0
+			endif
+				ui_outfield	"외측 핸드레일",	65,	150, 90, 20
+	
+			if	bHandIn	then
+				ui_style	0,	1
+			else
+				ui_style	0,	0
+			endif
+				ui_outfield	"내측 핸드레일",	65,	205, 90, 20
+	
+			ui_style	0,	0
+				ui_outfield	"(1) Offset 거리",	70,	175, 90, 20
+				ui_outfield	"(2) Offset 거리",	70,	230, 90, 20
+	
+				ui_infield	"handOffset_out",	165, 170, 65, 20
+				ui_infield	"bHandOut",			165, 146, 20, 20
+				ui_infield	"handOffset_in",	165, 225, 65, 20
+				ui_infield	"bHandIn",			165, 201, 20, 20
+
+		endif
+
+		if	uiPage_hand=2	then
+
+			ui_style	0,	0
+				ui_outfield	"단너비",			65,	150, 95, 20	ui_tooltip	"만나는 계단의 단너비"
+				ui_outfield	"핸드레일 높이",	65,	175, 95, 20
+				ui_outfield	"핸드레일 반지름",	65,	200, 95, 20
+				ui_outfield	"핸드레일 재질",	65,	225, 95, 20
+
+				ui_infield	"strTrd",		165, 145, 65, 20	ui_tooltip	"만나는 계단의 단너비"
+				ui_infield	"handHeight",	165, 170, 65, 20
+				ui_infield	"handRad",		165, 195, 65, 20
+				ui_infield	"handMat",		165, 219, 65, 25
+
+		endif
+
+	!	ui_image
+	!-----------------------------------------------------------------------------------------------
+	ui_pict	"landing_ui_5",	210, 25, 205, 80, 1+2
+	ui_pict	"landing_ui_3",	235, 140, 185, 110, 1+2
+
+
+!-----------------------------------------------------------------------------------------------
+ui_page	3,	-1,	"2D&3D 표현",	"uiTab_RevAttributes(1)"
+!-----------------------------------------------------------------------------------------------
+itemID = 100
+
+	!	2D표현
+	!-----------------------------------------------------------------------------------------------
+	ui_style	0,	0
+		ui_listfield	100, 20, 20, 402, 226
+			ui_listitem	itemID, 100, "", 0, "", "재질 설정"	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "landingMat",	1	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "fnsMat", 	1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "basMat", 	1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "handMat",	1		: itemID = itemID + 1
+
+			ui_listitem	itemID, 100, "", 0, "", "2D 표현"	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "bRep2D", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "bOutline", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "landingPen", 1	: itemID = itemID + 1
+
+			ui_listitem	itemID, 100, "", 0, "", "입면 설정"	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "landingPen3D", 1	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "fnsPen3D", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "basPen3D", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "handPen3D", 1		: itemID = itemID + 1
+
+			ui_listitem	itemID, 100, "", 0, "", "단면 설정"	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "landingPenS", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "landingFill", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "landingFillPen", 1	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "landingFillPenBg", 1	: itemID = itemID + 1
+
+				ui_listitem	itemID, 100, "fnsPenS", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "fnsFill", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "fnsFillPen", 1	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "fnsFillPenBg", 1	: itemID = itemID + 1
+
+				ui_listitem	itemID, 100, "basPenS", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "basFill", 1		: itemID = itemID + 1
+				ui_listitem	itemID, 100, "basFillPen", 1	: itemID = itemID + 1
+				ui_listitem	itemID, 100, "basFillPenBg", 1	: itemID = itemID + 1
+

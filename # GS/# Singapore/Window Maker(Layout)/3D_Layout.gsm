@@ -1,0 +1,199 @@
+
+
+!======================================================================================================
+!	Window Maker(Layout) 20 
+!======================================================================================================
+!   DATE : 2017/4/6 THU
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Genaral
+!----------------------------------------------------------------------------------------------
+unID = 10000
+
+resol	12
+
+	!	3D Text Define
+	!------------------------------------------------------------------------------------------------------
+	font_type = "Arial"
+	font_size = 50
+	anchor = 5
+	face_code = 0
+	define style 	"textStyle_3D" font_type, font_size, anchor, face_code
+	set	style	"textStyle_3D"
+
+
+!----------------------------------------------------------------------------------------------
+!  3D Shape
+!----------------------------------------------------------------------------------------------
+addx	-mLayoutWidth/2									!	Move Position to Origin
+
+	!----------------------------------------------------------------------------------------------
+	!  Test Script
+	!----------------------------------------------------------------------------------------------
+!	pen	iText_pen
+!	material iText_mat
+!	sphere 0.02					!	W.P.
+
+
+	!----------------------------------------------------------------------------------------------
+	!  Wall Hole
+	!----------------------------------------------------------------------------------------------
+
+
+
+	!----------------------------------------------------------------------------------------------
+	!  Layout
+	!----------------------------------------------------------------------------------------------
+	if	bEdit	then
+
+		gosub	"Layout_total_ui_batch"
+
+	endif
+
+
+del	1												!	Move Position to Origin
+		
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+"Layout_total_ui_batch"	:
+
+	!  Layout Outside UI
+	!----------------------------------------------------------------------------------------------
+	for i = 1	to	iLayout_outFrame_num
+
+		!	Outside Frame
+		mDividerL_sub = mLayout_outFrame_length[i]
+		if	mDividerL_sub > EPS	then
+			gosub	"Layout_divider_ui_batch"
+		endif
+
+	next i
+
+return
+
+
+
+
+"Layout_divider_ui_batch"	:
+
+	!	Position Hotspot(Center)
+	if	bLayout_hotspot[i]	then
+		if	aLayout_outFrame_angle[i] < EPS			then
+			addx	mLayout_outFrame_pos[i][POS_X]
+				hotspot		mDividerL_sub/2, 	0,									0, unID,	mLayout_outFrame_pos[i][POS_Y], 1+128	:	unID = unID + 1
+				hotspot		mDividerL_sub/2,	 mLayout_outFrame_pos[i][POS_Y], 	0, unID,	mLayout_outFrame_pos[i][POS_Y], 2		:	unID = unID + 1		
+				hotspot		mDividerL_sub/2,	-1, 								0, unID,	mLayout_outFrame_pos[i][POS_Y], 3		:	unID = unID + 1
+			del	1
+		endif
+		if	(aLayout_outFrame_angle[i] > 180-EPS	and	aLayout_outFrame_angle[i] < 180+EPS)	then
+			addx	mLayout_outFrame_pos[i][POS_X]
+				hotspot		-mDividerL_sub/2, 	0,									0, unID,	mLayout_outFrame_pos[i][POS_Y], 1+128	:	unID = unID + 1
+				hotspot		-mDividerL_sub/2,	 mLayout_outFrame_pos[i][POS_Y], 	0, unID,	mLayout_outFrame_pos[i][POS_Y], 2		:	unID = unID + 1		
+				hotspot		-mDividerL_sub/2,	-1, 								0, unID,	mLayout_outFrame_pos[i][POS_Y], 3		:	unID = unID + 1
+			del	1
+		endif
+		if	(aLayout_outFrame_angle[i] > 90-EPS	and	aLayout_outFrame_angle[i] < 90+EPS)		then
+			addy	mLayout_outFrame_pos[i][POS_Y]
+				hotspot		0, 									mDividerL_sub/2,	0, unID,	mLayout_outFrame_pos[i][POS_X], 1+128	:	unID = unID + 1
+				hotspot		mLayout_outFrame_pos[i][POS_X], 	mDividerL_sub/2,	0, unID,	mLayout_outFrame_pos[i][POS_X], 2		:	unID = unID + 1
+				hotspot		-1, 								mDividerL_sub/2,	0, unID,	mLayout_outFrame_pos[i][POS_X], 3		:	unID = unID + 1
+			del	1
+		endif
+		if	(aLayout_outFrame_angle[i] > 270-EPS	and	aLayout_outFrame_angle[i] < 270+EPS)	then
+			addy	mLayout_outFrame_pos[i][POS_Y]
+				hotspot		0, 									-mDividerL_sub/2,	0, unID,	mLayout_outFrame_pos[i][POS_X], 1+128	:	unID = unID + 1
+				hotspot		mLayout_outFrame_pos[i][POS_X], 	-mDividerL_sub/2,	0, unID,	mLayout_outFrame_pos[i][POS_X], 2		:	unID = unID + 1
+				hotspot		-1, 								-mDividerL_sub/2,	0, unID,	mLayout_outFrame_pos[i][POS_X], 3		:	unID = unID + 1
+			del	1
+		endif		
+	endif
+
+	addx	mLayout_outFrame_pos[i][POS_X]
+		addy	mLayout_outFrame_pos[i][POS_Y]
+			rotz	aLayout_outFrame_angle[i]
+				if	bLayout_index	then	
+					gosub	"Layout_divider_index"
+				endif
+				gosub	"Layout_divider_ui"			
+			del	1	
+		del	1
+	del	1
+
+return
+
+
+
+"Layout_divider_ui"	:
+
+	mAddL = 0.1
+	
+	pen	iLayout_outFrame_pen	
+	lin_	-mAddL, 0, 0, mDividerL_sub+mAddL, 0, 0
+	hotline	-mAddL, 0, 0, mDividerL_sub+mAddL, 0, 0, unID	: unID = unID+1
+
+	!	Hotline (for inFrame)
+	if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+		mOffset = (mFrameWidth_insert_out-mFrameWidth_insert_in)/2
+	endif
+	if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+		if	(aLayout_outFrame_angle[i] < EPS) | (aLayout_outFrame_angle[i] > 180-EPS	and	aLayout_outFrame_angle[i] < 180+EPS)		then
+			mOffset = (mFrameWidth_insert_hori_out-mFrameWidth_insert_hori_in)/2
+		endif
+		if	(aLayout_outFrame_angle[i] > 90-EPS	and	aLayout_outFrame_angle[i] < 90+EPS) | (aLayout_outFrame_angle[i] > 270-EPS	and	aLayout_outFrame_angle[i] < 270+EPS)	then
+			mOffset = (mFrameWidth_insert_vert_out-mFrameWidth_insert_vert_in)/2
+		endif	
+	endif
+	addy	mOffset
+		hotline	-mAddL, 0, 0, mDividerL_sub+mAddL, 0, 0, unID	: unID = unID+1
+		if	bLayout_Offsetline	or	GLOB_FEEDBACK_MODE = 1	then	lin_	-mAddL, 0, 0, mDividerL_sub+mAddL, 0, 0
+	del	1
+	addy	-mOffset
+		hotline	-mAddL, 0, 0, mDividerL_sub+mAddL, 0, 0, unID	: unID = unID+1
+		if	bLayout_Offsetline	or	GLOB_FEEDBACK_MODE = 1	then	lin_	-mAddL, 0, 0, mDividerL_sub+mAddL, 0, 0
+	del	1	
+
+return
+
+
+
+"Layout_divider_index"	:
+
+	pen	iText_pen
+	material iText_mat
+	
+	!	Rotate Text
+	if	iSymbol_reveal_side = 0	then	
+		mulz	1			
+	else
+		mulz	-1	
+	endif
+	if	iSymbol_reveal_side = 0	then	
+		mulx	-1			
+	else
+		mulx	1
+	endif	
+	if	SYMB_MIRRORED = 1	then	
+		mulx	-1			
+	else
+		mulx	1
+	endif			
+
+		addz	-mLayout_index_offset
+			text	0.005, 0, "OUT " + str(i, 1, 0)	
+		del	1
+
+	del	3
+
+return
+
+
+

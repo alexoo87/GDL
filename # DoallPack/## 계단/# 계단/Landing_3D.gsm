@@ -1,0 +1,475 @@
+
+!===============================================================================================
+!	기본설정
+!===============================================================================================
+eps = 0.0001
+unID = 1000
+
+if	GLOB_FEEDBACK_MODE	then	resol	8
+	
+	!	기준점 이동
+	!-----------------------------------------------------------------------------------------------
+	if	bFns	then	addz	-(fnsThk + basThk)
+
+
+	!	hotspot
+	!-----------------------------------------------------------------------------------------------
+	hotspot	0,	-strOffsetL,	0
+	hotspot	0,	B + addRange_L,	0
+	hotspot	A,	B + addRange_R,	0
+	hotspot	A,	-strOffsetR,	0
+	hotspot	A - strWdtR,	-strOffsetR,	0
+	hotspot	A - strWdtR,	0,				0
+	hotspot	strWdtL,		0,				0
+	hotspot	strWdtL,		-strOffsetL,	0
+
+	addz	-ZZYZX
+		hotspot	0,	-strOffsetL,	0
+		hotspot	0,	B + addRange_L,	0
+		hotspot	A,	B + addRange_R,	0
+		hotspot	A,	-strOffsetR,	0
+		hotspot	A - strWdtR,	-strOffsetR,	0
+		hotspot	A - strWdtR,	0,				0
+		hotspot	strWdtL,		0,				0
+		hotspot	strWdtL,		-strOffsetL,	0
+	del 1
+
+	if	bFns	then
+		addz	fnsThk + basThk
+			hotspot	0,	-strOffsetL,	0
+			hotspot	0,	B + addRange_L,	0
+			hotspot	A,	B + addRange_R,	0
+			hotspot	A,	-strOffsetR,	0
+			hotspot	A - strWdtR,	-strOffsetR,	0
+			hotspot	A - strWdtR,	0,				0
+			hotspot	strWdtL,		0,				0
+			hotspot	strWdtL,		-strOffsetL,	0
+		del 1
+	endif
+
+
+
+!===============================================================================================
+!	계단참 - 구조
+!===============================================================================================
+pen			landingPen3D
+material	landingMat
+sect_fill	landingFill,	landingFillPenBg,	landingFillPen,	landingPenS
+
+	put	0,				-strOffsetL,
+		0,				B + addRange_L,
+		A,				B + addRange_R,
+		A,				-strOffsetR,
+		A - strWdtR,	-strOffsetR,
+		A - strWdtR,	0,
+		strWdtL,		0,
+		strWdtL,		-strOffsetL
+
+	prism	nsp/2,	-ZZYZX,	get(nsp)
+
+
+	!	hotspot
+	!-----------------------------------------------------------------------------------------------
+	hotspot	0,			0,	-ZZYZX,	unID,	strWdtL,	1+128	:	 unID = unID + 1
+	hotspot	-1,			0,	-ZZYZX,	unID,	strWdtL,	3		:	 unID = unID + 1
+	hotspot	strWdtL,	0,	-ZZYZX,	unID,	strWdtL,	2		:	 unID = unID + 1
+
+	addx	strWdtL
+		hotspot	0,			0,	-ZZYZX,	unID,	strWell,	1+128	:	 unID = unID + 1
+		hotspot	-1,			0,	-ZZYZX,	unID,	strWell,	3		:	 unID = unID + 1
+		hotspot	strWell,	0,	-ZZYZX,	unID,	strWell,	2		:	 unID = unID + 1
+	del 1
+
+	addx	strWdtL + strWell
+		hotspot	0,			0,	-ZZYZX,	unID,	strWdtR,	1+128	:	 unID = unID + 1
+		hotspot	-1,			0,	-ZZYZX,	unID,	strWdtR,	3		:	 unID = unID + 1
+		hotspot	strWdtR,	0,	-ZZYZX,	unID,	strWdtR,	2		:	 unID = unID + 1
+	del 1
+
+	hotspot	0,	0,	-ZZYZX,	unID,	B,	1+128	:	 unID = unID + 1
+	hotspot	0,	-1,	-ZZYZX,	unID,	B,	3		:	 unID = unID + 1
+	hotspot	0,	B,	-ZZYZX,	unID,	B,	2		:	 unID = unID + 1
+
+	addx	strWdtL/2
+		hotspot	0,	0,				-ZZYZX,	unID,	strOffsetL,	1+128	:	 unID = unID + 1
+		hotspot	0,	1,				-ZZYZX,	unID,	strOffsetL,	3		:	 unID = unID + 1
+		hotspot	0,	-strOffsetL,	-ZZYZX,	unID,	strOffsetL,	2		:	 unID = unID + 1
+	del 1
+
+	addx	A - strWdtR/2
+		hotspot	0,	0,				-ZZYZX,	unID,	strOffsetR,	1+128	:	 unID = unID + 1
+		hotspot	0,	1,				-ZZYZX,	unID,	strOffsetR,	3		:	 unID = unID + 1
+		hotspot	0,	-strOffsetR,	-ZZYZX,	unID,	strOffsetR,	2		:	 unID = unID + 1
+	del 1
+
+
+
+!===============================================================================================
+!	계단참 - 바탕
+!===============================================================================================
+pen			basPen3D
+material	basMat
+sect_fill	basFill,	basFillPenBg,	basFillPen,	basPenS
+
+	if	bFns and GLOB_STRUCTURE_DISPLAY = 0	then
+	
+		put	0,				-strOffsetL,
+			0,				B + addRange_L,
+			A,				B + addRange_R,
+			A,				-strOffsetR,
+			A - strWdtR,	-strOffsetR,
+			A - strWdtR,	0,
+			strWdtL,		0,
+			strWdtL,		-strOffsetL
+
+		prism	nsp/2,	basThk,	get(nsp)
+
+	endif
+
+
+
+!===============================================================================================
+!	계단참 - 마감
+!===============================================================================================
+pen			fnsPen3D
+material	fnsMat
+sect_fill	fnsFill,	fnsFillPenBg,	fnsFillPen,	fnsPenS
+
+	if	bFns and GLOB_STRUCTURE_DISPLAY = 0	then
+	
+		put	0,				-strOffsetL,
+			0,				B + addRange_L,
+			A,				B + addRange_R,
+			A,				-strOffsetR,
+			A - strWdtR,	-strOffsetR,
+			A - strWdtR,	0,
+			strWdtL,		0,
+			strWdtL,		-strOffsetL
+
+		addz	basThk
+			prism	nsp/2,	fnsThk,	get(nsp)
+		del 1
+
+	endif
+
+
+
+!===============================================================================================
+!	바깥쪽_핸드레일
+!===============================================================================================
+
+	pen			handPen3D
+	material	handMat
+
+
+	if	bHandOut	then
+
+		!	Vertical Bar
+		!-----------------------------------------------------------------------------------------------
+		group	"_HandVrtOut"
+
+			addz	fnsThkTmp
+				addx	handOffset_out
+					addy	(B + addRange_L) - handOffset_out
+						cylind	handHeight - handRad,	handRad*0.8
+					del 1
+				del 1
+	
+				addx	A - handOffset_out
+					addy	-strOffsetR + strTrd/2 + VectTmp
+						cylind	handHeight - handRad,	handRad*0.8
+					del 1
+	
+					addy	(B + addRange_R) - handOffset_out
+						cylind	handHeight - handRad,	handRad*0.8
+					del 1
+				del 1
+			del 1
+
+		endgroup
+
+
+		!	Horizonal Bar
+		!-----------------------------------------------------------------------------------------------
+		group	"_HandHrzOut"
+
+			addz	fnsThkTmp + handHeight - handRad
+				addx	handOffset_out
+					addy	-strOffsetL
+
+						put	0,						-1,												0,	0,
+							0,						strTrd/2 - VectTmp,								0,	0,
+							0,						(B + addRange_L + strOffsetL) - handOffset_out,	0,	0,
+							A - (handOffset_out*2),	(B + addRange_R + strOffsetL) - handOffset_out,	0,	0,
+							A - (handOffset_out*2),	strOffsetL - strOffsetR + (strTrd/2 + VectTmp),	0,	0,
+							A - (handOffset_out*2),	-1,												0,	0
+			
+						tube	2,	nsp/4,	1+2+16+32,
+								0,			0,		900,
+								handRad,	360,	4000,
+								get(nsp)
+
+					del 1
+				del 1
+			del 1
+
+		endgroup
+
+
+		!	Place Group
+		!-----------------------------------------------------------------------------------------------
+		_subHandOut = subgroup("_HandVrtOut",	"_HandHrzOut")
+
+		if	GLOB_VIEW_TYPE = 3	then
+			if	GLOB_STRUCTURE_DISPLAY = 0	then
+	
+				placegroup	_subHandOut
+				placegroup	"_HandHrzOut"
+	
+			endif
+		endif
+
+
+	endif
+
+
+!===============================================================================================
+!	안쪽_핸드레일
+!===============================================================================================
+
+	pen			handPen3D
+	material	handMat
+
+	if	bHandIn	then
+
+		!	
+		_handOffset_Stw = strTrd/2
+
+		if	handOffset_Stw - strTrd/2 > -eps	then
+			_handOffset_Stw = handOffset_Stw
+		endif
+
+		!	Vertical Bar
+		!-----------------------------------------------------------------------------------------------
+		group	"_HandVrtIn"
+
+			addz	fnsThkTmp
+
+				!	공통 수직바
+				if	strOffsetR + handOffset_in - VectTmp > strTrd/2	then
+					addx	strWdtL + strWell + handOffset_in
+						addy	-strOffsetR + strTrd/2 + VectTmp
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+					del 1
+				endif
+
+				if	strOffsetL >= 0 and strOffsetR >= 0	then
+					if	(strOffsetR + handOffset_in - VectTmp <= strTrd/2) | (strOffsetL + handOffset_in <= strTrd/2)	then
+						if	strOffsetR - strOffsetL - VectTmp < eps	then
+							addy	-strOffsetR + _handOffset_Stw + VectTmp
+						else
+							addy	_handOffset_Stw - VectTmp
+						endif
+					else
+						addy	_handOffset_Stw
+					endif
+
+						if	not(strOffsetL + handOffset_in <= strTrd/2)	then
+							addx	strWdtL - handOffset_in
+								cylind	handHeight - handRad,	handRad*0.8
+							del 1
+						endif
+
+						addx	strWdtL + strWell + handOffset_in
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+					del 1
+				endif
+
+				if	strOffsetL < 0 and strOffsetR >= 0	then
+					addx	strWdtL + handOffset_in
+						addy	-strOffsetL + strTrd/2 - VectTmp
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+					del 1
+
+					if	strOffsetR + handOffset_in - VectTmp <= strTrd/2	then
+						addy	-strOffsetR + strTrd/2 + VectTmp
+					else
+						addy	handOffset_in
+					endif
+
+					addx	strWdtL + handOffset_in
+						cylind	handHeight - handRad,	handRad*0.8
+					del 1
+		
+					addx	strWdtL + strWell + handOffset_in
+						cylind	handHeight - handRad,	handRad*0.8
+					del 1
+				endif
+
+				if	strOffsetL >= 0 and strOffsetR < 0	then
+					addx	strWdtL + strWell + handOffset_in
+						addy	-strOffsetR + strTrd/2 + VectTmp
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+					del 1
+
+					addx	strWdtL + strWell - handOffset_in
+						addy	-strOffsetR + strTrd/2 + VectTmp
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+					del 1
+
+					if	strOffsetL + handOffset_in <= strTrd/2	then
+						addy	strTrd/2 - VectTmp
+					else
+						addy	handOffset_in
+					endif
+
+						if	not(strOffsetL + handOffset_in <= strTrd/2)	then
+							addx	strWdtL - handOffset_in
+								cylind	handHeight - handRad,	handRad*0.8
+							del 1
+						endif
+
+						addx	strWdtL + strWell - handOffset_in
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+				endif
+
+				if	strOffsetL < 0 and strOffsetR < 0	then
+					addx	strWdtL + handOffset_in
+						addy	-strOffsetL + strTrd/2 - VectTmp
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+		
+						addy	handOffset_in
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+					del 1
+
+					addx	strWdtL + strWell - handOffset_in
+						addy	-strOffsetR + strTrd/2 + VectTmp
+							cylind	handHeight - handRad,	handRad*0.8
+						del 1
+		
+						addy	handOffset_in
+							cylind	handHeight -  handRad,	handRad*0.8
+						del 1
+					del 1
+				endif
+
+				del 1
+
+		endgroup
+
+
+		!	Horizonal Bar
+		!-----------------------------------------------------------------------------------------------
+		group	"_HandHrzIn"
+
+			addz	fnsThkTmp + handHeight - handRad
+				addx	strWdtL - handOffset_in
+					addy	-strOffsetL
+
+						if	strOffsetL >= 0 and strOffsetR >= 0	then
+							put	0,								-1,					0,	0,
+								0,								strTrd/2 - VectTmp,	0,	0
+
+							if	(strOffsetR + handOffset_in - VectTmp <= strTrd/2) | (strOffsetL + handOffset_in <= strTrd/2)	then
+								if	strOffsetR - strOffsetL - VectTmp < eps	then
+									put	0,								strOffsetL - strOffsetR + _handOffset_Stw + VectTmp,	0,	0,
+										strWell + (handOffset_in*2),	strOffsetL - strOffsetR + _handOffset_Stw + VectTmp,	0,	0
+								else
+									put	0,								strOffsetL + _handOffset_Stw - VectTmp,	0,	0,
+										strWell + (handOffset_in*2),	strOffsetL + _handOffset_Stw - VectTmp,	0,	0
+								endif
+							else
+								put	0,								strOffsetL + _handOffset_Stw,	0,	0,
+									strWell + (handOffset_in*2),	strOffsetL + _handOffset_Stw,	0,	0
+							endif
+
+							if	strOffsetR + handOffset_in - VectTmp <= strTrd/2	then
+								put	strWell + (handOffset_in*2) + 1,	strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0
+
+							else
+								put	strWell + (handOffset_in*2),	strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0,
+									strWell + (handOffset_in*2),	-1,												0,	0
+							endif
+						endif
+	
+						if	strOffsetL < 0 and strOffsetR >= 0	then
+							put	-1,								0,					0,	0,
+								0,								strTrd/2 - VectTmp,	0,	0,
+								handOffset_in*2,				strTrd/2 - VectTmp,	0,	0
+
+							if	strOffsetR + handOffset_in - VectTmp <= strTrd/2	then
+								put	handOffset_in*2,					strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0,
+									strWell + (handOffset_in*2),		strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0,
+									strWell + (handOffset_in*2) + 1,	strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0
+							else
+								put	handOffset_in*2,				strOffsetL + handOffset_in,						0,	0,
+									strWell + (handOffset_in*2),	strOffsetL + handOffset_in,						0,	0,
+									strWell + (handOffset_in*2),	strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0,
+									strWell + (handOffset_in*2),	-1,												0,	0
+							endif
+						endif
+	
+						if	strOffsetL >= 0 and strOffsetR < 0	then
+							put	0,	-1,					0,	0,
+								0,	strTrd/2 - VectTmp,	0,	0
+
+							if	strOffsetL + handOffset_in <= strTrd/2	then
+								put	0,			strOffsetL + strTrd/2 - VectTmp,	0,	0,
+									strWell,	strOffsetL + strTrd/2 - VectTmp,	0,	0
+																else	
+								put	0,			strOffsetL + handOffset_in,	0,	0,
+									strWell,	strOffsetL + handOffset_in,	0,	0
+							endif
+
+							put	strWell,							strOffsetL - strOffsetR + strTrd/2 + VectTmp ,	0,	0,
+								strWell + (handOffset_in*2),		strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0,
+								strWell + (handOffset_in*2) + 1,	strOffsetL - strOffsetR,						0,	0
+						endif
+
+						if	strOffsetL < 0 and strOffsetR < 0	then
+							put	-1,									0,												0,	0,
+								0,									strTrd/2 - VectTmp,								0,	0,
+								handOffset_in*2,					strTrd/2 - VectTmp,								0,	0,
+								handOffset_in*2,					strOffsetL + handOffset_in,						0,	0,
+								strWell,							strOffsetL + handOffset_in,						0,	0,
+								strWell,							strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0,
+								strWell + (handOffset_in*2),		strOffsetL - strOffsetR + strTrd/2 + VectTmp,	0,	0,
+								strWell + (handOffset_in*2) + 1,	strOffsetL - strOffsetR,						0,	0
+						endif
+
+						tube	2,	nsp/4,	1+2+16+32,
+								0,			0,		900,
+								handRad,	360,	4000,
+								get(nsp)
+
+					del 1
+				del 1
+			del 1
+
+		endgroup
+
+
+		!	Place Group
+		!-----------------------------------------------------------------------------------------------
+		_subHandIn = subgroup("_HandVrtIn",	"_HandHrzIn")
+
+		if	GLOB_VIEW_TYPE = 3	then
+			if	GLOB_STRUCTURE_DISPLAY = 0	then
+		
+				placegroup	_subHandIn
+				placegroup	"_HandHrzIn"
+		
+			endif
+		endif
+
+	endif
+
+

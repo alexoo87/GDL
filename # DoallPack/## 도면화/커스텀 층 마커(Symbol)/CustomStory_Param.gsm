@@ -1,0 +1,163 @@
+!===============================================================================================
+!	커스텀 층 마커
+!===============================================================================================
+
+
+!===============================================================================================
+!	마커
+!===============================================================================================
+
+if	not(bMarkerHead)	then lock \
+	"iMarkerType", "strMarkerBreadth", "iMarkerBreadth",
+	"iMarkerDir", "iMarkerPos", "lenMarkerOffset",
+	"bMarkerFill", "strMarkerFill", "AC_MarkerSize", "MarkerFill2", "fillPen2", "backPen2",
+	"AC_MarkerFill", "gs_Fill_Pen2", "gs_Back_Pen2"
+
+!	마커 유형
+values{2}	"iMarkerType"	Marker_Circle,	stMarkerType[Marker_Circle],
+							Marker_Nabla,	stMarkerType[Marker_Nabla],
+							Marker_Rect,	stMarkerType[Marker_Rect]
+
+!	마커 방향
+values{2}	"iMarkerDir"	Dir_Top,	stMarkerDir[Dir_Top],
+							Dir_Bottom,	stMarkerDir[Dir_Bottom]
+
+!	마커 위치
+values{2}	"iMarkerPos"	Pos_Inside,		stMarkerPos[Pos_Inside],
+							Pos_Outside,	stMarkerPos[Pos_Outside]
+
+if	not(bMarkerHead & (iMarkerType = Marker_Circle))	then lock "topOverhang", "MarkerFill2", "fillPen2", "backPen2"
+if	not(bMarkerHead & (iMarkerType # Marker_Circle))	then lock "iMarkerDir"
+
+values	"strMarkerFill" `fillOff`, `fillOn`
+if	GLOB_MODPAR_NAME = "strMarkerFill"	then
+	if	strMarkerFill = "fillOff"	then	parameters bMarkerFill = 0
+	if	strMarkerFill = "fillOn"	then	parameters bMarkerFill = 1
+endif
+
+values	"markerSize"	range (0, ]
+
+
+!===============================================================================================
+!	라인 설정
+!===============================================================================================
+values	"lp1"	range	(0,	]
+values	"lp2"	range	[0,	]
+values	"lp2_a"			range	[-90,	90]
+values	"lenLineCut"	range [0, lp1)
+
+values	"rightOverhang"		range	[0,	]
+values	"lenMarkerOffset"	range	[0,	]
+values	"topOverhang"		range	[0,	]
+
+values	"leftOverhang"	range [0, ]
+values	"xTextPos"		range [0, ]
+
+if	not(bLineCut)	then lock "lenLineCut"
+
+
+!===============================================================================================
+!	라벨 설정
+!===============================================================================================
+
+!-----------------------------------------------------------------------------------------------
+!	라벨(상)
+!-----------------------------------------------------------------------------------------------
+!	층 번호
+values{2}	"iStoryNumberText_Top"	StoryText_Custom,	stStoryText[StoryText_Custom],
+									StoryText_None,		stStoryText[StoryText_None]
+
+!	층 이름
+values{2}	"iStoryNameText_Top"	StoryText_Custom,	stStoryText[StoryText_Custom],
+									StoryText_None,		stStoryText[StoryText_None]
+
+!	층 입면
+values{2}	"iElevationText_Top"	StoryText_Custom,	stStoryText[StoryText_Custom],
+									StoryText_None,		stStoryText[StoryText_None]
+
+if	not(bSeparator1_Top)	then lock "strSeparator1_Top"
+if	not(bSeparator2_Top)	then lock "strSeparator2_Top"
+
+values	"strStoryNameFirst_Top" stStoryNameFirst
+if	GLOB_MODPAR_NAME = "strStoryNameFirst_Top"	then
+	if	strStoryNameFirst_Top = stStoryNameFirst[1]	then	parameters bStoryNameFirst_Top = 1
+	if	strStoryNameFirst_Top = stStoryNameFirst[2]	then	parameters bStoryNameFirst_Top = 0
+else
+	if	bStoryNameFirst_Top	then	parameters strStoryNameFirst_Top = stStoryNameFirst[1]
+	if	not(bStoryNameFirst_Top)	then	parameters strStoryNameFirst_Top = stStoryNameFirst[2]
+endif
+
+if	iStoryNumberText_Top	<> StoryText_Custom	then lock "strStoryNumberText_Top"
+if	iStoryNameText_Top		<> StoryText_Custom	then lock "strStoryNameText_Top"
+if	iElevationText_Top		<> StoryText_Custom	then lock "strElevationText_Top"
+
+!-----------------------------------------------------------------------------------------------
+!	라벨(하)
+!-----------------------------------------------------------------------------------------------
+!	층 번호
+values{2}	"iStoryNumberText_Bottom"	StoryText_Custom,	stStoryText[StoryText_Custom],
+										StoryText_None,		stStoryText[StoryText_None]
+
+!	층 이름
+values{2}	"iStoryNameText_Bottom"	StoryText_Custom,	stStoryText[StoryText_Custom],
+									StoryText_None,		stStoryText[StoryText_None]
+
+!	층 입면
+values{2}	"iElevationText_Bottom"	StoryText_Custom,	stStoryText[StoryText_Custom],
+									StoryText_None,		stStoryText[StoryText_None]
+
+if	not(bSeparator1_Bottom)	then lock "strSeparator1_Bottom"
+if	not(bSeparator2_Bottom)	then lock "strSeparator2_Bottom"
+
+values	"strStoryNameFirst_Bottom" stStoryNameFirst
+if	GLOB_MODPAR_NAME = "strStoryNameFirst_Bottom"	then
+	if	strStoryNameFirst_Bottom = stStoryNameFirst[1]	then	parameters bStoryNameFirst_Bottom = 1
+	if	strStoryNameFirst_Bottom = stStoryNameFirst[2]	then	parameters bStoryNameFirst_Bottom = 0
+else
+	if	bStoryNameFirst_Bottom	then	parameters strStoryNameFirst_Bottom = stStoryNameFirst[1]
+	if	not(bStoryNameFirst_Bottom)	then	parameters strStoryNameFirst_Bottom = stStoryNameFirst[2]
+endif
+
+
+if	iStoryNumberText_Bottom	<> StoryText_Custom	then lock "strStoryNumberText_Bottom"
+if	iStoryNameText_Bottom	<> StoryText_Custom	then lock "strStoryNameText_Bottom"
+if	iElevationText_Bottom	<> StoryText_Custom	then lock "strElevationText_Bottom"
+
+
+!===============================================================================================
+!	텍스트 설정
+!===============================================================================================
+
+dim	fontnames[]
+r = request("FONTNAMES_LIST", "", fontnames)
+values	"stFontType"	fontnames
+
+! ----- 배치 -----
+values	"sPlacement" stPlacement
+
+if	GLOB_MODPAR_NAME = "sPlacement"	then
+	if	sPlacement = stPlacement[1]	then	parameters iPlacement = 1
+	if	sPlacement = stPlacement[2]	then	parameters iPlacement = 2
+	if	sPlacement = stPlacement[3]	then	parameters iPlacement = 3
+else
+	parameters sPlacement = stPlacement[iPlacement ]
+endif
+
+! ----- 정렬 -----
+values	"sAlignment" stAlignment
+
+if	GLOB_MODPAR_NAME = "sAlignment"	then
+	if	sAlignment = stAlignment[1]	then	parameters iAlignment = 1
+	if	sAlignment = stAlignment[2]	then	parameters iAlignment = 2
+	if	sAlignment = stAlignment[3]	then	parameters iAlignment = 3
+else
+	parameters sAlignment = stAlignment[iAlignment]
+endif
+
+
+!===============================================================================================
+!	기타
+!===============================================================================================
+!!! UI
+values	"gs_ui_current_page" 1
+values	"gs_ui_sub_tabpage" 1,2

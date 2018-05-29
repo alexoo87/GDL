@@ -1,0 +1,984 @@
+!===============================================================================================
+!	철골계단
+!===============================================================================================
+!	W.P
+hotspot	0,	0,	0,	unID	:	unID = unID + 1
+
+if	bGuide	then
+	model	wire
+		circle	0.1
+		circle	0.2
+	model	solid
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	단 + 계단참
+!-----------------------------------------------------------------------------------------------
+!	계단 인덱스
+STEP_SOLO = 1
+STEP_SET_1ST = 2
+STEP_SET_2ND = 3
+
+material	matStep
+pen			strElevPen
+sect_fill	strFill,	strBackPen,	strFillPen,	strSectPen
+
+	!	I형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_I	then
+		!	단
+		_stepStatus = STEP_SOLO
+		_stepHgt_input = stepHgt_1
+		_strWdt = strWdt_1
+		_nStep = nStep_1
+
+		gosub	"draw_step"
+
+		!	Hotspot : stepHgt_E/stepDpt_E
+		add	strWdt_1/2,	stepDpt*(nStep_1 - 1),	stepHgt_S + stepHgt_1*(nStep_1 - 2)
+			hotspot	0,	0,	0,			unID,	stepHgt_E,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	stepHgt_E,	3		:	unID = unID + 1
+			hotspot	0,	0,	stepHgt_E,	unID,	stepHgt_E,	2		:	unID = unID + 1
+
+			addz	stepHgt_E
+				hotspot	0,	0,			0,	unID,	stepDpt_E,	1+128	:	unID = unID + 1
+				hotspot	0,	-1,			0,	unID,	stepDpt_E,	3		:	unID = unID + 1
+				hotspot	0,	stepDpt_E,	0,	unID,	stepDpt_E,	2		:	unID = unID + 1
+			del 1
+		del 1
+	endif
+
+	!	ㄱ형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_L	then
+		!	단
+		_stepStatus = STEP_SET_1ST
+		_stepHgt_input = stepHgt_1
+		_strWdt = strWdt_1
+		_nStep = nStep_1
+
+		gosub	"draw_step"
+
+		add	strWdt_1 + strOff_2,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			rotz	-90
+				_stepStatus = STEP_SET_2ND
+				_stepHgt_input = stepHgt_2
+				_strWdt = strWdt_2
+				_nStep = nStep_2
+
+				gosub	"draw_step"
+			del 1
+		del 1
+
+		!	계단참
+		add	0,	stepDpt*(nStep_1 - 1),	stepHgt_S + stepHgt_1*(nStep_1 - 1) - stepThk
+			put	0,								0,						14,
+				0,								stepThk,				13,
+				0,								strOff_1 + strWdt_2,	15,
+				strWdt_1 + strOff_2,			strOff_1 + strWdt_2,	9,
+				strWdt_1 + strOff_2 + stepThk,	strOff_1 + strWdt_2,	11,
+				strWdt_1 + strOff_2 + stepThk,	strOff_1,				11,
+				strWdt_1 + strOff_2,			strOff_1,				13,
+				strWdt_1,						strOff_1,				15,
+				strWdt_1,						stepThk,				12,
+				strWdt_1,						0,						14
+
+			prism_	nsp/3,	stepThk,	get(nsp)
+		del 1
+
+		!	Hotspot : stepHgt_2
+		add	strWdt_1 + strOff_2,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			hotspot	0,	0,	0,			unID,	stepHgt_2,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	stepHgt_2,	3		:	unID = unID + 1
+			hotspot	0,	0,	stepHgt_2,	unID,	stepHgt_2,	2		:	unID = unID + 1
+		del 1
+
+		!	Hotspot : stepHgt_E
+		add	strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1),	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2,	stepHgt_S + stepHgt_1*(nStep_1 - 1) + stepHgt_2*(nStep_2 - 1)
+			hotspot	0,	0,	0,			unID,	stepHgt_E,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	stepHgt_E,	3		:	unID = unID + 1
+			hotspot	0,	0,	stepHgt_E,	unID,	stepHgt_E,	2		:	unID = unID + 1
+
+			addz	stepHgt_E
+				hotspot	0,			0,	0,	unID,	stepDpt_E,	1+128	:	unID = unID + 1
+				hotspot	-1,			0,	0,	unID,	stepDpt_E,	3		:	unID = unID + 1
+				hotspot	stepDpt_E,	0,	0,	unID,	stepDpt_E,	2		:	unID = unID + 1
+			del 1
+		del 1
+
+		!	Hotspot : strOff_1 & strOff_2
+		add	strWdt_1,	stepDpt*(nStep_1 - 1),	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			hotspot	0,	0,			0,	unID,	strOff_1,	1+128	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	strOff_1,	3		:	unID = unID + 1
+			hotspot	0,	strOff_1,	0,	unID,	strOff_1,	2		:	unID = unID + 1
+
+			addy	strOff_1
+				hotspot	0,			0,	0,	unID,	strOff_2,	1+128	:	unID = unID + 1
+				hotspot	-1,			0,	0,	unID,	strOff_2,	3		:	unID = unID + 1
+				hotspot	strOff_2,	0,	0,	unID,	strOff_2,	2		:	unID = unID + 1
+			del 1
+		del 1
+	endif
+
+	!	U형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_U	then
+		!	단
+		_stepStatus = STEP_SET_1ST
+		_stepHgt_input = stepHgt_1
+		_strWdt = strWdt_1
+		_nStep = nStep_1
+
+		gosub	"draw_step"
+
+		add	strWdt_1 + strDist + strWdt_2,	stepDpt*(nStep_1 - 1) + strOff_1 - strOff_2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			rotz	180
+				_stepStatus = STEP_SET_2ND
+				_stepHgt_input = stepHgt_2
+				_strWdt = strWdt_2
+				_nStep = nStep_2
+
+				gosub	"draw_step"
+			del 1
+		del 1
+
+		!	계단참
+		add	0,	stepDpt*(nStep_1 - 1),	stepHgt_S + stepHgt_1*(nStep_1 - 1) - stepThk
+			put	0,											0,									14,
+				0,											stepThk,							13,
+				0,											strOff_1,							15,
+				-landLth_L,									strOff_1,							15,
+				-landLth_L,									strOff_1 + landDpt + landLth_D,		15,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	strOff_1 + landDpt + landLth_D,		15,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	strOff_1,							15,
+				strWdt_1 + strDist + strWdt_2,				strOff_1,							15,
+				strWdt_1 + strDist + strWdt_2,				strOff_1 - strOff_2,				9,
+				strWdt_1 + strDist + strWdt_2,				strOff_1 - (strOff_2 + stepThk),	11,
+				strWdt_1 + strDist,							strOff_1 - (strOff_2 + stepThk),	11,
+				strWdt_1 + strDist,							strOff_1 - strOff_2,				13,
+				strWdt_1 + strDist,							strOff_1,							15,
+				strWdt_1,									strOff_1,							15,
+				strWdt_1,									stepThk,							12,
+				strWdt_1,									0,									14
+
+			prism_	nsp/3,	stepThk,	get(nsp)
+		del 1
+
+		!	Hotspot : stepHgt_2
+		add	strWdt_1 + strDist + strWdt_2/2,	stepDpt*(nStep_1 - 1) + strOff_1 - strOff_2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			hotspot	0,	0,	0,			unID,	stepHgt_2,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	stepHgt_2,	3		:	unID = unID + 1
+			hotspot	0,	0,	stepHgt_2,	unID,	stepHgt_2,	2		:	unID = unID + 1
+		del 1
+
+		!	Hotspot : stepHgt_E
+		add	strWdt_1 + strDist + strWdt_2/2,	stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1)),	stepHgt_S + stepHgt_1*(nStep_1 - 1) + stepHgt_2*(nStep_2 - 1)
+			hotspot	0,	0,	0,			unID,	stepHgt_E,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	stepHgt_E,	3		:	unID = unID + 1
+			hotspot	0,	0,	stepHgt_E,	unID,	stepHgt_E,	2		:	unID = unID + 1
+
+			addz	stepHgt_E
+				hotspot	0,	0,			0,	unID,	stepDpt_E,	1+128	:	unID = unID + 1
+				hotspot	0,	1,			0,	unID,	stepDpt_E,	3		:	unID = unID + 1
+				hotspot	0,	-stepDpt_E,	0,	unID,	stepDpt_E,	2		:	unID = unID + 1
+			del 1
+		del 1
+
+		!	Hotspot : strOff_1 & strOff_2 & strDist
+		add	strWdt_1,	stepDpt*(nStep_1 - 1),	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			hotspot	0,	0,			0,	unID,	strOff_1,	1+128	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	strOff_1,	3		:	unID = unID + 1
+			hotspot	0,	strOff_1,	0,	unID,	strOff_1,	2		:	unID = unID + 1
+
+			addy	strOff_1
+				hotspot	0,			0,	0,	unID,	strDist,	1+128	:	unID = unID + 1
+				hotspot	-1,			0,	0,	unID,	strDist,	3		:	unID = unID + 1
+				hotspot	strDist,	0,	0,	unID,	strDist,	2		:	unID = unID + 1
+
+				addx	strDist
+					hotspot	0,	0,			0,	unID,	strOff_2,	1+128	:	unID = unID + 1
+					hotspot	0,	1,			0,	unID,	strOff_2,	3		:	unID = unID + 1
+					hotspot	0,	-strOff_2,	0,	unID,	strOff_2,	2		:	unID = unID + 1
+				del 1
+			del 1
+		del 1
+
+		!	Hotspot : landLth_L & landLth_R & landLth_D
+		add	0,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			hotspot	0,			landLth_D,	0,	unID,	landLth_L,	1+128	:	unID = unID + 1
+			hotspot	1,			landLth_D,	0,	unID,	landLth_L,	3		:	unID = unID + 1
+			hotspot	-landLth_L,	landLth_D,	0,	unID,	landLth_L,	2		:	unID = unID + 1
+
+			hotspot	-landLth_L,	0,			0,	unID,	landLth_D,	1+128	:	unID = unID + 1
+			hotspot	-landLth_L,	-1,			0,	unID,	landLth_D,	3		:	unID = unID + 1
+			hotspot	-landLth_L,	landLth_D,	0,	unID,	landLth_D,	2		:	unID = unID + 1
+
+			addx	strWdt_1 + strDist + strWdt_2
+				hotspot	0,			landLth_D,	0,	unID,	landLth_R,	1+128	:	unID = unID + 1
+				hotspot	-1,			landLth_D,	0,	unID,	landLth_R,	3		:	unID = unID + 1
+				hotspot	landLth_R,	landLth_D,	0,	unID,	landLth_R,	2		:	unID = unID + 1
+
+				hotspot	landLth_R,	0,			0,	unID,	landLth_D,	1+128	:	unID = unID + 1
+				hotspot	landLth_R,	-1,			0,	unID,	landLth_D,	3		:	unID = unID + 1
+				hotspot	landLth_R,	landLth_D,	0,	unID,	landLth_D,	2		:	unID = unID + 1
+			del 1
+		del 1
+
+
+	endif
+
+	!	공통 Hotspot
+	addx	strWdt_1/2
+		hotspot	0,	0,	0,			unID,	stepHgt_S,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	-1,			unID,	stepHgt_S,	3		:	unID = unID + 1
+		hotspot	0,	0,	stepHgt_S,	unID,	stepHgt_S,	2		:	unID = unID + 1
+
+		addz	stepHgt_S
+			hotspot	0,	0,			0,	unID,	stepDpt,	1+128	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	stepDpt,	3		:	unID = unID + 1
+			hotspot	0,	stepDpt,	0,	unID,	stepDpt,	2		:	unID = unID + 1
+
+			addy	stepDpt
+				hotspot	0,	0,	0,			unID,	stepHgt_1,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	stepHgt_1,	3		:	unID = unID + 1
+				hotspot	0,	0,	stepHgt_1,	unID,	stepHgt_1,	2		:	unID = unID + 1
+			del 1
+		del 1
+	del 1
+
+
+!-----------------------------------------------------------------------------------------------
+!	스트링거
+!-----------------------------------------------------------------------------------------------
+material	matStg
+pen			stgElevPen
+sect_fill	stgFill,	stgBackPen,	stgFillPen,	stgSectPen
+
+addz	stepHgt_S
+	!	Hotspot : posStg
+	hotspot	0,	0,			zPosStg_1,	unID,	yPosStg_1,	1+128	:	unID = unID + 1
+	hotspot	0,	1,			zPosStg_1,	unID,	yPosStg_1,	3		:	unID = unID + 1
+	hotspot	0,	-yPosStg_1,	zPosStg_1,	unID,	yPosStg_1,	2		:	unID = unID + 1
+
+	hotspot	0,	-yPosStg_1,	0,			unID,	zPosStg_1,	1+128	:	unID = unID + 1
+	hotspot	0,	-yPosStg_1,	-1,			unID,	zPosStg_1,	3		:	unID = unID + 1
+	hotspot	0,	-yPosStg_1,	zPosStg_1,	unID,	zPosStg_1,	2		:	unID = unID + 1
+
+
+	add	0,	-yPosStg_1,	zPosStg_1
+		!	Hotspot : distBase
+		hotspot	0,	0,	0,			unID,	distBase,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	1,			unID,	distBase,	3		:	unID = unID + 1
+		hotspot	0,	0,	-distBase,	unID,	distBase,	2		:	unID = unID + 1
+
+		!	I형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_I	then
+			!	1st, 2nd
+			!-----------------------------------------------------------------------------------------------
+			!	Poly : 1, 2
+			gosub	"coordinate_stringer"
+
+			!	Path : 1, 2
+			_zPosTop = (stepHgt_1*(nStep_1 - 2) + stepHgt_E - zPosStg_1)
+			_addLth = (stepHgt_1 - stepHgt_E)/tan(_aStr_1) + stepDpt_E + yPosStg_1 + zPosStg_1/tan(_aStr_1)
+
+			put	0,	0,										-(distBase + 1),	0,
+				0,	0,										-distBase,			0,
+				0,	0,										0,					0,
+				0,	_zPosTop/tan(_aStr_1),					_zPosTop,			0,
+				0,	_zPosTop/tan(_aStr_1) + _addLth,		_zPosTop,			0,
+				0,	_zPosTop/tan(_aStr_1) + _addLth + 1,	_zPosTop,			0
+
+			_nPath = 6
+
+			!	1st
+			tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
+
+			!	2nd
+			addx	strWdt_1
+				mulx	-1
+					tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+				del 1
+			del 1
+		endif
+
+		!	ㄱ형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_L	then
+			!	1st, 2nd
+			!-----------------------------------------------------------------------------------------------
+			!	Poly : 1, 2
+			gosub	"coordinate_stringer"
+
+			!	Path : 1, 2
+				!	변수정의
+				_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+				_addLth = yPosStg_1 + (stepThk + zPosStg_1)/tan(_aStr_1) + strOff_1 - stgWdt
+
+				put	0,	0,										-(distBase + 1),	0,
+					0,	0,										-distBase,			0,
+					0,	0,										0,					0,
+					0,	_zPosTop/tan(_aStr_1),					_zPosTop,			0,
+					0,	_zPosTop/tan(_aStr_1) + _addLth,		_zPosTop,			0,
+					0,	_zPosTop/tan(_aStr_1) + _addLth + 1,	_zPosTop,			0
+
+				_nPath = 6
+
+				!	1st
+				tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
+
+				!	2nd
+				addx	strWdt_1
+					mulx	-1
+						tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+					del 1
+				del 1
+
+			!	3rd, 4th
+			!-----------------------------------------------------------------------------------------------
+			!	Poly : 3, 4
+			gosub	"coordinate_stringer"
+
+			!	Path : 3, 4
+			add	-stgWdt,	stepDpt*(nStep_1 - 1) + yPosStg_1 + strOff_1,	stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1 - stgDpt
+				!	변수 정의
+				_bendHgt = stgDpt + stepHgt_2 + stepThk - stgDpt*tan(_aCutStg_B2) + zPosStg_2
+				_zPosTop = stepThk + stepHgt_2*(nStep_2 - 1) + stepHgt_E - _bendHgt
+				_addLth = yPosStg_2 - stgDpt*tan(_aCutStg_T2) + stepDpt_E + (stepHgt_2 - stepHgt_E)/tan(_aStr_2)
+
+				put	-(addStgLth + 1),																			0,	0,						0,
+					-addStgLth,																					0,	0,						0,
+					0,																							0,	0,						0,
+					strWdt_1 + stgDpt + stgWdt + strOff_2 - yPosStg_2,											0,	0,						0,
+					strWdt_1 + stgDpt + stgWdt + strOff_2 - yPosStg_2,											0,	_bendHgt,				0,
+					strWdt_1 + stgDpt + stgWdt + strOff_2 - yPosStg_2 + _zPosTop/tan(_aStr_2),					0,	_bendHgt + _zPosTop,	0,
+					strWdt_1 + stgDpt + stgWdt + strOff_2 - yPosStg_2 + _zPosTop/tan(_aStr_2) + _addLth,		0,	_bendHgt + _zPosTop,	0,
+					strWdt_1 + stgDpt + stgWdt + strOff_2 - yPosStg_2 + _zPosTop/tan(_aStr_2) + _addLth + 1,	0,	_bendHgt + _zPosTop,	0
+
+				_nPath = 8
+
+				!	4th
+				tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
+
+				!	3rd
+				addy	strWdt_2
+					muly	-1
+						tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+					del 1
+				del 1
+
+				!	Hotspot : addStgLth
+				addz	stgDpt
+					hotspot	0,			0,	0,	unID,	addStgLth,	1+128	:	unID = unID + 1
+					hotspot	1,			0,	0,	unID,	addStgLth,	3		:	unID = unID + 1
+					hotspot -addStgLth,	0,	0,	unID,	addStgLth,	2		:	unID = unID + 1
+
+					addy	strWdt_2
+						hotspot	0,			0,	0,	unID,	addStgLth,	1+128	:	unID = unID + 1
+						hotspot	1,			0,	0,	unID,	addStgLth,	3		:	unID = unID + 1
+						hotspot -addStgLth,	0,	0,	unID,	addStgLth,	2		:	unID = unID + 1
+					del 1
+				del 1
+
+				!	Hotspot : yPosStg_2, zPosStg_2
+				add	stgWdt + strWdt_1 + strOff_2,	0,	stgDpt + stepThk + stepHgt_2
+					hotspot	0,			0,	zPosStg_2,	unID,	yPosStg_2,	1+128	:	unID = unID + 1
+					hotspot	1,			0,	zPosStg_2,	unID,	yPosStg_2,	3		:	unID = unID + 1
+					hotspot	-yPosStg_2,	0,	zPosStg_2,	unID,	yPosStg_2,	2		:	unID = unID + 1
+
+					hotspot	-yPosStg_2,	0,	0,			unID,	zPosStg_2,	1+128	:	unID = unID + 1
+					hotspot	-yPosStg_2,	0,	-1,			unID,	zPosStg_2,	3		:	unID = unID + 1
+					hotspot	-yPosStg_2,	0,	zPosStg_2,	unID,	zPosStg_2,	2		:	unID = unID + 1
+				del 1
+			del 1
+
+			!	5th, 6th
+			!-----------------------------------------------------------------------------------------------
+			!	Poly : 5, 6
+			gosub	"coordinate_stringer"
+
+			!	Path : 5, 6
+			add	strWdt_1,	stepDpt*(nStep_1 - 1) + yPosStg_1 + strOff_1,	stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1 - stgDpt
+
+				!	변수 정의
+
+				put	0,	-1,				0,	0,
+					0,	0,				0,	0,
+					0,	strWdt_2,		0,	0,
+					0,	strWdt_2 + 1,	0,	0
+
+				_nPath = 4
+
+				!	5th
+				addx	-strWdt_1
+					mulx	-1
+						tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
+					del 1
+				del 1
+
+				!	6th
+				tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+			del 1
+
+		endif
+
+		!	U형
+		!-----------------------------------------------------------------------------------------------
+		if	iStrShape = STRSHAPE_U	then
+			!	1st, 2nd
+			!-----------------------------------------------------------------------------------------------
+			for	i = 1	to	2
+				!	Poly : 1, 2
+				gosub	"coordinate_stringer"
+
+				!	Path : 1, 2
+				if	i = 1	then	_offset = endOff_Out
+				if	i = 2	then	_offset = endOff_In
+
+				_zPosTop = (stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1)
+				_addLth = yPosStg_1 + (stepThk + zPosStg_1)/tan(_aStr_1) + strOff_1 + landDpt - _offset
+
+				put	0,	0,										-(distBase + 1),	0,
+					0,	0,										-distBase,			0,
+					0,	0,										0,					0,
+					0,	_zPosTop/tan(_aStr_1),					_zPosTop,			0,
+					0,	_zPosTop/tan(_aStr_1) + _addLth,		_zPosTop,			0,
+					0,	_zPosTop/tan(_aStr_1) + _addLth + 1,	_zPosTop,			0
+
+				_nPath = 6
+
+				addx	strWdt_1*(i - 1)
+					mulx	-2*i + 3
+						tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+					del 1
+				del 1
+			next	i
+
+				!	Hotspot : endOff_Out, endOff_In
+				add	0,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + yPosStg_1,	stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1
+					hotspot	0,	0,				0,	unID,	endOff_Out,	1+128	:	unID = unID + 1
+					hotspot	0,	1,				0,	unID,	endOff_Out,	3		:	unID = unID + 1
+					hotspot	0,	-endOff_Out,	0,	unID,	endOff_Out,	2		:	unID = unID + 1
+
+					addx	strWdt_1
+						hotspot	0,	0,			0,	unID,	endOff_In,	1+128	:	unID = unID + 1
+						hotspot	0,	1,			0,	unID,	endOff_In,	3		:	unID = unID + 1
+						hotspot	0,	-endOff_In,	0,	unID,	endOff_In,	2		:	unID = unID + 1
+					del 1
+				del 1
+
+			!	3rd, 4th
+			!-----------------------------------------------------------------------------------------------
+			add	strWdt_1 + strDist + strWdt_2,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + yPosStg_1,	stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1 - stgDpt
+				muly	-1
+					for	i = 1	to	2
+						!	Poly : 3, 4
+						gosub	"coordinate_stringer"
+
+						!	Path : 3, 4
+						if	i = 1	then	_offset = endOff_Out
+						if	i = 2	then	_offset = endOff_In
+
+						_yPosBend = (landDpt + strOff_2 + stgDpt)
+						_bendHgt = stgDpt + stepThk + stepHgt_2 - stgDpt*tan(_aCutStg_B2) + zPosStg_2
+						_zPosTop = stepThk + stepHgt_2*(nStep_2 - 1) + stepHgt_E - _bendHgt
+						_addLth = yPosStg_2 - stgDpt*tan(_aCutStg_T2) + stepDpt_E + (stepHgt_2 - stepHgt_E)/tan(_aStr_2) + zPosStg_2/tan(_aStr_2)
+
+
+						put	0,	-1,																0,						0,
+							0,	_offset,														0,						0,
+							0,	_yPosBend - yPosStg_2,											0,						0,
+							0,	_yPosBend - yPosStg_2,											_bendHgt,				0,
+							0,	_yPosBend - yPosStg_2 + _zPosTop/tan(_aStr_2),					_bendHgt + _zPosTop,	0,
+							0,	_yPosBend - yPosStg_2 + _zPosTop/tan(_aStr_2) + _addLth,		_bendHgt + _zPosTop,	0,
+							0,	_yPosBend - yPosStg_2 + _zPosTop/tan(_aStr_2) + _addLth + 1,	_bendHgt + _zPosTop,	0
+
+						_nPath = 7
+
+						addx	-strWdt_2*(i - 1)
+							mulx	-2*i + 3
+								tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+							del 1
+						del 1
+					next	i
+				del 1
+
+				!	Hotspot : endOff_Out, endOff_In
+				addz	stgDpt
+					hotspot	0,	0,				0,	unID,	endOff_Out,	1+128	:	unID = unID + 1
+					hotspot	0,	1,				0,	unID,	endOff_Out,	3		:	unID = unID + 1
+					hotspot	0,	-endOff_Out,	0,	unID,	endOff_Out,	2		:	unID = unID + 1
+
+					addx	-strWdt_2
+						hotspot	0,	0,			0,	unID,	endOff_In,	1+128	:	unID = unID + 1
+						hotspot	0,	1,			0,	unID,	endOff_In,	3		:	unID = unID + 1
+						hotspot	0,	-endOff_In,	0,	unID,	endOff_In,	2		:	unID = unID + 1
+					del 1
+				del 1
+			del 1
+
+				!	Hotspot : yPosStg_2, zPosStg_2
+				add	strWdt_1 + strDist,	stepDpt*(nStep_1 - 1) + strOff_1 - strOff_2 + yPosStg_1,	stepHgt_1*(nStep_1 - 1) - zPosStg_1 + stepHgt_2
+					hotspot	0,	0,			zPosStg_2,	unID,	yPosStg_2,	1+128	:	unID = unID + 1
+					hotspot	0,	-1,			zPosStg_2,	unID,	yPosStg_2,	3		:	unID = unID + 1
+					hotspot	0,	yPosStg_2,	zPosStg_2,	unID,	yPosStg_2,	2		:	unID = unID + 1
+
+					hotspot	0,	yPosStg_2,	0,			unID,	zPosStg_2,	1+128	:	unID = unID + 1
+					hotspot	0,	yPosStg_2,	-1,			unID,	zPosStg_2,	3		:	unID = unID + 1
+					hotspot	0,	yPosStg_2,	zPosStg_2,	unID,	zPosStg_2,	2		:	unID = unID + 1
+				del 1
+
+			!	5th(H형강)
+			!-----------------------------------------------------------------------------------------------
+			! add	0,	stepDpt*(nStep_1 - 1) + strOff_1 + landDpt + yPosStg_1,	stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1 - stgDpt
+			! 	muly	-1
+			! 		!	Poly : 5
+			! 		gosub	"coordinate_stringer"
+
+			! 		!	Path : 5
+			! 		put	-(stgWdt + 1),										0,	0,	0,
+			! 			-stgWdt + colWdt_L,									0,	0,	0,
+			! 			strWdt_1 + strDist + strWdt_2 + stgWdt - colWdt_R,	0,	0,	0,
+			! 			strWdt_1 + strDist + strWdt_2 + stgWdt - colWdt_R + 1,	0,	0,	0
+
+			! 		_nPath = 4
+
+			! 		tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+			! 	del 1
+			! del 1
+
+			!	6th
+			!-----------------------------------------------------------------------------------------------
+			_bDraw6th = strDist > stgWdt*2
+
+			if	_bDraw6th	then
+				add	strWdt_1,	stepDpt*(nStep_1 - 1) + strOff_1 + yPosStg_1,	stepHgt_1*(nStep_1 - 1) - stepThk - zPosStg_1 - stgDpt
+					!	Poly : 6
+					gosub	"coordinate_stringer"
+
+					!	Path : 6
+					put	0,					0,	0,	0,
+						stgWdt,				0,	0,	0,
+						strDist - stgWdt,	0,	0,	0,
+						strDist,			0,	0,	0
+
+					_nPath = 4
+
+					tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+				del 1
+			endif
+
+
+
+		endif
+
+	del 1
+del 1
+
+!-----------------------------------------------------------------------------------------------
+!	디딤판
+!-----------------------------------------------------------------------------------------------
+material	matTrd
+pen			trdElevPen
+sect_fill	trdFill,	trdBackPen,	trdFillPen,	trdSectPen
+
+if	iPlanView = VIEW_A & bTrd	then
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+	_rsrThk = 0
+	if	bRsr	then	_rsrThk = rsrThk
+
+	!	Hotspot : trdThk & nosLth & trdDpt_E
+	addz	stepHgt_S
+		addx	strWdt_1/2
+			hotspot	0,	0,	0,		unID,	trdThk,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,		unID,	trdThk,	3		:	unID = unID + 1
+			hotspot	0,	0,	trdThk,	unID,	trdThk,	2		:	unID = unID + 1
+
+			add	0,	-_rsrThk,	trdThk/2
+				hotspot	0,	0,			0,	unID,	nosLth,	1+128	:	unID = unID + 1
+				hotspot	0,	1,			0,	unID,	nosLth,	3		:	unID = unID + 1
+				hotspot	0,	-nosLth,	0,	unID,	nosLth,	2		:	unID = unID + 1
+			del 1
+		del 1
+	del 1
+
+	!	I형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_I	then
+		addz	stepHgt_S
+			for	i = 1	to	nStep_1
+				if	not(i = nStep_1)	then
+					put	0,			-(_rsrThk + nosLth),	15,
+						0,			stepDpt - _rsrThk,		15,
+						strWdt_1,	stepDpt - _rsrThk,		15,
+						strWdt_1,	-(_rsrThk + nosLth),	15
+				else
+					put	0,			-(_rsrThk + nosLth),	15,
+						0,			trdDpt_E,				15,
+						strWdt_1,	trdDpt_E,				15,
+						strWdt_1,	-(_rsrThk + nosLth),	15
+				endif
+
+				prism_	nsp/3,	trdThk,	get(nsp)
+
+				add	0,	stepDpt,	stepHgt_1
+			next	i
+
+			del nStep_1
+
+			add	strWdt_1/2,	stepDpt*(nStep_1 - 1),	stepHgt_1*(nStep_1 - 1) + trdThk/2
+				hotspot	0,	0,			0,	unID,	trdDpt_E,	1+128	:	unID = unID + 1
+				hotspot	0,	-1,			0,	unID,	trdDpt_E,	3		:	unID = unID + 1
+				hotspot	0,	trdDpt_E,	0,	unID,	trdDpt_E,	2		:	unID = unID + 1
+			del 1
+		del 1
+	endif
+
+	!	L형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_L	then
+		addz	stepHgt_S
+			!	1단 디딤판
+			for	i = 1	to	(nStep_1 - 1)
+				put	0,			-(_rsrThk + nosLth),	15,
+					0,			stepDpt - _rsrThk,		15,
+					strWdt_1,	stepDpt - _rsrThk,		15,
+					strWdt_1,	-(_rsrThk + nosLth),	15
+
+				prism_	nsp/3,	trdThk,	get(nsp)
+
+				add	0,	stepDpt,	stepHgt_1
+			next	i
+
+			!	계단참
+			put	0,								-(_rsrThk + nosLth),	15,
+				0,								strOff_1 + strWdt_2,	15,
+				strWdt_1 + strOff_2 - _rsrThk,	strOff_1 + strWdt_2,	15,
+				strWdt_1 + strOff_2 - _rsrThk,	strOff_1,				15,
+				strWdt_1,						strOff_1,				15,
+				strWdt_1,						-(_rsrThk + nosLth),	15
+
+			prism_	nsp/3,	trdThk,	get(nsp)
+
+			del (nStep_1 - 1)
+
+			!	2단 디딤판
+			add	strWdt_1 + strOff_2,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	stepHgt_1*(nStep_1 - 1) + stepHgt_2
+				rotz	-90
+					for	i = 1	to	nStep_2
+						if	not(i = nStep_2)	then
+							put	0,			-(_rsrThk + nosLth),	15,
+								0,			stepDpt - _rsrThk,		15,
+								strWdt_1,	stepDpt - _rsrThk,		15,
+								strWdt_1,	-(_rsrThk + nosLth),	15
+						else
+							put	0,			-(_rsrThk + nosLth),	15,
+								0,			trdDpt_E,				15,
+								strWdt_1,	trdDpt_E,				15,
+								strWdt_1,	-(_rsrThk + nosLth),	15
+						endif
+
+						prism_	nsp/3,	trdThk,	get(nsp)
+
+						add	0,	stepDpt,	stepHgt_2
+					next	i
+
+					del nStep_2
+
+					add	strWdt_2/2,	stepDpt*(nStep_2 - 1),	stepHgt_2*(nStep_2 - 1) + trdThk/2
+						hotspot	0,	0,			0,	unID,	trdDpt_E,	1+128	:	unID = unID + 1
+						hotspot	0,	-1,			0,	unID,	trdDpt_E,	3		:	unID = unID + 1
+						hotspot	0,	trdDpt_E,	0,	unID,	trdDpt_E,	2		:	unID = unID + 1
+					del 1
+				del 1
+			del 1
+		del 1
+	endif
+
+	!	U형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_U	then
+		addz	stepHgt_S
+			!	1단 디딤판
+			for	i = 1	to	(nStep_1 - 1)
+				put	0,			-(_rsrThk + nosLth),	15,
+					0,			stepDpt - _rsrThk,		15,
+					strWdt_1,	stepDpt - _rsrThk,		15,
+					strWdt_1,	-(_rsrThk + nosLth),	15
+
+				prism_	nsp/3,	trdThk,	get(nsp)
+
+				add	0,	stepDpt,	stepHgt_1
+			next	i
+
+			!	계단참
+			put	0,											-(_rsrThk + nosLth),				15,
+				0,											strOff_1,							15,
+				-landLth_L,									strOff_1,							15,
+				-landLth_L,									strOff_1 + landDpt + landLth_D,		15,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	strOff_1 + landDpt + landLth_D,		15,
+				strWdt_1 + strDist + strWdt_2 + landLth_R,	strOff_1,							15,
+				strWdt_1 + strDist + strWdt_2,				strOff_1,							15,
+				strWdt_1 + strDist + strWdt_2,				strOff_1 - strOff_2 + _rsrThk,		15,
+				strWdt_1 + strDist,							strOff_1 - strOff_2 + _rsrThk,		15,
+				strWdt_1 + strDist,							strOff_1,							15,
+				strWdt_1,									strOff_1,							15,
+				strWdt_1,									-(_rsrThk + nosLth),				15
+
+			prism_	nsp/3,	trdThk,	get(nsp)
+
+			del (nStep_1 - 1)
+
+			!	2단 디딤판
+			add	strWdt_1 + strDist + strWdt_2,	stepDpt*(nStep_1 - 1) + strOff_1 - strOff_2,	stepHgt_1*(nStep_1 - 1) + stepHgt_2
+				rotz	-180
+					for	i = 1	to	nStep_2
+						if	not(i = nStep_2)	then
+							put	0,			-(_rsrThk + nosLth),	15,
+								0,			stepDpt - _rsrThk,		15,
+								strWdt_2,	stepDpt - _rsrThk,		15,
+								strWdt_2,	-(_rsrThk + nosLth),	15
+						else
+							put	0,			-(_rsrThk + nosLth),	15,
+								0,			trdDpt_E,				15,
+								strWdt_2,	trdDpt_E,				15,
+								strWdt_2,	-(_rsrThk + nosLth),	15
+						endif
+
+						prism_	nsp/3,	trdThk,	get(nsp)
+
+						add	0,	stepDpt,	stepHgt_2
+					next	i
+
+					del nStep_2
+
+					add	strWdt_2/2,	stepDpt*(nStep_2 - 1),	stepHgt_2*(nStep_2 - 1) + trdThk/2
+						hotspot	0,	0,			0,	unID,	trdDpt_E,	1+128	:	unID = unID + 1
+						hotspot	0,	-1,			0,	unID,	trdDpt_E,	3		:	unID = unID + 1
+						hotspot	0,	trdDpt_E,	0,	unID,	trdDpt_E,	2		:	unID = unID + 1
+					del 1
+				del 1
+			del 1
+		del 1
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	챌판
+!-----------------------------------------------------------------------------------------------
+material	matRsr
+pen			rsrElevPen
+sect_fill	rsrFill,	rsrBackPen,	rsrFillPen,	rsrSectPen
+
+if	iPlanView = VIEW_A & bRsr	then
+	!	I형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_I	then
+		for	i = 1	to	nStep_1
+			if	i = 1	then
+				_rsrHgt = stepHgt_S
+			else
+				_rsrHgt = stepHgt_1
+			endif
+
+			put	0,			-rsrThk,	15,
+				0,			0,			15,
+				strWdt_1,	0,			15,
+				strWdt_1,	-rsrThk,	15
+
+			prism_	nsp/3,	_rsrHgt,	get(nsp)
+
+			add	0,	stepDpt,	_rsrHgt
+		next	i
+
+		del nStep_1
+	endif
+
+	!	L형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_L	then
+		!	1단 챌판
+		for	i = 1	to	nStep_1
+			if	i = 1	then
+				_rsrHgt = stepHgt_S
+			else
+				_rsrHgt = stepHgt_1
+			endif
+
+			put	0,			-rsrThk,	15,
+				0,			0,			15,
+				strWdt_1,	0,			15,
+				strWdt_1,	-rsrThk,	15
+
+			prism_	nsp/3,	_rsrHgt,	get(nsp)
+
+			add	0,	stepDpt,	_rsrHgt
+		next	i
+
+		del nStep_1
+
+		!	2단 챌판
+		add	strWdt_1 + strOff_2,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			rotz	-90
+				for	i = 1	to	nStep_2
+					_rsrHgt = stepHgt_2
+
+					put	0,			-rsrThk,	15,
+						0,			0,			15,
+						strWdt_2,	0,			15,
+						strWdt_2,	-rsrThk,	15
+
+					prism_	nsp/3,	_rsrHgt,	get(nsp)
+
+					add	0,	stepDpt,	_rsrHgt
+				next	i
+
+				del nStep_2
+			del 1
+		del 1
+	endif
+
+	!	U형
+	!-----------------------------------------------------------------------------------------------
+	if	iStrShape = STRSHAPE_U	then
+		!	1단 챌판
+		for	i = 1	to	nStep_1
+			if	i = 1	then
+				_rsrHgt = stepHgt_S
+			else
+				_rsrHgt = stepHgt_1
+			endif
+
+			put	0,			-rsrThk,	15,
+				0,			0,			15,
+				strWdt_1,	0,			15,
+				strWdt_1,	-rsrThk,	15
+
+			prism_	nsp/3,	_rsrHgt,	get(nsp)
+
+			add	0,	stepDpt,	_rsrHgt
+		next	i
+
+		del nStep_1
+
+		!	2단 챌판
+		add	strWdt_1 + strDist + strWdt_2,	stepDpt*(nStep_1 - 1) + strOff_1 - strOff_2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+			rotz	-180
+				for	i = 1	to	nStep_2
+					_rsrHgt = stepHgt_2
+
+					put	0,			-rsrThk,	15,
+						0,			0,			15,
+						strWdt_2,	0,			15,
+						strWdt_2,	-rsrThk,	15
+
+					prism_	nsp/3,	_rsrHgt,	get(nsp)
+
+					add	0,	stepDpt,	_rsrHgt
+				next	i
+
+				del nStep_2
+			del 1
+		del 1
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	보강 L형강
+!-----------------------------------------------------------------------------------------------
+
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+
+!-----------------------------------------------------------------------------------------------
+"draw_step":	!	단 모듈
+!-----------------------------------------------------------------------------------------------
+	material	matStep
+
+	addx	_strWdt
+		roty	-90
+			for	i = 1	to	_nStep
+				!	단 높이 정의
+				_stepHgt = _stepHgt_input
+				_stepDpt = stepDpt
+				_stepThk = stepThk
+				_si1 = 8
+				_si2 = 8
+				if	i = 1	then
+					if	(_stepStatus = STEP_SOLO | _stepStatus = STEP_SET_1ST)	then
+						_stepHgt = stepHgt_S
+					endif
+					_si1 = 8
+					_si2 = 8
+				endif
+				if	i = _nStep	then
+					if	(_stepStatus = STEP_SOLO | _stepStatus = STEP_SET_2ND)	then
+						_stepHgt = stepHgt_E
+						_stepDpt = stepDpt_E
+						_stepThk = 0
+					endif
+					_si1 = 13
+					_si2 = 8
+				endif
+
+				if	not(i = _nStep & _stepStatus = STEP_SET_1ST)	then
+					put	0,					0,						15,
+						_stepHgt,			0,						15,
+						_stepHgt,			_stepDpt,				_si1,
+						_stepHgt,			_stepDpt + _stepThk,	13,
+						_stepHgt - stepThk,	_stepDpt + _stepThk,	15,
+						_stepHgt - stepThk,	stepThk,				15,
+						0,					stepThk,				_si2,
+						0,					0,						15
+				else
+					put	0,					0,			15,
+						_stepHgt - stepThk,	0,			_si2,
+						_stepHgt - stepThk,	stepThk,	15,
+						0,					stepThk,	_si2,
+						0,					0,			15
+				endif
+
+				prism_	nsp/3,	_strWdt,	get(nsp)
+
+				add	_stepHgt,	stepDpt,	0
+			next	i
+
+			del _nStep
+		del 1
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"coordinate_stringer":	!	스트링거 단면 좌표
+!-----------------------------------------------------------------------------------------------
+	if	iStgType = STRINGER_C	then
+		put	0,			0,					0,
+			-stgWdt,	0,					0,
+			-stgWdt,	stgThk,				0,
+			-stgThk,	stgThk,				0,
+			-stgThk,	stgDpt - stgThk,	0,
+			-stgWdt,	stgDpt - stgThk,	0,
+			-stgWdt,	stgDpt,				0,
+			0,			stgDpt,				0
+
+		_nPoly = 8
+	endif
+
+	if	iStgType = STRINGER_I	then
+		put	0,			0,					0,
+			-stgWdt,	0,					0,
+			-stgWdt,	stgDpt,				0,
+			0,			stgDpt,				0
+
+		_nPoly = 4
+	endif
+return

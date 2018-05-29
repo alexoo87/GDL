@@ -1,0 +1,355 @@
+!===============================================================================================
+!	에스컬레이터
+!===============================================================================================
+!	W.P
+hotspot	0,	0,	0,	unID	:	unID = unID + 1
+
+_escLth = escHgt/tan(aEsc)
+! lin_	0,	0,	0,	_escLth,	0,	escHgt
+add	_escLth,	0,	escHgt
+	hotspot	0,	0,	0,	unID	:	unID = unID + 1
+del 1
+
+!	난간 너비
+_balustradeWdt = (escWdt - stepWdt)/2
+
+!	덮개 두께
+_coverThk = 0.020
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+!	에스컬레이터 높이
+roty	-aEsc
+	hotspot	0,			0,	0,	unID,	escHgt_Lth,	1+128,	escHgt	:	unID = unID + 1
+	hotspot	-1,			0,	0,	unID,	escHgt_Lth,	3				:	unID = unID + 1
+	hotspot	escHgt_Lth,	0,	0,	unID,	escHgt_Lth,	2,	escHgt		:	unID = unID + 1
+del 1
+
+addz	_coverThk
+	!	에스컬레이터 너비
+	addx	-lowLandLth
+		hotspot	0,	0,				0,	unID,	escWdt_Half,	1+128,	escWdt	:	unID = unID + 1
+		hotspot	0,	-1,				0,	unID,	escWdt_Half,	3				:	unID = unID + 1
+		hotspot	0,	escWdt_Half,	0,	unID,	escWdt_Half,	2,	escWdt		:	unID = unID + 1
+
+		hotspot	0,	0,				0,	unID,	escWdt_Half,	1+128,	escWdt	:	unID = unID + 1
+		hotspot	0,	1,				0,	unID,	escWdt_Half,	3				:	unID = unID + 1
+		hotspot	0,	-escWdt_Half,	0,	unID,	escWdt_Half,	2,	escWdt		:	unID = unID + 1
+	del 1
+
+	!	에스컬레이터 두께
+	add	_escLth/2,	0,	escHgt/2
+		roty	-aEsc
+			hotspot	0,	0,	0,			unID,	escThk,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,			unID,	escThk,	3		:	unID = unID + 1
+			hotspot	0,	0,	-escThk,	unID,	escThk,	2		:	unID = unID + 1
+		del 1
+	del 1
+
+	!	하부 승강장 너비/두께
+	hotspot	0,				0,	0,	unID,	lowLandLth,	1+128	:	unID = unID + 1
+	hotspot	1,				0,	0,	unID,	lowLandLth,	3		:	unID = unID + 1
+	hotspot	-lowLandLth,	0,	0,	unID,	lowLandLth,	2		:	unID = unID + 1
+
+	addx	-lowLandLth
+		hotspot	0,	0,	0,				unID,	lowLandThk,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	1,				unID,	lowLandThk,	3		:	unID = unID + 1
+		hotspot	0,	0,	-lowLandThk,	unID,	lowLandThk,	2		:	unID = unID + 1
+	del 1
+
+	!	상부 승강장 너비
+	add	_escLth,	0,	escHgt
+		hotspot	0,			0,	0,	unID,	uprLandLth,	1+128	:	unID = unID + 1
+		hotspot	-1,			0,	0,	unID,	uprLandLth,	3		:	unID = unID + 1
+		hotspot	uprLandLth,	0,	0,	unID,	uprLandLth,	2		:	unID = unID + 1
+
+		addx	uprLandLth
+			hotspot	0,	0,	0,				unID,	uprLandThk,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,				unID,	uprLandThk,	3		:	unID = unID + 1
+			hotspot	0,	0,	-uprLandThk,	unID,	uprLandThk,	2		:	unID = unID + 1
+		del 1
+	del 1
+
+	!	고정 핫스팟
+	hotspot	-lowLandLth,	escWdt_Half,	-lowLandThk,	unID	:	unID = unID + 1
+	hotspot	-lowLandLth,	-escWdt_Half,	-lowLandThk,	unID	:	unID = unID + 1
+
+	hotspot	_escLth + uprLandLth,	escWdt_Half,	escHgt,	unID	:	unID = unID + 1
+	hotspot	_escLth + uprLandLth,	-escWdt_Half,	escHgt,	unID	:	unID = unID + 1
+	hotspot	_escLth + uprLandLth,	escWdt_Half,	escHgt - uprLandThk,	unID	:	unID = unID + 1
+	hotspot	_escLth + uprLandLth,	-escWdt_Half,	escHgt - uprLandThk,	unID	:	unID = unID + 1
+del 1
+
+
+
+
+
+!===============================================================================================
+!	에스컬레이터 본체
+!===============================================================================================
+pen			escElevPen
+sect_fill	escFill,	escBackPen,	escFillPen,	escSectPen
+material	escMat
+
+addy	escWdt_Half
+	rotx	90
+
+		!	디딤판 부분 자르기
+		addz	(escWdt - stepWdt)/2
+			put	0,											_coverThk,			31,
+				-stepLth*(nLandStep + 1),					_coverThk,			31,
+				-stepLth*nLandStep,							0,					31,
+				-stepLth*nLandStep,							-stepHgt,			31,
+				(stepLth - stepLth*cos(aEsc)),				-stepHgt,			31,
+				_escLth + (stepLth - stepLth*cos(aEsc)),	escHgt - stepHgt,	31,
+				_escLth + stepLth*nLandStep,				escHgt - stepHgt,	31,
+				_escLth + stepLth*nLandStep,				escHgt,				31,
+				_escLth + stepLth*(nLandStep + 1),			escHgt + _coverThk,	31,
+				_escLth,									escHgt + _coverThk,	31,
+				0,											_coverThk,			31
+
+			cutform	nsp/3,	1,	1+2,
+					0,	0,	1,	stepWdt,	get(nsp)
+		del 1
+
+			!	본체
+			put	0,																	_coverThk,							15,
+				-lowLandLth,														_coverThk,							15,
+				-lowLandLth,														-lowLandThk + _coverThk,			15,
+				lowLandThk*tan(aEsc) - (lowLandThk/cos(aEsc) - escThk)/sin(aEsc),	-lowLandThk + _coverThk,			15,
+				_escLth + (escThk/cos(aEsc) - uprLandThk)/tan(aEsc),				escHgt - uprLandThk + _coverThk,	15,
+				_escLth + uprLandLth,												escHgt - uprLandThk + _coverThk,	15,
+				_escLth + uprLandLth,												escHgt + _coverThk,					15,
+				_escLth,															escHgt + _coverThk,					15,
+				0,																	_coverThk,							15
+
+			prism_	nsp/3,	escWdt,	get(nsp)
+
+		cutend
+	del 1
+del 1
+
+!===============================================================================================
+!	디딤판
+!===============================================================================================
+pen			stepElevPen
+sect_fill	stepFill,	stepBackPen,	stepFillPen,	stepSectPen
+material	stepMat
+
+!	하부
+for	 i = 1	to	(nLandStep + 1)
+	gosub	"stepShape"
+
+	addx	-stepLth
+next	i
+
+del	(nLandStep + 1)
+
+!	사이
+_rStep = fra(escHgt/stepHgt)
+_nStep = int(escHgt/stepHgt)
+if	_rStep < eps	then	_nStep = _nStep - 1
+
+_xStep = stepLth - (stepLth - stepLth*cos(aEsc))
+
+for	i = 1	to	_nStep
+	add	_xStep,	0,	stepHgt
+	
+	gosub	"stepShape"
+next	i
+
+del	_nStep
+
+!	상부
+_distHgt = stepHgt - (escHgt - stepHgt*_nStep)
+_xDistStep = stepLth - sqr(stepLth^2 - (stepHgt - _distHgt)^2)
+
+addz	escHgt
+	!	상부 nLandStep 자르기
+	addx	_escLth + stepLth*nLandStep
+		roty	90
+			cutplane	1,	1,	0,	0
+		del 1
+	del 1
+
+	addx	_xStep*_nStep + stepLth - _xDistStep
+		for	i = 1	to	nLandStep
+			gosub	"stepShape"
+
+			addx	stepLth
+		next	i
+
+		del nLandStep
+	del 1
+
+	cutend
+
+del 1
+
+!===============================================================================================
+!	난간
+!===============================================================================================
+addz	_coverThk
+	!	좌측
+	gosub	"balustradeShape"
+
+	!	우측
+	muly	-1
+		gosub	"balustradeShape"
+	del 1
+del 1
+
+
+
+
+
+
+
+end
+
+
+
+
+
+!-----------------------------------------------------------------------------------------------
+"stepShape":	!	디딤판 형상
+!-----------------------------------------------------------------------------------------------
+	_aStep = aEsc
+
+	addy	stepWdt/2
+		rotx	90
+			put	stepLth,	0,		15,
+				0,			0,		13,
+				stepLth,	0,		900,
+				stepLth,	_aStep,	4000+13
+
+			prism_	nsp/3,	stepWdt,	get(nsp)
+		del 1
+	del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"balustradeShape":
+!-----------------------------------------------------------------------------------------------
+	resol	72
+
+	!	스커트
+	!-----------------------------------------------------------------------------------------------
+	pen			sktElevPen
+	sect_fill	sktFill,	sktBackPen,	sktFillPen,	sktSectPen
+	material	sktMat
+
+	!	Poly
+	put	0,											0,						0,
+		0,											sktHgt,					0,
+		-(_balustradeWdt/2 - glsThk/2 - hndLct),	sktHgt,					0,
+		-(_balustradeWdt/2 - glsThk/2 - hndLct),	sktHgt/2 + hndThk/2,	0,
+		-(_balustradeWdt/2 - hndWdt/2 - hndLct),	sktHgt/2 + hndThk/2,	0,
+		-(_balustradeWdt/2 - hndWdt/2 - hndLct),	sktHgt/2 - hndThk/2,	0,
+		-(_balustradeWdt/2 + hndWdt/2 - hndLct),	sktHgt/2 - hndThk/2,	0,
+		-(_balustradeWdt/2 + hndWdt/2 - hndLct),	sktHgt/2 + hndThk/2,	0,
+		-(_balustradeWdt/2 + glsThk/2 - hndLct),	sktHgt/2 + hndThk/2,	0,
+		-(_balustradeWdt/2 + glsThk/2 - hndLct),	sktHgt,					0,
+		-_balustradeWdt,							sktHgt,					0,
+		-_balustradeWdt,							0,						0
+
+	_nPoly = 12
+
+	!	Path
+	put	-stepLth*(nLandStep + 2) - addHnd_Low,			0,	0,		0,
+		-stepLth*(nLandStep + 1) - addHnd_Low,			0,	0,		0,
+		0,												0,	0,		0,
+		_escLth,										0,	escHgt,	0,
+		_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	0,	escHgt,	0,
+		_escLth + stepLth*(nLandStep + 2) + addHnd_Upr,	0,	escHgt,	0
+
+	_nPath = 6
+
+	addy	escWdt/2
+		tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+	del 1
+
+	!	난간(유리)
+	!-----------------------------------------------------------------------------------------------
+	pen			glsElevPen
+	sect_fill	glsFill,	glsBackPen,	glsFillPen,	glsSectPen
+	material	glsMat
+
+	_rGls = (hndHgt - sktHgt/2 - hndThk*1.5)/2
+
+	addy	escWdt/2 - _balustradeWdt/2 + hndLct + glsThk/2
+		rotx	90
+			put	-(sktHgt/2 + hndThk/2)*tan(aEsc/2),				(sktHgt/2 + hndThk/2),					13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			(sktHgt/2 + hndThk/2),					13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			(sktHgt/2 + hndThk/2) + _rGls,			900,
+				_rGls,											-180,									4000+13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			hndHgt - hndThk,						13,
+				-stepLth,										hndHgt - hndThk,						13,
+					stepLth*10,			-hndHgt/10,								800,		!	탄젠트 설정
+					stepLth*cos(aEsc),	hndHgt - hndThk + stepLth*sin(aEsc),	1000+13,	!	곡선
+				_escLth - stepLth*cos(aEsc),	escHgt + hndHgt - hndThk - stepLth*sin(aEsc),	13,
+					_escLth + stepLth,	escHgt + hndHgt - hndThk,	1000+13,	!	곡선
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + hndHgt - hndThk,				13,
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + (sktHgt/2 + hndThk/2) + _rGls,	900,
+				_rGls,											-180,									4000+13,
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + (sktHgt/2 + hndThk/2),			13,
+				_escLth - (sktHgt/2 + hndThk/2)*tan(aEsc/2),	escHgt + (sktHgt/2 + hndThk/2),			13
+
+			prism_	nsp/3,	glsThk,	get(nsp)
+		del 1
+	del 1
+
+	!	손스침
+	!-----------------------------------------------------------------------------------------------
+	pen			hndElevPen
+	sect_fill	hndFill,	hndBackPen,	hndFillPen,	hndSectPen
+	material	hndMat
+
+	_rHnd = (hndHgt - sktHgt/2 + hndThk*0.5)/2
+	_rGls = (hndHgt - sktHgt/2 - hndThk*1.5)/2
+
+	addy	escWdt/2 - _balustradeWdt/2 + hndLct + hndWdt/2
+		rotx	90
+			put	-(sktHgt/2 - hndThk/2)*tan(aEsc/2),				(sktHgt/2 - hndThk/2),					13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			(sktHgt/2 - hndThk/2),					13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			(sktHgt/2 - hndThk/2) + _rHnd,			900,
+				_rHnd,											-180,									4000+13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			hndHgt,									13,
+				-stepLth,										hndHgt,									13,
+					stepLth*10,			-hndHgt/10,					800,		!	탄젠트 설정
+					stepLth*cos(aEsc),	hndHgt + stepLth*sin(aEsc),	1000+13,	!	곡선
+				_escLth - stepLth*cos(aEsc),					escHgt + hndHgt - stepLth*sin(aEsc),	13,
+					_escLth + stepLth,	escHgt + hndHgt,	1000+13,	!	곡선
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + hndHgt,						13,
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + (sktHgt/2 - hndThk/2) + _rHnd,	900,
+				_rHnd,											-180,									4000+13,
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + (sktHgt/2 - hndThk/2),			13,
+				_escLth - (sktHgt/2 - hndThk/2)*tan(aEsc/2),	escHgt + (sktHgt/2 - hndThk/2),			13,
+
+				!	내부 뚫기
+				-(sktHgt/2 - hndThk/2)*tan(aEsc/2),				(sktHgt/2 - hndThk/2),					-1,
+				-(sktHgt/2 + hndThk/2)*tan(aEsc/2),				(sktHgt/2 + hndThk/2),					13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			(sktHgt/2 + hndThk/2),					13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			(sktHgt/2 + hndThk/2) + _rGls,			900,
+				_rGls,											-180,									4000+13,
+				-stepLth*(nLandStep + 1) - addHnd_Low,			hndHgt - hndThk,						13,
+				-stepLth,										hndHgt - hndThk,						13,
+					stepLth*10,			-hndHgt/10,								800,		!	탄젠트 설정
+					stepLth*cos(aEsc),	hndHgt - hndThk + stepLth*sin(aEsc),	1000+13,	!	곡선
+				_escLth - stepLth*cos(aEsc),	escHgt + hndHgt - hndThk - stepLth*sin(aEsc),	13,
+					_escLth + stepLth,	escHgt + hndHgt - hndThk,	1000+13,	!	곡선
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + hndHgt - hndThk,				13,
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + (sktHgt/2 + hndThk/2) + _rGls,	900,
+				_rGls,											-180,									4000+13,
+				_escLth + stepLth*(nLandStep + 1) + addHnd_Upr,	escHgt + (sktHgt/2 + hndThk/2),			13,
+				_escLth - (sktHgt/2 + hndThk/2)*tan(aEsc/2),	escHgt + (sktHgt/2 + hndThk/2),			13,
+				-(sktHgt/2 + hndThk/2)*tan(aEsc/2),				(sktHgt/2 + hndThk/2),					-1
+
+			prism_	nsp/3,	hndWdt,	get(nsp)
+		del 1
+	del 1
+
+return

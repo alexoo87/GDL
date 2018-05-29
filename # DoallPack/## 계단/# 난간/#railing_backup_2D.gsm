@@ -1,0 +1,350 @@
+!===============================================================================================
+!	난간(직/곡선)
+!===============================================================================================
+!	C.P
+hotspot2	0,	0
+
+!	난간 단면 절반 값
+if	iRailShape = Shape_Rectangle	then
+	_halfRail = shapeWdt/2
+endif
+if	iRailShape = Shape_Circle	then
+	_halfRail = shapeRad
+endif
+
+!===============================================================================================
+!	가이드라인
+!===============================================================================================
+if	bGuide	then
+	!	C.P
+	circle2		0,	0,	0.01
+
+	if	iRailType = Rail_Straight	then
+		!	중심선
+		line2	0,	0,	xRailPos,	yRailPos
+
+		!	시작점 난간 동자
+		if	bBaluster_SP	then
+			rot2	_aLine
+				gosub	"Baluster_"
+			del 1
+		endif
+
+		!	사이 난간 동자
+		for	i = 1	to	iBalusterNum
+			rot2	_aLine
+				add2	eachLth[i],	0
+					gosub	"Baluster_"
+				del 1
+			del 1
+		next	i
+
+		!	끝점 난간 동자
+		if	bBaluster_EP	then
+			rot2	_aLine
+				add2	calcLth_2D,	0
+					gosub	"Baluster_"
+				del 1
+			del 1
+		endif
+	endif
+
+	if	iRailType = Rail_Curved	then
+		!	중심선
+		arc2	0,	0,	rRailPos,	0,	aRailPos
+
+		!	시작점 난간 동자
+		if	bBaluster_SP	then
+			add2	rRailPos,	0
+				gosub	"Baluster_"
+			del 1
+		endif
+
+		!	사이 난간 동자
+		for	i = 1	to	iBalusterNum
+			rot2	eachAng[i]
+				add2	rRailPos,	0
+					gosub	"Baluster_"
+				del 1
+			del 1
+		next	i
+
+		!	끝점 난간 동자
+		if	bBaluster_EP	then
+			rot2	aRailPos
+				add2	rRailPos,	0
+					gosub	"Baluster_"
+				del 1
+			del 1
+		endif
+	endif
+endif
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+!	난간 생성 라인
+if	iRailType = Rail_Straight	then
+	hotspot2	0,			yRailPos,	unID,	xRailPos,	1+128	:	unID = unID + 1
+	hotspot2	-1,			yRailPos,	unID,	xRailPos,	3		:	unID = unID + 1
+	hotspot2	xRailPos,	yRailPos,	unID,	xRailPos,	2		:	unID = unID + 1
+
+	hotspot2	xRailPos,	0,			unID,	yRailPos,	1+128	:	unID = unID + 1
+	hotspot2	xRailPos,	-1,			unID,	yRailPos,	3		:	unID = unID + 1
+	hotspot2	xRailPos,	yRailPos,	unID,	yRailPos,	2		:	unID = unID + 1
+endif
+
+if	iRailType = Rail_Curved	then
+	hotspot2	0,			0,	unID,	rRailPos,	1+128	:	unID = unID + 1
+	hotspot2	-1,			0,	unID,	rRailPos,	3		:	unID = unID + 1
+	hotspot2	rRailPos,	0,	unID,	rRailPos,	2		:	unID = unID + 1
+
+	hotspot2	rRailPos,				0,						unID,	aRailPos,	4+128	:	unID = unID + 1
+	hotspot2	rRailPos*cos(aRailPos),	rRailPos*sin(aRailPos),	unID,	aRailPos,	5		:	unID = unID + 1
+	hotspot2	0,						0,						unID,	aRailPos,	6		:	unID = unID + 1
+endif
+
+!	난간 동자 간격
+if	iBalusterPlace = Place_Custom	then
+	if	iRailType = Rail_Straight	then
+		rot2	_aLine
+			for	i = 1	to	iBalusterNum
+				hotspot2	0,			0,	unID,	eachLth[i],	1+128	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	eachLth[i],	3		:	unID = unID + 1
+				hotspot2	eachLth[i],	0,	unID,	eachLth[i],	2		:	unID = unID + 1
+			next	i
+		del 1
+	endif
+
+	if	iRailType = Rail_Curved	then
+		if	iDistMethod = DistMethod_Angle	then
+			for	i = 1	to	iBalusterNum
+				hotspot2	rRailPos,					0,							unID,	eachAng[i],	4+128	:	unID = unID + 1
+				hotspot2	rRailPos*cos(eachAng[i]),	rRailPos*sin(eachAng[i]),	unID,	eachAng[i],	5		:	unID = unID + 1
+				hotspot2	0,							0,							unID,	eachAng[i],	6		:	unID = unID + 1
+			next	i
+		endif
+	endif
+endif
+
+!	연장 길이
+if	iRailType = Rail_Straight	then
+	rot2	_aLine
+		!	시작점(S.P)
+		add2	-_halfRail,	0
+			hotspot2	0,			0,	unID,	exLth_SP,	1+128	:	unID = unID + 1
+			hotspot2	1,			0,	unID,	exLth_SP,	3		:	unID = unID + 1
+			hotspot2	-exLth_SP,	0,	unID,	exLth_SP,	2		:	unID = unID + 1
+		del 1
+
+		!	끝점(E.P)
+		add2	calcLth_2D + _halfRail,	0
+			hotspot2	0,			0,	unID,	exLth_EP,	1+128	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	exLth_EP,	3		:	unID = unID + 1
+			hotspot2	exLth_EP,	0,	unID,	exLth_EP,	2		:	unID = unID + 1
+		del 1
+	del 1
+endif
+
+if	iRailType = Rail_Curved	then
+	!	시작점(S.P)
+	add2	rRailPos,	-_halfRail
+		hotspot2	0,	0,			unID,	exLth_SP,	1+128	:	unID = unID + 1
+		hotspot2	0,	1,			unID,	exLth_SP,	3		:	unID = unID + 1
+		hotspot2	0,	-exLth_SP,	unID,	exLth_SP,	2		:	unID = unID + 1
+	del 1
+
+	!	끝점(E.P)
+	rot2	aRailPos
+		add2	rRailPos,	_halfRail
+			hotspot2	0,	0,			unID,	exLth_EP,	1+128	:	unID = unID + 1
+			hotspot2	0,	-1,			unID,	exLth_EP,	3		:	unID = unID + 1
+			hotspot2	0,	exLth_EP,	unID,	exLth_EP,	2		:	unID = unID + 1
+		del 1
+	del 1
+endif
+
+!===============================================================================================
+!	난간 그리기
+!===============================================================================================
+pen		railPen
+fill	65
+fillPen = 1
+backPen = 0
+
+if	iRailType = Rail_Straight	then
+	!	난간 단면 : 사각형
+	if	iRailShape = Shape_Rectangle	then
+		put	-(_halfRail + exLth_SP),				-_halfRail,	1,
+			-(_halfRail + exLth_SP),				_halfRail,	1,
+			calcLth_2D + (_halfRail + exLth_EP),	_halfRail,	1,
+			calcLth_2D + (_halfRail + exLth_EP),	-_halfRail,	1,
+			-(_halfRail + exLth_SP),				-_halfRail,	1
+
+		rot2	_aLine
+			poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	use(nsp)
+
+			!	hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+		del 1
+	endif
+
+	!	난간 단면 : 원형
+	if	iRailShape = Shape_Circle	then
+		put	0,						-_halfRail,	1,
+			-exLth_SP,				-_halfRail,	1,
+			-exLth_SP,				0,			900,
+			_halfRail,				-180,		4000+1,
+			0,						_halfRail,	1,
+			calcLth_2D,				_halfRail,	1,
+			calcLth_2D + exLth_EP,	_halfRail,	1,
+			calcLth_2D + exLth_EP,	0,			900,
+			_halfRail,				-180,		4000+1,
+			calcLth_2D,				-_halfRail,	1
+
+		rot2	_aLine
+			poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	get(nsp)
+
+			!	hotline
+			hotline2	0,			_halfRail,	-exLth_SP,				_halfRail
+			hotline2	0,			_halfRail,	calcLth_2D,				_halfRail
+			hotline2	calcLth_2D,	_halfRail,	calcLth_2D + exLth_EP,	_halfRail
+
+			hotline2	0,			-_halfRail,	-exLth_SP,				-_halfRail
+			hotline2	0,			-_halfRail,	calcLth_2D,				-_halfRail
+			hotline2	calcLth_2D,	-_halfRail,	calcLth_2D + exLth_EP,	-_halfRail
+
+			add2	-exLth_SP,	0
+				hotarc2	0,	0,	_halfRail,	90,	270
+			del 1
+
+			add2	calcLth_2D + exLth_EP,	0
+				hotarc2	0,	0,	_halfRail,	-90,	90
+			del 1
+		del 1
+	endif
+endif
+
+if	iRailType = Rail_Curved	then
+	_radRail_In = rRailPos - _halfRail
+	_radRail_Out = rRailPos + _halfRail
+
+	put	_radRail_In,				0,							1,
+		0,							0,							900,
+		_radRail_In,				aRailPos,					4000,
+		_radRail_Out*cos(aRailPos),	_radRail_Out*sin(aRailPos),	1,
+		0,							0,							900,
+		_radRail_Out,				-aRailPos,					4000
+
+	poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	get(nsp)
+
+	!	hotarc
+	hotarc2	0,	0,	_radRail_In,	0,	aRailPos
+	hotarc2	0,	0,	_radRail_Out,	0,	aRailPos
+
+	add2	rRailPos,	0
+		!	난간 단면 : 사각형
+		if	iRailShape = Shape_Rectangle	then
+			put	-_halfRail,	0,							1,
+				-_halfRail,	-(_halfRail + exLth_SP),	1,
+				_halfRail,	-(_halfRail + exLth_SP),	1,
+				_halfRail,	0,							0
+
+			poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	use(nsp)
+
+			!	hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+		endif
+
+		!	난간 단면 : 원형
+		if	iRailShape = Shape_Circle	then
+			put	-_halfRail,	0,			1,
+				-_halfRail,	-exLth_SP,	1,
+				0,			-exLth_SP,	900,
+				_halfRail,	180,		4000+1,
+				_halfRail,	0,			0
+
+			poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	get(nsp)
+
+			!	hotline
+			hotline2	-_halfRail,	0,	-_halfRail,	-exLth_SP
+			hotline2	_halfRail,	0,	_halfRail,	-exLth_SP
+
+			add2	0,	-exLth_SP
+				hotarc2	0,	0,	_halfRail,	180,	360
+			del 1
+		endif
+	del 1
+
+	rot2	aRailPos
+		add2	rRailPos,	0
+			!	난간 단면 : 사각형
+			if	iRailShape = Shape_Rectangle	then
+				put	-_halfRail,	0,						1,
+					-_halfRail,	_halfRail + exLth_EP,	1,
+					_halfRail,	_halfRail + exLth_EP,	1,
+					_halfRail,	0,						0
+
+				poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	use(nsp)
+
+				!	hotline
+				for	h = 1	to	(nsp/3) - 2
+					hotline2	get(2) + (use(1) - get(1)),	use(2)
+				next	h
+					hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+			endif
+
+			!	난간 단면 : 원형
+			if	iRailShape = Shape_Circle	then
+				put	-_halfRail,	0,			1,
+					-_halfRail,	exLth_EP,	1,
+					0,			exLth_EP,	900,
+					_halfRail,	-180,		4000+1,
+					_halfRail,	0,			0
+
+				poly2_b	nsp/3,	1+2+4,	fillPen,	backPen,	get(nsp)
+
+				!	hotline
+				hotline2	-_halfRail,	0,	-_halfRail,	exLth_EP
+				hotline2	_halfRail,	0,	_halfRail,	exLth_EP
+
+				add2	0,	exLth_EP
+					hotarc2	0,	0,	_halfRail,	0,	180
+				del 1
+			endif
+		del 1
+	del 1
+endif
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+
+!===============================================================================================
+!	Sub-Routine
+!===============================================================================================
+"Baluster_":	!	난간 동자
+!-----------------------------------------------------------------------------------------------
+if	iBalusterShape = Shape_Rectangle	then
+	put	-shapeSubWdt/2,	-shapeSubHgt/2,
+		-shapeSubWdt/2,	shapeSubHgt/2,
+		shapeSubWdt/2,	shapeSubHgt/2,
+		shapeSubWdt/2,	-shapeSubHgt/2
+
+	poly2	nsp/2,	1+4,	get(nsp)
+endif
+
+if	iBalusterShape = Shape_Circle	then
+	circle2	0,	0,	shapeSubRad
+endif
+
+return

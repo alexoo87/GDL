@@ -1,0 +1,240 @@
+!=======================================================================================
+!	변수 정의
+!=======================================================================================
+!	철골보(라이브러리), 벽, 슬라브 치수 -> ID
+!---------------------------------------------------------------------------------------
+if	GLOB_ELEM_TYPE = 1 or GLOB_ELEM_TYPE = 12	then
+	parameters iType = Object_Beam
+endif
+
+if	GLOB_ELEM_TYPE = 5	then
+	parameters iType = Object_Wall
+endif
+
+if	GLOB_ELEM_TYPE = 7	then
+	parameters iType = Object_Slab
+endif
+
+if	GLOB_ELEM_TYPE = 6	then
+	parameters iType = Object_Column
+endif
+
+
+!	변수 설정하기
+!---------------------------------------------------------------------------------------
+
+	!	객체타입
+	!---------------------------------------------------------------------------------------
+	values{2}	"iType"	Object_Column,	stObjectType[Object_Column],
+						Object_Wall,	stObjectType[Object_Wall],
+						Object_Beam,	stObjectType[Object_Beam],
+						Object_Slab,	stObjectType[Object_Slab]
+	
+	!	심볼타입
+	!---------------------------------------------------------------------------------------
+	values{2}	"iSymbType"	SYMB_RECT,		stSymbType[SYMB_RECT],
+							SYMB_DIAMOND,	stSymbType[SYMB_DIAMOND],
+							SYMB_CIRCLE,	stSymbType[SYMB_CIRCLE],
+							SYMB_ELLIPSE,	stSymbType[SYMB_ELLIPSE],
+							SYMB_STADIUM,	stSymbType[SYMB_STADIUM],
+							SYMB_PENTAGON,	stSymbType[SYMB_PENTAGON],
+							SYMB_HEXAGON,	stSymbType[SYMB_HEXAGON],
+							SYMB_FLAG,		stSymbType[SYMB_FLAG],
+							SYMB_NONE,		stSymbType[SYMB_NONE]
+	
+	!	라벨타입
+	!---------------------------------------------------------------------------------------
+	dim	_iLabelType[],	_stLabelType[]
+
+	if	GLOB_ELEM_TYPE = 6 or GLOB_ELEM_TYPE = 12	then
+		_iLabelType[1] = Label_ID
+		_iLabelType[2] = Label_Size
+		_iLabelType[3] = Label_Custom
+
+		_stLabelType[1] = stLabelType[Label_ID]
+		_stLabelType[2] = stLabelType[Label_Size]
+		_stLabelType[3] = stLabelType[Label_Custom]
+	endif
+	
+	if	GLOB_ELEM_TYPE = 1 or GLOB_ELEM_TYPE = 5 or GLOB_ELEM_TYPE = 7	then
+		_iLabelType[1] = Label_ID
+		_iLabelType[2] = Label_Custom
+
+		_stLabelType[1] = stLabelType[Label_ID]
+		_stLabelType[2] = stLabelType[Label_Custom]
+	endif
+
+	values{2} "iLabelType"	_iLabelType,	_stLabelType
+
+	!	데크슬라브 배근방향
+	!---------------------------------------------------------------------------------------
+	values{2}	"iDeckSlabSymb"	DeckSlab_None,		stDeckSlaB[DeckSlab_None],
+								DeckSlab_Bottom,	stDeckSlaB[DeckSlab_Bottom],
+								DeckSlab_Right,		stDeckSlaB[DeckSlab_Right]
+
+	if	GLOB_MODPAR_NAME = "halfBottom"	then
+		parameters	lengthBottom = halfBottom*2
+	endif
+	if	GLOB_MODPAR_NAME = "lengthBottom"	then
+		parameters	halfBottom = lengthBottom/2
+	endif
+
+	if	GLOB_MODPAR_NAME = "halfRight"	then
+		parameters	lengthRight = halfRight*2
+	endif
+	if	GLOB_MODPAR_NAME = "lengthRight"	then
+		parameters	halfRight = lengthRight/2
+	endif
+
+	if	GLOB_ELEM_TYPE <> 7	then
+		parameters	iDeckSlabSymb = DeckSlab_None
+		lock	"iDeckSlabSymb"
+	endif
+
+	!	AC_CustomReadability On
+	!---------------------------------------------------------------------------------------
+	if	AC_CustomReadability < eps	then
+		parameters	AC_CustomReadability = 1
+	endif
+
+
+!	LB_name 변수에 글로벌ID 변수넣기
+!---------------------------------------------------------------------------------------
+parameters	LB_name = GLOB_ID
+
+
+
+!=======================================================================================
+!	변수 숨기기/LOCK/RANGE
+!=======================================================================================
+	!	A, B 파라미터 사용 안함
+	!---------------------------------------------------------------------------------------
+	lock	"A", "B"
+
+	!	객체 타입 / ID 자동 입력
+	!---------------------------------------------------------------------------------------
+	lock	"iType", "LB_name"
+
+	!	심볼 형태 : 원 / 육각형 일때 높이변수 잠금
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = Symb_Circle or iSymbType = Symb_Hexagon	then
+		lock	"LabelHeight"
+	endif
+	
+	!	커스텀 문자
+	!---------------------------------------------------------------------------------------
+	if	iLabelType # Label_Custom	then
+		hideparameter	"LB_custom"
+		lock			"LB_custom"
+	endif
+
+	if	iLabelType # Label_ID	then
+		hideparameter	"LB_name"
+	endif
+	
+	!	라벨 오프셋 : 길이
+	!---------------------------------------------------------------------------------------
+	if	not(bLabelOffset)	then
+		hideparameter	"LabelOffsetLth",	"offsetH"
+		lock			"LabelOffsetLth",	"offsetH"
+	endif
+	
+	!	슬라브 : 오프셋 사용안함
+	!---------------------------------------------------------------------------------------
+	if	GLOB_ELEM_TYPE = 7	then
+		parameters		bLabelOffset = 0
+		hideparameter	"bLabelOffset"
+		lock			"bLabelOffset"
+	endif
+
+	if	iDeckSlabSymb = DeckSlab_None	then
+		hideparameter	"offsetBottom", "lengthBottom", "offsetRight", "lengthRight", "arwThk", "arwLth", "aTilt", "penArw"
+	endif
+
+	if	iDeckSlabSymb = DeckSlab_Bottom	then
+		hideparameter	"offsetRight", "lengthRight"
+	endif
+
+	if	iDeckSlabSymb = DeckSlab_Right	then
+		hideparameter	"offsetBottom", "lengthBottom"
+	endif
+
+	_minArwLth = 0
+	if	arwThk > eps	then
+		_minArwLth = arwThk/tan(aTilt)
+	endif
+
+	values	"arwLth"	range	(_minArwLth,	0.005)
+	values	"aTilt"		range	[10,	80]
+	values	"arwThk"	range	[0,	0.002]
+
+	!	자동크기 설정시 변수 LOCK
+	!---------------------------------------------------------------------------------------
+	if	bAutoSize	then
+		lock	"LabelWidth", "LabelHeight"
+	endif
+
+	!	지시선
+	!---------------------------------------------------------------------------------------
+	if	not(bLeaderT)	then
+		lock			"nLeaderT", "distT", "defaultT"
+		hideparameter	"nLeaderT", "distT", "defaultT"
+	endif
+
+	if	not(bLeaderB)	then
+		lock			"nLeaderB", "distB", "defaultB"
+		hideparameter	"nLeaderB", "distB", "defaultB"
+	endif
+
+	if	not(bLeaderL)	then
+		lock			"nLeaderL", "distL", "defaultL"
+		hideparameter	"nLeaderL", "distL", "defaultL"
+	endif
+
+	if	not(bLeaderR)	then
+		lock			"nLeaderR", "distR", "defaultR"
+		hideparameter	"nLeaderR", "distR", "defaultR"
+	endif
+
+	values	"nLeaderT"	range	[1,	20]
+	values	"nLeaderB"	range	[1,	20]
+	values	"nLeaderL"	range	[1,	20]
+	values	"nLeaderR"	range	[1,	20]
+
+	values	"distT"	range	(0,	]
+	values	"distB"	range	(0,	]
+	values	"distL"	range	(0,	]
+	values	"distR"	range	(0,	]
+
+	!	기본값 넣기
+	if	abs(defaultT) > eps	then
+		for	i = 1	to	20
+			parameters	distT[i] = defaultT
+		next	i
+
+		parameters	defaultT = 0
+	endif
+
+	if	abs(defaultB) > eps	then
+		for	i = 1	to	20
+			parameters	distB[i] = defaultB
+		next	i
+
+		parameters	defaultB = 0
+	endif
+
+	if	abs(defaultL) > eps	then
+		for	i = 1	to	20
+			parameters	distL[i] = defaultL
+		next	i
+
+		parameters	defaultL = 0
+	endif
+
+	if	abs(defaultR) > eps	then
+		for	i = 1	to	20
+			parameters	distR[i] = defaultR
+		next	i
+
+		parameters	defaultR = 0
+	endif

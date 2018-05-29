@@ -1,0 +1,1025 @@
+!===============================================================================================
+!	각도치수
+!===============================================================================================
+
+!	W.P
+!-----------------------------------------------------------------------------------------------
+hotspot2	0,	0
+
+!	Scale Values
+!-----------------------------------------------------------------------------------------------
+yDimPos = yDimPos*GLOB_SCALE
+dimHgt = dimHgt*GLOB_SCALE
+spotRad = spotRad*GLOB_SCALE
+SwitchLth = 0.001*GLOB_SCALE
+
+for	i = 1	to	100
+	xTextPos[i] = xTextPos[i]*GLOB_SCALE
+	yTextPos[i] = yTextPos[i]*GLOB_SCALE
+next	i
+
+	!	치수 배율
+	dim	stDimAng[]
+
+	for	i = 1	to	100
+		stDimAng[i] = dimAng[i]*dimSV
+	next	i
+
+	!	전체 배율
+	_entireSV = entireSV
+
+		spotRad = spotRad*_entireSV
+		dimHgt = dimHgt*_entireSV
+		yDimPos = yDimPos*_entireSV
+		textSize = textSize*_entireSV
+		SwitchLth = SwitchLth*_entireSV
+	
+		for	i = 1	to	100
+			xTextPos[i] = xTextPos[i]*_entireSV
+			yTextPos[i] = yTextPos[i]*_entireSV
+		next	i
+
+!	Text
+!-----------------------------------------------------------------------------------------------
+define style	"sty_Length"	stFontType,	textSize,	8,	0
+
+	r = request("Height_of_style",	"sty_Length",	_textHgt,	_descent,	_leading)
+
+	adjustY = textSize/2 + _descent + _leading
+	adjustY = adjustY/1000*GLOB_SCALE
+
+!===============================================================================================
+!	치수선
+!===============================================================================================
+
+!-----------------------------------------------------------------------------------------------
+!	치수 방향 조정기
+!-----------------------------------------------------------------------------------------------
+rot2	150
+	hotspot2	SwitchLth,				0,						unID,	aDirect,	4+128	:	unID = unID + 1
+	hotspot2	SwitchLth*cos(aDirect),	SwitchLth*sin(aDirect),	unID,	aDirect,	5		:	unID = unID + 1
+	hotspot2	0,						0,						unID,	aDirect,	6		:	unID = unID + 1
+del 1
+
+if	aDirect	< eps	then	gosub	"not_Mirrored"
+if	aDirect - 60 > -eps	then	gosub	"Mirrored"
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+!===============================================================================================
+!	Sub-Routine
+!===============================================================================================
+"not_Mirrored":
+!-----------------------------------------------------------------------------------------------
+	!-----------------------------------------------------------------------------------------------
+	!	Start Point Dimension
+	!-----------------------------------------------------------------------------------------------
+
+		!	Dimension
+		!-----------------------------------------------------------------------------------------------
+		pen			penDim
+		line_type	1
+		fill		64
+
+		!	distwP Hotspot
+		hotspot2	0,	0,		unID,	distWP,	1+128	:	unID = unID + 1
+		hotspot2	0,	-1,		unID,	distWP,	3		:	unID = unID + 1
+		hotspot2	0,	distWP,	unID,	distWP,	2		:	unID = unID + 1
+
+		!	dim Angle Hotspot
+		_distWP = distWP - yCenPos[2]
+		hotspot2	0,						_distWP,				unID,	dimAng[1],	4		:	unID = unID + 1
+		hotspot2	_distWP*sin(dimAng[1]),	_distWP*cos(dimAng[1]),	unID,	dimAng[1],	5		:	unID = unID + 1
+		hotspot2	0,						0,						unID,	dimAng[1],	6+512	:	unID = unID + 1
+
+		!	custom dim Angle Hotspot
+		rot2	-dimAng[1]/2
+			_distWP = distWP + yDimPos + dimHgt/2
+			hotspot2	0,				_distWP,		unID,	customAng[1],	4		:	unID = unID + 1
+			hotspot2	_distWP*sin(0),	_distWP*cos(0),	unID,	customAng[1],	5		:	unID = unID + 1
+			hotspot2	0,				0,				unID,	customAng[1],	6+512	:	unID = unID + 1
+		del 1
+
+		!	dimHgt Hotspot
+		rot2	-dimAng[1]/2
+			add2	0,	distWP + yDimPos
+				hotspot2	0,	0,		unID,	dimHgt,	1+128+1024	:	unID = unID + 1
+				hotspot2	0,	-1,		unID,	dimHgt,	3			:	unID = unID + 1
+				hotspot2	0,	dimHgt,	unID,	dimHgt,	2			:	unID = unID + 1
+			del 1
+		del 1
+
+		add2	0,	distWP
+			!	yDimPos Hotspot
+			add2	0,	-yCenPos[1]
+				hotspot2	0,	0,			unID,	yDimPos,	1+128+1024	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	yDimPos,	3			:	unID = unID + 1
+				hotspot2	0,	yDimPos,	unID,	yDimPos,	2			:	unID = unID + 1
+			del 1
+
+			!	spotRad Hotspot
+			add2	0,	yDimPos + dimHgt
+				hotspot2	0,	0,			unID,	spotRad,	1+128+1024	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	spotRad,	3			:	unID = unID + 1
+				hotspot2	0,	spotRad,	unID,	spotRad,	2			:	unID = unID + 1
+			del 1
+		del 1
+
+		!	yTextPos Hotspot
+		rot2	-dimAng[1]/2
+			add2	0,	distWP + yDimPos + dimHgt
+				hotspot2	xTextPos[1],	0,				unID,	yTextPos[1],	1+128+1024	:	unID = unID + 1
+				hotspot2	xTextPos[1],	-1,				unID,	yTextPos[1],	3			:	unID = unID + 1
+				hotspot2	xTextPos[1],	yTextPos[1],	unID,	yTextPos[1],	2			:	unID = unID + 1
+
+				hotspot2	0,				yTextPos[1],	unID,	xTextPos[1],	1+128+1024	:	unID = unID + 1
+				hotspot2	-1,				yTextPos[1],	unID,	xTextPos[1],	3			:	unID = unID + 1
+				hotspot2	xTextPos[1],	yTextPos[1],	unID,	xTextPos[1],	2			:	unID = unID + 1
+			del 1
+		del 1
+
+		!	Dim Column 1
+		add2	0,	distWP
+			add2	0,	yDimPos
+				line2		0,	-yCenPos[1],	0,	dimHgt + spotRad*2
+				hotline2	0,	-yCenPos[1],	0,	dimHgt + spotRad*2
+
+				add2	0,	dimHgt
+					put	0,			0,		900,
+						spotRad,	360,	4000+1
+
+					poly2_	nsp/3,	1+2,	get(nsp)
+				del 1
+			del 1
+		del 1
+
+		!	Dim Arc
+		_rad = distWP + yDimPos + dimHgt
+		_aEdge = (spotRad*2)*180/(PI*_rad)
+		rot2	90
+			arc2	0,	0,	_rad,	-dimAng[1],	0
+
+			!	Edge
+			arc2	0,	0,	_rad,	0,	_aEdge
+		del 1
+
+		!	Dim Column 2
+		rot2	-dimAng[1]
+			add2	0,	distWP
+				add2	0,	yDimPos
+					line2		0,	-yCenPos[2],	0,	dimHgt + spotRad*2
+					hotline2	0,	-yCenPos[2],	0,	dimHgt + spotRad*2
+
+					add2	0,	dimHgt
+						put	0,			0,		900,
+							spotRad,	360,	4000+1
+
+						poly2_	nsp/3,	1+2,	get(nsp)
+					del 1
+				del 1
+			del 1
+		del 1
+
+		!	Text
+		!-----------------------------------------------------------------------------------------------
+		pen		penText
+		style	sty_Length
+
+		rot2	-dimAng[1]/2
+			add2	xTextPos[1],	_rad + yTextPos[1]
+				hotspot2	SwitchLth,						0,								unID,	aSuffixText[1],	4+128	:	unID = unID + 1
+				hotspot2	SwitchLth*cos(aSuffixText[1]),	SwitchLth*sin(aSuffixText[1]),	unID,	aSuffixText[1],	5		:	unID = unID + 1
+				hotspot2	0,								0,								unID,	aSuffixText[1],	6		:	unID = unID + 1
+
+				_unitText = "°"
+
+				if	customAng[1] < eps | customAng[1] > 360 - eps	then
+					if	dimDecimal = 0	then	_dimText = str("%.0",	stDimAng[1])
+					if	dimDecimal = 1	then	_dimText = str("%.1",	stDimAng[1])
+					if	dimDecimal = 2	then	_dimText = str("%.2",	stDimAng[1])
+
+					_dimText = _dimText + _unitText
+					if	aSuffixText[1] < 60 + eps	then
+						_dimText = _dimText + SuffixText
+					endif
+				else
+					if	dimDecimal = 0	then	_dimText = str("%.0",	customAng[1])
+					if	dimDecimal = 1	then	_dimText = str("%.1",	customAng[1])
+					if	dimDecimal = 2	then	_dimText = str("%.2",	customAng[1])
+
+					_dimText = _dimText + _unitText
+					if	aSuffixText[1] < 60 + eps	then
+						_dimText = _dimText + SuffixText
+					endif
+				endif
+
+				add2	0,	-adjustY
+					text2	0,	0,	_dimText
+				del 1
+			del 1
+		del 1
+
+		!	Center Line
+		!-----------------------------------------------------------------------------------------------
+		pen			penCen
+		line_type	ltCen
+
+		if	bCen	then
+			!	Hotspot
+			rot2	-dimAng[1]
+				add2	eps*10,	distWP
+					hotspot2	0,	0,				unID,	yCenPos[2],	1+128	:	unID = unID + 1
+					hotspot2	0,	1,				unID,	yCenPos[2],	3		:	unID = unID + 1
+					hotspot2	0,	-yCenPos[2],	unID,	yCenPos[2],	2		:	unID = unID + 1
+				del 1
+			del 1
+
+			!	Center Line 1
+			add2	0,	distWP
+				line2		0,	-yCenPos[1],	0,	-cenLth[1]
+				hotline2	0,	-yCenPos[1],	0,	-cenLth[1]
+
+				!	Hotspot
+				hotspot2	0,	0,			unID,	cenLth[1],	1+128	:	unID = unID + 1
+				hotspot2	0,	1,			unID,	cenLth[1],	3		:	unID = unID + 1
+				hotspot2	0,	-cenLth[1],	unID,	cenLth[1],	2		:	unID = unID + 1
+			del 1
+
+			!	Center Line 2
+			rot2	-dimAng[1]
+				add2	0,	distWP
+					if	bCenLthE	then
+						line2		0,	-yCenPos[2],	0,	-cenLth[1]
+						hotline2	0,	-yCenPos[2],	0,	-cenLth[1]
+					else
+						line2		0,	-yCenPos[2],	0,	-cenLth[1]
+						hotline2	0,	-yCenPos[2],	0,	-cenLth[1]
+
+						!	Hotspot
+						hotspot2	0,	0,			unID,	cenLth[2],	1+128	:	unID = unID + 1
+						hotspot2	0,	1,			unID,	cenLth[2],	3		:	unID = unID + 1
+						hotspot2	0,	-cenLth[2],	unID,	cenLth[2],	2		:	unID = unID + 1
+					endif
+				del 1
+			del 1
+
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	Add Hotspot
+	!-----------------------------------------------------------------------------------------------
+	if	iDim = Dim_2D_Plan	then
+		_count = 1
+		for	i = 1	to	100
+			if	aSwitch[i] < 60 + eps	then
+				_count = _count + 1
+			endif
+
+			if	aSwitch[i] > 90 - eps	then
+				_count = _count
+			endif
+		next	i
+
+		if	_count > 1 + eps	then
+			_aPlus = 0
+			_aMinus = 0
+			for	i = 1	to	_count
+				_aPlus = _aPlus + dimAng[i]
+			next	i
+			for	i = 1	to	_count - 1
+				_aMinus = _aMinus + dimAng[i]
+			next	i
+
+			rot2	-_aMinus
+				add2	0,	_rad
+					hotspot2	SwitchLth,							0,									unID,	aSwitch[_count - 1],	4+128	:	unID = unID + 1
+					hotspot2	SwitchLth*cos(aSwitch[_count - 1]),	SwitchLth*sin(aSwitch[_count - 1]),	unID,	aSwitch[_count - 1],	5		:	unID = unID + 1
+					hotspot2	0,									0,									unID,	aSwitch[_count - 1],	6		:	unID = unID + 1
+				del 1
+			del 1
+
+			rot2	-_aPlus
+				add2	0,	_rad
+					hotspot2	SwitchLth,						0,								unID,	aSwitch[_count],	4+128	:	unID = unID + 1
+					hotspot2	SwitchLth*cos(aSwitch[_count]),	SwitchLth*sin(aSwitch[_count]),	unID,	aSwitch[_count],	5		:	unID = unID + 1
+					hotspot2	0,								0,								unID,	aSwitch[_count],	6		:	unID = unID + 1
+				del 1
+			del 1
+
+			!	+/-
+			if	GLOB_FEEDBACK_MODE	then
+				rot2	-_aMinus
+					add2	0,	_rad
+						rot2	90
+							add2	SwitchLth*1.2,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+
+						rot2	60
+							add2	SwitchLth*1.2,	0
+								line2	-spotRad,	0,	spotRad,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+					del 1
+				del 1
+
+				rot2	-_aPlus
+					add2	0,	_rad
+						rot2	90
+							add2	SwitchLth*1.2,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+
+						rot2	60
+							add2	SwitchLth*1.2,	0
+								line2	-spotRad,	0,	spotRad,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+					del 1
+				del 1
+			endif
+		else
+			rot2	-dimAng[1]
+				add2	0,	_rad
+					hotspot2	SwitchLth,					0,							unID,	aSwitch[1],	4+128	:	unID = unID + 1
+					hotspot2	SwitchLth*cos(aSwitch[1]),	SwitchLth*sin(aSwitch[1]),	unID,	aSwitch[1],	5		:	unID = unID + 1
+					hotspot2	0,							0,							unID,	aSwitch[1],	6		:	unID = unID + 1
+					del 1
+			del 1
+
+			!	+/-
+			if	GLOB_FEEDBACK_MODE	then
+				rot2	-dimAng[1]
+					add2	0,	_rad
+						rot2	90
+							add2	SwitchLth*1.2,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+
+						rot2	60
+							add2	SwitchLth*1.2,	0
+								line2	-spotRad,	0,	spotRad,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+					del 1
+				del 1
+			endif
+		endif
+
+	endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	Added Dimension
+	!-----------------------------------------------------------------------------------------------
+	nDim = 1
+	do
+		!	End
+		if	nDim > 100 + eps	then
+			_bStop = 1
+		endif
+
+		!	추가 치수선
+		if	aSwitch[nDim] < 60 + eps	then
+
+			!	Dimension
+			!-----------------------------------------------------------------------------------------------
+			pen			penDim
+			line_type	1
+			fill		64
+
+				!	시작 위치
+				_aPos = 0
+				for	j = 1	to	nDim
+					_aPos = _aPos + dimAng[j]
+				next	j
+
+				!	dim Angle Hotspot
+				rot2	-_aPos
+					_distWP = distWP - yCenPos[nDim + 2]
+					hotspot2	0,								_distWP,						unID,	dimAng[nDim + 1],	4		:	unID = unID + 1
+					hotspot2	_distWP*sin(dimAng[nDim + 1]),	_distWP*cos(dimAng[nDim + 1]),	unID,	dimAng[nDim + 1],	5		:	unID = unID + 1
+					hotspot2	0,								0,								unID,	dimAng[nDim + 1],	6+512	:	unID = unID + 1
+				del 1
+
+				!	Custom Dim Length Hotspot
+				rot2	-(_aPos + dimAng[nDim + 1]/2)
+					_distWP = distWP + yDimPos + dimHgt/2
+					hotspot2	0,				_distWP,		unID,	customAng[nDim + 1],	4		:	unID = unID + 1
+					hotspot2	_distWP*sin(0),	_distWP*cos(0),	unID,	customAng[nDim + 1],	5		:	unID = unID + 1
+					hotspot2	0,				0,				unID,	customAng[nDim + 1],	6+512	:	unID = unID + 1
+				del 1
+
+				!	yTextPos Hotspot
+				rot2	-(_aPos + dimAng[nDim + 1]/2)
+					add2	0,	_rad
+						hotspot2	xTextPos[nDim + 1],	0,					unID,	yTextPos[nDim + 1],	1+128+1024	:	unID = unID + 1
+						hotspot2	xTextPos[nDim + 1],	-1,					unID,	yTextPos[nDim + 1],	3			:	unID = unID + 1
+						hotspot2	xTextPos[nDim + 1],	yTextPos[nDim + 1],	unID,	yTextPos[nDim + 1],	2			:	unID = unID + 1
+
+						hotspot2	0,					yTextPos[nDim + 1],	unID,	xTextPos[nDim + 1],	1+128+1024	:	unID = unID + 1
+						hotspot2	-1,					yTextPos[nDim + 1],	unID,	xTextPos[nDim + 1],	3			:	unID = unID + 1
+						hotspot2	xTextPos[nDim + 1],	yTextPos[nDim + 1],	unID,	xTextPos[nDim + 1],	2			:	unID = unID + 1
+					del 1
+				del 1
+
+				!	Dim Arc
+				rot2	90 - _aPos
+					arc2	0,	0,	_rad,	-dimAng[nDim + 1],	0
+				del 1
+
+				!	Dim	Column 2
+				rot2	-(_aPos + dimAng[nDim + 1])
+					add2	0,	distWP + yDimPos
+						line2		0,	-yCenPos[nDim + 2],	0,	dimHgt + spotRad*2
+						hotline2	0,	-yCenPos[nDim + 2],	0,	dimHgt + spotRad*2
+
+						add2	0,	dimHgt
+							put	0,			0,		900,
+								spotRad,	360,	4000+1
+
+							poly2_	nsp/3,	1+2,	get(nsp)
+						del 1
+					del 1
+				del 1
+
+			!	Text
+			!-----------------------------------------------------------------------------------------------
+			pen		penText
+			style	sty_Length
+
+			rot2	-(_aPos + dimAng[nDim + 1]/2)
+				add2	xTextPos[nDim + 1],	_rad +  yTextPos[nDim + 1]
+					hotspot2	SwitchLth,								0,										unID,	aSuffixText[nDim + 1],	4+128	:	unID = unID + 1
+					hotspot2	SwitchLth*cos(aSuffixText[nDim + 1]),	SwitchLth*sin(aSuffixText[nDim + 1]),	unID,	aSuffixText[nDim + 1],	5		:	unID = unID + 1
+					hotspot2	0,										0,										unID,	aSuffixText[nDim + 1],	6		:	unID = unID + 1
+
+					if	customAng[nDim + 1] < eps | customAng[nDim + 1] > 360 - eps	then
+						if	dimDecimal = 0	then	_dimText = str("%.0",	stDimAng[nDim + 1])
+						if	dimDecimal = 1	then	_dimText = str("%.1",	stDimAng[nDim + 1])
+						if	dimDecimal = 2	then	_dimText = str("%.2",	stDimAng[nDim + 1])
+
+						_dimText = _dimText +_unitText
+						if	aSuffixText[nDim + 1] < 60 + eps	then
+							_dimText = _dimText + SuffixText
+						endif
+					else
+						if	dimDecimal = 1	then	_dimText = str("%.1",	customAng[nDim + 1])
+						if	dimDecimal = 0	then	_dimText = str("%.0",	customAng[nDim + 1])
+						if	dimDecimal = 2	then	_dimText = str("%.2",	customAng[nDim + 1])
+
+						_dimText = _dimText +_unitText
+						if	aSuffixText[nDim + 1] < 60 + eps	then
+							_dimText = _dimText + SuffixText
+						endif
+					endif
+
+					add2	0,	-adjustY
+						text2	0,	0,	_dimText
+					del 1
+				del 1
+			del 1
+
+			!	Center Line
+			!-----------------------------------------------------------------------------------------------
+			pen			penCen
+			line_type	ltCen
+
+			if	bCen	then
+				!	yCenPos
+				rot2	-(_aPos + dimAng[nDim + 1])
+					add2	eps*10,	distWP
+						hotspot2	0,	0,					unID,	yCenPos[nDim + 2],	1+128	:	unID = unID + 1
+						hotspot2	0,	1,					unID,	yCenPos[nDim + 2],	3		:	unID = unID + 1
+						hotspot2	0,	-yCenPos[nDim + 2],	unID,	yCenPos[nDim + 2],	2		:	unID = unID + 1
+					del 1
+				del 1
+
+				!	Center Line
+				rot2	-(_aPos + dimAng[nDim + 1])
+					add2	0,	distWP
+						if	bCenLthE	then
+							line2		0,	-yCenPos[nDim + 2],	0,	-cenLth[1]
+							hotline2	0,	-yCenPos[nDim + 2],	0,	-cenLth[1]
+						else
+							line2		0,	-yCenPos[nDim + 2],	0,	-cenLth[nDim + 2]
+							hotline2	0,	-yCenPos[nDim + 2],	0,	-cenLth[nDim + 2]
+
+							!	Hotspot
+							hotspot2	0,	0,					unID,	cenLth[nDim + 2],	1+128	:	unID = unID + 1
+							hotspot2	0,	1,					unID,	cenLth[nDim + 2],	3		:	unID = unID + 1
+							hotspot2	0,	-cenLth[nDim + 2],	unID,	cenLth[nDim + 2],	2		:	unID = unID + 1
+						endif
+					del 1
+				del 1
+			endif
+
+			nDim = nDim + 1
+			_bStop = 0
+		endif
+
+		!	End
+		if	aSwitch[nDim] > 90 - eps	then
+			pen			penDim
+			line_type	1
+
+			!	시작 위치
+			_aPos = 0
+			for	j = 1	to	nDim
+				_aPos = _aPos + dimAng[j]
+			next	j
+
+			!	Edge
+			rot2	90 - _aPos
+				arc2	0,	0,	_rad,	-_aEdge,	0
+			del 1
+
+			_bStop = 1
+		endif
+	while	not(_bStop)
+return
+
+!-----------------------------------------------------------------------------------------------
+"Mirrored":
+!-----------------------------------------------------------------------------------------------
+	!-----------------------------------------------------------------------------------------------
+	!	Start Point Dimension
+	!-----------------------------------------------------------------------------------------------
+
+		!	Dimension
+		!-----------------------------------------------------------------------------------------------
+		pen			penDim
+		line_type	1
+		fill		64
+
+		!	distwP Hotspot
+		hotspot2	0,	0,			unID,	distWP,	1+128	:	unID = unID + 1
+		hotspot2	0,	1,			unID,	distWP,	3		:	unID = unID + 1
+		hotspot2	0,	-distWP,	unID,	distWP,	2		:	unID = unID + 1
+
+		!	dim Angle Hotspot
+		_distWP = -(distWP - yCenPos[2])
+		hotspot2	0,							_distWP,				unID,	dimAng[1],	4	:	unID = unID + 1
+		hotspot2	-_distWP*sin(dimAng[1]),	_distWP*cos(dimAng[1]),	unID,	dimAng[1],	5	:	unID = unID + 1
+		hotspot2	0,							0,						unID,	dimAng[1],	6	:	unID = unID + 1
+
+		!	custom dim Angle Hotspot
+		rot2	dimAng[1]/2
+			_distWP = -(distWP + yDimPos + dimHgt/2)
+			hotspot2	0,					_distWP,		unID,	customAng[1],	4	:	unID = unID + 1
+			hotspot2	-_distWP*sin(0),	_distWP*cos(0),	unID,	customAng[1],	5	:	unID = unID + 1
+			hotspot2	0,					0,				unID,	customAng[1],	6	:	unID = unID + 1
+		del 1
+
+		!	dimHgt Hotspot
+		rot2	dimAng[1]/2
+			add2	0,	-(distWP + yDimPos)
+				hotspot2	0,	0,			unID,	dimHgt,	1+128+1024	:	unID = unID + 1
+				hotspot2	0,	1,			unID,	dimHgt,	3			:	unID = unID + 1
+				hotspot2	0,	-dimHgt,	unID,	dimHgt,	2			:	unID = unID + 1
+			del 1
+		del 1
+
+		add2	0,	-distWP
+			!	yDimPos Hotspot
+			add2	0,	yCenPos[1]
+				hotspot2	0,	0,			unID,	yDimPos,	1+128+1024	:	unID = unID + 1
+				hotspot2	0,	1,			unID,	yDimPos,	3			:	unID = unID + 1
+				hotspot2	0,	-yDimPos,	unID,	yDimPos,	2			:	unID = unID + 1
+			del 1
+
+			!	spotRad Hotspot
+			add2	0,	-(yDimPos + dimHgt)
+				hotspot2	0,	0,			unID,	spotRad,	1+128+1024	:	unID = unID + 1
+				hotspot2	0,	1,			unID,	spotRad,	3			:	unID = unID + 1
+				hotspot2	0,	-spotRad,	unID,	spotRad,	2			:	unID = unID + 1
+			del 1
+		del 1
+
+		!	yTextPos Hotspot
+		rot2	dimAng[1]/2
+			add2	0,	-(distWP + yDimPos + dimHgt)
+				hotspot2	xTextPos[1],	0,				unID,	yTextPos[1],	1+128+1024	:	unID = unID + 1
+				hotspot2	xTextPos[1],	-1,				unID,	yTextPos[1],	3			:	unID = unID + 1
+				hotspot2	xTextPos[1],	yTextPos[1],	unID,	yTextPos[1],	2			:	unID = unID + 1
+
+				hotspot2	0,				yTextPos[1],	unID,	xTextPos[1],	1+128+1024	:	unID = unID + 1
+				hotspot2	-1,				yTextPos[1],	unID,	xTextPos[1],	3			:	unID = unID + 1
+				hotspot2	xTextPos[1],	yTextPos[1],	unID,	xTextPos[1],	2			:	unID = unID + 1
+			del 1
+		del 1
+
+		!	Dim Column 1
+		add2	0,	-distWP
+			add2	0,	-yDimPos
+				line2		0,	yCenPos[1],	0,	-(dimHgt + spotRad*2)
+				hotline2	0,	yCenPos[1],	0,	-(dimHgt + spotRad*2)
+
+				add2	0,	-dimHgt
+					put	0,			0,		900,
+						spotRad,	360,	4000+1
+
+					poly2_	nsp/3,	1+2,	get(nsp)
+				del 1
+			del 1
+		del 1
+
+		!	Dim Arc
+		_rad = (distWP + yDimPos + dimHgt)
+		_aEdge = (spotRad*2)*180/(PI*_rad)
+		rot2	270
+			arc2	0,	0,	_rad,	0,	dimAng[1]
+
+			!	Edge
+			arc2	0,	0,	_rad,	-_aEdge,	0
+		del 1
+
+		!	Dim Column 2
+		rot2	dimAng[1]
+			add2	0,	-distWP
+				add2	0,	-yDimPos
+					line2		0,	yCenPos[2],	0,	-(dimHgt + spotRad*2)
+					hotline2	0,	yCenPos[2],	0,	-(dimHgt + spotRad*2)
+
+					add2	0,	-dimHgt
+						put	0,			0,		900,
+							spotRad,	360,	4000+1
+
+						poly2_	nsp/3,	1+2,	get(nsp)
+					del 1
+				del 1
+			del 1
+		del 1
+
+		!	Text
+		!-----------------------------------------------------------------------------------------------
+		pen		penText
+		style	sty_Length
+
+		rot2	dimAng[1]/2
+			add2	xTextPos[1],	-_rad + yTextPos[1]
+				hotspot2	SwitchLth,						0,								unID,	aSuffixText[1],	4+128	:	unID = unID + 1
+				hotspot2	SwitchLth*cos(aSuffixText[1]),	SwitchLth*sin(aSuffixText[1]),	unID,	aSuffixText[1],	5		:	unID = unID + 1
+				hotspot2	0,								0,								unID,	aSuffixText[1],	6		:	unID = unID + 1
+
+				_unitText = "°"
+
+				if	customAng[1] < eps | customAng[1] > 360 - eps	then
+					if	dimDecimal = 0	then	_dimText = str("%.0",	stDimAng[1])
+					if	dimDecimal = 1	then	_dimText = str("%.1",	stDimAng[1])
+					if	dimDecimal = 2	then	_dimText = str("%.2",	stDimAng[1])
+
+					_dimText = _dimText + _unitText
+					if	aSuffixText[1] < 60 + eps	then
+						_dimText = _dimText + SuffixText
+					endif
+				else
+					if	dimDecimal = 0	then	_dimText = str("%.0",	customAng[1])
+					if	dimDecimal = 1	then	_dimText = str("%.1",	customAng[1])
+					if	dimDecimal = 2	then	_dimText = str("%.2",	customAng[1])
+
+					_dimText = _dimText + _unitText
+					if	aSuffixText[1] < 60 + eps	then
+						_dimText = _dimText + SuffixText
+					endif
+				endif
+
+				add2	0,	-adjustY
+					text2	0,	0,	_dimText
+				del 1
+			del 1
+		del 1
+
+		!	Center Line
+		!-----------------------------------------------------------------------------------------------
+		pen			penCen
+		line_type	ltCen
+
+		if	bCen	then
+			!	Hotspot
+			rot2	dimAng[1]
+				add2	eps*10,	-distWP
+					hotspot2	0,	0,			unID,	yCenPos[2],	1+128	:	unID = unID + 1
+					hotspot2	0,	-1,			unID,	yCenPos[2],	3		:	unID = unID + 1
+					hotspot2	0,	yCenPos[2],	unID,	yCenPos[2],	2		:	unID = unID + 1
+				del 1
+			del 1
+
+			!	Center Line 1
+			add2	0,	-distWP
+				line2		0,	yCenPos[1],	0,	cenLth[1]
+				hotline2	0,	yCenPos[1],	0,	cenLth[1]
+
+				!	Hotspot
+				hotspot2	0,	0,			unID,	cenLth[1],	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	cenLth[1],	3		:	unID = unID + 1
+				hotspot2	0,	cenLth[1],	unID,	cenLth[1],	2		:	unID = unID + 1
+			del 1
+
+			!	Center Line 2
+			rot2	dimAng[1]
+				add2	0,	-distWP
+					if	bCenLthE	then
+						line2		0,	yCenPos[2],	0,	cenLth[1]
+						hotline2	0,	yCenPos[2],	0,	cenLth[1]
+					else
+						line2		0,	yCenPos[2],	0,	cenLth[1]
+						hotline2	0,	yCenPos[2],	0,	cenLth[1]
+
+						!	Hotspot
+						hotspot2	0,	0,			unID,	cenLth[2],	1+128	:	unID = unID + 1
+						hotspot2	0,	-1,			unID,	cenLth[2],	3		:	unID = unID + 1
+						hotspot2	0,	cenLth[2],	unID,	cenLth[2],	2		:	unID = unID + 1
+					endif
+				del 1
+			del 1
+
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	Add Hotspot
+	!-----------------------------------------------------------------------------------------------
+	if	iDim = Dim_2D_Plan	then
+		_count = 1
+		for	i = 1	to	100
+			if	aSwitch[i] < 60 + eps	then
+				_count = _count + 1
+			endif
+
+			if	aSwitch[i] > 90 - eps	then
+				_count = _count
+			endif
+		next	i
+
+		if	_count > 1 + eps	then
+			_aPlus = 0
+			_aMinus = 0
+			for	i = 1	to	_count
+				_aPlus = _aPlus + dimAng[i]
+			next	i
+			for	i = 1	to	_count - 1
+				_aMinus = _aMinus + dimAng[i]
+			next	i
+
+			rot2	_aMinus
+				add2	0,	-_rad
+					hotspot2	SwitchLth,							0,									unID,	aSwitch[_count - 1],	4+128	:	unID = unID + 1
+					hotspot2	SwitchLth*cos(aSwitch[_count - 1]),	SwitchLth*sin(aSwitch[_count - 1]),	unID,	aSwitch[_count - 1],	5		:	unID = unID + 1
+					hotspot2	0,									0,									unID,	aSwitch[_count - 1],	6		:	unID = unID + 1
+				del 1
+			del 1
+
+			rot2	_aPlus
+				add2	0,	-_rad
+					hotspot2	SwitchLth,						0,								unID,	aSwitch[_count],	4+128	:	unID = unID + 1
+					hotspot2	SwitchLth*cos(aSwitch[_count]),	SwitchLth*sin(aSwitch[_count]),	unID,	aSwitch[_count],	5		:	unID = unID + 1
+					hotspot2	0,								0,								unID,	aSwitch[_count],	6		:	unID = unID + 1
+				del 1
+			del 1
+
+			!	+/-
+			if	GLOB_FEEDBACK_MODE	then
+				rot2	_aMinus
+					add2	0,	-_rad
+						rot2	90
+							add2	SwitchLth*1.2,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+
+						rot2	60
+							add2	SwitchLth*1.2,	0
+								line2	-spotRad,	0,	spotRad,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+					del 1
+				del 1
+
+				rot2	_aPlus
+					add2	0,	-_rad
+						rot2	90
+							add2	SwitchLth*1.2,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+
+						rot2	60
+							add2	SwitchLth*1.2,	0
+								line2	-spotRad,	0,	spotRad,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+					del 1
+				del 1
+			endif
+		else
+			rot2	dimAng[1]
+				add2	0,	-_rad
+					hotspot2	SwitchLth,					0,							unID,	aSwitch[1],	4+128	:	unID = unID + 1
+					hotspot2	SwitchLth*cos(aSwitch[1]),	SwitchLth*sin(aSwitch[1]),	unID,	aSwitch[1],	5		:	unID = unID + 1
+					hotspot2	0,							0,							unID,	aSwitch[1],	6		:	unID = unID + 1
+					del 1
+			del 1
+
+			!	+/-
+			if	GLOB_FEEDBACK_MODE	then
+				rot2	dimAng[1]
+					add2	0,	-_rad
+						rot2	90
+							add2	SwitchLth*1.2,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+
+						rot2	60
+							add2	SwitchLth*1.2,	0
+								line2	-spotRad,	0,	spotRad,	0
+								line2	0,	-spotRad,	0,	spotRad
+							del 1
+						del 1
+					del 1
+				del 1
+			endif
+		endif
+
+	endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	Added Dimension
+	!-----------------------------------------------------------------------------------------------
+	nDim = 1
+	do
+		!	End
+		if	nDim > 100 + eps	then
+			_bStop = 1
+		endif
+
+		!	추가 치수선
+		if	aSwitch[nDim] < 60 + eps	then
+
+			!	Dimension
+			!-----------------------------------------------------------------------------------------------
+			pen			penDim
+			line_type	1
+			fill		64
+
+				!	시작 위치
+				_aPos = 0
+				for	j = 1	to	nDim
+					_aPos = _aPos + dimAng[j]
+				next	j
+
+				!	dim Angle Hotspot
+				rot2	_aPos
+					_distWP = -(distWP - yCenPos[nDim + 2])
+					hotspot2	0,								_distWP,						unID,	dimAng[nDim + 1],	4	:	unID = unID + 1
+					hotspot2	-_distWP*sin(dimAng[nDim + 1]),	_distWP*cos(dimAng[nDim + 1]),	unID,	dimAng[nDim + 1],	5	:	unID = unID + 1
+					hotspot2	0,								0,								unID,	dimAng[nDim + 1],	6	:	unID = unID + 1
+				del 1
+
+				!	Custom Dim Length Hotspot
+				rot2	(_aPos + dimAng[nDim + 1]/2)
+					_distWP = -(distWP + yDimPos + dimHgt/2)
+					hotspot2	0,					_distWP,		unID,	customAng[nDim + 1],	4	:	unID = unID + 1
+					hotspot2	-_distWP*sin(0),	_distWP*cos(0),	unID,	customAng[nDim + 1],	5	:	unID = unID + 1
+					hotspot2	0,					0,				unID,	customAng[nDim + 1],	6	:	unID = unID + 1
+				del 1
+
+				!	yTextPos Hotspot
+				rot2	(_aPos + dimAng[nDim + 1]/2)
+					add2	0,	-_rad
+						hotspot2	xTextPos[nDim + 1],	0,					unID,	yTextPos[nDim + 1],	1+128+1024	:	unID = unID + 1
+						hotspot2	xTextPos[nDim + 1],	-1,					unID,	yTextPos[nDim + 1],	3			:	unID = unID + 1
+						hotspot2	xTextPos[nDim + 1],	yTextPos[nDim + 1],	unID,	yTextPos[nDim + 1],	2			:	unID = unID + 1
+
+						hotspot2	0,					yTextPos[nDim + 1],	unID,	xTextPos[nDim + 1],	1+128+1024	:	unID = unID + 1
+						hotspot2	-1,					yTextPos[nDim + 1],	unID,	xTextPos[nDim + 1],	3			:	unID = unID + 1
+						hotspot2	xTextPos[nDim + 1],	yTextPos[nDim + 1],	unID,	xTextPos[nDim + 1],	2			:	unID = unID + 1
+					del 1
+				del 1
+
+				!	Dim Arc
+				rot2	270 + _aPos
+					arc2	0,	0,	_rad,	0,	dimAng[nDim + 1]
+				del 1
+
+				!	Dim	Column 2
+				rot2	(_aPos + dimAng[nDim + 1])
+					add2	0,	-(distWP + yDimPos)
+						line2		0,	yCenPos[nDim + 2],	0,	-(dimHgt + spotRad*2)
+						hotline2	0,	yCenPos[nDim + 2],	0,	-(dimHgt + spotRad*2)
+
+						add2	0,	-dimHgt
+							put	0,			0,		900,
+								spotRad,	360,	4000+1
+
+							poly2_	nsp/3,	1+2,	get(nsp)
+						del 1
+					del 1
+				del 1
+
+			!	Text
+			!-----------------------------------------------------------------------------------------------
+			pen		penText
+			style	sty_Length
+
+			rot2	(_aPos + dimAng[nDim + 1]/2)
+				add2	xTextPos[nDim + 1],	-_rad +  yTextPos[nDim + 1]
+					hotspot2	SwitchLth,								0,										unID,	aSuffixText[nDim + 1],	4+128	:	unID = unID + 1
+					hotspot2	SwitchLth*cos(aSuffixText[nDim + 1]),	SwitchLth*sin(aSuffixText[nDim + 1]),	unID,	aSuffixText[nDim + 1],	5		:	unID = unID + 1
+					hotspot2	0,										0,										unID,	aSuffixText[nDim + 1],	6		:	unID = unID + 1
+
+					if	customAng[nDim + 1] < eps | customAng[nDim + 1] > 360 - eps	then
+						if	dimDecimal = 0	then	_dimText = str("%.0",	stDimAng[nDim + 1])
+						if	dimDecimal = 1	then	_dimText = str("%.1",	stDimAng[nDim + 1])
+						if	dimDecimal = 2	then	_dimText = str("%.2",	stDimAng[nDim + 1])
+
+						_dimText = _dimText +_unitText
+						if	aSuffixText[nDim + 1] < 60 + eps	then
+							_dimText = _dimText + SuffixText
+						endif
+					else
+						if	dimDecimal = 1	then	_dimText = str("%.1",	customAng[nDim + 1])
+						if	dimDecimal = 0	then	_dimText = str("%.0",	customAng[nDim + 1])
+						if	dimDecimal = 2	then	_dimText = str("%.2",	customAng[nDim + 1])
+
+						_dimText = _dimText +_unitText
+						if	aSuffixText[nDim + 1] < 60 + eps	then
+							_dimText = _dimText + SuffixText
+						endif
+					endif
+
+					add2	0,	-adjustY
+						text2	0,	0,	_dimText
+					del 1
+				del 1
+			del 1
+
+			!	Center Line
+			!-----------------------------------------------------------------------------------------------
+			pen			penCen
+			line_type	ltCen
+
+			if	bCen	then
+				!	yCenPos
+				rot2	(_aPos + dimAng[nDim + 1])
+					add2	eps*10,	-distWP
+						hotspot2	0,	0,					unID,	yCenPos[nDim + 2],	1+128	:	unID = unID + 1
+						hotspot2	0,	-1,					unID,	yCenPos[nDim + 2],	3		:	unID = unID + 1
+						hotspot2	0,	yCenPos[nDim + 2],	unID,	yCenPos[nDim + 2],	2		:	unID = unID + 1
+					del 1
+				del 1
+
+				!	Center Line
+				rot2	(_aPos + dimAng[nDim + 1])
+					add2	0,	-distWP
+						if	bCenLthE	then
+							line2		0,	yCenPos[nDim + 2],	0,	cenLth[1]
+							hotline2	0,	yCenPos[nDim + 2],	0,	cenLth[1]
+						else
+							line2		0,	yCenPos[nDim + 2],	0,	cenLth[nDim + 2]
+							hotline2	0,	yCenPos[nDim + 2],	0,	cenLth[nDim + 2]
+
+							!	Hotspot
+							hotspot2	0,	0,					unID,	cenLth[nDim + 2],	1+128	:	unID = unID + 1
+							hotspot2	0,	-1,					unID,	cenLth[nDim + 2],	3		:	unID = unID + 1
+							hotspot2	0,	cenLth[nDim + 2],	unID,	cenLth[nDim + 2],	2		:	unID = unID + 1
+						endif
+					del 1
+				del 1
+			endif
+
+			nDim = nDim + 1
+			_bStop = 0
+		endif
+
+		!	End
+		if	aSwitch[nDim] > 90 - eps	then
+			pen			penDim
+			line_type	1
+
+			!	시작 위치
+			_aPos = 0
+			for	j = 1	to	nDim
+				_aPos = _aPos + dimAng[j]
+			next	j
+
+			!	Edge
+			rot2	270 + _aPos
+				arc2	0,	0,	_rad,	0,	_aEdge
+			del 1
+
+			_bStop = 1
+		endif
+	while	not(_bStop)
+return

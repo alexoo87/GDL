@@ -1,0 +1,100 @@
+!-----------------------------------------------------------------------------------------------
+! 	공통 
+!-----------------------------------------------------------------------------------------------
+EPS = 0.0001
+unID = 100
+
+
+!-----------------------------------------------------------------------------------------------
+! 	스탬프 설정
+!-----------------------------------------------------------------------------------------------
+
+	! 	스탬프 타입 정의
+	!-----------------------------------------------------------------------------------------------
+	STAMP_TYPE1 = 1
+	STAMP_TYPE2 = 2
+	STAMP_TYPE3 = 3
+	STAMP_TYPE4 = 4
+	STAMP_MVO = 5
+
+	if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+		dim	stStampType[]
+			stStampType[1] = "TYPE1(실명)"
+			stStampType[2] = "TYPE2(실명+FL+SL)"
+			stStampType[3] = "TYPE3(실명+CH+FL+SL)"
+			stStampType[4] = "TYPE4(실명+CH+실크기+FL+SL)"
+			stStampType[5] = "by MVO"
+	endif
+
+	!	MVO 변수명 배열
+	dim	_stScaleValueParam[]
+		_stScaleValueParam[1] = "scaleValue_1"
+		_stScaleValueParam[2] = "scaleValue_2"
+		_stScaleValueParam[3] = "scaleValue_3"
+		_stScaleValueParam[4] = "scaleValue_4"
+		_stScaleValueParam[5] = "scaleValue_5"
+
+	dim	_stStampTypeParam[]
+		_stStampTypeParam[1] = "iStampType_1"
+		_stStampTypeParam[2] = "iStampType_2"
+		_stStampTypeParam[3] = "iStampType_3"
+		_stStampTypeParam[4] = "iStampType_4"
+		_stStampTypeParam[5] = "iStampType_5"
+		_stStampTypeParam[6] = "iStampType_etc"
+
+	!	내부 변수 배열
+	dim	_scaleValue_array[],	_iStampType_array[]
+
+	if	iStampType = STAMP_MVO	then
+		_getScale = GLOB_SCALE
+		r = libraryglobal("MVO_Stamp_POSCO", "iStampType", _iStampType)
+		r = libraryglobal("MVO_Stamp_POSCO", "bByScale", _bByScale)
+		r = libraryglobal("MVO_Stamp_POSCO", "nScale", _nScale)
+
+		if	r = 1	then
+			if	not(_bByScale)	then
+				_iStampType = _iStampType
+			else
+				!	MVO 변수값 추출
+				for	i = 1	to	(_nScale + 1)
+					if	i # (_nScale + 1)	then
+						r = libraryglobal("MVO_Stamp_POSCO", _stScaleValueParam[i], _scaleValue_array[i])
+						r = libraryglobal("MVO_Stamp_POSCO", _stStampTypeParam[i], _iStampType_array[i])
+					else
+						r = libraryglobal("MVO_Stamp_POSCO", _stStampTypeParam[6], _iStampType_array[6])
+					endif
+				next	i
+
+				!	스케일 비교
+				_findScale = 0
+				for	i = 1	to	_nScale
+					if	abs(_scaleValue_array[i] - _getScale) < eps	then
+						_iStampType = _iStampType_array[i]
+						_findScale = 1
+					endif
+				next	i
+
+				if	not(_findScale)	then
+					_iStampType = _iStampType_array[6]
+				endif
+			endif
+		else
+			text2	0,	0,	"MVO파일이 라이브러리 관리자에 로딩되지 않았습니다."
+		endif
+	else
+		_iStampType = iStampType
+	endif
+
+	!	텍스트(평면도)
+	!-----------------------------------------------------------------------------------------------
+	!	실명(평면도)
+	dim	enterText[]
+	if	not(bCustomName)	then
+		call	"Macro_EnterText_POSCO.gsm"	parameters	all	insertText = ROOM_NAME,
+															enterTextSign = enterTextSign,
+															returned_parameters		enterText
+	else
+		enterText[1] = stCustomName
+	endif
+
+	_nTextLine = vardim1(enterText)												!	텍스트 라인 수

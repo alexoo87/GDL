@@ -1,0 +1,18 @@
+!===============================================================================================
+!	ㅁ형 철골 기둥
+!===============================================================================================
+
+!	W.P
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+!	Hotspot
+!-----------------------------------------------------------------------------------------------
+hotspot2	0,		yTrans,	unID,	xTrans,	1+128	:	unID = unID + 1
+hotspot2	-1,		yTrans,	unID,	xTrans,	3		:	unID = unID + 1
+hotspot2	xTrans,	yTrans,	unID,	xTrans,	2		:	unID = unID + 1
+
+hotspot2	xTrans,	0,		unID,	yTrans,	1+128	:	unID = unID + 1
+hotspot2	xTrans,	-1,		unID,	yTrans,	3		:	unID = unID + 1
+hotspot2	xTrans,	yTrans,	unID,	yTrans,	2		:	unID = unID + 1
+
+project2	3,	270,	3

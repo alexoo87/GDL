@@ -1,0 +1,375 @@
+!===============================================================================================
+!	경사커튼월
+!===============================================================================================
+
+!	천정도 표현
+!-----------------------------------------------------------------------------------------------
+r = request("floor_plan_option", "", storyViewType)
+
+if	storyViewType > eps	then
+	_frmThk = max(frmThkL, frmThkR)
+
+	hotspot2	0,		-(_frmThk + gskThk),	unID	:	unID = unID + 1
+	hotspot2	ctwWdt,	-(_frmThk + gskThk),	unID	:	unID = unID + 1
+	hotspot2	ctwWdt,	0,						unID	:	unID = unID + 1
+
+	pen		ceilPen
+	fill	65
+
+	put	0,		0,						1,
+		ctwWdt,	0,						0,
+		ctwWdt,	-(_frmThk + gskThk),	1,
+		0,		-(_frmThk + gskThk),	0
+
+	poly2_b	nsp/3,	1+2+4,	0,	0,	get(nsp)
+
+	end
+endif
+
+!	수직프레임 Index
+VFRAME_CORNER = 1
+VFRAME_MULLION = 2
+
+!-----------------------------------------------------------------------------------------------
+!	Hotspot
+!-----------------------------------------------------------------------------------------------
+!	W.P
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+!	수직프레임 간격
+for	i = 1	to	(nMln + 1)
+	hotspot2	0,			0,	unID,	mlnGap[i],	1+128	:	unID = unID + 1
+	hotspot2	-1,			0,	unID,	mlnGap[i],	3		:	unID = unID + 1
+	hotspot2	mlnGap[i],	0,	unID,	mlnGap[i],	2		:	unID = unID + 1
+
+	add2	mlnGap[i],	0
+next	i
+
+del	(nMln + 1)
+
+!	좌측프레임
+_frmType = iFrmTypeL
+_frmClass = VFRAME_CORNER
+_frmWdt = frmWdtL
+_frmThk = frmThkL
+_gskWdt = gskWdtL
+
+gosub	"hCoorFrm"
+
+!	우측프레임
+_frmType = iFrmTypeR
+_frmClass = VFRAME_CORNER
+_frmWdt = frmWdtR
+_frmThk = frmThkR
+_gskWdt = gskWdtR
+
+add2	ctwWdt,	0
+	mul2	-1,	1
+		gosub	"hCoorFrm"
+	del 1
+del 1
+
+!	멀리언
+_bMln = (nMln > eps)
+if	_bMln	then
+	_frmClass = VFRAME_MULLION
+	_frmWdt = mlnWdt
+	_frmThk = mlnThk
+	_gskWdt = mlnGskWdt
+
+	for	i = 1	to	nMln
+		add2	mlnGap[i],	0
+
+		gosub	"hCoorFrm"
+	next	i
+
+	del nMln
+endif
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+	!	Height of Plane
+	_cutPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[1]
+	_topPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[2]
+	_btmPlaneHgt = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[3]
+	if	iProjectTo = PROJECTTO_ABSOLUTE	then
+		_btmPlaneHgt = GLOB_CUTPLANES_INFO[4]
+	endif
+
+	_bCutPlane = (iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_CUTPLANE)
+
+	!	절단면/하단면
+	if	_bCutPlane	then
+		!	절단면
+		pen			cutPen
+		fill		cutFill
+		line_type	1
+
+			if	not(iDisplay = DISPLAY_CUTPLANE)	then
+				!	선
+				project2{3}	3,	270,	2+16,	2,	cutBackPen,
+					parameters	bSymbol			= 1,
+								iProjectType	= 1,
+								cutPlaneHgt		= _cutPlaneHgt,
+								topPlaneHgt		= _topPlaneHgt,
+								btmPlaneHgt		= _btmPlaneHgt
+
+				!	면
+				project2{3}	3,	270,	3+32,	1,	cutBackPen,
+					parameters	bSymbol			= 1,
+								iProjectType	= 1,
+								cutPlaneHgt		= _cutPlaneHgt,
+								topPlaneHgt		= _topPlaneHgt,
+								btmPlaneHgt		= _btmPlaneHgt
+			else
+				project2{3}	3,	270,	2+16,	2,	cutBackPen,
+					parameters	bSymbol			= 1,
+								iProjectType	= 1,
+								cutPlaneHgt		= _cutPlaneHgt,
+								topPlaneHgt		= _cutPlaneHgt,
+								btmPlaneHgt		= _cutPlaneHgt
+
+				!	면
+				project2{3}	3,	270,	3+32,	1,	cutBackPen,
+					parameters	bSymbol			= 1,
+								iProjectType	= 1,
+								cutPlaneHgt		= _cutPlaneHgt,
+								topPlaneHgt		= _cutPlaneHgt,
+								btmPlaneHgt		= _cutPlaneHgt
+			endif
+
+		!	하단면
+		if	not(iDisplay = DISPLAY_CUTPLANE)	then
+			pen			btmPen
+			fill		btmFill
+			line_type	1
+
+			project2{3}	3,	270,	2+16,	4+8,	btmBackPen,
+				parameters	bSymbol			= 1,
+							iProjectType	= 1,
+							cutPlaneHgt		= _cutPlaneHgt,
+							topPlaneHgt		= _topPlaneHgt,
+							btmPlaneHgt		= _btmPlaneHgt
+		endif
+	endif
+
+	!	Overhead
+	if	iDisplay = DISPLAY_WITHOVERHEAD	then
+		pen			overPen
+		line_type	overLT
+
+		project2{3}	3,	270,	2+32,	2+8,
+			parameters	bSymbol			= 1,
+						iProjectType	= 2,
+						cutPlaneHgt		= _cutPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Outlines only
+	if	iDisplay = DISPLAY_OUTLINES	then
+		!	하단면
+		pen			btmPen
+		fill		btmFill
+		line_type	1
+
+		project2{3}	3,	270,	3+32,	2+4+8,	btmBackPen,
+			parameters	bSymbol			= 1,
+						iProjectType	= 1,
+						cutPlaneHgt		= _topPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	Overhead all
+	if	iDisplay = DISPLAY_OVERHEAD	then
+		!	하단면
+		pen			overPen
+		line_type	overLT
+
+		project2{3}	3,	270,	2+32,	2+8,
+			parameters	bSymbol			= 1,
+						iProjectType	= 2,
+						cutPlaneHgt		= _btmPlaneHgt,
+						topPlaneHgt		= _topPlaneHgt,
+						btmPlaneHgt		= _btmPlaneHgt
+	endif
+
+	!	하부 입면 라인
+	if	iDisplay = DISPLAY_CUTPLANE & (_cutPlaneHgt < ctwHgt)	then
+		pen	frmSectPen
+
+		_idx = 1
+		if	not(nTrs < eps)	then
+			_sumTrsGap = 0
+			for	j = 1	to	(nTrs + 1)
+				_sumTrsGap = _sumTrsGap + trsGap[j]
+				if	_cutPlaneHgt - _sumTrsGap > eps	then
+					_idx = _idx + 1
+				endif
+			next	j
+		endif
+
+		add2	0,	_cutPlaneHgt*tan(aTilt)
+			for	i = 1	to	(nMln + 1)
+				!	변수 정의
+				_pnlType = iPnlType[i][_idx]
+
+				if	nMln < eps	then
+					_xPosLine_S = frmWdtL/2
+					_xPosLine_E = frmWdtR/2
+					_yPosLine2 = min(frmThkL,	frmThkR)
+				else
+					if	i = 1	then
+						_xPosLine_S = frmWdtL/2
+						_xPosLine_E = mlnWdt/2
+						_yPosLine2 = min(frmThkL,	mlnThk)
+					endif
+
+					if	i # 1 & i # (nMln + 1)	then
+						_xPosLine_S = mlnWdt/2
+						_xPosLine_E = mlnWdt/2
+						_yPosLine2 = mlnThk
+					endif
+
+					if	i = (nMln + 1)	then
+						_xPosLine_S = mlnWdt/2
+						_xPosLine_E = frmWdtR/2
+						_yPosLine2 = min(frmThkR,	mlnThk)
+					endif
+				endif
+
+				!	입면 라인 1
+				add2	0,	-gskThk
+					line2	_xPosLine_S,	0,	mlnGap[i] - _xPosLine_E,	0
+				del 1
+
+				!	입면 라인 2
+				add2	0,	-(gskThk + _yPosLine2)
+					if	not(_pnlType = PNL_SEP2_HORIZON | _pnlType = PNL_SEP3_HORIZON)	then
+						line2	_xPosLine_S,	0,	mlnGap[i] - _xPosLine_E,	0
+					else
+						if	not(abs(_yPosLine2 - mlnThk) < eps)	then
+							_yPosSep1 = _yPosLine2 - mlnThk
+							_yPosSep2 = _yPosLine2 - mlnThk
+							_yPosSep3 = _yPosLine2 - mlnThk
+
+							if	nMln < eps	then
+								_yPosSep1 = 0
+								_yPosSep3 = 0
+							else
+								if	i = 1	then
+									_yPosSep1 = 0
+								endif
+								if	i = (nMln + 1)	then
+									_yPosSep3 = 0
+								endif
+							endif
+						endif
+
+						if	_pnlType = PNL_SEP2_HORIZON	then
+							line2	_xPosLine_S,					_yPosSep1,	sep2_Horz[i][_idx] - mlnWdt/2,	_yPosSep1
+							line2	sep2_Horz[i][_idx] + mlnWdt/2,	_yPosSep3,	mlnGap[i] - _xPosLine_E,		_yPosSep3
+						endif
+
+						if	_pnlType = PNL_SEP3_HORIZON	then
+							line2	_xPosLine_S,					_yPosSep1,	sep2_Horz[i][_idx] - mlnWdt/2,	_yPosSep1
+							line2	sep2_Horz[i][_idx] + mlnWdt/2,	_yPosSep2,	sep3_Horz[i][_idx] - mlnWdt/2,	_yPosSep2
+							line2	sep3_Horz[i][_idx] + mlnWdt/2,	_yPosSep3,	mlnGap[i] - _xPosLine_E,		_yPosSep3
+						endif
+					endif
+				del 1
+
+				add2	mlnGap[i],	0
+			next	i
+
+			del (nMln + 1)
+		del 1
+	endif
+
+!-----------------------------------------------------------------------------------------------
+!	창호입면도 가이드라인
+!-----------------------------------------------------------------------------------------------
+if	_iWinElev = WINELEV_ON & bGuideLine	then
+
+	!	Hotspot
+	hotspot2	0,			yPosGuide,	unID,	xPosGuide,	1+128	:	unID = unID + 1
+	hotspot2	-1,			yPosGuide,	unID,	xPosGuide,	3		:	unID = unID + 1
+	hotspot2	xPosGuide,	yPosGuide,	unID,	xPosGuide,	2		:	unID = unID + 1
+
+	hotspot2	xPosGuide,	0,			unID,	yPosGuide,	1+128	:	unID = unID + 1
+	hotspot2	xPosGuide,	-1,			unID,	yPosGuide,	3		:	unID = unID + 1
+	hotspot2	xPosGuide,	yPosGuide,	unID,	yPosGuide,	2		:	unID = unID + 1
+
+	_guide = 0.100
+	add2	xPosGuide,	yPosGuide
+		hotspot2	_guide,				0,					unID,	aGuide,	4	:	unID = unID + 1
+		hotspot2	_guide*cos(aGuide),	_guide*sin(aGuide),	unID,	aGuide,	5	:	unID = unID + 1
+		hotspot2	0,					0,					unID,	aGuide,	6	:	unID = unID + 1
+
+		rot2	aGuide
+			line2		0,	0,	ctwWdt,	0
+			hotline2	0,	0,	ctwWdt,	0
+
+			hotspot2	0,		0
+			hotspot2	ctwWdt,	0
+		del 1
+	del 1
+
+endif
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"hCoorFrm":
+!-----------------------------------------------------------------------------------------------
+	if	(_frmType = FRAME_BOUNDARY & _frmClass = VFRAME_CORNER)	then
+		put	0,						-(_frmThk + gskThk),
+			0,						0,
+			_frmWdt/2,				0,
+			(_frmWdt + _gskWdt)/2,	0,
+			(_frmWdt + _gskWdt)/2,	-gskThk,
+			_frmWdt,				-gskThk,
+			_frmWdt,				-(_frmThk + gskThk)
+	endif
+
+	if	(_frmType = FRAME_MULLION & _frmClass = VFRAME_CORNER) | _frmClass = VFRAME_MULLION	then
+		if	iMlnType = MLN_TYPE1	then
+			put	-_frmWdt/2,	-(_frmThk + gskThk),
+				-_frmWdt/2,	-gskThk,
+				-_gskWdt/2,	-gskThk,
+				-_gskWdt/2,	0,
+				0,			0,
+				_gskWdt/2,	0,
+				_gskWdt/2,	-gskThk,
+				_frmWdt/2,	-gskThk,
+				_frmWdt/2,	-(_frmThk + gskThk)
+		endif
+
+		if	iMlnType = MLN_TYPE2	then
+			put	-_frmWdt/2,	-(_frmThk + gskThk),
+				-_frmWdt/2,	-gskThk,
+				-_gskWdt/2,	-gskThk,
+				-_gskWdt/2,	-gskCapThk,
+				-_frmWdt/2,	-gskCapThk,
+				-_frmWdt/2,	0,
+				0,			0,
+				_frmWdt/2,	0,
+				_frmWdt/2,	-gskCapThk,
+				_gskWdt/2,	-gskCapThk,
+				_gskWdt/2,	-gskThk,
+				_frmWdt/2,	-gskThk,
+				_frmWdt/2,	-(_frmThk + gskThk)
+		endif
+	endif
+
+	for	h = 1	to	(nsp/2)
+		hotspot2	get(2),	unID	:	unID = unID + 1
+	next	h
+
+return

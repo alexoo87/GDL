@@ -1,0 +1,85 @@
+
+tempMIN = MIN(moY02,moY03)
+
+values	"m_3d_type"	"Volume",	"Volume(+Z)",	"Surface"
+parameters	m_inform_data = tmpToSection
+
+values	"moX01"	range	(0,	]
+values	"moX02"	range	[moX03,	moX01]
+values	"moX03"	range	[moX04,	moX02]
+values	"moX04"	range	[0,	moX03)
+
+
+values "moY01"	RANGE [,tempMIN]
+values "moY02"	RANGE [moY01,]
+values "moY03"	RANGE [moY01,]
+values "moY04"	RANGE [0,]
+
+
+values "moY03"	RANGE [0,]
+
+
+if	not(m_3d_type = "Volume(+Z)")	then
+	lock	"moZ01", "moZ02", "moZ03", "moZ04"
+endif
+
+values	"cutLct_1"	0,	depth
+values	"cutLct_2"	0,	depth
+values	"cutLct_3"	0,	depth
+values	"cutLct_4"	0,	depth
+values	"cutLct_5"	0,	depth
+
+if	cutLct_1 < eps	then
+	values	"aCut_1"	range	[0,	60]
+else
+	values	"aCut_1"	range	[-60,	0]
+endif
+if	cutLct_2 < eps	then
+	values	"aCut_2"	range	[0,	60]
+else
+	values	"aCut_2"	range	[-60,	0]
+endif
+if	cutLct_3 < eps	then
+	values	"aCut_3"	range	[0,	60]
+else
+	values	"aCut_3"	range	[-60,	0]
+endif
+if	cutLct_4 < eps	then
+	values	"aCut_4"	range	[0,	60]
+else
+	values	"aCut_4"	range	[-60,	0]
+endif
+if	cutLct_5 < eps	then
+	values	"aCut_5"	range	[0,	60]
+else
+	values	"aCut_5"	range	[-60,	0]
+endif
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDisplay"	DISPLAY_PROJECTED,		stDisplay[DISPLAY_PROJECTED],
+						DISPLAY_WITHOVERHEAD,	stDisplay[DISPLAY_WITHOVERHEAD],
+						DISPLAY_OUTLINES,		stDisplay[DISPLAY_OUTLINES],
+						DISPLAY_OVERHEAD,		stDisplay[DISPLAY_OVERHEAD],
+						DISPLAY_CUTPLANE,		stDisplay[DISPLAY_CUTPLANE]
+
+if	not(iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_CUTPLANE)	then
+	lock			"cutPen", "cutFill", "cutFillPen", "cutBackPen"
+	hideparameter	"cutPen", "cutFill", "cutFillPen", "cutBackPen"
+endif
+
+if	not(iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_OVERHEAD)	then
+	lock			"overPen", "overLT"
+	hideparameter	"overPen", "overLT"
+endif
+
+if	not(iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_OUTLINES)	then
+	lock			"btmPen", "btmFill", "btmFillPen", "btmBackPen"
+	hideparameter	"btmPen", "btmFill", "btmFillPen", "btmBackPen"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+values{2}	"iProjectTo"	PROJECTTO_FLOORPLAN,	stProjectTo[PROJECTTO_FLOORPLAN],
+							PROJECTTO_ABSOLUTE,		stProjectTo[PROJECTTO_ABSOLUTE],
+							PROJECTTO_ENTIRE,		stProjectTo[PROJECTTO_ENTIRE]

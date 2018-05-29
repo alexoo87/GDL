@@ -1,0 +1,985 @@
+!===============================================================================================
+!	경사커튼월
+!===============================================================================================
+values	"aTilt"	range	[-89,	89]
+values	"nMln"	range	[0,	40]
+values	"nTrs"	range	[0,	40]
+
+values	"glsThk"	range	(0,	gskThk)
+values	"glsLct"	range	[0,	(gskThk - glsThk)]
+values	"txtSize"	range	(0,	)
+values	"insThk_1"	range	(0,	)
+values	"insThk_2"	range	(0,	)
+values	"insThk_3"	range	(0,	)
+values	"insThk_4"	range	(0,	)
+values	"grlThk"	range	(0,	)
+values	"grlGap"	range	(0,	)
+values	"aGrl"		range	[-90,	90]
+
+values	"spdFrmThk"	range	(0,	)
+
+values	"gskThk"	range	(0,	)
+values	"gskCapThk"	range	(0,	)
+
+values	"frmWdtB"	range	(0,	)
+values	"frmThkB"	range	(0,	)
+values	"gskWdtB"	range	(0,	)
+values	"frmWdtT"	range	(0,	)
+values	"frmThkT"	range	(0,	)
+values	"gskWdtT"	range	(0,	)
+values	"frmWdtL"	range	(0,	)
+values	"frmThkL"	range	(0,	)
+values	"gskWdtL"	range	(0,	)
+values	"frmWdtR"	range	(0,	)
+values	"frmThkR"	range	(0,	)
+values	"gskWdtR"	range	(0,	)
+
+values	"mlnThk"	range	(0,	)
+values	"mlnWdt"	range	(0,	)
+values	"mlnGskWdt"	range	(0,	)
+values	"mlnGap"	range	[0.100,	)
+
+values	"trsThk"	range	(0,	)
+values	"trsWdt"	range	(0,	)
+values	"trsGskWdt"	range	(0,	)
+values	"trsGap"	range	[0.100,	)
+
+
+!	커튼월 너비/높이 자동계산
+!-----------------------------------------------------------------------------------------------
+lock	"ctwWdt", "ctwHgt"
+
+	!	기본값
+	for	i = 1	to	41
+		if	mlnGap[i] < eps	then
+			parameters	mlnGap[i] = 0.800
+		endif
+
+		if	trsGap[i] < eps	then
+			parameters	trsGap[i] = 0.500
+		endif
+	next	i
+
+	!	계산
+	_ctwWdt = 0
+	for	i = 1	to	nMln + 1
+		_ctwWdt = _ctwWdt + mlnGap[i]
+	next	i
+	parameters	ctwWdt = _ctwWdt
+
+	_ctwHgt = 0
+	for	i = 1	to	nTrs + 1
+		_ctwHgt = _ctwHgt + trsGap[i]
+	next	i
+	parameters	ctwHgt = _ctwHgt
+
+
+!	코너프레임 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iFrmTypeL"	FRAME_BOUNDARY,	stFrmType[FRAME_BOUNDARY],
+						FRAME_MULLION,	stFrmType[FRAME_MULLION]
+
+values{2}	"iFrmTypeR"	FRAME_BOUNDARY,	stFrmType[FRAME_BOUNDARY],
+						FRAME_MULLION,	stFrmType[FRAME_MULLION]
+
+values{2}	"iFrmTypeT"	FRAME_BOUNDARY,	stFrmType[FRAME_BOUNDARY],
+						FRAME_TRANSOM,	stFrmType[FRAME_TRANSOM]
+
+values{2}	"iFrmTypeB"	FRAME_BOUNDARY,	stFrmType[FRAME_BOUNDARY],
+						FRAME_TRANSOM,	stFrmType[FRAME_TRANSOM]
+
+
+!	멀리언 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMlnType"	MLN_TYPE1,	stMlnType[MLN_TYPE1],
+						MLN_TYPE2,	stMlnType[MLN_TYPE2]
+
+
+!	트랜섬 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iTrsType"	TRS_TYPE1,	stTrsType[TRS_TYPE1],
+						TRS_TYPE2,	stTrsType[TRS_TYPE2]
+
+
+!	 패널 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iPnlType"	PNL_FIX,			stPnlType[PNL_FIX],
+						PNL_PROJECT,		stPnlType[PNL_PROJECT],
+						PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+						PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+						PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+						PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+						PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+						PNL_GRILL,			stPnlType[PNL_GRILL],
+						PNL_OPEN,			stPnlType[PNL_OPEN],
+						PNL_SEP2_HORIZON,	stPnlType[PNL_SEP2_HORIZON],
+						PNL_SEP3_HORIZON,	stPnlType[PNL_SEP3_HORIZON],
+						PNL_SEP2_VERTICAL,	stPnlType[PNL_SEP2_VERTICAL],
+						PNL_SEP3_VERTICAL,	stPnlType[PNL_SEP3_VERTICAL]
+
+!	프로젝트창 힌지 위치
+!-----------------------------------------------------------------------------------------------
+values{2}	"iHingeType"	HINGE_TOP,			stHingeType[HINGE_TOP],
+							HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+							HINGE_LEFT,			stHingeType[HINGE_LEFT],
+							HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+							HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+							HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+							HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+							HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+values{2}	"iHingeType_2Horz"	HINGE_TOP,			stHingeType[HINGE_TOP],
+								HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+								HINGE_LEFT,			stHingeType[HINGE_LEFT],
+								HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+								HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+								HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+								HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+								HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+values{2}	"iHingeType_3Horz"	HINGE_TOP,			stHingeType[HINGE_TOP],
+								HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+								HINGE_LEFT,			stHingeType[HINGE_LEFT],
+								HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+								HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+								HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+								HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+								HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+values{2}	"iHingeType_2Vert"	HINGE_TOP,			stHingeType[HINGE_TOP],
+								HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+								HINGE_LEFT,			stHingeType[HINGE_LEFT],
+								HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+								HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+								HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+								HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+								HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+values{2}	"iHingeType_3Vert"	HINGE_TOP,			stHingeType[HINGE_TOP],
+								HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+								HINGE_LEFT,			stHingeType[HINGE_LEFT],
+								HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+								HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+								HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+								HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+								HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+!	 분할 패널 유형
+!-----------------------------------------------------------------------------------------------
+values	"iSepType"	1,	2,	3,	4,	5
+
+values{2}	"iSepType_2Horz"	PNL_FIX,			stPnlType[PNL_FIX],
+								PNL_PROJECT,		stPnlType[PNL_PROJECT],
+								PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+								PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+								PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+								PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+								PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+								PNL_GRILL,			stPnlType[PNL_GRILL],
+								PNL_OPEN,			stPnlType[PNL_OPEN]
+
+values{2}	"iSepType_3Horz"	PNL_FIX,			stPnlType[PNL_FIX],
+								PNL_PROJECT,		stPnlType[PNL_PROJECT],
+								PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+								PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+								PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+								PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+								PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+								PNL_GRILL,			stPnlType[PNL_GRILL],
+								PNL_OPEN,			stPnlType[PNL_OPEN]
+
+values{2}	"iSepType_2Vert"	PNL_FIX,			stPnlType[PNL_FIX],
+								PNL_PROJECT,		stPnlType[PNL_PROJECT],
+								PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+								PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+								PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+								PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+								PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+								PNL_GRILL,			stPnlType[PNL_GRILL],
+								PNL_OPEN,			stPnlType[PNL_OPEN]
+
+values{2}	"iSepType_3Vert"	PNL_FIX,			stPnlType[PNL_FIX],
+								PNL_PROJECT,		stPnlType[PNL_PROJECT],
+								PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+								PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+								PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+								PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+								PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+								PNL_GRILL,			stPnlType[PNL_GRILL],
+								PNL_OPEN,			stPnlType[PNL_OPEN]
+
+!	 패널 선택
+!-----------------------------------------------------------------------------------------------
+dim	_iPosX[]
+for	i = 1	to	(nMln + 1)
+	_iPosX[i] = i
+next	i
+values	"iPosX" _iPosX
+
+dim	_iPosY[]
+for	i = 1	to	(nTrs + 1)
+	_iPosY[i] = i
+next	i
+values	"iPosY" _iPosY
+
+!	패널 유형 선택
+values{2}	"iPnlType_"	PNL_FIX,			stPnlType[PNL_FIX],
+						PNL_PROJECT,		stPnlType[PNL_PROJECT],
+						PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+						PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+						PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+						PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+						PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+						PNL_GRILL,			stPnlType[PNL_GRILL],
+						PNL_OPEN,			stPnlType[PNL_OPEN],
+						PNL_SEP2_HORIZON,	stPnlType[PNL_SEP2_HORIZON],
+						PNL_SEP3_HORIZON,	stPnlType[PNL_SEP3_HORIZON],
+						PNL_SEP2_VERTICAL,	stPnlType[PNL_SEP2_VERTICAL],
+						PNL_SEP3_VERTICAL,	stPnlType[PNL_SEP3_VERTICAL]
+
+if	GLOB_MODPAR_NAME = "iPosX" | GLOB_MODPAR_NAME = "iPosY" | GLOB_MODPAR_NAME = "iPnlType"	then
+	parameters	iPnlType_ = iPnlType[iPosX][iPosY]
+else
+	parameters	iPnlType[iPosX][iPosY] = iPnlType_
+endif
+
+!	프로젝트창 힌지 위치
+values{2}	"iHingeType_"	HINGE_TOP,			stHingeType[HINGE_TOP],
+							HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+							HINGE_LEFT,			stHingeType[HINGE_LEFT],
+							HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+							HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+							HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+							HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+							HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+if	GLOB_MODPAR_NAME = "iPosX" | GLOB_MODPAR_NAME = "iPosY" | GLOB_MODPAR_NAME = "iHingeType"	then
+	parameters	iHingeType_ = iHingeType[iPosX][iPosY]
+else
+	parameters	iHingeType[iPosX][iPosY] = iHingeType_
+endif
+
+if	not(iPnlType_ = PNL_PROJECT | iPnlType_ = PNL_PROJECT_SMOKE)	then
+	lock	"iHingeType_"
+endif
+
+!	분할 패널 유형 선택
+values	"iSepType_"	1,	2,	3,	4,	5
+
+values{2}	"iSep1st"	PNL_FIX,			stPnlType[PNL_FIX],
+						PNL_PROJECT,		stPnlType[PNL_PROJECT],
+						PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+						PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+						PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+						PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+						PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+						PNL_GRILL,			stPnlType[PNL_GRILL],
+						PNL_OPEN,			stPnlType[PNL_OPEN]
+
+values{2}	"iSep2nd"	PNL_FIX,			stPnlType[PNL_FIX],
+						PNL_PROJECT,		stPnlType[PNL_PROJECT],
+						PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+						PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+						PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+						PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+						PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+						PNL_GRILL,			stPnlType[PNL_GRILL],
+						PNL_OPEN,			stPnlType[PNL_OPEN]
+
+values{2}	"iSep3rd"	PNL_FIX,			stPnlType[PNL_FIX],
+						PNL_PROJECT,		stPnlType[PNL_PROJECT],
+						PNL_PROJECT_SMOKE,	stPnlType[PNL_PROJECT_SMOKE],
+						PNL_SPANDREL,		stPnlType[PNL_SPANDREL],
+						PNL_SPANDREL_SUB,	stPnlType[PNL_SPANDREL_SUB],
+						PNL_SPANDREL_SUB2,	stPnlType[PNL_SPANDREL_SUB2],
+						PNL_SPANDREL_SUB3,	stPnlType[PNL_SPANDREL_SUB3],
+						PNL_GRILL,			stPnlType[PNL_GRILL],
+						PNL_OPEN,			stPnlType[PNL_OPEN]
+
+values{2}	"iHinge1st"	HINGE_TOP,			stHingeType[HINGE_TOP],
+						HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+						HINGE_LEFT,			stHingeType[HINGE_LEFT],
+						HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+						HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+						HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+						HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+						HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+values{2}	"iHinge2nd"	HINGE_TOP,			stHingeType[HINGE_TOP],
+						HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+						HINGE_LEFT,			stHingeType[HINGE_LEFT],
+						HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+						HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+						HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+						HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+						HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+values{2}	"iHinge3rd"	HINGE_TOP,			stHingeType[HINGE_TOP],
+						HINGE_BOTTOM,		stHingeType[HINGE_BOTTOM],
+						HINGE_LEFT,			stHingeType[HINGE_LEFT],
+						HINGE_RIGHT,		stHingeType[HINGE_RIGHT],
+						HINGE_TOP_LEFT,		stHingeType[HINGE_TOP_LEFT],
+						HINGE_TOP_RIGHT,	stHingeType[HINGE_TOP_RIGHT],
+						HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
+						HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
+
+if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP3_HORIZON | iPnlType_ = PNL_SEP2_VERTICAL | iPnlType_ = PNL_SEP3_VERTICAL	then
+	if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP2_VERTICAL	then
+		lock	"iSep3rd", "iHinge3rd"
+	endif
+
+	if	GLOB_MODPAR_NAME = "iPosX" | GLOB_MODPAR_NAME = "iPosY" | GLOB_MODPAR_NAME = "iSepType"	then
+		parameters	iSepType_ = iSepType[iPosX][iPosY]
+	else
+		parameters	iSepType[iPosX][iPosY] = iSepType_
+	endif
+
+	!	가로 분할
+	if	iPnlType_ = PNL_SEP2_HORIZON	then
+		if	GLOB_MODPAR_NAME = "iSep1st"	then
+			parameters	iSepType_2Horz[iSepType_][1] = iSep1st
+		else
+			parameters	iSep1st = iSepType_2Horz[iSepType_][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iSep2nd"	then
+			parameters	iSepType_2Horz[iSepType_][2] = iSep2nd
+		else
+			parameters	iSep2nd = iSepType_2Horz[iSepType_][2]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge1st"	then
+			parameters	iHingeType_2Horz[iSepType_][1] = iHinge1st
+		else
+			parameters	iHinge1st = iHingeType_2Horz[iSepType_][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge2nd"	then
+			parameters	iHingeType_2Horz[iSepType_][2] = iHinge2nd
+		else
+			parameters	iHinge2nd = iHingeType_2Horz[iSepType_][2]
+		endif
+	endif
+
+	if	iPnlType_ = PNL_SEP3_HORIZON	then
+		if	GLOB_MODPAR_NAME = "iSep1st"	then
+			parameters	iSepType_3Horz[iSepType_][1] = iSep1st
+		else
+			parameters	iSep1st = iSepType_3Horz[iSepType_][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iSep2nd"	then
+			parameters	iSepType_3Horz[iSepType_][2] = iSep2nd
+		else
+			parameters	iSep2nd = iSepType_3Horz[iSepType_][2]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iSep3rd"	then
+			parameters	iSepType_3Horz[iSepType_][3] = iSep3rd
+		else
+			parameters	iSep3rd = iSepType_3Horz[iSepType_][3]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge1st"	then
+			parameters	iHingeType_3Horz[iSepType_][1] = iHinge1st
+		else
+			parameters	iHinge1st = iHingeType_3Horz[iSepType_][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge2nd"	then
+			parameters	iHingeType_3Horz[iSepType_][2] = iHinge2nd
+		else
+			parameters	iHinge2nd = iHingeType_3Horz[iSepType_][2]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge3rd"	then
+			parameters	iHingeType_3Horz[iSepType_][3] = iHinge3rd
+		else
+			parameters	iHinge3rd = iHingeType_3Horz[iSepType_][3]
+		endif
+	endif
+
+	!	세로 분할
+	if	iPnlType_ = PNL_SEP2_VERTICAL	then
+		if	GLOB_MODPAR_NAME = "iSep1st"	then
+			parameters	iSepType_2Vert[1][iSepType_] = iSep1st
+		else
+			parameters	iSep1st = iSepType_2Vert[1][iSepType_]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iSep2nd"	then
+			parameters	iSepType_2Vert[2][iSepType_] = iSep2nd
+		else
+			parameters	iSep2nd = iSepType_2Vert[2][iSepType_]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge1st"	then
+			parameters	iHingeType_2Vert[1][iSepType_] = iHinge1st
+		else
+			parameters	iHinge1st = iHingeType_2Vert[1][iSepType_]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge2nd"	then
+			parameters	iHingeType_2Vert[2][iSepType_] = iHinge2nd
+		else
+			parameters	iHinge2nd = iHingeType_2Vert[2][iSepType_]
+		endif
+	endif
+
+	if	iPnlType_ = PNL_SEP3_VERTICAL	then
+		if	GLOB_MODPAR_NAME = "iSep1st"	then
+			parameters	iSepType_3Vert[1][iSepType_] = iSep1st
+		else
+			parameters	iSep1st = iSepType_3Vert[1][iSepType_]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iSep2nd"	then
+			parameters	iSepType_3Vert[2][iSepType_] = iSep2nd
+		else
+			parameters	iSep2nd = iSepType_3Vert[2][iSepType_]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iSep3rd"	then
+			parameters	iSepType_3Vert[3][iSepType_] = iSep3rd
+		else
+			parameters	iSep3rd = iSepType_3Vert[3][iSepType_]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge1st"	then
+			parameters	iHingeType_3Vert[1][iSepType_] = iHinge1st
+		else
+			parameters	iHinge1st = iHingeType_3Vert[1][iSepType_]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge2nd"	then
+			parameters	iHingeType_3Vert[2][iSepType_] = iHinge2nd
+		else
+			parameters	iHinge2nd = iHingeType_3Vert[2][iSepType_]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iHinge3rd"	then
+			parameters	iHingeType_3Vert[3][iSepType_] = iHinge3rd
+		else
+			parameters	iHinge3rd = iHingeType_3Vert[3][iSepType_]
+		endif
+	endif
+
+	!	힌지 위치 변수 잠금
+	if	not(iSep1st = PNL_PROJECT | iSep1st = PNL_PROJECT_SMOKE)	then
+		lock	"iHinge1st"
+	endif
+
+	if	not(iSep2nd = PNL_PROJECT | iSep2nd = PNL_PROJECT_SMOKE)	then
+		lock	"iHinge2nd"
+	endif
+
+	if	not(iSep3rd = PNL_PROJECT | iSep3rd = PNL_PROJECT_SMOKE)	then
+		lock	"iHinge3rd"
+	endif
+else
+	parameters	iPagePnl = 2
+	lock	"iPagePnl"
+
+	lock	"iSepType_", "iSep1st", "iSep2nd", "iSep3rd", "iHinge1st", "iHinge2nd", "iHinge3rd"
+endif
+
+	!	분할 프레임 위치 기본값
+	for	i = 1	to	41
+		for	j = 1	to	41
+			if	sep2_Horz[i][j] < eps	then
+				parameters	sep2_Horz[i][j] = 0.250
+			endif
+			if	sep3_Horz[i][j] < eps	then
+				parameters	sep3_Horz[i][j] = 0.550
+			endif
+
+			if	sep2_Vert[i][j] < eps	then
+				parameters	sep2_Vert[i][j] = 0.150
+			endif
+			if	sep3_Vert[i][j] < eps	then
+				parameters	sep3_Vert[i][j] = 0.350
+			endif
+		next	j
+	next	i
+
+!	제한값
+_offsetValue = 0.100
+
+for	i = 1	to	41
+	for	j = 1	to	41
+		!	분할 프레임(가로)
+		_value = sep2_Horz[i][j]
+		_minValue = 0
+		_maxValue = mlnGap[i]
+
+		if	_value - _minValue < _offsetValue	then
+			parameters	sep2_Horz[i][j] = _offsetValue
+		endif
+		if	_maxValue - _value < _offsetValue	then
+			parameters	sep2_Horz[i][j] = _maxValue - _offsetValue
+		endif
+
+		!	분할 프레임(세로)
+		_value = sep2_Vert[i][j]
+		_minValue = 0
+		_maxValue = trsGap[j]
+
+		if	_value - _minValue < _offsetValue	then
+			parameters	sep2_Vert[i][j] = _offsetValue
+		endif
+		if	_maxValue - _value < _offsetValue	then
+			parameters	sep2_Vert[i][j] = _maxValue - _offsetValue
+		endif
+	next	j
+next	i
+
+for	i = 1	to	41
+	for	j = 1	to	41
+		if	iPnlType[i][j] = PNL_SEP3_HORIZON	then
+			_value1 = sep2_Horz[i][j]
+			_value2 = sep3_Horz[i][j]
+			_minValue = 0
+			_maxValue = mlnGap[i]
+
+			if	_value1 - _minValue < _offsetValue	then
+				parameters	sep2_Horz[i][j] = _offsetValue
+			endif
+			if	_value2 - _value1 < _offsetValue	then
+				if	GLOB_MODPAR_NAME = "sep2_Horz"	then
+					parameters	sep2_Horz[i][j] = _value2 - _offsetValue
+					parameters	sep3_Horz[i][j] = _value2
+				endif
+				if	GLOB_MODPAR_NAME = "sep3_Horz"	then
+					parameters	sep2_Horz[i][j] = _value1
+					parameters	sep3_Horz[i][j] = _value1 + _offsetValue
+				endif
+			endif
+			if	_maxValue - _value2 < _offsetValue	then
+				parameters	sep3_Horz[i][j] = _maxValue - _offsetValue
+			endif
+		endif
+
+		if	iPnlType[i][j] = PNL_SEP3_VERTICAL	then
+			_value1 = sep2_Vert[i][j]
+			_value2 = sep3_Vert[i][j]
+			_minValue = 0
+			_maxValue = trsGap[j]
+
+			if	_value1 - _minValue < _offsetValue	then
+				parameters	sep2_Vert[i][j] = _offsetValue
+			endif
+			if	_value2 - _value1 < _offsetValue	then
+				if	GLOB_MODPAR_NAME = "sep2_Vert"	then
+					parameters	sep2_Vert[i][j] = _value2 - _offsetValue
+					parameters	sep3_Vert[i][j] = _value2
+				endif
+				if	GLOB_MODPAR_NAME = "sep3_Vert"	then
+					parameters	sep2_Vert[i][j] = _value1
+					parameters	sep3_Vert[i][j] = _value1 + _offsetValue
+				endif
+			endif
+			if	_maxValue - _value2 < _offsetValue	then
+				parameters	sep3_Vert[i][j] = _maxValue - _offsetValue
+			endif
+		endif
+	next	j
+next	i
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDisplay"	DISPLAY_PROJECTED,		stDisplay[DISPLAY_PROJECTED],
+						DISPLAY_WITHOVERHEAD,	stDisplay[DISPLAY_WITHOVERHEAD],
+						DISPLAY_OUTLINES,		stDisplay[DISPLAY_OUTLINES],
+						DISPLAY_OVERHEAD,		stDisplay[DISPLAY_OVERHEAD],
+						DISPLAY_CUTPLANE,		stDisplay[DISPLAY_CUTPLANE]
+
+if	not(iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_CUTPLANE)	then
+	lock			"cutPen", "cutFill", "cutFillPen", "cutBackPen"
+	hideparameter	"cutPen", "cutFill", "cutFillPen", "cutBackPen"
+endif
+
+if	not(iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_OVERHEAD)	then
+	lock			"overPen", "overLT"
+	hideparameter	"overPen", "overLT"
+endif
+
+if	not(iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_OUTLINES)	then
+	lock			"btmPen", "btmFill", "btmFillPen", "btmBackPen"
+	hideparameter	"btmPen", "btmFill", "btmFillPen", "btmBackPen"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+values{2}	"iProjectTo"	PROJECTTO_FLOORPLAN,	stProjectTo[PROJECTTO_FLOORPLAN],
+							PROJECTTO_ABSOLUTE,		stProjectTo[PROJECTTO_ABSOLUTE],
+							PROJECTTO_ENTIRE,		stProjectTo[PROJECTTO_ENTIRE]
+
+
+!	창호입면도
+!-----------------------------------------------------------------------------------------------
+values{2}	"iWinElev"	WINELEV_ON,		stWinElev[WINELEV_ON],
+						WINELEV_OFF,	stWinElev[WINELEV_OFF],
+						WINELEV_MVO,	stWinElev[WINELEV_MVO]
+
+
+if	_iWinElev = WINELEV_OFF	then
+	lock	"bGuideLine", "xPosGuide", "yPosGuide", "zPosGuide", "aGuide"
+endif
+
+!	UI
+!-----------------------------------------------------------------------------------------------
+values	"iPagePnl"	1, 2
+values	"iPageFrm"	1, 2, 3, 4
+
+
+!-----------------------------------------------------------------------------------------------
+!	면적 산출
+!-----------------------------------------------------------------------------------------------
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+	if	iFrmTypeL = FRAME_BOUNDARY	then
+		_offsetL_PNL_Elev = (frmWdtL + gskWdtL)/2
+	else
+		if	iMlnType = MLN_TYPE1	then
+			_offsetL_PNL_Elev = gskWdtL/2
+		else
+			_offsetL_PNL_Elev = frmWdtL/2
+		endif
+	endif
+
+	if	iFrmTypeR = FRAME_BOUNDARY	then
+		_offsetR_PNL_Elev = (frmWdtR + gskWdtR)/2
+	else
+		if	iMlnType = MLN_TYPE1	then
+			_offsetR_PNL_Elev = gskWdtR/2
+		else
+			_offsetR_PNL_Elev = frmWdtR/2
+		endif
+	endif
+
+	if	iMlnType = MLN_TYPE1	then
+		_offsetM_PNL_Elev = mlnGskWdt/2
+	else
+		_offsetM_PNL_Elev = mlnWdt/2
+	endif
+
+	_glsArea = 0
+	_glsArea_Spd1 = 0
+	_glsArea_Spd2 = 0
+	_glsArea_Spd3 = 0
+	_glsArea_Spd4 = 0
+
+	_nCount = 0
+
+	!	창호 면적 계산
+	!-----------------------------------------------------------------------------------------------
+	for	i = 1	to	(nMln + 1)
+		for	j = 1	to	(nTrs + 1)
+			!	변수 정의
+			_pnlType = iPnlType[i][j]
+			_hingeType = iHingeType[i][j]
+
+			_bSingle = (_pnlType = PNL_FIX | _pnlType = PNL_PROJECT | _pnlType = PNL_PROJECT_SMOKE | _pnlType = PNL_SPANDREL | \
+						_pnlType = PNL_SPANDREL_SUB | _pnlType = PNL_SPANDREL_SUB2 | _pnlType = PNL_SPANDREL_SUB3 | _pnlType = PNL_GRILL)
+
+			!	패널 너비
+			_pnlWdt = 0
+			if	nMln < eps	then
+				_pnlWdt = mlnGap[i] - (_offsetL_PNL_Elev + _offsetR_PNL_Elev)
+			else
+				if	i = 1	then
+					_pnlWdt = mlnGap[i] - (_offsetL_PNL_Elev + _offsetM_PNL_Elev)
+				endif
+				if	i # 1 & i # (nMln + 1)	then
+					_pnlWdt = mlnGap[i] - _offsetM_PNL_Elev*2
+				endif
+				if	i = (nMln + 1)	then
+					_pnlWdt = mlnGap[i] - (_offsetR_PNL_Elev + _offsetM_PNL_Elev)
+				endif
+			endif
+
+			!	패널 높이
+			_pnlHgt = trsGap[j]
+
+			if	nTrs < eps	then
+				_offsetB_PNL = (frmWdtB + gskWdtB)/2
+				if	iFrmTypeB = FRAME_TRANSOM & iTrsType = TRS_TYPE2	then	_offsetB_PNL = frmWdtB
+				_offsetT_PNL = (frmWdtT + gskWdtT)/2
+				if	iFrmTypeT = FRAME_TRANSOM & iTrsType = TRS_TYPE2	then	_offsetT_PNL = frmWdtT
+			else
+				if	j = 1	then
+					_offsetB_PNL = (frmWdtB + gskWdtB)/2
+					if	iFrmTypeB = FRAME_TRANSOM & iTrsType = TRS_TYPE2	then	_offsetB_PNL = frmWdtB
+					_offsetT_PNL = trsGskWdt/2
+					if	iTrsType = TRS_TYPE2	then	_offsetT_PNL = trsWdt/2
+				endif
+				if	j # 1 & j # (nTrs + 1)	then
+					_offsetB_PNL = trsGskWdt/2
+					if	iTrsType = TRS_TYPE2	then	_offsetB_PNL = trsWdt/2
+					_offsetT_PNL = trsGskWdt/2
+					if	iTrsType = TRS_TYPE2	then	_offsetT_PNL = trsWdt/2
+				endif
+				if	j = (nTrs +1)	then
+					_offsetB_PNL = trsGskWdt/2
+					if	iTrsType = TRS_TYPE2	then	_offsetB_PNL = trsWdt/2
+					_offsetT_PNL = (frmWdtT + gskWdtT)/2
+					if	iFrmTypeT = FRAME_TRANSOM & iTrsType = TRS_TYPE2	then	_offsetT_PNL = frmWdtT
+				endif
+			endif
+			_pnlHgt = (_pnlHgt - (_offsetB_PNL + _offsetT_PNL))/cos(aTilt)
+
+			!	단일 창호 유형
+			if	_bSingle	then
+				gosub	"calc_glsArea"
+			endif
+
+			!	복합 창호 유형
+			if	not(_bSingle)	then
+				!	2분할 패널 유형(가로)
+				if	_pnlType = PNL_SEP2_HORIZON	then
+					!	변수정의
+					_idx = iSepType[i][j]
+					_pnlType1 = iSepType_2Horz[_idx][1]
+					_pnlType2 = iSepType_2Horz[_idx][2]
+
+					_pnlWdt1 = 0
+					_pnlWdt2 = 0
+
+					if	nMln < eps	then
+						_pnlWdt1 = sep2_Horz[i][j] - (_offsetL_PNL_Elev + _offsetM_PNL_Elev)
+						_pnlWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - (_offsetR_PNL_Elev + _offsetM_PNL_Elev)
+					else
+						if	i = 1	then
+							_pnlWdt1 = sep2_Horz[i][j] - (_offsetL_PNL_Elev + _offsetM_PNL_Elev)
+							_pnlWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - _offsetM_PNL_Elev*2
+						endif
+						if	i # 1 & i # (nMln + 1)	then
+							_pnlWdt1 = sep2_Horz[i][j] - _offsetM_PNL_Elev*2
+							_pnlWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - _offsetM_PNL_Elev*2
+						endif
+						if	i = (nMln + 1)	then
+							_pnlWdt1 = sep2_Horz[i][j] - _offsetM_PNL_Elev*2
+							_pnlWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - (_offsetR_PNL_Elev + _offsetM_PNL_Elev)
+						endif
+					endif
+
+					!	1번 영역
+					_pnlType = _pnlType1
+					_pnlWdt = _pnlWdt1
+
+					gosub	"calc_glsArea"
+
+					!	2번 영역
+					_pnlType = _pnlType2
+					_pnlWdt = _pnlWdt2
+
+					gosub	"calc_glsArea"
+				endif
+
+				!	3분할 패널 유형(가로)
+				if	_pnlType = PNL_SEP3_HORIZON	then
+					!	변수정의
+					_idx = iSepType[i][j]
+					_pnlType1 = iSepType_3Horz[_idx][1]
+					_pnlType2 = iSepType_3Horz[_idx][2]
+					_pnlType3 = iSepType_3Horz[_idx][3]
+
+					_pnlWdt1 = 0
+					_pnlWdt2 = 0
+					_pnlWdt3 = 0
+
+					if	nMln < eps	then
+						_pnlWdt1 = sep2_Horz[i][j] - (_offsetL_PNL_Elev + _offsetM_PNL_Elev)
+						_pnlWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - _offsetM_PNL_Elev*2
+						_pnlWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - (_offsetR_PNL_Elev + _offsetM_PNL_Elev)
+					else
+						if	i = 1	then
+							_pnlWdt1 = sep2_Horz[i][j] - (_offsetL_PNL_Elev + _offsetM_PNL_Elev)
+							_pnlWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - _offsetM_PNL_Elev*2
+							_pnlWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - _offsetM_PNL_Elev*2
+						endif
+						if	i # 1 & i # (nMln + 1)	then
+							_pnlWdt1 = sep2_Horz[i][j] - _offsetM_PNL_Elev*2
+							_pnlWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - _offsetM_PNL_Elev*2
+							_pnlWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - _offsetM_PNL_Elev*2
+						endif
+						if	i = (nMln + 1)	then
+							_pnlWdt1 = sep2_Horz[i][j] - _offsetM_PNL_Elev*2
+							_pnlWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - _offsetM_PNL_Elev*2
+							_pnlWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - (_offsetR_PNL_Elev + _offsetM_PNL_Elev)
+						endif
+					endif
+
+					!	1번 영역
+					_pnlType = _pnlType1
+					_pnlWdt = _pnlWdt1
+
+					gosub	"calc_glsArea"
+
+					!	2번 영역
+					_pnlType = _pnlType2
+					_pnlWdt = _pnlWdt2
+
+					gosub	"calc_glsArea"
+
+					!	3번 영역
+					_pnlType = _pnlType3
+					_pnlWdt = _pnlWdt3
+
+					gosub	"calc_glsArea"
+				endif
+
+				!	2분할 패널 유형(세로)
+				if	_pnlType = PNL_SEP2_VERTICAL	then
+					!	변수정의
+					_idx = iSepType[i][j]
+					_pnlType1 = iSepType_2Vert[1][_idx]
+					_pnlType2 = iSepType_2Vert[2][_idx]
+
+					_pnlHgt1 = 0
+					_pnlHgt2 = 0
+
+					if	nTrs < eps	then
+						_pnlHgt1 = sep2_Vert[i][j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+						_pnlHgt2 = (trsGap[j] - sep2_Vert[i][j]) - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+					else
+						if	j = 1	then
+							_pnlHgt1 = sep2_Vert[i][j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+							_pnlHgt2 = (trsGap[j] - sep2_Vert[i][j]) - trsGskWdt
+						endif
+						if	j # 1 & j # (nTrs + 1)	then
+							_pnlHgt1 = sep2_Vert[i][j] - trsGskWdt
+							_pnlHgt2 = (trsGap[j] - sep2_Vert[i][j]) - trsGskWdt
+						endif
+						if	j = (nTrs + 1)	then
+							_pnlHgt1 = sep2_Vert[i][j] - trsGskWdt
+							_pnlHgt2 = (trsGap[j] - sep2_Vert[i][j]) - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+						endif
+					endif
+
+					_pnlHgt1 = _pnlHgt1/cos(aTilt)
+					_pnlHgt2 = _pnlHgt2/cos(aTilt)
+
+					!	1번 영역
+					_pnlType = _pnlType1
+					_pnlHgt = _pnlHgt1
+
+					gosub	"calc_glsArea"
+
+					!	2번 영역
+					_pnlType = _pnlType2
+					_pnlHgt = _pnlHgt2
+
+					gosub	"calc_glsArea"
+				endif
+
+				!	3분할 패널 유형(세로)
+				if	_pnlType = PNL_SEP3_VERTICAL	then
+					!	변수정의
+					_idx = iSepType[i][j]
+					_pnlType1 = iSepType_3Vert[1][_idx]
+					_pnlType2 = iSepType_3Vert[2][_idx]
+					_pnlType3 = iSepType_3Vert[3][_idx]
+
+					_pnlHgt1 = 0
+					_pnlHgt2 = 0
+					_pnlHgt3 = 0
+
+					if	nTrs < eps	then
+						_pnlHgt1 = sep2_Vert[i][j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+						_pnlHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsGskWdt
+						_pnlHgt3 = (trsGap[j] - sep3_Vert[i][j]) - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+					else
+						if	j = 1	then
+							_pnlHgt1 = sep2_Vert[i][j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+							_pnlHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsGskWdt
+							_pnlHgt3 = (trsGap[j] - sep3_Vert[i][j]) - trsGskWdt
+						endif
+						if	j # 1 & j # (nTrs + 1)	then
+							_pnlHgt1 = sep2_Vert[i][j] - trsGskWdt
+							_pnlHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsGskWdt
+							_pnlHgt3 = (trsGap[j] - sep3_Vert[i][j]) - trsGskWdt
+						endif
+						if	j = (nTrs + 1)	then
+							_pnlHgt1 = sep2_Vert[i][j] - trsGskWdt
+							_pnlHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsGskWdt
+							_pnlHgt3 = (trsGap[j] - sep3_Vert[i][j]) - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+						endif
+					endif
+
+					_pnlHgt1 = _pnlHgt1/cos(aTilt)
+					_pnlHgt2 = _pnlHgt2/cos(aTilt)
+					_pnlHgt3 = _pnlHgt3/cos(aTilt)
+
+					!	1번 영역
+					_pnlType = _pnlType1
+					_pnlHgt = _pnlHgt1
+
+					gosub	"calc_glsArea"
+
+					!	2번 영역
+					_pnlType = _pnlType2
+					_pnlHgt = _pnlHgt2
+
+					gosub	"calc_glsArea"
+
+					!	3번 영역
+					_pnlType = _pnlType3
+					_pnlHgt = _pnlHgt3
+
+					gosub	"calc_glsArea"
+				endif
+			endif
+
+
+		next	j
+	next	i
+
+	!	변수 입력
+	!-----------------------------------------------------------------------------------------------
+	parameters	glsArea = _glsArea,
+				glsArea_Spd1 = _glsArea_Spd1,
+				glsArea_Spd2 = _glsArea_Spd2,
+				glsArea_Spd3 = _glsArea_Spd3,
+				glsArea_Spd4 = _glsArea_Spd4
+
+	parameters	nCount = _nCount
+
+	!	변수 잠금 및 숨기기
+	!-----------------------------------------------------------------------------------------------
+	lock	"glsArea", "glsArea_Spd1", "glsArea_Spd2", "glsArea_Spd3", "glsArea_Spd4"
+
+	hideparameter	"nCount"
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"calc_glsArea":	!	유리면적 계산
+!-----------------------------------------------------------------------------------------------
+	!	일반 유리
+	if	_pnlType = PNL_FIX | _pnlType = PNL_PROJECT_SMOKE | _pnlType = PNL_PROJECT	then
+		_glsArea = _glsArea + _pnlWdt*_pnlHgt	:	_nCount = _nCount + 1
+	endif
+
+	!	스팬드럴(TYPE1)	유리
+	if	_pnlType = PNL_SPANDREL	then
+		_glsArea_Spd1 = _glsArea_Spd1 + _pnlWdt*_pnlHgt	:	_nCount = _nCount + 1
+	endif
+
+	!	스팬드럴(TYPE2)	유리
+	if	_pnlType = PNL_SPANDREL_SUB	then
+		_glsArea_Spd2 = _glsArea_Spd2 + _pnlWdt*_pnlHgt	:	_nCount = _nCount + 1
+	endif
+
+	!	스팬드럴(TYPE3)	유리
+	if	_pnlType = PNL_SPANDREL_SUB2	then
+		_glsArea_Spd3 = _glsArea_Spd3 + _pnlWdt*_pnlHgt	:	_nCount = _nCount + 1
+	endif
+
+	!	스팬드럴(TYPE4)	유리
+	if	_pnlType = PNL_SPANDREL_SUB3	then
+		_glsArea_Spd4 = _glsArea_Spd4 + _pnlWdt*_pnlHgt	:	_nCount = _nCount + 1
+	endif
+
+return

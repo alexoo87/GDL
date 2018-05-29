@@ -1,0 +1,177 @@
+
+!	변수 정의
+_offsetZ = m_box_Dist
+
+
+!	Box Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iBoxType"	Box_Flush,		stBoxType[Box_Flush],
+						Box_Surface,	stBoxType[Box_Surface]
+
+if	iBoxType = Box_Surface	then
+	lock	"m_box_Leaf_Left", "m_box_Leaf_Right"
+endif
+
+!	Shutter Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iShtType"	Shutter_Slat,	stShtType[Shutter_Slat],
+						Shutter_Screen,	stShtType[Shutter_Screen]
+
+if	iShtType = Shutter_Slat	then
+	lock	"scrThk"
+endif
+if	iShtType = Shutter_Screen	then
+	lock	"m_slat_hght", "m_slat_thk"
+endif
+
+!	Door Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDoorType"	DOOR_SLAT,		stDoorType[DOOR_SLAT],
+						DOOR_SCREEN,	stDoorType[DOOR_SCREEN]
+
+
+!	Hinge Position
+!-----------------------------------------------------------------------------------------------
+values{2}	"iHingePos"	HINGE_LEFT,		stHingePos[HINGE_LEFT],
+						HINGE_RIGHT,	stHingePos[HINGE_RIGHT]
+
+
+!	2D Symbol Direction
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDirect2D"	DIRECT_IN,	stDirect2D[DIRECT_IN],
+						DIRECT_OUT,	stDirect2D[DIRECT_OUT],
+						DIRECT_ALL,	stDirect2D[DIRECT_ALL]
+
+!	코너 방향
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDirect_CornerL"	CORNER_NORMAL,	stDirect_Corner[CORNER_NORMAL],
+								CORNER_MIRROR,	stDirect_Corner[CORNER_MIRROR]
+
+if	not(bCornerL)	then
+	lock	"iDirect_CornerL"
+endif
+
+values	"slpLthL"	range	[-(A/2 - m_guide_depth),	(A/2 - m_guide_depth))
+if	slpLthL > eps	then
+	parameters	bCornerL = 0,
+				m_Lguide_moveX = 0
+	lock	"bCornerL", "m_Lguide_moveX"
+endif
+
+values{2}	"iDirect_CornerR"	CORNER_NORMAL,	stDirect_Corner[CORNER_NORMAL],
+								CORNER_MIRROR,	stDirect_Corner[CORNER_MIRROR]
+
+if	not(bCornerR)	then
+	lock	"iDirect_CornerR"
+endif
+
+values	"slpLthR"	range	[-(A/2 - m_guide_depth),	(A/2 - m_guide_depth))
+if	slpLthR > eps	then
+	parameters	bCornerR = 0,
+				m_Rguide_moveX = 0
+	lock	"bCornerR", "m_Rguide_moveX"
+endif
+
+!	Line Type(Section)
+!-----------------------------------------------------------------------------------------------
+values{2}	"iLineType"	LINETYPE_SOLID,		stLineType[LINETYPE_SOLID],
+						LINETYPE_DASHED,	stLineType[LINETYPE_DASHED]
+
+if	not(iLineType = LINETYPE_DASHED)	then
+	lock	"dash_Solid", "dash_Offset"
+endif
+
+values	"dash_Solid"	range	[eps,	]
+values	"dash_Offset"	range	[eps,	]
+
+!	Screen
+values	"scrThk"	range	[eps,	m_rail_hall]
+
+!	Slat
+values	"m_slat_hght"	range	(0,	)
+values	"m_slat_thk"	range	(0,	m_rail_hall]
+
+values	"A"					range	[0.5,]
+values	"zzyzx"				range	(0,	]
+values	"m_box_Depth"		range	(0,	]
+values	"m_box_Height"		range	(0,	]
+values	"m_box_Dist"		range	[0,	]
+
+values	"m_box_leaf_left"	range	(0,	)
+values	"m_box_leaf_right"	range	(0,	)
+
+values	"m_screen_cutplane"	range	(-_offsetZ,	zzyzx]
+values	"m_screen_section"	range	(-_offsetZ,	zzyzx]
+values	"m_screen_move_y"	range	[0,	m_box_Depth - m_guide_width]
+
+!	Guide Rail
+values	"m_guide_depth"		range	(m_rail_depth,	A/2)
+values	"m_guide_width"		range	(m_rail_hall,	m_box_Depth)
+
+values	"m_rail_hall"		range	(0,	m_guide_width)
+values	"m_rail_hall_half"	range	(0,	m_guide_width/2)
+values	"m_rail_depth"		range	(0,	m_guide_depth)
+
+!	자동계산
+lock	"m_guide_thk"
+if	GLOB_MODPAR_NAME = "m_guide_width" | GLOB_MODPAR_NAME = "m_rail_hall" | GLOB_MODPAR_NAME = "m_rail_hall_half"	then
+	_guideThk = (m_guide_width - m_rail_hall)/2
+	parameters	m_guide_thk = _guideThk
+endif
+
+if	GLOB_MODPAR_NAME = "m_rail_hall"	then
+	parameters	m_rail_hall_half = m_rail_hall/2
+endif
+if	GLOB_MODPAR_NAME = "m_rail_hall_half"	then
+	parameters	m_rail_hall = m_rail_hall_half*2
+endif
+
+values	"m_Lguide_moveX"	range	[0,	A/3]
+values	"m_Rguide_moveX"	range	[0,	A/3]
+
+!	Door
+if	not(bDoor)	then
+	lock			"bSymbol2D", "iDirect2D", "iDirect2D", "bSymbol3D", "iDoorType", "iHingePos", "doorWdt", "doorHgt", "xDoorPos", "yDoorPos", "matDoor"
+	hideparameter	"bSymbol2D", "iDirect2D", "iDirect2D", "bSymbol3D", "iDoorType", "iHingePos", "doorWdt", "doorHgt", "xDoorPos", "yDoorPos", "matDoor"
+endif
+
+if	not(bSymbol2D)	then
+	lock	"iDirect2D"
+endif
+
+values	"doorWdt"	range	(0,	A - xDoorPos)
+values	"doorHgt"	range	(0,	)
+
+_xMinDoorPos = m_guide_depth
+if	slpLthL > eps	then
+	_xMinDoorPos = _xMinDoorPos - m_rail_depth
+endif
+_xMaxDoorPos = A - doorWdt - _xMinDoorPos
+if	slpLthR > eps	then
+	_xMaxDoorPos = _xMaxDoorPos + m_rail_depth - 0.010 - slpLthR
+endif
+
+values	"xDoorPos"	range	(_xMinDoorPos,	_xMaxDoorPos)
+values	"yDoorPos"	range	[0,	)
+
+
+!	Angle Line
+if	not(bAngleLine)	then
+	lock	"angHgt",	"angThk"
+endif
+
+values	"angHgt"	range	(angThk,	)
+values	"angThk"	range	(0,	)
+
+!	2D
+values	"cutPlaneHgt"	range	(0,	zzyzx)
+
+!	셔터박스 상부 벽
+if	not(bUprWall)	then
+	lock	"uprWallLct", "uprWallThk", "uprWallHgt"
+endif
+
+values	"uprWallLct"	range	[0,	(m_box_Depth - uprWallThk)]
+
+values	"uprWallThk"	range	(0,	(m_box_Depth - uprWallLct))
+values	"uprWallHgt"	range	(0,	)

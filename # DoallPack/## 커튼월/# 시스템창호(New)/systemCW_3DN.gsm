@@ -1,0 +1,2655 @@
+!===============================================================================================
+!	시스템창호N
+!===============================================================================================
+
+!	Resolution
+resol	12
+if	GLOB_FEEDBACK_MODE	then
+	resol	4
+endif
+
+!	텍스트 정의
+define style	"txtSty_Fix"	"맑은 고딕",	txtSize,	5,	0
+
+!	수직프레임 유형
+VFRAME_CORNER = 1
+VFRAME_MULLION = 2
+
+!	수평프레임 유형
+HFRAME_CORNER = 1
+HFRAME_TRANSOM = 2
+
+HFRAME_BOTTOM = 1
+HFRAME_OTHER = 2
+
+!	코너프레임 유형에 따른 Offset 값
+_addPnlL = 0
+_addPnlR = 0
+_addEtcL = 0
+_addEtcR = 0
+
+_maxFrmThk = max(frmThkB,	frmThkT,	trsThk)
+
+if	iFrmTypeL = FRAME_BOUNDARY	then
+	_offsetL_PNL = (frmWdtL + gskWdtL)/2
+	_offsetL_ETC = frmWdtL
+else
+	if	abs(aFrmL) < eps	then
+		_offsetL_PNL = gskWdtL/2
+		_offsetL_ETC = frmWdtL/2
+	else
+		if	aFrmL > (300 - eps)	then
+			! _addPnlL = (gskThk - glsThk)*tan(aFrmL) - gskWdtL/2
+			_addPnlL = -gskWdtL/2 + glsThk/tan(aFrmL)
+			_addEtcL = (_maxFrmThk + gskThk)*tan(aFrmL) - frmWdtL/2
+		else
+			! _addPnlL = (gskThk - glsThk)*tan(aFrmL) + (gskWdtL/2)/cos(aFrmL) - gskWdtL/2
+			_addPnlL = -gskWdtL/2
+			_addEtcL = gskThk*tan(aFrmL) + (frmWdtL/2)/cos(aFrmL) - frmWdtL/2
+		endif
+
+		_offsetL_PNL = gskWdtL/2 + _addPnlL
+		_offsetL_ETC = frmWdtL/2 + _addEtcL
+	endif
+endif
+
+if	iFrmTypeR = FRAME_BOUNDARY	then
+	_offsetR_PNL = (frmWdtR + gskWdtR)/2
+	_offsetR_ETC = frmWdtR
+else
+	if	abs(aFrmR) < eps	then
+		_offsetR_PNL = gskWdtR/2
+		_offsetR_ETC = frmWdtR/2
+	else
+		if	aFrmL > (300 - eps)	then
+			! _addPnlR = (gskThk - glsThk)*tan(aFrmR) - gskWdtR/2
+			_addPnlR = -gskWdtR/2 + glsThk/tan(aFrmR)
+			_addEtcR = (_maxFrmThk + gskThk)*tan(aFrmR) - frmWdtR/2
+		else
+			! _addPnlR = (gskThk - glsThk)*tan(aFrmR) - (gskWdtL/2)/cos(aFrmL) - gskWdtR/2
+			_addPnlR = -gskWdtR/2
+			_addEtcR = gskThk*tan(aFrmR) - (frmWdtR/2)/cos(aFrmR) - frmWdtR/2
+		endif
+
+		_offsetR_PNL = gskWdtR/2 + _addPnlR
+		_offsetR_ETC = frmWdtR/2 + _addEtcR
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+if	bSymbol	then
+	_n2Dcut = 0
+	if	iProjectTo = PROJECTTO_FLOORPLAN | (iProjectTo = PROJECTTO_ABSOLUTE & btmPlaneHgt < cutPlaneHgt)	then
+		addz	btmPlaneHgt
+			cutplane{2}	180,	2	:	_n2Dcut = _n2Dcut + 1
+		del 1
+	endif
+
+	addz	cutPlaneHgt
+		cutplane{2}	180*(iProjectType = 2),	1	:	_n2Dcut = _n2Dcut + 1
+	del 1
+
+	if	iProjectTo = PROJECTTO_FLOORPLAN | (iProjectTo = PROJECTTO_ABSOLUTE & btmPlaneHgt < cutPlaneHgt)	then
+		addz	topPlaneHgt
+			cutplane{2}	0,	2	:	_n2Dcut = _n2Dcut + 1
+		del 1
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	Hotspot
+!-----------------------------------------------------------------------------------------------
+!	코너프레임 회전각도
+if	iFrmTypeL = FRAME_MULLION	then
+	_spotLthL = (frmThkL + gskThk)/cos(aFrmL)
+	hotspot	0,						-_spotLthL,				0,	unID,	aFrmL,	4	:	unID = unID + 1
+	hotspot	_spotLthL*sin(aFrmL),	-_spotLthL*cos(aFrmL),	0,	unID,	aFrmL,	5	:	unID = unID + 1
+	hotspot	0,						0,						0,	unID,	aFrmL,	6	:	unID = unID + 1
+	hotspot	0,						0,						1,	unID,	aFrmL,	7	:	unID = unID + 1
+endif
+
+if	iFrmTypeR = FRAME_MULLION	then
+	_spotLthR = (frmThkR + gskThk)/cos(aFrmR)
+	addx	ctwWdt
+		hotspot	0,						-_spotLthR,				0,	unID,	aFrmR,	4		:	unID = unID + 1
+		hotspot	-_spotLthR*sin(aFrmR),	-_spotLthR*cos(aFrmR),	0,	unID,	aFrmR,	5		:	unID = unID + 1
+		hotspot	0,						0,						0,	unID,	aFrmR,	6+512	:	unID = unID + 1
+		hotspot	0,						0,						-1,	unID,	aFrmR,	7		:	unID = unID + 1
+	del 1
+endif
+
+!	수직프레임 간격
+for	i = 1	to	nMln + 1
+	hotspot	0,			0,	0,	unID,	mlnGap[i],	1+128	:	unID = unID + 1
+	hotspot	-1,			0,	0,	unID,	mlnGap[i],	3		:	unID = unID + 1
+	hotspot	mlnGap[i],	0,	0,	unID,	mlnGap[i],	2		:	unID = unID + 1
+
+	addx	mlnGap[i]
+next	i
+
+del	nMln + 1
+
+!	수평프레임 간격
+for	i = 1	to	nTrs + 1
+	for	j = 1	to	2
+		addx	ctwWdt*(j - 1)
+			hotspot	0,	0,	0,			unID,	trsGap[i],	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	trsGap[i],	3		:	unID = unID + 1
+			hotspot	0,	0,	trsGap[i],	unID,	trsGap[i],	2		:	unID = unID + 1
+		del 1
+	next	j
+
+	addz	trsGap[i]
+next	i
+
+del nTrs + 1
+
+!-----------------------------------------------------------------------------------------------
+!	수직프레임
+!-----------------------------------------------------------------------------------------------
+group	"_vFrame"
+	!	좌측프레임
+	if	bFrmL	then
+		_frmType = iFrmTypeL
+		_frmClass = VFRAME_CORNER
+		_frmWdt = frmWdtL
+		_frmThk = frmThkL
+		_gskWdt = gskWdtL
+		_aFrm = aFrmL
+
+		gosub	"vFrame"
+	endif
+
+	!	우측프레임
+	if	bFrmR	then
+		_frmType = iFrmTypeR
+		_frmClass = VFRAME_CORNER
+		_frmWdt = frmWdtR
+		_frmThk = frmThkR
+		_gskWdt = gskWdtR
+		_aFrm = aFrmR
+
+		addx	ctwWdt
+			mulx	-1
+				gosub	"vFrame"
+			del 1
+		del 1
+	endif
+
+	!	멀리언
+	_bMln = (nMln > eps)
+	if	_bMln	then
+		_frmClass = VFRAME_MULLION
+		_frmWdt = mlnWdt
+		_frmThk = mlnThk
+		_gskWdt = mlnGskWdt
+		_aFrm = 0
+
+		for	i = 1	to	nMln
+			addx	mlnGap[i]
+
+			gosub	"vFrame"
+		next	i
+
+		del nMln
+	endif
+endgroup
+
+group	"_vFrameCut"
+	!	좌측프레임
+	_frmType = iFrmTypeL
+	_frmClass = VFRAME_CORNER
+	_frmWdt = frmWdtL
+	_frmThk = frmThkL
+	_gskWdt = gskWdtL
+	_aFrm = aFrmL
+
+	gosub	"vFrame"
+
+	!	우측프레임
+	_frmType = iFrmTypeR
+	_frmClass = VFRAME_CORNER
+	_frmWdt = frmWdtR
+	_frmThk = frmThkR
+	_gskWdt = gskWdtR
+	_aFrm = aFrmR
+
+	addx	ctwWdt
+		mulx	-1
+			gosub	"vFrame"
+		del 1
+	del 1
+
+	!	멀리언
+	_bMln = (nMln > eps)
+	if	_bMln	then
+		_frmClass = VFRAME_MULLION
+		_frmWdt = mlnWdt
+		_frmThk = mlnThk
+		_gskWdt = mlnGskWdt
+		_aFrm = 0
+
+		for	i = 1	to	nMln
+			addx	mlnGap[i]
+
+			gosub	"vFrame"
+		next	i
+
+		del nMln
+	endif
+endgroup
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	수평프레임
+!-----------------------------------------------------------------------------------------------
+group	"_hFrame"
+	!	하부프레임
+	if	bFrmB	then
+		!	자르기 좌표 정의
+		_cutHgt1 = 0
+		_cutHgt2 = (frmWdtB - gskWdtB)/2
+		_cutHgt3 = (frmWdtB + gskWdtB)/2
+		_cutHgt4 = frmWdtB
+
+		_frmType = iFrmTypeB
+		_frmClass = HFRAME_CORNER
+		_frmWdt = frmWdtB
+		_frmThk = frmThkB
+
+		_idxH = HFRAME_BOTTOM
+
+		gosub	"hFrame"
+	endif
+
+	!	상부프레임
+	if	bFrmT	then
+		!	자르기 좌표 정의
+		_cutHgt1 = frmWdtT
+		_cutHgt2 = (frmWdtT + gskWdtT)/2
+		_cutHgt3 = (frmWdtT - gskWdtT)/2
+		_cutHgt4 = 0
+
+		_frmType = iFrmTypeT
+		_frmClass = HFRAME_CORNER
+		_frmWdt = frmWdtT
+		_frmThk = frmThkT
+
+		_idxH = HFRAME_OTHER
+
+		addz	ctwHgt - _frmWdt
+			gosub	"hFrame"
+		del 1
+	endif
+
+	_bTrs = (nTrs > eps)
+	if	_bTrs	then
+		!	자르기 좌표 정의
+		_cutHgt1 = 0
+		_cutHgt2 = (trsWdt - trsGskWdt)/2
+		_cutHgt3 = (trsWdt + trsGskWdt)/2
+		_cutHgt4 = trsWdt
+
+		_frmClass = HFRAME_TRANSOM
+		_frmWdt = trsWdt
+		_frmThk = trsThk
+
+		_idxH = HFRAME_OTHER
+
+		for	j = 1	to	nTrs
+			addz	trsGap[j]
+
+			addz	-_frmWdt/2
+				gosub	"hFrame"
+			del 1
+		next	j
+
+		del	nTrs
+	endif
+
+endgroup
+
+!-----------------------------------------------------------------------------------------------
+!	패널
+!-----------------------------------------------------------------------------------------------
+group	"_panel"
+
+for	i = 1	to	(nMln + 1)
+	for	j = 1	to	(nTrs + 1)
+
+		!	변수 정의
+		_pnlType = iPnlType[i][j]
+		_hingeType = iHingeType[i][j]
+
+		_bDoor = (bDoor[i] & j = 1)
+		_bPanel = not(_bDoor)
+		_bSingle = (_pnlType = PNL_FIX | _pnlType = PNL_PROJECT | _pnlType = PNL_PROJECT_SMOKE | _pnlType = PNL_SPANDREL | \
+					_pnlType = PNL_SPANDREL_SUB | _pnlType = PNL_SPANDREL_SUB2 | _pnlType = PNL_SPANDREL_SUB3 | _pnlType = PNL_GRILL)
+
+		!	패널 너비
+		_pnlWdt = 0
+		_etcWdt = 0
+
+		if	nMln < eps	then
+			_pnlWdt = mlnGap[i] - (_offsetL_PNL + _offsetR_PNL)
+			_etcWdt = mlnGap[i] - (_offsetL_ETC + _offsetR_ETC)
+			_minFrmThk1 = min(frmThkL,	frmThkR)
+		else
+			if	i = 1	then
+				_pnlWdt = mlnGap[i] - (_offsetL_PNL + mlnGskWdt/2)
+				_etcWdt = mlnGap[i] - (_offsetL_ETC + mlnWdt/2)
+				_minFrmThk1 = min(frmThkL,	mlnThk)
+			endif
+			if	i # 1 & i # (nMln + 1)	then
+				_pnlWdt = mlnGap[i] - mlnGskWdt
+				_etcWdt = mlnGap[i] - mlnWdt
+				_minFrmThk1 = mlnThk
+			endif
+			if	i = (nMln + 1)	then
+				_pnlWdt = mlnGap[i] - (_offsetR_PNL + mlnGskWdt/2)
+				_etcWdt = mlnGap[i] - (_offsetR_ETC + mlnWdt/2)
+				_minFrmThk1 = min(frmThkR,	mlnThk)
+			endif
+		endif
+
+		!	패널 높이
+		_pnlHgt = 0
+		_etcHgt = 0
+		if	nTrs < eps	then
+			_pnlLct = (frmWdtB + gskWdtB)/2
+			_etcLct = frmWdtB
+			_pnlHgt = trsGap[j] - ((frmWdtB + gskWdtB)/2 + (frmWdtT + gskWdtT)/2)
+			_etcHgt = trsGap[j] - (frmWdtB + frmWdtT)
+			_minFrmThk2 = min(frmThkB,	frmThkT)
+		else
+			if	j = 1	then
+				_pnlLct = (frmWdtB + gskWdtB)/2
+				_etcLct = frmWdtB
+				_pnlHgt = trsGap[j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+				_etcHgt = trsGap[j] - (frmWdtB + trsWdt/2)
+				_minFrmThk2 = min(frmThkB,	trsThk)
+			endif
+			if	j # 1 & j # (nTrs + 1)	then
+				_pnlLct = trsGskWdt/2
+				_etcLct = trsWdt/2
+				_pnlHgt = trsGap[j] - trsGskWdt
+				_etcHgt = trsGap[j] - trsWdt
+				_minFrmThk2 = trsThk
+			endif
+			if	j = (nTrs + 1)	then
+				_pnlLct = trsGskWdt/2
+				_etcLct = trsWdt/2
+				_pnlHgt = trsGap[j] - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+				_etcHgt = trsGap[j] - (frmWdtT + trsWdt/2)
+				_minFrmThk2 = min(frmThkT,	trsThk)
+			endif
+		endif
+
+		!	최소 프레임 두께
+		_minFrmThk = min(_minFrmThk1,	_minFrmThk2)
+
+		!	패널 x위치
+		if	nMln < eps	then
+			_xPosPnl = _offsetL_PNL
+			_xPosEtc = _offsetL_ETC
+		else
+			if	i = 1	then
+				_xPosPnl = _offsetL_PNL
+				_xPosEtc = _offsetL_ETC
+			else
+				_xPosPnl = mlnGskWdt/2
+				_xPosEtc = mlnWdt/2
+			endif
+		endif
+
+		!-----------------------------------------------------------------------------------------------
+		!	단일 창호 유형
+		!-----------------------------------------------------------------------------------------------
+		if	_bSingle & _bPanel	then
+			gosub	"pnl_Matrix"
+		endif
+
+		!-----------------------------------------------------------------------------------------------
+		!	복합창호 유형
+		!-----------------------------------------------------------------------------------------------
+		if	not(_bSingle) & _bPanel	then
+
+			!	2분할 패널 유형(가로)
+			!-----------------------------------------------------------------------------------------------
+			if	_pnlType = PNL_SEP2_HORIZON	then
+				!	변수정의
+				_idx = iSepType[i][j]
+				_pnlType1 = iSepType_2Horz[_idx][1]
+				_pnlType2 = iSepType_2Horz[_idx][2]
+				_hingeType1 = iHingeType_2Horz[_idx][1]
+				_hingeType2 = iHingeType_2Horz[_idx][2]
+
+				_pnlWdt1 = 0
+				_pnlWdt2 = 0
+
+				_xPosPnl1 = 0
+				_xPosPnl2 = sep2_Horz[i][j] + mlnGskWdt/2
+
+				if	nMln < eps	then
+					_pnlWdt1 = sep2_Horz[i][j] - (_offsetL_PNL + mlnGskWdt/2)
+					_pnlWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - (_offsetR_PNL + mlnGskWdt/2)
+
+					_xPosPnl1 = _offsetL_PNL
+				else
+					if	i = 1	then
+						_pnlWdt1 = sep2_Horz[i][j] - (_offsetL_PNL + mlnGskWdt/2)
+						_pnlWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - mlnGskWdt
+
+						_xPosPnl1 = _offsetL_PNL
+					endif
+					if	i # 1 & i # (nMln + 1)	then
+						_pnlWdt1 = sep2_Horz[i][j] - mlnGskWdt
+						_pnlWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - mlnGskWdt
+
+						_xPosPnl1 = mlnGskWdt/2
+					endif
+					if	i = (nMln + 1)	then
+						_pnlWdt1 = sep2_Horz[i][j] - mlnGskWdt
+						_pnlWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - (_offsetR_PNL + mlnGskWdt/2)
+
+						_xPosPnl1 = mlnGskWdt/2
+					endif
+				endif
+
+				_etcWdt1 = 0
+				_etcWdt2 = 0
+
+				_xPosEtc1 = 0
+				_xPosEtc2 = sep2_Horz[i][j] + mlnWdt/2
+
+				if	nMln < eps	then
+					_etcWdt1 = sep2_Horz[i][j] - (_offsetL_ETC + mlnWdt/2)
+					_etcWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - (_offsetR_ETC + mlnWdt/2)
+
+					_xPosEtc1 = _offsetL_ETC
+				else
+					if	i = 1	then
+						_etcWdt1 = sep2_Horz[i][j] - (_offsetL_ETC + mlnWdt/2)
+						_etcWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - mlnWdt
+
+						_xPosEtc1 = _offsetL_ETC
+					endif
+					if	i # 1 & i # (nMln + 1)	then
+						_etcWdt1 = sep2_Horz[i][j] - mlnWdt
+						_etcWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - mlnWdt
+
+						_xPosEtc1 = mlnWdt/2
+					endif
+					if	i = (nMln + 1)	then
+						_etcWdt1 = sep2_Horz[i][j] - mlnWdt
+						_etcWdt2 = (mlnGap[i] - sep2_Horz[i][j]) - (_offsetR_ETC + mlnWdt/2)
+
+						_xPosEtc1 = mlnWdt/2
+					endif
+				endif
+
+				!	Hotspot
+				addz	trsGap[j]/2
+					hotspot	0,					0,	0,	unID,	sep2_Horz[i][j],	1+128	:	unID = unID + 1
+					hotspot	-1,					0,	0,	unID,	sep2_Horz[i][j],	3		:	unID = unID + 1
+					hotspot	sep2_Horz[i][j],	0,	0,	unID,	sep2_Horz[i][j],	2		:	unID = unID + 1
+				del 1
+
+				!	수직프레임
+				_xPosFrm = sep2_Horz[i][j]
+				gosub	"pnl_vFrame"
+
+				!	1번 영역
+				_pnlType = _pnlType1
+				_hingeType = _hingeType1
+				_pnlWdt = _pnlWdt1
+				_etcWdt = _etcWdt1
+				_xPosPnl = _xPosPnl1
+				_xPosEtc = _xPosEtc1
+
+				gosub	"pnl_Matrix"
+
+				!	2번 영역
+				_pnlType = _pnlType2
+				_hingeType = _hingeType2
+				_pnlWdt = _pnlWdt2
+				_etcWdt = _etcWdt2
+				_xPosPnl = _xPosPnl2
+				_xPosEtc = _xPosEtc2
+
+				gosub	"pnl_Matrix"
+			endif
+
+			!	3분할 패널 유형(가로)
+			!-----------------------------------------------------------------------------------------------
+			if	_pnlType = PNL_SEP3_HORIZON	then
+				!	변수정의
+				_idx = iSepType[i][j]
+				_pnlType1 = iSepType_3Horz[_idx][1]
+				_pnlType2 = iSepType_3Horz[_idx][2]
+				_pnlType3 = iSepType_3Horz[_idx][3]
+				_hingeType1 = iHingeType_3Horz[_idx][1]
+				_hingeType2 = iHingeType_3Horz[_idx][2]
+				_hingeType3 = iHingeType_3Horz[_idx][3]
+
+				_pnlWdt1 = 0
+				_pnlWdt2 = 0
+				_pnlWdt3 = 0
+
+				_xPosPnl1 = 0
+				_xPosPnl2 = sep2_Horz[i][j] + mlnGskWdt/2
+				_xPosPnl3 = sep3_Horz[i][j] + mlnGskWdt/2
+
+				if	nMln < eps	then
+					_pnlWdt1 = sep2_Horz[i][j] - (_offsetL_PNL + mlnGskWdt/2)
+					_pnlWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - mlnGskWdt
+					_pnlWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - (_offsetR_PNL + mlnGskWdt/2)
+
+					_xPosPnl1 = _offsetL_PNL
+				else
+					if	i = 1	then
+						_pnlWdt1 = sep2_Horz[i][j] - (_offsetL_PNL + mlnGskWdt/2)
+						_pnlWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - mlnGskWdt
+						_pnlWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - mlnGskWdt
+
+						_xPosPnl1 = _offsetL_PNL
+					endif
+					if	i # 1 & i # (nMln + 1)	then
+						_pnlWdt1 = sep2_Horz[i][j] - mlnGskWdt
+						_pnlWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - mlnGskWdt
+						_pnlWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - mlnGskWdt
+
+						_xPosPnl1 = mlnGskWdt/2
+					endif
+					if	i = (nMln + 1)	then
+						_pnlWdt1 = sep2_Horz[i][j] - mlnGskWdt
+						_pnlWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - mlnGskWdt
+						_pnlWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - (_offsetR_PNL + mlnGskWdt/2)
+
+						_xPosPnl1 = mlnGskWdt/2
+					endif
+				endif
+
+				_etcWdt1 = 0
+				_etcWdt2 = 0
+				_etcWdt3 = 0
+
+				_xPosEtc1 = 0
+				_xPosEtc2 = sep2_Horz[i][j] + mlnWdt/2
+				_xPosEtc3 = sep3_Horz[i][j] + mlnWdt/2
+
+				if	nMln < eps	then
+					_etcWdt1 = sep2_Horz[i][j] - (_offsetL_ETC + mlnWdt/2)
+					_etcWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - mlnWdt
+					_etcWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - (_offsetR_ETC + mlnWdt/2)
+
+					_xPosEtc1 = _offsetL_ETC
+				else
+					if	i = 1	then
+						_etcWdt1 = sep2_Horz[i][j] - (_offsetL_ETC + mlnWdt/2)
+						_etcWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - mlnWdt
+						_etcWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - mlnWdt
+
+						_xPosEtc1 = _offsetL_ETC
+					endif
+					if	i # 1 & i # (nMln + 1)	then
+						_etcWdt1 = sep2_Horz[i][j] - mlnWdt
+						_etcWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - mlnWdt
+						_etcWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - mlnWdt
+
+						_xPosEtc1 = mlnWdt/2
+					endif
+					if	i = (nMln + 1)	then
+						_etcWdt1 = sep2_Horz[i][j] - mlnWdt
+						_etcWdt2 = (sep3_Horz[i][j] - sep2_Horz[i][j]) - mlnWdt
+						_etcWdt3 = (mlnGap[i] - sep3_Horz[i][j]) - (_offsetR_ETC + mlnWdt/2)
+
+						_xPosEtc1 = mlnWdt/2
+					endif
+				endif
+
+				!	Hotspot
+				addz	trsGap[j]/2
+					hotspot	0,					0,	0,	unID,	sep2_Horz[i][j],	1+128	:	unID = unID + 1
+					hotspot	-1,					0,	0,	unID,	sep2_Horz[i][j],	3		:	unID = unID + 1
+					hotspot	sep2_Horz[i][j],	0,	0,	unID,	sep2_Horz[i][j],	2		:	unID = unID + 1
+
+					hotspot	0,					0,	0,	unID,	sep3_Horz[i][j],	1+128	:	unID = unID + 1
+					hotspot	-1,					0,	0,	unID,	sep3_Horz[i][j],	3		:	unID = unID + 1
+					hotspot	sep3_Horz[i][j],	0,	0,	unID,	sep3_Horz[i][j],	2		:	unID = unID + 1
+				del 1
+
+				!	수직프레임
+				_xPosFrm = sep2_Horz[i][j]
+				gosub	"pnl_vFrame"
+
+				_xPosFrm = sep3_Horz[i][j]
+				gosub	"pnl_vFrame"
+
+				!	1번 영역
+				_pnlType = _pnlType1
+				_hingeType = _hingeType1
+				_pnlWdt = _pnlWdt1
+				_etcWdt = _etcWdt1
+				_xPosPnl = _xPosPnl1
+				_xPosEtc = _xPosEtc1
+
+				gosub	"pnl_Matrix"
+
+				!	2번 영역
+				_pnlType = _pnlType2
+				_hingeType = _hingeType2
+				_pnlWdt = _pnlWdt2
+				_etcWdt = _etcWdt2
+				_xPosPnl = _xPosPnl2
+				_xPosEtc = _xPosEtc2
+
+				gosub	"pnl_Matrix"
+
+				!	3번 영역
+				_pnlType = _pnlType3
+				_hingeType = _hingeType3
+				_pnlWdt = _pnlWdt3
+				_etcWdt = _etcWdt3
+				_xPosPnl = _xPosPnl3
+				_xPosEtc = _xPosEtc3
+
+				gosub	"pnl_Matrix"
+			endif
+
+			!	2분할 패널 유형(세로)
+			!-----------------------------------------------------------------------------------------------
+			if	_pnlType = PNL_SEP2_VERTICAL	then
+				!	변수정의
+				_idx = iSepType[i][j]
+				_pnlType1 = iSepType_2Vert[1][_idx]
+				_pnlType2 = iSepType_2Vert[2][_idx]
+				_hingeType1 = iHingeType_2Vert[1][_idx]
+				_hingeType2 = iHingeType_2Vert[2][_idx]
+
+				_pnlHgt1 = 0
+				_pnlHgt2 = 0
+
+				_etcHgt1 = 0
+				_etcHgt2 = 0
+
+				_pnlLct1 = 0
+				_pnlLct2 = sep2_Vert[i][j] + trsGskWdt/2
+
+				_etcLct1 = 0
+				_etcLct2 = sep2_Vert[i][j] + trsWdt/2
+
+				if	nTrs < eps	then
+					_pnlHgt1 = sep2_Vert[i][j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+					_pnlHgt2 = (trsGap[j] - sep2_Vert[i][j]) - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+
+					_etcHgt1 = sep2_Vert[i][j] - (frmWdtB + trsWdt/2)
+					_etcHgt2 = (trsGap[j] - sep2_Vert[i][j]) - (frmWdtT + trsWdt/2)
+
+					_pnlLct1 = (frmWdtB + gskWdtB)/2
+					_etcLct1 = frmWdtB
+				else
+					if	j = 1	then
+						_pnlHgt1 = sep2_Vert[i][j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+						_pnlHgt2 = (trsGap[j] - sep2_Vert[i][j]) - trsGskWdt
+
+						_etcHgt1 = sep2_Vert[i][j] - (frmWdtB + trsWdt/2)
+						_etcHgt2 = (trsGap[j] - sep2_Vert[i][j]) - trsWdt
+
+						_pnlLct1 = (frmWdtB + gskWdtB)/2
+						_etcLct1 = frmWdtB
+					endif
+					if	j # 1 & j # (nTrs + 1)	then
+						_pnlHgt1 = sep2_Vert[i][j] - trsGskWdt
+						_pnlHgt2 = (trsGap[j] - sep2_Vert[i][j]) - trsGskWdt
+
+						_etcHgt1 = sep2_Vert[i][j] - trsWdt
+						_etcHgt2 = (trsGap[j] - sep2_Vert[i][j]) - trsWdt
+
+						_pnlLct1 = trsGskWdt/2
+						_etcLct1 = trsWdt/2
+					endif
+					if	j = (nTrs + 1)	then
+						_pnlHgt1 = sep2_Vert[i][j] - trsGskWdt
+						_pnlHgt2 = (trsGap[j] - sep2_Vert[i][j]) - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+
+						_etcHgt1 = sep2_Vert[i][j] - trsWdt
+						_etcHgt2 = (trsGap[j] - sep2_Vert[i][j]) - (frmWdtT + trsWdt/2)
+
+						_pnlLct1 = trsGskWdt/2
+						_etcLct1 = trsWdt/2
+					endif
+				endif
+
+				!	Hotspot
+				addx	mlnGap[i]/2
+					hotspot	0,	0,	0,					unID,	sep2_Vert[i][j],	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,					unID,	sep2_Vert[i][j],	3		:	unID = unID + 1
+					hotspot	0,	0,	sep2_Vert[i][j],	unID,	sep2_Vert[i][j],	2		:	unID = unID + 1
+				del 1
+
+				!	수평프레임
+				_frmLct = sep2_Vert[i][j] - trsWdt/2
+				gosub	"pnl_hFrame"
+
+				!	1번 영역
+				_pnlType = _pnlType1
+				_hingeType = _hingeType1
+				_pnlHgt = _pnlHgt1
+				_etcHgt = _etcHgt1
+				_pnlLct = _pnlLct1
+				_etcLct = _etcLct1
+
+				gosub	"pnl_Matrix"
+
+				!	2번 영역
+				_pnlType = _pnlType2
+				_hingeType = _hingeType2
+				_pnlHgt = _pnlHgt2
+				_etcHgt = _etcHgt2
+				_pnlLct = _pnlLct2
+				_etcLct = _etcLct2
+
+				gosub	"pnl_Matrix"
+			endif
+
+			!	3분할 패널 유형(세로)
+			!-----------------------------------------------------------------------------------------------
+			if	_pnlType = PNL_SEP3_VERTICAL	then
+				!	변수정의
+				_idx = iSepType[i][j]
+				_pnlType1 = iSepType_3Vert[1][_idx]
+				_pnlType2 = iSepType_3Vert[2][_idx]
+				_pnlType3 = iSepType_3Vert[3][_idx]
+				_hingeType1 = iHingeType_3Vert[1][_idx]
+				_hingeType2 = iHingeType_3Vert[2][_idx]
+				_hingeType3 = iHingeType_3Vert[3][_idx]
+
+				_pnlHgt1 = 0
+				_pnlHgt2 = 0
+				_pnlHgt3 = 0
+
+				_etcHgt1 = 0
+				_etcHgt2 = 0
+				_etcHgt3 = 0
+
+				_pnlLct1 = 0
+				_pnlLct2 = sep2_Vert[i][j] + trsGskWdt/2
+				_pnlLct3 = sep3_Vert[i][j] + trsGskWdt/2
+
+				_etcLct1 = 0
+				_etcLct2 = sep2_Vert[i][j] + trsWdt/2
+				_etcLct3 = sep3_Vert[i][j] + trsWdt/2
+
+				if	nTrs < eps	then
+					_pnlHgt1 = sep2_Vert[i][j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+					_pnlHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsGskWdt
+					_pnlHgt3 = (trsGap[j] - sep3_Vert[i][j]) - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+
+					_etcHgt1 = sep2_Vert[i][j] - (frmWdtB + trsWdt/2)
+					_etcHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsWdt
+					_etcHgt3 = (trsGap[j] - sep3_Vert[i][j]) - (frmWdtT + trsWdt/2)
+
+					_pnlLct1 = (frmWdtB + gskWdtB)/2
+					_etcLct1 = frmWdtB
+				else
+					if	j = 1	then
+						_pnlHgt1 = sep2_Vert[i][j] - ((frmWdtB + gskWdtB)/2 + trsGskWdt/2)
+						_pnlHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsGskWdt
+						_pnlHgt3 = (trsGap[j] - sep3_Vert[i][j]) - trsGskWdt
+
+						_etcHgt1 = sep2_Vert[i][j] - (frmWdtB + trsWdt/2)
+						_etcHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsWdt
+						_etcHgt3 = (trsGap[j] - sep3_Vert[i][j]) - trsWdt
+
+						_pnlLct1 = (frmWdtB + gskWdtB)/2
+						_etcLct1 = frmWdtB
+					endif
+					if	j # 1 & j # (nTrs + 1)	then
+						_pnlHgt1 = sep2_Vert[i][j] - trsGskWdt
+						_pnlHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsGskWdt
+						_pnlHgt3 = (trsGap[j] - sep3_Vert[i][j]) - trsGskWdt
+
+						_etcHgt1 = sep2_Vert[i][j] - trsWdt
+						_etcHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsWdt
+						_etcHgt3 = (trsGap[j] - sep3_Vert[i][j]) - trsWdt
+
+						_pnlLct1 = trsGskWdt/2
+						_etcLct1 = trsWdt/2
+					endif
+					if	j = (nTrs + 1)	then
+						_pnlHgt1 = sep2_Vert[i][j] - trsGskWdt
+						_pnlHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsGskWdt
+						_pnlHgt3 = (trsGap[j] - sep3_Vert[i][j]) - ((frmWdtT + gskWdtT)/2 + trsGskWdt/2)
+
+						_etcHgt1 = sep2_Vert[i][j] - trsWdt
+						_etcHgt2 = (sep3_Vert[i][j] - sep2_Vert[i][j]) - trsWdt
+						_etcHgt3 = (trsGap[j] - sep3_Vert[i][j]) - (frmWdtT + trsWdt/2)
+
+						_pnlLct1 = trsGskWdt/2
+						_etcLct1 = trsWdt/2
+					endif
+				endif
+
+				!	Hotspot
+				addx	mlnGap[i]/2
+					hotspot	0,	0,	0,					unID,	sep2_Vert[i][j],	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,					unID,	sep2_Vert[i][j],	3		:	unID = unID + 1
+					hotspot	0,	0,	sep2_Vert[i][j],	unID,	sep2_Vert[i][j],	2		:	unID = unID + 1
+
+					hotspot	0,	0,	0,					unID,	sep3_Vert[i][j],	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,					unID,	sep3_Vert[i][j],	3		:	unID = unID + 1
+					hotspot	0,	0,	sep3_Vert[i][j],	unID,	sep3_Vert[i][j],	2		:	unID = unID + 1
+				del 1
+
+				!	수평프레임
+				_frmLct = sep2_Vert[i][j] - trsWdt/2
+				gosub	"pnl_hFrame"
+
+				_frmLct = sep3_Vert[i][j] - trsWdt/2
+				gosub	"pnl_hFrame"
+
+				!	1번 영역
+				_pnlType = _pnlType1
+				_hingeType = _hingeType1
+				_pnlHgt = _pnlHgt1
+				_etcHgt = _etcHgt1
+				_pnlLct = _pnlLct1
+				_etcLct = _etcLct1
+
+				gosub	"pnl_Matrix"
+
+				!	2번 영역
+				_pnlType = _pnlType2
+				_hingeType = _hingeType2
+				_pnlHgt = _pnlHgt2
+				_etcHgt = _etcHgt2
+				_pnlLct = _pnlLct2
+				_etcLct = _etcLct2
+
+				gosub	"pnl_Matrix"
+
+				!	3번 영역
+				_pnlType = _pnlType3
+				_hingeType = _hingeType3
+				_pnlHgt = _pnlHgt3
+				_etcHgt = _etcHgt3
+				_pnlLct = _pnlLct3
+				_etcLct = _etcLct3
+
+				gosub	"pnl_Matrix"
+			endif
+		endif
+
+
+		addz	trsGap[j]
+	next	j
+
+	del	(nTrs + 1)
+
+	addx	mlnGap[i]
+next	i
+
+del	(nMln + 1)
+
+endgroup
+
+_panel1 = subgroup("_panel",	"_vFrameCut")
+_panel2 = subgroup(_panel1,	"_hFrame")
+
+!-----------------------------------------------------------------------------------------------
+!	문
+!-----------------------------------------------------------------------------------------------
+group	"_door"
+	for	i = 1	to	(nMln + 1)
+		!	변수 정의
+		_bDoor = bDoor[i]
+		_doorType = iM_Type[i][1]
+		_openType = iM_Type[i][2]
+		_openDirect = iM_Type[i][3]
+		_frameType = iM_Type[i][4]
+		_symbol = iM_Type[i][5]
+
+		_doorWdt = iM_Length[i][1]
+		_doorWdtL = iM_Length[i][2]
+		_doorWdtR = iM_Length[i][3]
+		_doorHgt = iM_Length[i][4]
+		_doorThk = iM_Length[i][5]
+		_fixWdtL = iM_Length[i][6]
+		_fixWdtR = iM_Length[i][7]
+
+		_frmL = iM_Frame[i][1]
+		_frmR = iM_Frame[i][2]
+		_frmT = iM_Frame[i][3]
+		_frmB = iM_Frame[i][4]
+
+		!	수평프레임 Offset값
+		if	iMlnType = MLN_TYPE1	then
+			
+		endif
+		if	iMlnType = MLN_TYPE2	then
+
+		endif
+
+		!	좌/우 고정창
+		if	_bDoor	then
+			!	Hotspot
+			addy	-(mlnThk + gskThk)/2
+				hotspot	0,					0,	0,	unID,	iM_Length[i][6],	1+128	:	unID = unID + 1
+				hotspot	-1,					0,	0,	unID,	iM_Length[i][6],	3		:	unID = unID + 1
+				hotspot	iM_Length[i][6],	0,	0,	unID,	iM_Length[i][6],	2,	iM_Length[i][6],	"좌측 고정창 너비"		:	unID = unID + 1
+
+				addx	mlnGap[i]
+					hotspot	0,					0,	0,	unID,	iM_Length[i][7],	1+128	:	unID = unID + 1
+					hotspot	1,					0,	0,	unID,	iM_Length[i][7],	3		:	unID = unID + 1
+					hotspot	-iM_Length[i][7],	0,	0,	unID,	iM_Length[i][7],	2,	iM_Length[i][7],	"우측 고정창 너비"		:	unID = unID + 1
+				del 1
+			del 1
+
+			!	좌측 프레임
+			if	_fixWdtL > eps	then
+				!	수직프레임
+				addx	_fixWdtL
+					gosub	"vFrame_D"
+				del 1
+
+				!	수평프레임
+				pen			frmElevPen
+				sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+				material	frmMat
+
+					!	프레임 몸통
+					if	nMln < eps	then
+						if	iFrmTypeL = FRAME_BOUNDARY	then
+							put	frmWdtL,				-gskThk,				15,
+								frmWdtL,				-(frmThkB + gskThk),	15
+						else
+							put	frmWdtL/2,				-gskThk,				15,
+								frmWdtL/2,				-(frmThkB + gskThk),	15
+						endif
+						put	_fixWdtL - mlnWdt/2,	-(frmThkB + gskThk),	15,
+							_fixWdtL - mlnWdt/2,	-gskThk,				15
+					else
+						if	i = 1	then
+							if	iFrmTypeL = FRAME_BOUNDARY	then
+								put	frmWdtL,				-gskThk,				15,
+									frmWdtL,				-(frmThkB + gskThk),	15
+							else
+								put	frmWdtL/2,				-gskThk,				15,
+									frmWdtL/2,				-(frmThkB + gskThk),	15
+							endif
+							put	_fixWdtL - mlnWdt/2,	-(frmThkB + gskThk),	15,
+								_fixWdtL - mlnWdt/2,	-gskThk,				15
+						else
+							put	mlnWdt/2,				-gskThk,				15,
+								mlnWdt/2,				-(frmThkB + gskThk),	15,
+								_fixWdtL - mlnWdt/2,	-(frmThkB + gskThk),	15,
+								_fixWdtL - mlnWdt/2,	-gskThk,				15
+						endif
+					endif
+
+					prism_	nsp/3,	frmWdtB,	get(nsp)
+
+					!	프레임 개스킷 Cut
+					roty	-90
+						_nFrmCut_D = 0
+						if	iFrmTypeB = FRAME_BOUNDARY	then
+							put	(frmWdtB + gskWdtB)/2,	0,
+								(frmWdtB + gskWdtB)/2,	-gskThk,
+								frmWdtB,				-gskThk,
+								frmWdtB,				0
+
+							cutpoly	nsp/2,	get(nsp)	:	_nFrmCut_D = _nFrmCut_D + 1
+						endif
+
+						if	iFrmTypeB = FRAME_TRANSOM	then
+							if	iTrsType = TRS_TYPE1	then	_bGskCap = 0
+							if	iTrsType = TRS_TYPE2	then	_bGskCap = 1
+
+							put	0,						-gskCapThk*(_bGskCap),
+								0,						-gskThk,
+								(frmWdtB - gskWdtB)/2,	-gskThk,
+								(frmWdtB - gskWdtB)/2,	-gskCapThk*(_bGskCap)
+
+							cutpoly	nsp/2,	get(nsp)	:	_nFrmCut_D = _nFrmCut_D + 1
+
+							put	(frmWdtB + gskWdtB)/2,	-gskCapThk*(_bGskCap),
+								(frmWdtB + gskWdtB)/2,	-gskThk,
+								frmWdtB,				-gskThk,
+								frmWdtB,				-gskCapThk*(_bGskCap)
+
+							cutpoly	nsp/2,	get(nsp)	:	_nFrmCut_D = _nFrmCut_D + 1
+						endif
+					del 1
+
+						!	프레임 개스킷
+						if	nMln < eps	then
+							if	iFrmTypeL = FRAME_BOUNDARY	then
+								put	(frmWdtL + gskWdtL)/2,	0,			15,
+									(frmWdtL + gskWdtL)/2,	-gskThk,	15
+							else
+								put	gskWdtL/2,	0,			15,
+									gskWdtL/2,	-gskThk,	15
+							endif
+						else
+							if	i = 1	then
+								if	iFrmTypeL = FRAME_BOUNDARY	then
+									put	(frmWdtL + gskWdtL)/2,	0,			15,
+										(frmWdtL + gskWdtL)/2,	-gskThk,	15
+								else
+									put	gskWdtL/2,	0,			15,
+										gskWdtL/2,	-gskThk,	15
+								endif
+							else
+								put	mlnGskWdt/2,			0,			15,
+									mlnGskWdt/2,			-gskThk,	15
+							endif
+						endif
+						put	_fixWdtL - mlnGskWdt/2,	-gskThk,	15,
+							_fixWdtL - mlnGskWdt/2,	-gskCapThk,	15
+						if	iMlnType = MLN_TYPE1	then
+							put	_fixWdtL - mlnGskWdt/2,	0,			15
+						else
+							put	_fixWdtL - mlnWdt/2,	-gskCapThk,	15,
+								_fixWdtL - mlnWdt/2,	0,			15
+						endif
+
+
+						prism_	nsp/3,	frmWdtB,	get(nsp)
+
+					if	_nFrmCut_D > eps	then
+						for	c = 1	to	_nFrmCut_D
+							cutend
+						next	c
+					endif
+
+				!	유리
+				pen			glsElevPen
+				sect_fill	glsFill,	glsBackPen,	glsFillPen,	glsSectPen
+				material	glsMat
+
+				_dGlsHgt = trsGap[1] - (frmWdtB + gskWdtB)/2
+				if	nTrs < eps	then
+					_dGlsHgt = _dGlsHgt - (frmWdtT + gskWdtT)/2
+				else
+					_dGlsHgt = _dGlsHgt - trsGskWdt/2
+				endif
+
+				if	nMln < eps	then
+					if	iFrmTypeL = FRAME_BOUNDARY	then
+						put	(frmWdtL + gskWdtL)/2,	-(gskThk - glsThk),	15,
+							(frmWdtL + gskWdtL)/2,	-gskThk,			15
+					else
+						put	gskWdtL/2,	-(gskThk - glsThk),	15,
+							gskWdtL/2,	-gskThk,			15
+					endif
+					put	_fixWdtL - mlnGskWdt/2,	-gskThk,			15,
+						_fixWdtL - mlnGskWdt/2,	-(gskThk - glsThk),	15
+
+					_xPosTxt = (((frmWdtL + gskWdtL)/2) + (_fixWdtL - mlnGskWdt/2))/2
+				else
+					if	i = 1	then
+						if	iFrmTypeL = FRAME_BOUNDARY	then
+							put	(frmWdtL + gskWdtL)/2,	-(gskThk - glsThk),	15,
+								(frmWdtL + gskWdtL)/2,	-gskThk,			15
+						else
+							put	gskWdtL/2,	-(gskThk - glsThk),	15,
+								gskWdtL/2,	-gskThk,			15
+						endif
+						put	_fixWdtL - mlnGskWdt/2,	-gskThk,			15,
+							_fixWdtL - mlnGskWdt/2,	-(gskThk - glsThk),	15
+
+						_xPosTxt = (((frmWdtL + gskWdtL)/2) + (_fixWdtL - mlnGskWdt/2))/2
+					else
+						put	mlnGskWdt/2,			-(gskThk - glsThk),	15,
+							mlnGskWdt/2,			-gskThk,			15,
+							_fixWdtL - mlnGskWdt/2,	-gskThk,			15,
+							_fixWdtL - mlnGskWdt/2,	-(gskThk - glsThk),	15
+
+						_xPosTxt = ((mlnGskWdt/2) + (_fixWdtL - mlnGskWdt/2))/2
+					endif
+				endif
+
+				_bText = 0
+				if	bFixTxt	then
+					_bText = 1
+				endif
+
+				addz	(frmWdtB + gskWdtB)/2
+					addy	glsLct
+						prism_	nsp/3,	_dGlsHgt,	get(nsp)
+
+						if	_bText	then
+							add	_xPosTxt,	-gskThk,	_dGlsHgt/2
+								gosub	"pnlTxt"
+							del 1
+						endif
+					del 1
+				del 1
+			endif
+
+			!	우측 프레임
+			if	_fixWdtR > eps	then
+				addx	mlnGap[i]
+					mulx	-1
+
+						!	수직프레임
+						addx	_fixWdtR
+							gosub	"vFrame_D"
+						del 1
+
+						!	수평프레임
+						pen			frmElevPen
+						sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+						material	frmMat
+
+							!	프레임 몸통
+							if	nMln < eps	then
+								if	iFrmTypeR = FRAME_BOUNDARY	then
+									put	frmWdtR,				-gskThk,				15,
+										frmWdtR,				-(frmThkB + gskThk),	15
+								else
+									put	frmWdtR/2,				-gskThk,				15,
+										frmWdtR/2,				-(frmThkB + gskThk),	15
+								endif
+								put	_fixWdtR - mlnWdt/2,	-(frmThkB + gskThk),	15,
+									_fixWdtR - mlnWdt/2,	-gskThk,				15
+							else
+								if	i = (nMln + 1)	then
+									if	iFrmTypeR = FRAME_BOUNDARY	then
+										put	frmWdtR,				-gskThk,				15,
+											frmWdtR,				-(frmThkB + gskThk),	15
+									else
+										put	frmWdtR/2,				-gskThk,				15,
+											frmWdtR/2,				-(frmThkB + gskThk),	15
+									endif
+									put	_fixWdtR - mlnWdt/2,	-(frmThkB + gskThk),	15,
+										_fixWdtR - mlnWdt/2,	-gskThk,				15
+								else
+									put	mlnWdt/2,				-gskThk,				15,
+										mlnWdt/2,				-(frmThkB + gskThk),	15,
+										_fixWdtR - mlnWdt/2,	-(frmThkB + gskThk),	15,
+										_fixWdtR - mlnWdt/2,	-gskThk,				15
+								endif
+							endif
+
+							prism_	nsp/3,	frmWdtB,	get(nsp)
+
+							!	프레임 개스킷 Cut
+							roty	-90
+								_nFrmCut_D = 0
+								if	iFrmTypeB = FRAME_BOUNDARY	then
+									put	(frmWdtB + gskWdtB)/2,	0,
+										(frmWdtB + gskWdtB)/2,	-gskThk,
+										frmWdtB,				-gskThk,
+										frmWdtB,				0
+
+									cutpoly	nsp/2,	get(nsp)	:	_nFrmCut_D = _nFrmCut_D + 1
+								endif
+
+								if	iFrmTypeB = FRAME_TRANSOM	then
+									if	iTrsType = TRS_TYPE1	then	_bGskCap = 0
+									if	iTrsType = TRS_TYPE2	then	_bGskCap = 1
+
+									put	0,						-gskCapThk*(_bGskCap),
+										0,						-gskThk,
+										(frmWdtB - gskWdtB)/2,	-gskThk,
+										(frmWdtB - gskWdtB)/2,	-gskCapThk*(_bGskCap)
+
+									cutpoly	nsp/2,	get(nsp)	:	_nFrmCut_D = _nFrmCut_D + 1
+
+									put	(frmWdtB + gskWdtB)/2,	-gskCapThk*(_bGskCap),
+										(frmWdtB + gskWdtB)/2,	-gskThk,
+										frmWdtB,				-gskThk,
+										frmWdtB,				-gskCapThk*(_bGskCap)
+
+									cutpoly	nsp/2,	get(nsp)	:	_nFrmCut_D = _nFrmCut_D + 1
+								endif
+							del 1
+
+								!	프레임 개스킷
+								if	nMln < eps	then
+									if	iFrmTypeR = FRAME_BOUNDARY	then
+										put	(frmWdtR + gskWdtR)/2,	0,			15,
+											(frmWdtR + gskWdtR)/2,	-gskThk,	15
+									else
+										put	gskWdtR/2,	0,			15,
+											gskWdtR/2,	-gskThk,	15
+									endif
+								else
+									if	i = (nMln + 1)	then
+										if	iFrmTypeR = FRAME_BOUNDARY	then
+											put	(frmWdtR + gskWdtR)/2,	0,			15,
+												(frmWdtR + gskWdtR)/2,	-gskThk,	15
+										else
+											put	gskWdtR/2,	0,			15,
+												gskWdtR/2,	-gskThk,	15
+										endif
+									else
+										put	mlnGskWdt/2,			0,			15,
+											mlnGskWdt/2,			-gskThk,	15
+									endif
+								endif
+								put	_fixWdtR - mlnGskWdt/2,	-gskThk,	15,
+									_fixWdtR - mlnGskWdt/2,	-gskCapThk,	15
+								if	iMlnType = MLN_TYPE1	then
+									put	_fixWdtR - mlnGskWdt/2,	0,			15
+								else
+									put	_fixWdtR - mlnWdt/2,	-gskCapThk,	15,
+										_fixWdtR - mlnWdt/2,	0,			15
+								endif
+
+								prism_	nsp/3,	frmWdtB,	get(nsp)
+
+							if	_nFrmCut_D > eps	then
+								for	c = 1	to	_nFrmCut_D
+									cutend
+								next	c
+							endif
+
+						!	유리
+						pen			glsElevPen
+						sect_fill	glsFill,	glsBackPen,	glsFillPen,	glsSectPen
+						material	glsMat
+
+						_dGlsHgt = trsGap[1] - (frmWdtB + gskWdtB)/2
+						if	nTrs < eps	then
+							_dGlsHgt = _dGlsHgt - (frmWdtT + gskWdtT)/2
+						else
+							_dGlsHgt = _dGlsHgt - trsGskWdt/2
+						endif
+
+						if	nMln < eps	then
+							put	(frmWdtR + gskWdtR)/2,	-(gskThk - glsThk),	15,
+								(frmWdtR + gskWdtR)/2,	-gskThk,			15,
+								_fixWdtR - mlnGskWdt/2,	-gskThk,			15,
+								_fixWdtR - mlnGskWdt/2,	-(gskThk - glsThk),	15
+
+							_xPosTxt = (((frmWdtR + gskWdtR)/2) + (_fixWdtR - mlnGskWdt/2))/2
+						else
+							if	i = (nMln + 1)	then
+								put	(frmWdtR + gskWdtR)/2,	-(gskThk - glsThk),	15,
+									(frmWdtR + gskWdtR)/2,	-gskThk,			15,
+									_fixWdtR - mlnGskWdt/2,	-gskThk,			15,
+									_fixWdtR - mlnGskWdt/2,	-(gskThk - glsThk),	15
+
+								_xPosTxt = (((frmWdtR + gskWdtR)/2) + (_fixWdtR - mlnGskWdt/2))/2
+							else
+								put	mlnGskWdt/2,			-(gskThk - glsThk),	15,
+									mlnGskWdt/2,			-gskThk,			15,
+									_fixWdtR - mlnGskWdt/2,	-gskThk,			15,
+									_fixWdtR - mlnGskWdt/2,	-(gskThk - glsThk),	15
+
+								_xPosTxt = ((mlnGskWdt/2) + (_fixWdtR - mlnGskWdt/2))/2
+							endif
+						endif
+
+						_bText = 0
+						if	bFixTxt	then
+							_bText = 1
+						endif
+
+						addz	(frmWdtB + gskWdtB)/2
+							addy	glsLct
+								prism_	nsp/3,	_dGlsHgt,	get(nsp)
+
+								if	_bText	then
+									add	_xPosTxt,	-gskThk,	_dGlsHgt/2
+										mulx	-1
+											gosub	"pnlTxt"
+										del 1
+									del 1
+								endif
+							del 1
+						del 1
+
+					del 1
+				del 1
+			endif
+		endif
+
+		!	문
+		if	_bDoor	then
+			_doorLct = 0
+			if	nMln < eps	then
+				_doorLct = frmWdtL
+				if	_fixWdtL > eps	then
+					_doorLct = _fixWdtL + mlnWdt/2
+				endif
+			else
+				if	i = 1	then
+					_doorLct = frmWdtL
+					if	_fixWdtL > eps	then
+						_doorLct = _fixWdtL + mlnWdt/2
+					endif
+				else
+					_doorLct = mlnWdt/2
+					if	_fixWdtL > eps	then
+						_doorLct = _fixWdtL + mlnWdt/2
+					endif
+				endif
+			endif
+			_offsetSlide = _doorThk + 0.030
+
+			addx	_doorLct
+				!	문 유형 : 기본형(1Panel)
+				if	_doorType = DOOR_1PANEL	then
+					!	문 열림유형 : 여닫이
+					if	_openType = OPENTYPE_HINGE	then
+						addy	-gskThk
+							gosub	"doorShape"
+						del 1
+					endif
+
+					!	문 열림유형 : 미닫이
+					if	_openType = OPENTYPE_SLIDE	then
+						!	심볼 방향 : 전면
+						if	_symbol = SYMBOL_FRONT	then
+							addy	_offsetSlide
+								gosub	"doorShape"
+							del 1
+						endif
+
+						!	심볼 방향 : 후면
+						if	_symbol = SYMBOL_BACK	then
+							addy	-(mlnThk + gskThk)
+								muly	-1
+									addy	_offsetSlide
+										gosub	"doorShape"
+									del 1
+								del 1
+							del 1
+						endif
+					endif
+				endif
+
+				!	문 유형 : 양문형(2Panel)
+				if	_doorType = DOOR_2PANEL	then
+					!	문 열림유형 : 여닫이
+					if	_openType = OPENTYPE_HINGE	then
+						addy	-gskThk
+							_doorWdt = _doorWdtL
+							_openDirect = OPENDIRECT_LEFT
+
+							gosub	"doorShape"
+
+							addx	_doorWdt
+								_doorWdt = _doorWdtR
+								_openDirect = OPENDIRECT_RIGHT
+
+								gosub	"doorShape"
+							del 1
+						del 1
+					endif
+
+					!	문 열림유형 : 미닫이
+					if	_openType = OPENTYPE_SLIDE	then
+						!	심볼 방향 : 전면
+						if	_symbol = SYMBOL_FRONT	then
+							addy	_offsetSlide
+								_doorWdt = _doorWdt/2
+								_openDirect = OPENDIRECT_LEFT
+
+								gosub	"doorShape"
+
+								addx	_doorWdt
+									_doorWdt = _doorWdt
+									_openDirect = OPENDIRECT_RIGHT
+
+									gosub	"doorShape"
+								del 1
+							del 1
+						endif
+
+						!	심볼 방향 : 후면
+						if	_symbol = SYMBOL_BACK	then
+							addy	-(mlnThk + gskThk)
+								muly	-1
+									addy	_offsetSlide
+										_doorWdt = _doorWdt/2
+										_openDirect = OPENDIRECT_LEFT
+
+										gosub	"doorShape"
+
+										addx	_doorWdt
+											_doorWdt = _doorWdt
+											_openDirect = OPENDIRECT_RIGHT
+
+											gosub	"doorShape"
+										del 1
+									del 1
+								del 1
+							del 1
+						endif
+					endif
+				endif
+			del 1
+		endif
+
+
+
+		addx	mlnGap[i]
+	next	i
+
+	del	(nMln + 1)
+endgroup
+
+pen	frmElevPen
+_door1 = subgroup("_door",	"_vFrameCut")
+_door2 = subgroup(_door1,	"_hFrame")
+
+!-----------------------------------------------------------------------------------------------
+!	그룹 배치
+!-----------------------------------------------------------------------------------------------
+
+	!	문 그룹 배치
+	placegroup	_door2
+
+	!-----------------------------------------------------------------------------------------------
+	!	프레임 회전 각도에 따른 패널 Cut
+	!-----------------------------------------------------------------------------------------------
+	material	frmMat
+	_nPnlCut = 0
+	if	not(abs(aFrmL) < eps)	then
+		if	aFrmL < 300	then
+			rotz	aFrmL
+				addy	-(gskWdtL/2)*tan(aFrmL)
+					rotx	-90
+						cutplane	1,	1,	0,	0,	4+256	:	_nPnlCut = _nPnlCut + 1
+					del 1
+				del 1
+			del 1
+		endif
+
+		rotz	aFrmL
+			roty	-90
+				cutplane	1,	1,	0,	0,	256	:	_nPnlCut = _nPnlCut + 1
+			del 1
+
+			_frmThk = 2
+			_frmWdt = frmWdtL
+			_gskWdt = gskWdtL
+			_aFrm = aFrmL
+			gosub	"getCoor_cutPnl"
+
+			! poly	nsp/2,	use(nsp)
+			cutpoly	nsp/2,	get(nsp)	:	_nPnlCut = _nPnlCut + 1
+		del 1
+	else
+		if	iFrmTypeL = FRAME_BOUNDARY	then
+			put	0,			-gskThk,
+				0,			-(gskThk + _maxFrmThk),
+				frmWdtL,	-(gskThk + _maxFrmThk),
+				frmWdtL,	-gskThk
+
+			cutpoly	nsp/2,	get(nsp)	:	_nPnlCut = _nPnlCut + 1
+		endif
+		if	iFrmTypeL = FRAME_MULLION	then
+			put	-frmWdtL/2,	-gskThk,
+				-frmWdtL/2,	-(gskThk + _maxFrmThk),
+				frmWdtL/2,	-(gskThk + _maxFrmThk),
+				frmWdtL/2,	-gskThk
+
+			cutpoly	nsp/2,	get(nsp)	:	_nPnlCut = _nPnlCut + 1
+		endif
+	endif
+
+	if	not(abs(aFrmR) < eps)	then
+		if	aFrmR < 300	then
+			addx	ctwWdt
+				rotz	-aFrmR
+					addy	-(gskWdtR/2)*tan(aFrmR)
+						rotx	-90
+							cutplane	1,	1,	0,	0,	4+256	:	_nPnlCut = _nPnlCut + 1
+						del 1
+					del 1
+				del 1
+			del 1
+		endif
+
+		addx	ctwWdt
+			rotz	-aFrmR
+				roty	90
+					cutplane	1,	1,	0,	0,	256	:	_nPnlCut = _nPnlCut + 1
+				del 1
+			del 1
+
+			_frmThk = 2
+			_frmWdt = frmWdtR
+			_gskWdt = gskWdtR
+			_aFrm = aFrmR
+			gosub	"getCoor_cutPnl"
+
+			mulx	-1
+				rotz	aFrmR
+					! poly	nsp/2,	use(nsp)
+					cutpoly	nsp/2,	get(nsp)	:	_nPnlCut = _nPnlCut + 1
+				del 1
+			del 1
+		del 1
+	else
+		addx	ctwWdt
+			if	iFrmTypeR = FRAME_BOUNDARY	then
+				put	0,			-gskThk,
+					0,			-(gskThk + _maxFrmThk),
+					-frmWdtR,	-(gskThk + _maxFrmThk),
+					-frmWdtR,	-gskThk
+
+				cutpoly	nsp/2,	get(nsp)	:	_nPnlCut = _nPnlCut + 1
+			endif
+			if	iFrmTypeR = FRAME_MULLION	then
+				put	-frmWdtR/2,	-gskThk,
+					-frmWdtR/2,	-(gskThk + _maxFrmThk),
+					frmWdtR/2,	-(gskThk + _maxFrmThk),
+					frmWdtR/2,	-gskThk
+
+				cutpoly	nsp/2,	get(nsp)	:	_nPnlCut = _nPnlCut + 1
+			endif
+		del 1
+	endif
+
+	if	nMln > eps	then
+		for	i = 1	to	nMln
+			addx	mlnGap[i]
+				put	-frmWdtR/2,	-gskThk,
+					-frmWdtR/2,	-(gskThk + _maxFrmThk),
+					frmWdtR/2,	-(gskThk + _maxFrmThk),
+					frmWdtR/2,	-gskThk
+
+				cutpoly	nsp/2,	get(nsp)	:	_nPnlCut = _nPnlCut + 1
+		next	i
+
+		del nMln
+	endif
+
+		!	패널 그룹 배치
+		placegroup	_panel2
+
+	!-----------------------------------------------------------------------------------------------
+	!	Cut End
+	!-----------------------------------------------------------------------------------------------
+	if	_nPnlCut > eps	then
+		for	c = 1	to	_nPnlCut
+			cutend
+		next	c
+	endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	프레임 회전 각도에 따른 수평프레임 Cut
+	!-----------------------------------------------------------------------------------------------
+	material	frmMat
+	_nFrmCut = 0
+	if	not(abs(aFrmL) < eps)	then
+		if	aFrmL < 300	then
+			rotz	aFrmL
+				addy	-(gskWdtL/2)*tan(aFrmL)
+					rotx	-90
+						cutplane	1,	1,	0,	0,	4+256	:	_nFrmCut = _nFrmCut + 1
+					del 1
+				del 1
+			del 1
+		endif
+
+		rotz	aFrmL
+			_frmThk = 2
+			_frmWdt = frmWdtL
+			_gskWdt = gskWdtL
+			_aFrm = aFrmL
+			gosub	"getCoor_cutPnl"
+
+			! poly	nsp/2,	use(nsp)
+			cutpoly	nsp/2,	get(nsp)	:	_nFrmCut = _nFrmCut + 1
+		del 1
+	else
+		if	iFrmTypeL = FRAME_BOUNDARY	then
+			put	0,			-gskThk,
+				0,			-(gskThk + _maxFrmThk),
+				frmWdtL,	-(gskThk + _maxFrmThk),
+				frmWdtL,	-gskThk
+
+			cutpoly	nsp/2,	get(nsp)	:	_nFrmCut = _nFrmCut + 1
+		endif
+		if	iFrmTypeL = FRAME_MULLION	then
+			put	-frmWdtL/2,	-gskThk,
+				-frmWdtL/2,	-(gskThk + _maxFrmThk),
+				frmWdtL/2,	-(gskThk + _maxFrmThk),
+				frmWdtL/2,	-gskThk
+
+			cutpoly	nsp/2,	get(nsp)	:	_nFrmCut = _nFrmCut + 1
+		endif
+	endif
+
+	if	not(abs(aFrmR) < eps)	then
+		if	aFrmR < 300	then
+			addx	ctwWdt
+				rotz	-aFrmR
+					addy	-(gskWdtR/2)*tan(aFrmR)
+						rotx	-90
+							cutplane	1,	1,	0,	0,	4+256	:	_nFrmCut = _nFrmCut + 1
+						del 1
+					del 1
+				del 1
+			del 1
+		endif
+
+		addx	ctwWdt
+			_frmThk = 2
+			_frmWdt = frmWdtR
+			_gskWdt = gskWdtR
+			_aFrm = aFrmR
+			gosub	"getCoor_cutPnl"
+
+			mulx	-1
+				rotz	aFrmR
+					! poly	nsp/2,	use(nsp)
+					cutpoly	nsp/2,	get(nsp)	:	_nFrmCut = _nFrmCut + 1
+				del 1
+			del 1
+		del 1
+	else
+		addx	ctwWdt
+			if	iFrmTypeR = FRAME_BOUNDARY	then
+				put	0,			-gskThk,
+					0,			-(gskThk + _maxFrmThk),
+					-frmWdtR,	-(gskThk + _maxFrmThk),
+					-frmWdtR,	-gskThk
+
+				cutpoly	nsp/2,	get(nsp)	:	_nFrmCut = _nFrmCut + 1
+			endif
+			if	iFrmTypeR = FRAME_MULLION	then
+				put	-frmWdtR/2,	-gskThk,
+					-frmWdtR/2,	-(gskThk + _maxFrmThk),
+					frmWdtR/2,	-(gskThk + _maxFrmThk),
+					frmWdtR/2,	-gskThk
+
+				cutpoly	nsp/2,	get(nsp)	:	_nFrmCut = _nFrmCut + 1
+			endif
+		del 1
+	endif
+
+	if	nMln > eps	then
+		for	i = 1	to	nMln
+			addx	mlnGap[i]
+				put	-frmWdtR/2,	-gskThk,
+					-frmWdtR/2,	-(gskThk + _maxFrmThk),
+					frmWdtR/2,	-(gskThk + _maxFrmThk),
+					frmWdtR/2,	-gskThk
+
+				cutpoly	nsp/2,	get(nsp)	:	_nFrmCut = _nFrmCut + 1
+		next	i
+
+		del nMln
+	endif
+
+		!	수평프레임 그룹배치
+		placegroup	subgroup("_hFrame",	"_vFrameCut")
+
+	!-----------------------------------------------------------------------------------------------
+	!	Cut End
+	!-----------------------------------------------------------------------------------------------
+	if	_nFrmCut > eps	then
+		for	c = 1	to	_nFrmCut
+			cutend
+		next	c
+	endif
+
+	!	수직프레임 배치
+	placegroup	"_vFrame"
+
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+if	bSymbol	then
+	for	i = 1	to	_n2Dcut
+		cutend
+	next	i
+endif
+
+
+
+end
+
+
+
+
+!-----------------------------------------------------------------------------------------------
+"vFrame":	!	수직프레임
+!-----------------------------------------------------------------------------------------------
+	pen			frmElevPen
+	sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+	material	frmMat
+
+	!	자르기
+	_nCut = 0
+	if	not(bFrmB)	then
+		addz	frmWdtB
+			cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+		del 1
+	endif
+	if	not(bFrmT)	then
+		addz	ctwHgt - frmWdtT
+			cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+		del 1
+	endif
+
+		!	형태
+		if	(_frmType = FRAME_BOUNDARY & _frmClass = VFRAME_CORNER)	then
+			put	0,						0,						15,
+				0,						-(gskThk + _frmThk),	15,
+				_frmWdt,				-(gskThk + _frmThk),	15,
+				_frmWdt,				-gskThk,				15,
+				(_frmWdt + _gskWdt)/2,	-gskThk,				15,
+				(_frmWdt + _gskWdt)/2,	0,						15
+		endif
+
+		if	(_frmType = FRAME_MULLION & _frmClass = VFRAME_CORNER) | _frmClass = VFRAME_MULLION	then
+			if	iCornerType = CORNER_TYPE1	then
+				if	iMlnType = MLN_TYPE1	then
+					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15,
+						-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),	15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),	15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
+						_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
+						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15,
+						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15
+				endif
+
+				if	iMlnType = MLN_TYPE2	then
+					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),									15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),				15,
+						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),				15,
+						-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),	15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),	15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
+						_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
+						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),				15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),				15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),									15,
+						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15,
+						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15
+				endif
+			endif
+
+			if	iCornerType = CORNER_TYPE2	then
+				if	iMlnType = MLN_TYPE1	then
+					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15,
+						-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm) + ((_frmWdt - _gskWdt)/2)*tan(_aFrm),	15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),										15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),							15,
+						0,			-(gskThk + _frmThk)/cos(_aFrm),														15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),							15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),										15,
+						_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm) + ((_frmWdt - _gskWdt)/2)*tan(_aFrm),	15,
+						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15,
+						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15
+				endif
+
+				if	iMlnType = MLN_TYPE2	then
+					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),															15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										15,
+						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										15,
+						-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm) + ((_frmWdt - _gskWdt)/2)*tan(_aFrm),	15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),										15,
+						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),							15,
+						0,			-(gskThk + _frmThk)/cos(_aFrm),														15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),							15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),										15,
+						_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm) + ((_frmWdt - _gskWdt)/2)*tan(_aFrm),	15,
+						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										15,
+						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),															15,
+						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15,
+						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15
+				endif
+			endif
+		endif
+
+		rotz	_aFrm
+			prism_	nsp/3,	ctwHgt,	use(nsp)
+
+			for	h = 1	to	(nsp/3)
+				hotspot	use(2),	0,	unID	:	unID = unID + 1
+
+				addz	frmWdtB
+					hotspot	use(2),	0,	unID	:	unID = unID + 1
+				del 1
+
+				addz	ctwHgt - frmWdtT
+					hotspot	use(2),	0,	unID	:	unID = unID + 1
+				del 1
+
+				addz	ctwHgt
+					hotspot	get(2),	0 + use(1) - get(1),	unID	:	unID = unID + 1
+				del 1
+			next	h
+		del 1
+
+	if	_nCut > eps	then
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+	endif
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"hFrame":	!	수평프레임
+!-----------------------------------------------------------------------------------------------
+	pen			frmElevPen
+	sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+	material	frmMat
+
+	!	형태
+	for	i = 1	to	nMln + 1
+		_bDrawFrame = not((bDoor[i] & _idxH = HFRAME_BOTTOM) | (iPnlType[i][1] = PNL_OPEN & _idxH = HFRAME_BOTTOM))
+
+		if	_bDrawFrame	then
+			roty	-90
+				_nCut = 0
+
+				if	(_frmType = FRAME_BOUNDARY & _frmClass = HFRAME_CORNER)	then
+					put	_cutHgt3,	0,
+						_cutHgt3,	-gskThk,
+						_cutHgt4,	-gskThk,
+						_cutHgt4,	0
+					cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+				endif
+
+				if	(_frmType = FRAME_TRANSOM & _frmClass = HFRAME_CORNER) | _frmClass = HFRAME_TRANSOM	then
+					if	iTrsType = TRS_TYPE1	then	_bGskCap = 0
+					if	iTrsType = TRS_TYPE2	then	_bGskCap = 1
+
+					put	_cutHgt1,	-gskThk,
+						_cutHgt1,	-gskCapThk*_bGskCap,
+						_cutHgt2,	-gskCapThk*_bGskCap,
+						_cutHgt2,	-gskThk
+
+					cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+
+					put	_cutHgt3,	-gskThk,
+						_cutHgt3,	-gskCapThk*_bGskCap,
+						_cutHgt4,	-gskCapThk*_bGskCap,
+						_cutHgt4,	-gskThk
+
+					cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+				endif
+			del 1
+
+			if	nMln < eps	then
+				_xPosH1 = (gskThk + _frmThk)*tan(aFrmL)
+				_xPosH2 = mlnGap[i] - (gskThk + _frmThk)*tan(aFrmR)
+			else
+				_xPosH1 = 0
+				_xPosH2 = mlnGap[i]
+				if	i = 1	then
+					_xPosH1 = (gskThk + _frmThk)*tan(aFrmL)
+				endif
+				if	i = (nMln + 1)	then
+					_xPosH2 = mlnGap[i] - (gskThk + _frmThk)*tan(aFrmR)
+				endif
+			endif
+
+				put	_xPosH1,	-(_frmThk + gskThk),	15,
+					0,			0,						15,
+					mlnGap[i],	0,						15,
+					_xPosH2,	-(_frmThk + gskThk),	15
+
+				prism_	nsp/3,	_frmWdt,	get(nsp)
+
+			for	c = 1	to	_nCut
+				cutend
+			next	c
+		endif
+
+		addx	mlnGap[i]
+	next	i
+
+	del nMln + 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"pnl_Matrix":	!	패널 매트릭스
+!-----------------------------------------------------------------------------------------------
+
+	!	유리
+	if	not(_pnlType = PNL_GRILL) & not(_pnlType = PNL_OPEN)	then
+		addz	_pnlLct
+			addx	_xPosPnl
+				gosub	"pnlWin"
+			del 1
+		del 1
+	endif
+
+	!	텍스트
+	if	_pnlType = PNL_FIX | _pnlType = PNL_SPANDREL | _pnlType = PNL_SPANDREL_SUB | \
+		_pnlType = PNL_SPANDREL_SUB2 | _pnlType = PNL_SPANDREL_SUB3 | _pnlType = PNL_PROJECT_SMOKE	then
+		if	_pnlType = PNL_FIX | _pnlType = PNL_SPANDREL | _pnlType = PNL_SPANDREL_SUB | _pnlType = PNL_SPANDREL_SUB2 | _pnlType = PNL_SPANDREL_SUB3	then
+			_stFix = "F"
+			_bCircle = 0
+			_bText = 0
+			if	bFixTxt	then
+				_bText = 1
+			endif
+		else
+			_stFix = "배"
+			_bCircle = 1
+			_bText = 0
+			if	bSmkTxt	then
+				_bText = 1
+			endif
+		endif
+
+		if	_bText	then
+			addz	_pnlLct
+				add	_xPosPnl + _pnlWdt/2,	-gskThk,	_pnlHgt/2
+					gosub	"pnlTxt"
+				del 1
+			del 1
+		endif
+	endif
+
+	!	열림표현
+	if	_pnlType = PNL_PROJECT | _pnlType = PNL_PROJECT_SMOKE	then
+		addz	_pnlLct
+			addx	_xPosPnl
+				addy	-gskThk
+					gosub	"pnlOpen"
+				del 1
+
+				addy	-(gskThk - glsThk)
+					gosub	"pnlOpen"
+				del 1
+			del 1
+		del 1
+	endif
+
+	!	단열재
+	if	_pnlType = PNL_SPANDREL | _pnlType = PNL_SPANDREL_SUB | _pnlType = PNL_SPANDREL_SUB2 | _pnlType = PNL_SPANDREL_SUB3	then
+		if	_pnlType = PNL_SPANDREL	then
+			_insMat = insMat_1
+			_spdGlsMat = spdGlsMat_1
+			_insThk = insThk_1
+		endif
+		if	_pnlType = PNL_SPANDREL_SUB	then
+			_insMat = insMat_2
+			_spdGlsMat = spdGlsMat_2
+			_insThk = insThk_2
+		endif
+		if	_pnlType = PNL_SPANDREL_SUB2	then
+			_insMat = insMat_3
+			_spdGlsMat = spdGlsMat_3
+			_insThk = insThk_3
+		endif
+		if	_pnlType = PNL_SPANDREL_SUB3	then
+			_insMat = insMat_4
+			_spdGlsMat = spdGlsMat_4
+			_insThk = insThk_4
+		endif
+
+		addz	_etcLct
+			addx	_xPosEtc
+				gosub	"pnlIns"
+			del 1
+		del 1
+	endif
+
+	!	그릴
+	if	_pnlType = PNL_GRILL	then
+		addz	_etcLct
+			addx	_xPosEtc
+				gosub	"pnlGrl"
+			del 1
+		del 1
+	endif
+
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"pnl_vFrame":	!	패널 수직프레임
+!-----------------------------------------------------------------------------------------------
+	pen			frmElevPen
+	sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+	material	frmMat
+
+	addx	_xPosFrm
+		!	몸통
+		addz	_etcLct
+			put	-mlnWdt/2,		-gskThk,			15,
+				-mlnWdt/2,		-(gskThk + mlnThk),	15,
+				mlnWdt/2,		-(gskThk + mlnThk),	15,
+				mlnWdt/2,		-gskThk,			15
+
+			prism_	nsp/3,	_etcHgt,	get(nsp)
+		del 1
+
+		!	개스킷
+		addz	_pnlLct
+			if	iMlnType = MLN_TYPE1	then
+				put	-mlnGskWdt/2,	0,					15,
+					-mlnGskWdt/2,	-gskThk,			15,
+					mlnGskWdt/2,	-gskThk,			15,
+					mlnGskWdt/2,	0,					15
+			endif
+			if	iMlnType = MLN_TYPE2	then
+				put	-mlnWdt/2,		0,					15,
+					-mlnWdt/2,		-gskCapThk,			15,
+					-mlnGskWdt/2,	-gskCapThk,			15,
+					-mlnGskWdt/2,	-gskThk,			15,
+					mlnGskWdt/2,	-gskThk,			15,
+					mlnGskWdt/2,	-gskCapThk,			15,
+					mlnWdt/2,		-gskCapThk,			15,
+					mlnWdt/2,		0,					15
+			endif
+
+			prism_	nsp/3,	_pnlHgt,	get(nsp)
+		del 1
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"pnl_hFrame":	!	패널 수평프레임
+!-----------------------------------------------------------------------------------------------
+	pen			frmElevPen
+	sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+	material	frmMat
+
+	addz	_frmLct
+		_nCut = 0
+
+		roty	-90
+			if	iTrsType = TRS_TYPE1	then	_bGskCap = 0
+			if	iTrsType = TRS_TYPE2	then	_bGskCap = 1
+			_cutHgt = (trsWdt - trsGskWdt)/2
+			put	0,			-gskThk,
+				0,			-gskCapThk*_bGskCap,
+				_cutHgt,	-gskCapThk*_bGskCap,
+				_cutHgt,	-gskThk
+
+			cutpoly	nsp/2,	use(nsp)	:	_nCut = _nCut + 1
+			add	(trsWdt + trsGskWdt)/2,	(trsWdt + trsGskWdt)/2*tan(aTilt),	0
+				cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+			del 1
+		del 1
+
+			if	nMln < eps	then
+				_xPosH1 = (gskThk + _frmThk)*tan(aFrmL)
+				_xPosH2 = mlnGap[i] - (gskThk + _frmThk)*tan(aFrmR)
+			else
+				_xPosH1 = 0
+				_xPosH2 = mlnGap[i]
+				if	i = 1	then
+					_xPosH1 = (gskThk + _frmThk)*tan(aFrmL)
+				endif
+				if	i = (nMln + 1)	then
+					_xPosH2 = mlnGap[i] - (gskThk + _frmThk)*tan(aFrmR)
+				endif
+			endif
+
+			put	_xPosH1,	-(_frmThk + gskThk),	15,
+				0,			0,						15,
+				mlnGap[i],	0,						15,
+				_xPosH2,	-(_frmThk + gskThk),	15
+
+			prism_	nsp/3,	_frmWdt,	get(nsp)
+
+			! put	_xPosPnl,			0,					15,
+			! 	_xPosPnl,			-gskThk,			15,
+			! 	_xPosEtc,			-gskThk,			15,
+			! 	_xPosEtc,			-(gskThk + trsThk),	15,
+			! 	_xPosEtc + _etcWdt,	-(gskThk + trsThk),	15,
+			! 	_xPosEtc + _etcWdt,	-gskThk,			15,
+			! 	_xPosPnl + _pnlWdt,	-gskThk,			15,
+			! 	_xPosPnl + _pnlWdt,	0,					15
+
+			! prism_	nsp/3,	trsWdt,	get(nsp)
+
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"pnlWin":	!	패널 : 유리
+!-----------------------------------------------------------------------------------------------
+	pen			glsElevPen
+	sect_fill	glsFill,	glsBackPen,	glsFillPen,	glsSectPen
+	material	glsMat
+	if	_pnlType = PNL_SPANDREL			then	material	spdGlsMat_1
+	if	_pnlType = PNL_SPANDREL_SUB		then	material	spdGlsMat_2
+	if	_pnlType = PNL_SPANDREL_SUB2	then	material	spdGlsMat_3
+	if	_pnlType = PNL_SPANDREL_SUB3	then	material	spdGlsMat_4
+
+	put	0,			-(gskThk - glsThk),	15,
+		0,			-gskThk,			15,
+		_pnlWdt,	-gskThk,			15,
+		_pnlWdt,	-(gskThk - glsThk),	15
+
+	addy	glsLct
+		prism_	nsp/3,	_pnlHgt,	get(nsp)
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"pnlTxt":	!	패널 : 텍스트
+!-----------------------------------------------------------------------------------------------
+	pen			txtPen
+	material	txtMat
+	style		"txtSty_Fix"
+
+	_bSym = -1 + 2*bSymTxt
+
+	if	GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5	then
+		addy	glsLct
+			mulx	_bSym
+				rotx	90
+					text	eps,	0,	_stFix
+					if	_bCircle	then
+						model	wire
+							circle	txtSize/1000
+						model	solid
+					endif
+				del 1
+
+				addy	glsThk + eps
+					rotx	90
+						text	eps,	0,	_stFix
+						if	_bCircle	then
+							model	wire
+								circle	txtSize/1000
+							model	solid
+						endif
+					del 1
+				del 1
+			del 1
+		del 1
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"pnlOpen":	!	패널 : 열림표현
+!-----------------------------------------------------------------------------------------------
+	pen	oplinePen
+
+	if	not(GLOB_VIEW_TYPE = 2)	then
+		addy	glsLct
+			if	_hingeType = HINGE_TOP | _hingeType = HINGE_TOP_LEFT | _hingeType = HINGE_TOP_RIGHT	then
+				lin_	0,			0,	0,
+						_pnlWdt/2,	0,	_pnlHgt
+
+				lin_	_pnlWdt/2,	0,	_pnlHgt,
+						_pnlWdt,	0,	0
+			endif
+
+			if	_hingeType = HINGE_BOTTOM | _hingeType = HINGE_BOTTOM_LEFT | _hingeType = HINGE_BOTTOM_RIGHT	then
+				lin_	0,			0,	_pnlHgt,
+						_pnlWdt/2,	0,	0
+
+				lin_	_pnlWdt/2,	0,	0,
+						_pnlWdt,	0,	_pnlHgt
+			endif
+
+			if	_hingeType = HINGE_LEFT | _hingeType = HINGE_TOP_LEFT | _hingeType = HINGE_BOTTOM_LEFT	then
+				lin_	_pnlWdt,	0,	0,
+						0,			0,	_pnlHgt/2
+
+				lin_	0,			0,	_pnlHgt/2,
+						_pnlWdt,	0,	_pnlHgt
+			endif
+
+			if	_hingeType = HINGE_RIGHT | _hingeType = HINGE_TOP_RIGHT | _hingeType = HINGE_BOTTOM_RIGHT	then
+				lin_	0,			0,	0,
+						_pnlWdt,	0,	_pnlHgt/2
+
+				lin_	_pnlWdt,	0,	_pnlHgt/2,
+						0,			0,	_pnlHgt
+			endif
+		del 1
+	endif
+return
+
+!-----------------------------------------------------------------------------------------------
+"pnlIns":	!	패널 : 단열재
+!-----------------------------------------------------------------------------------------------
+	!	단열재
+	pen			insElevPen
+	sect_fill	insFill,	insBackPen,	insFillPen,	insSectPen
+	material	_insMat
+
+		!	단열 철판 두께 변수 정의
+		_offsetIns = 0
+		_spdFrmThk = 0
+		if	bSpdFrm	then
+			_offsetIns = 0.006
+			_spdFrmThk = spdFrmThk
+		endif
+
+	put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _spdFrmThk,			15,
+		(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _insThk - _spdFrmThk,	15,
+		_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk - _spdFrmThk,	15,
+		_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _spdFrmThk,			15
+
+	addz	(_offsetIns + _spdFrmThk)
+		prism_	nsp/3,	_etcHgt - (_offsetIns + _spdFrmThk)*2,	get(nsp)
+	del 1
+
+	!	단열 철판
+	sect_fill	65,	insBackPen,	insFillPen,	insSectPen
+	material	spdFrmMat
+
+	if	bSpdFrm	then
+		!	Cut
+		roty	-90
+			put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _spdFrmThk,
+				(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _insThk - _spdFrmThk,
+				_etcHgt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk - _spdFrmThk,
+				_etcHgt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _spdFrmThk
+
+			! poly	nsp/2,	use(nsp)
+			cutpoly	nsp/2,	get(nsp)
+		del 1
+
+		!	본체
+		put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk),				15,
+			(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _insThk,	15,
+			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
+			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
+
+		addz	_offsetIns
+			prism_	nsp/3,	_etcHgt - _offsetIns*2,	get(nsp)
+		del 1
+
+		!	Cutend
+		cutend
+
+		!	옆 덮개
+		put	_offsetIns,					-(_minFrmThk + gskThk),				15,
+			_offsetIns,					-(_minFrmThk + gskThk) + _insThk,	15,
+			(_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
+			(_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
+
+		addz	_offsetIns
+			prism_	nsp/3,	_etcHgt - _offsetIns*2,	get(nsp)
+		del 1
+
+		put	_etcWdt - _offsetIns,					-(_minFrmThk + gskThk),				15,
+			_etcWdt - _offsetIns,					-(_minFrmThk + gskThk) + _insThk,	15,
+			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
+			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
+
+		addz	_offsetIns
+			prism_	nsp/3,	_etcHgt - _offsetIns*2,	get(nsp)
+		del 1
+	endif
+
+	!	단열재 해치
+	if	GLOB_VIEW_TYPE = 4	then
+		sect_fill	insFill,	insBackPen,	insFillPen,	insHtcPen
+
+		!	해치 전체 길이
+		_insHtcLth = _etcHgt
+		_insHtcWdt = _etcWdt
+
+		!	해치 변수 정의
+		_modWdt = ((_insThk - _spdFrmThk*2) - eps*2)/2
+		_modUnit = _modWdt/2
+
+		_nMod = int(_insHtcLth/_modWdt)
+		_nMod = _nMod + 1
+
+		addy	-(_minFrmThk + gskThk) + _spdFrmThk + eps
+
+			!	해치 자르기
+			_nCut = 0
+			addz	(_offsetIns + _spdFrmThk)
+				cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+			del 1
+			addz	_etcHgt - (_offsetIns + _spdFrmThk)
+				cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+			del 1
+
+			!	해치 그리기
+			roty	-90
+				for	m = 1	to	_nMod
+					put	0,			0,			0,
+						0,			_modUnit,	900,
+						0,			90,			4000,
+						_modUnit,	_modUnit,	0,
+						0,			_modUnit*3,	0,
+						_modUnit,	_modUnit*3,	900,
+						0,			-180,		4000,
+						_modWdt,	_modUnit*3,	0,
+						_modUnit,	_modUnit,	0,
+						_modWdt,	_modUnit,	900,
+						0,			90,			4000
+
+					extrude	nsp/3,	0,	0,	-_insHtcWdt,	0,	get(nsp)
+
+					addx	_modWdt
+				next	m
+
+				del	_nMod
+			del 1
+		del 1
+
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"pnlGrl":	!	패널 : 그릴
+!-----------------------------------------------------------------------------------------------
+	pen			grlElevPen
+	sect_fill	grlFill,	grlBackPen,	grlFillPen,	grlSectPen
+	material	grlMat
+
+	!	변수 정의
+	_grlLth = _etcHgt
+	_grlWdt = _etcWdt
+
+	_nGrl = int(_grlLth/grlGap)
+	_rGrl = (_grlLth MOD grlGap)/2
+
+	!	그릴 형태
+	if	not(GLOB_FEEDBACK_MODE)	then
+		addy	-(gskThk + grlGap/2)
+
+			!	날개
+			for	m = 1	to	_nGrl
+				_modLct = grlGap*(m - 1) + grlGap/2 + _rGrl
+
+				addz	_modLct
+					if	GLOB_VIEW_TYPE = 5	then
+						lin_	0,			0,	0,
+								_grlWdt,	0,	0
+					else
+						rotx	-aGrl
+							put	0,			grlGap/2,	15,
+								0,			-grlGap/2,	15,
+								_grlWdt,	-grlGap/2,	15,
+								_grlWdt,	grlGap/2,	15
+
+							prism_	nsp/3,	grlThk/2,	use(nsp)
+							prism_	nsp/3,	-grlThk/2,	get(nsp)
+						del 1
+					endif
+				del 1
+			next	m
+
+			!	틈 막음(하부)
+			_btmLct = -grlGap/2 + _rGrl
+
+			cutplane	0,	0,	0,	1
+
+				addz	_btmLct
+					if	GLOB_VIEW_TYPE = 5	then
+					else
+						rotx	-90
+							put	0,			grlGap/2,	15,
+								0,			-grlGap/2,	15,
+								_grlWdt,	-grlGap/2,	15,
+								_grlWdt,	grlGap/2,	15
+
+							prism_	nsp/3,	grlThk/2,	use(nsp)
+							prism_	nsp/3,	-grlThk/2,	get(nsp)
+						del 1
+					endif
+				del 1
+
+			cutend
+
+			!	틈 막음(상부)
+			_topLct = grlGap*_nGrl + grlGap/2 + _rGrl
+
+			addz	_etcHgt
+				cutplane	0,	0, 	0,	0
+			del 1
+
+				addz	_topLct
+					rotx	-90
+						put	0,			grlGap/2,	15,
+							0,			-grlGap/2,	15,
+							_grlWdt,	-grlGap/2,	15,
+							_grlWdt,	grlGap/2,	15
+
+						prism_	nsp/3,	grlThk/2,	use(nsp)
+						prism_	nsp/3,	-grlThk/2,	get(nsp)
+					del 1
+				del 1
+
+			cutend
+		del 1
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"getCoor_cutPnl":
+!-----------------------------------------------------------------------------------------------
+	if	iMlnType = MLN_TYPE1	then
+		put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),
+			-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
+			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
+			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),
+			_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),
+			_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
+			_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
+			_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm)
+	endif
+
+	if	iMlnType = MLN_TYPE2	then
+		put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),
+			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),
+			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),
+			-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),
+			-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
+			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
+			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),
+			_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),
+			_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
+			_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
+			_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),
+			_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),
+			_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),
+			_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),
+			-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm)
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"vFrame_D":
+!-----------------------------------------------------------------------------------------------
+	pen			frmElevPen
+	sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+	material	frmMat
+
+	!	본체
+	put	-_frmWdt/2,	-gskThk,			15,
+		-_frmWdt/2,	-(gskThk + mlnThk),	15,
+		_frmWdt/2,	-(gskThk + mlnThk),	15,
+		_frmWdt/2,	-gskThk,			15
+
+	prism_	nsp/3,	_doorHgt,	get(nsp)
+
+	!	본체
+	if	iMlnType = MLN_TYPE1	then
+		put	-_gskWdt/2,	0,					15,
+			-_gskWdt/2,	-gskThk,			15,
+			_gskWdt/2,	-gskThk,			15,
+			_gskWdt/2,	0,					15
+	endif
+
+	if	iMlnType = MLN_TYPE2	then
+		put	-_frmWdt/2,	0,					15,
+			-_frmWdt/2,	-gskCapThk,			15,
+			-_gskWdt/2,	-gskCapThk,			15,
+			-_gskWdt/2,	-gskThk,			15,
+			_gskWdt/2,	-gskThk,			15,
+			_gskWdt/2,	-gskCapThk,			15,
+			_frmWdt/2,	-gskCapThk,			15,
+			_frmWdt/2,	0,					15,
+			-_frmWdt/2,	0,					15
+	endif
+
+	prism_	nsp/3,	trsGap[1],	get(nsp)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"doorShape":	!	여닫이 문
+!-----------------------------------------------------------------------------------------------
+	!	프레임 유형 : 상/하
+	if	_frameType = FRAME_TYPE1 | _frameType = FRAME_TYPE2	then
+		!	프레임
+		pen			frmElevPen
+		sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+		material	frmMat
+
+		put	0,			0,			15,
+			0,			-_doorThk,	15,
+			_doorWdt,	-_doorThk,	15,
+			_doorWdt,	0,			15
+
+		prism_	nsp/3,	_frmB,	use(nsp)
+
+		addz	_doorHgt - _frmT
+			prism_	nsp/3,	_frmT,	get(nsp)
+		del 1
+	endif
+
+	if	_frameType = FRAME_TYPE1	then
+		!	유리
+		pen			glsElevPen
+		sect_fill	glsFill,	glsBackPen,	glsFillPen,	glsSectPen
+		material	glsMat
+
+		put	0,			-_doorThk/2 + glsThk/2,	15,
+			0,			-_doorThk/2 - glsThk/2,	15,
+			_doorWdt,	-_doorThk/2 - glsThk/2,	15,
+			_doorWdt,	-_doorThk/2 + glsThk/2,	15
+
+		addz	_frmB
+			prism_	nsp/3,	_doorHgt - (_frmB + _frmT),	get(nsp)
+		del 1
+	endif
+
+	!	프레임 유형 : 상/하/좌/우
+	if	_frameType = FRAME_TYPE2	then
+		!	프레임
+		pen			frmElevPen
+		sect_fill	frmFill,	frmBackPen,	frmFillPen,	frmSectPen
+		material	frmMat
+
+		put	0,		0,			15,
+			0,		-_doorThk,	15,
+			_frmL,	-_doorThk,	15,
+			_frmL,	0,			15
+
+		addz	_frmB
+			prism_	nsp/3,	_doorHgt - (_frmB + _frmT),	get(nsp)
+		del 1
+
+		put	_doorWdt - _frmR,	0,			15,
+			_doorWdt - _frmR,	-_doorThk,	15,
+			_doorWdt,			-_doorThk,	15,
+			_doorWdt,			0,			15
+
+		addz	_frmB
+			prism_	nsp/3,	_doorHgt - (_frmB + _frmT),	get(nsp)
+		del 1
+
+		!	유리
+		pen			glsElevPen
+		sect_fill	glsFill,	glsBackPen,	glsFillPen,	glsSectPen
+		material	glsMat
+
+		put	_frmL,				-_doorThk/2 + glsThk/2,	15,
+			_frmL,				-_doorThk/2 - glsThk/2,	15,
+			_doorWdt - _frmR,	-_doorThk/2 - glsThk/2,	15,
+			_doorWdt - _frmR,	-_doorThk/2 + glsThk/2,	15
+
+		addz	_frmB
+			prism_	nsp/3,	_doorHgt - (_frmB + _frmT),	get(nsp)
+		del 1
+	endif
+
+	!	열림표현
+	pen	oplinePen
+
+	if	not(GLOB_VIEW_TYPE = 2)	then
+		!	열림표현 : 왼쪽
+		if	_openDirect = OPENDIRECT_LEFT	then
+			if	_openType = OPENTYPE_HINGE	then
+				lin_	_doorWdt,	0,	0,
+						0,			0,	_doorHgt/2
+				lin_	0,			0,	_doorHgt/2,
+						_doorWdt,	0,	_doorHgt
+						
+				lin_	_doorWdt,	-_doorThk,	0,
+						0,			-_doorThk,	_doorHgt/2
+				lin_	0,			-_doorThk,	_doorHgt/2,
+						_doorWdt,	-_doorThk,	_doorHgt
+			endif
+			if	_openType = OPENTYPE_SLIDE	then
+				lin_	_doorWdt*0.75,	0,	_doorHgt/2,
+						_doorWdt*0.25,	0,	_doorHgt/2
+				lin_	_doorWdt*0.25,	0,	_doorHgt/2,
+						_doorWdt*0.35,	0,	_doorHgt/2 + _doorWdt*0.1
+
+				lin_	_doorWdt*0.75,	-_doorThk,	_doorHgt/2,
+						_doorWdt*0.25,	-_doorThk,	_doorHgt/2
+				lin_	_doorWdt*0.25,	-_doorThk,	_doorHgt/2,
+						_doorWdt*0.35,	-_doorThk,	_doorHgt/2 + _doorWdt*0.1
+			endif
+		endif
+
+		!	열림표현 : 오른쪽
+		if	_openDirect = OPENDIRECT_RIGHT	then
+			if	_openType = OPENTYPE_HINGE	then
+				lin_	0,			0,	0,
+						_doorWdt,	0,	_doorHgt/2
+				lin_	_doorWdt,	0,	_doorHgt/2,
+						0,			0,	_doorHgt
+						
+				lin_	0,			-_doorThk,	0,
+						_doorWdt,	-_doorThk,	_doorHgt/2
+				lin_	_doorWdt,	-_doorThk,	_doorHgt/2,
+						0,			-_doorThk,	_doorHgt
+			endif
+			if	_openType = OPENTYPE_SLIDE	then
+				lin_	_doorWdt*0.25,	0,	_doorHgt/2,
+						_doorWdt*0.75,	0,	_doorHgt/2
+				lin_	_doorWdt*0.75,	0,	_doorHgt/2,
+						_doorWdt*0.65,	0,	_doorHgt/2 + _doorWdt*0.1
+
+				lin_	_doorWdt*0.25,	-_doorThk,	_doorHgt/2,
+						_doorWdt*0.75,	-_doorThk,	_doorHgt/2
+				lin_	_doorWdt*0.75,	-_doorThk,	_doorHgt/2,
+						_doorWdt*0.65,	-_doorThk,	_doorHgt/2 + _doorWdt*0.1
+			endif
+		endif
+	endif
+
+return

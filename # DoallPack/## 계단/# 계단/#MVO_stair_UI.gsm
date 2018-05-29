@@ -1,0 +1,35 @@
+!-----------------------------------------------------------------------------------------------
+!	MVO UI
+!-----------------------------------------------------------------------------------------------
+startX = 10
+startY = 10
+
+ui_dialog	"계단 단면 치수 설정",	600,	70
+
+ui_page	1
+	
+	ui_style 	2,	0
+
+	ui_outfield	"계단 평면 치수 설정:",	startX, startY	
+
+	posX = startX + 10
+	posY = startY + 20
+
+	ui_radiobutton	"iDimPlan", DimPlan_OFF,	"Off",	posX, posY,	100, 20		:	posY = posY + 20
+	ui_radiobutton	"iDimPlan", DimPlan_ON,		"On",	posX, posY,	100, 20
+
+	posX = posX + 110
+
+	ui_separator	posX,	startY,	posX,	70 - startY
+
+	posX = posX + 30
+	posY = startY + 20
+
+	ui_outfield	"계단 단면 치수 설정:",	startX + 140, startY
+
+	ui_radiobutton	"iDimSection", DimSection_OFF,	"Off",	posX, posY,	100, 20		:	posY = posY + 20
+	ui_radiobutton	"iDimSection", DimSection_ON,	"On",	posX, posY,	100, 20
+
+
+
+	

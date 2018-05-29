@@ -1,0 +1,17 @@
+!===============================================================================================
+!	회전문
+!===============================================================================================
+
+unID = 100
+eps = 0.0001
+
+
+!	회전문 유형
+DOORTYPE_4PANEL = 1
+DOORTYPE_3PANEL = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDoorType[]
+		stDoorType[1] = "TYPE1(4Panel)"
+		stDoorType[2] = "TYPE2(3Panel)"
+endif

@@ -1,0 +1,150 @@
+!===============================================================================================
+!	ㅇ,ㅁ형 철골보
+!===============================================================================================
+
+!	철골보 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iBeamType"	BeamType_Circle,	stBeamType[BeamType_Circle],
+						BeamType_Rectangle,	stBeamType[BeamType_Rectangle]
+
+values	"beamLth"	range	(0,	)
+
+if	iBeamType = BeamType_Circle	then
+	lock			"beamWdt", "beamHgt"
+	hideparameter	"beamWdt", "beamHgt"
+
+	values	"beamDia"	range	(beamThk*2,	)
+	values	"beamThk"	range	(0,	beamDia/2)
+endif
+
+if	iBeamType = BeamType_Rectangle	then
+	lock			"beamDia"
+	hideparameter	"beamDia"
+
+	_beamThkRange = min(beamWdt/2,	beamHgt/2)
+	values	"beamWdt"	range	(beamThk*2,	)
+	values	"beamHgt"	range	(beamThk*2,	)
+	values	"beamThk"	range	(0,	_beamThkRange)
+endif
+
+!	Profile
+if	iBeamType = BeamType_Circle		then	_stType = "Ø-" + str("%^.0mm",	beamDia) + "X" + str("%^.0mm",	beamThk)
+if	iBeamType = BeamType_Rectangle	then	_stType = "ㅁ-" + str("%^.0mm",	beamWdt) + "X" + str("%^.0mm",	beamHgt) + "X" + str("%^.0mm",	beamThk)
+
+lock	"stProfile"
+parameters	stProfile = _stType
+
+
+!	Cut Plane
+!-----------------------------------------------------------------------------------------------
+values{2}	"iCutPlaneL"	CutPlane_vert,	stCutPlane[CutPlane_vert],
+							CutPlane_horz,	stCutPlane[CutPlane_horz]
+
+values{2}	"iCutPlaneR"	CutPlane_vert,	stCutPlane[CutPlane_vert],
+							CutPlane_horz,	stCutPlane[CutPlane_horz]
+
+!	Offset
+values	"offsetL"	range	[0,	beamLth/2)
+values	"offsetR"	range	[0,	beamLth/2)
+
+!	cutCenL/R
+if	iBeamType = BeamType_Circle	then
+	_rangeCen_L = beamDia/2
+	_rangeCen_R = beamDia/2
+endif
+
+if	iBeamType = BeamType_Rectangle	then
+	_rangeCen_L = beamWdt/2
+	_rangeCen_R = beamWdt/2
+
+	if	iCutPlaneL = CutPlane_horz	then
+		_rangeCen_L = beamHgt/2
+	endif
+	if	iCutPlaneR = CutPlane_horz	then
+		_rangeCen_R = beamHgt/2
+	endif
+endif
+
+values	"cutCenL"	range	[-_rangeCen_L,	_rangeCen_L]
+values	"cutCenR"	range	[-_rangeCen_R,	_rangeCen_R]
+
+values	"cutLthL1"	range	(-beamLth/2,	beamLth/2 + offsetL)
+values	"cutLthL2"	range	(-beamLth/2,	beamLth/2 + offsetL)
+
+values	"cutLthR1"	range	(-beamLth/2,	beamLth/2 + offsetR)
+values	"cutLthR2"	range	(-beamLth/2,	beamLth/2 + offsetR)
+
+
+!	접합 형태
+!-----------------------------------------------------------------------------------------------
+values{2}	"iAttachL"	Attach_Moment,	stAttach[Attach_Moment],
+						Attach_PIN,		stAttach[Attach_PIN],
+						Attach_None,	stAttach[Attach_None]
+
+values{2}	"iAttachR"	Attach_Moment,	stAttach[Attach_Moment],
+						Attach_PIN,		stAttach[Attach_PIN],
+						Attach_None,	stAttach[Attach_None]
+
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDisplay"	Display_Projected,		stDisplay[Display_Projected],
+						Display_WithOverhead,	stDisplay[Display_WithOverhead],
+						Display_Symbolic,		stDisplay[Display_Symbolic],
+						Display_Outlines,		stDisplay[Display_Outlines],
+						Display_Overhead,		stDisplay[Display_Overhead],
+						Display_MVO,			stDisplay[Display_MVO]
+
+values{2}	"iDisplayCore"	Display_Projected,		stDisplay[Display_Projected],
+							Display_WithOverhead,	stDisplay[Display_WithOverhead],
+							Display_Symbolic,		stDisplay[Display_Symbolic],
+							Display_Outlines,		stDisplay[Display_Outlines],
+							Display_Overhead,		stDisplay[Display_Overhead],
+							Display_MVO,			stDisplay[Display_MVO]
+
+! if	not(iDisplay = Display_Projected | iDisplay = Display_WithOverhead)\
+! 	& not(iDisplayCore = Display_Projected | iDisplayCore = Display_WithOverhead)	then
+! 	lock			"cutPen", "cutFill", "cutFillPen", "cutBackPen"
+! 	hideparameter	"cutPen", "cutFill", "cutFillPen", "cutBackPen"
+! endif
+
+! if	not(iDisplay = Display_WithOverhead | iDisplay = Display_Overhead)\
+! 	& not(iDisplayCore = Display_WithOverhead | iDisplayCore = Display_Overhead)	then
+! 	lock			"overPen", "overLT"
+! 	hideparameter	"overPen", "overLT"
+! endif
+
+! if	not(iDisplay = Display_Projected | iDisplay = Display_WithOverhead | iDisplay = Display_Outlines)\
+! 	& not(iDisplayCore = Display_Projected | iDisplayCore = Display_WithOverhead | iDisplayCore = Display_Outlines)	then
+! 	lock			"btmPen", "btmFill", "btmFillPen", "btmBackPen"
+! 	hideparameter	"btmPen", "btmFill", "btmFillPen", "btmBackPen"
+! endif
+
+! if	not(iDisplay = Display_Symbolic) & not(iDisplayCore = Display_Symbolic)	then
+! 	lock			"symPen", "symSize", "symOffsetL", "symOffsetR", "symFill", "symFillPen", "symBackPen"
+! 	hideparameter	"symPen", "symSize", "symOffsetL", "symOffsetR", "symFill", "symFillPen", "symBackPen"
+! endif
+
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+values{2}	"iProjectTo"	ProjectTo_FloorPlan,	stProjectTo[ProjectTo_FloorPlan],
+							ProjectTo_Absolute,		stProjectTo[ProjectTo_Absolute],
+							ProjectTo_Entire,		stProjectTo[ProjectTo_Entire]
+
+
+!	Y축 회전 기준점
+!-----------------------------------------------------------------------------------------------
+values{2}	"iRotY"	Rotation_Top,		stRotation[Rotation_Top],
+					Rotation_Center,	stRotation[Rotation_Center],
+					Rotation_Bottom,	stRotation[Rotation_Bottom]
+
+values	"aRotY"	range	[0,	360)
+values	"aRotX"	range	[0,	360)
+
+
+!	3D Detail Level
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDetailLevel"	DetailLevel_Detailed,	stDetailLevel[DetailLevel_Detailed],
+							DetailLevel_Simple,		stDetailLevel[DetailLevel_Simple],
+							DetailLevel_None,		stDetailLevel[DetailLevel_None]

@@ -1,0 +1,619 @@
+!===============================================================================================
+!	커스텀 층 마커
+!===============================================================================================
+
+!	Scale
+!-----------------------------------------------------------------------------------------------
+	!	Marker
+	markerSize = markerSize*GLOB_SCALE
+	rMarker = (markerSize/2)
+
+	!	Line
+	lp1 = lp1*GLOB_SCALE
+	lp2 = lp2*GLOB_SCALE
+	lenLineCut = lenLineCut*GLOB_SCALE
+	rightOverhang = rightOverhang*GLOB_SCALE
+	lenMarkerOffset = lenMarkerOffset*GLOB_SCALE
+	TopOverhang = TopOverhang*GLOB_SCALE
+	xTextPos = xTextPos*GLOB_SCALE
+	leftOverhang = leftOverhang*GLOB_SCALE
+
+
+!===============================================================================================
+!	텍스트
+!===============================================================================================
+
+!	텍스트 입력
+!-----------------------------------------------------------------------------------------------
+	!	층 번호 텍스트 (top_TextIndex, bottom_TextIndex)
+	if	iStoryNumberText_Top = StoryText_Custom	then
+		top_TextIndex = strStoryNumberText_Top
+	else
+		top_TextIndex = ""
+	endif
+
+	if	iStoryNumberText_Bottom = StoryText_Custom	then
+		bottom_TextIndex = strStoryNumberText_Bottom
+	else
+		bottom_TextIndex = ""
+	endif
+
+	!	층 이름 텍스트 (top_TextName, bottom_TextName)
+	if	iStoryNameText_Top = StoryText_Custom	then
+		top_TextName = strStoryNameText_Top
+	else
+		top_TextName = ""
+	endif
+
+	if	iStoryNameText_Bottom = StoryText_Custom	then
+		bottom_TextName = strStoryNameText_Bottom
+	else
+		bottom_TextName = ""
+	endif
+
+	!	층 입면 텍스트 (top_TextElevation, bottom_TextElevation)
+	if	iElevationText_Top = StoryText_Custom	then
+		top_TextElevation = strElevationText_Top
+	else
+		top_TextElevation = ""
+	endif
+
+	if	iElevationText_Bottom = StoryText_Custom	then
+		bottom_TextElevation = strElevationText_Bottom
+	else
+		bottom_TextElevation = ""
+	endif
+
+	!	라벨(상) 텍스트
+	top_LabelText = top_TextIndex
+	if	iStoryNumberText_Top # StoryText_None	then
+		if	bSeparator1_Top	then
+			top_LabelText = top_LabelText + " " + strSeparator1_Top + " "
+		else
+			top_LabelText = top_LabelText + " "
+		endif
+	endif
+	if	bStoryNameFirst_Top	then
+		top_LabelText = top_LabelText + top_TextName
+	else
+		top_LabelText = top_LabelText + top_TextElevation
+	endif
+	if	(bStoryNameFirst_Top & iElevationText_Top # StoryText_None) | (not(bStoryNameFirst_Top) & iStoryNameText_Top # StoryText_None)	then
+		if	bSeparator2_Top	then
+			top_LabelText = top_LabelText + " " + strSeparator2_Top + " "
+		else
+			top_LabelText = top_LabelText + " "
+		endif
+	endif
+	if	bStoryNameFirst_Top	then
+		top_LabelText = top_LabelText + top_TextElevation
+	else
+		top_LabelText = top_LabelText + top_TextName
+	endif
+
+	!	라벨(하) 텍스트
+	bottom_LabelText = bottom_TextIndex
+	if	iStoryNumberText_Bottom # StoryText_None	then
+		if	bSeparator1_Bottom	then
+			bottom_LabelText = bottom_LabelText + " " + strSeparator1_Bottom + " "
+		else
+			bottom_LabelText = bottom_LabelText + " "
+		endif
+	endif
+	if	bStoryNameFirst_Bottom	then
+		bottom_LabelText = bottom_LabelText + bottom_TextName
+	else
+		bottom_LabelText = bottom_LabelText + bottom_TextElevation
+	endif
+	if	(bStoryNameFirst_Bottom & iElevationText_Bottom # StoryText_None) | (not(bStoryNameFirst_Bottom) & iStoryNameText_Bottom # StoryText_None)	then
+		if	bSeparator2_Bottom	then
+			bottom_LabelText = bottom_LabelText + " " + strSeparator2_Bottom + " "
+		else
+			bottom_LabelText = bottom_LabelText + " "
+		endif
+	endif
+	if	bStoryNameFirst_Bottom	then
+		bottom_LabelText = bottom_LabelText + bottom_TextElevation
+	else
+		bottom_LabelText = bottom_LabelText + bottom_TextName
+	endif
+
+!	텍스트 정렬
+!-----------------------------------------------------------------------------------------------
+textAnchor = 1
+
+define style	"topLabelStyle_calc"		stFontType,	textSize_Top,	textAnchor,	1
+define style	"bottomLabelStyle_calc"	stFontType,	textSize_Bottom,	textAnchor,	1
+
+style	"topLabelStyle_calc"
+top_LabelWidth = stw(top_LabelText)
+style	"bottomLabelStyle_calc"
+bottom_LabelWidth = stw(bottom_LabelText)
+
+textLength = max(top_LabelWidth,	bottom_LabelWidth)/1000*GLOB_SCALE
+textDiff = (top_LabelWidth - bottom_LabelWidth)/1000*GLOB_SCALE
+
+! text2	0,	2,	top_LabelWidth
+! text2	0,	1,	bottom_LabelWidth
+! text2	0,	0,	textDiff
+
+if	textDiff > eps	then	bTopLabelLong = 1	else	bTopLabelLong = 0
+
+! 배치 - iPlacement : 1(내부) 2(외부) 3(중심)
+! 정렬 - iAlignment : 1(왼쪽) 2(가운데) 3(오른쪽)
+
+topMovement = 0
+bottomMovement = 0
+
+if	iPlacement = 1	then		! 내부
+	textAnchor = 9
+
+	if	iAlignment = 1	then		! 왼쪽
+		if	bTopLabelLong	then
+			topMovement = 0
+			bottomMovement = textDiff
+		else
+			topMovement = -textDiff
+			bottomMovement = 0
+		endif
+	endif
+	if	iAlignment = 2	then		! 가운데
+		if	bTopLabelLong	then
+			topMovement = 0
+			bottomMovement = textDiff/2
+		else
+			topMovement = -textDiff/2
+			bottomMovement = 0
+		endif
+	endif
+	if	iAlignment = 3	then		! 오른쪽
+		topMovement = 0
+		bottomMovement = 0
+	endif
+endif
+if	iPlacement = 2	then		! 외부
+	textAnchor = 7
+
+	if	iAlignment = 1	then		! 왼쪽
+		topMovement = xTextPos
+		bottomMovement = xTextPos
+	endif
+	if	iAlignment = 2	then		! 가운데
+		if	bTopLabelLong	then
+			topMovement = xTextPos
+			bottomMovement = xTextPos - textDiff/2
+		else
+			topMovement = xTextPos + textDiff/2
+			bottomMovement = xTextPos
+		endif
+	endif
+	if	iAlignment = 3	then		! 오른쪽
+		if	bTopLabelLong	then
+			topMovement = xTextPos
+			bottomMovement = xTextPos - textDiff
+		else
+			topMovement = xTextPos + textDiff
+			bottomMovement = xTextPos
+		endif
+	endif
+endif
+if	iPlacement = 3	then		! 중심
+	textAnchor = 8
+
+	if	iAlignment = 1	then		! 왼쪽
+		if	bTopLabelLong	then
+			topMovement = xTextPos/2
+			bottomMovement = xTextPos/2 + textDiff/2
+		else
+			topMovement = xTextPos/2 - textDiff/2
+			bottomMovement = xTextPos/2
+		endif
+	endif
+	if	iAlignment = 2	then		! 가운데
+		topMovement = xTextPos/2
+		bottomMovement = xTextPos/2
+	endif
+	if	iAlignment = 3	then		! 오른쪽
+		if	bTopLabelLong	then
+			topMovement = xTextPos/2
+			bottomMovement = xTextPos/2 - textDiff/2
+		else
+			topMovement = xTextPos/2 + textDiff/2
+			bottomMovement = xTextPos/2
+		endif
+	endif
+endif
+
+define style	"topLabelStyle"		stFontType,	textSize_Top,		textAnchor,	1
+define style	"bottomLabelStyle"	stFontType,	textSize_Bottom,	textAnchor,	1
+
+	r = request("Height_of_style",	"topLabelStyle",	_textHgt_Top,	_descent_Top,	_leading_Top)
+	r = request("Height_of_style",	"bottomLabelStyle",	_textHgt_Bottom,	_descent_Bottom,	_leading_Bottom)
+
+	adjustY_Top = _descent_Top + _leading_Top
+	adjustY_Top = adjustY_Top/1000*GLOB_SCALE
+
+	adjustY_Bottom = textSize_Bottom + _descent_Bottom + _leading_Bottom
+	adjustY_Bottom = adjustY_Bottom/1000*GLOB_SCALE
+
+
+!===============================================================================================
+!	마커
+!===============================================================================================
+line_type	marker_line
+pen			linePen
+
+!	라인
+!-----------------------------------------------------------------------------------------------
+!	선 끊기 핫스팟
+if	bLineCut	then
+	hotspot2	0,				0,	unID,	lenLineCut,	1+1024	:	unID = unID + 1
+	hotspot2	1,				0,	unID,	lenLineCut,	3		:	unID = unID + 1
+	hotspot2	-lenLineCut,	0,	unID,	lenLineCut,	2		:	unID = unID + 1
+endif
+
+!	첫번째 선의 길이 핫스팟
+hotspot2	0,		0,	unID,	lp1,	1+1024	:	unID = unID + 1
+hotspot2	1,		0,	unID,	lp1,	3		:	unID = unID + 1
+hotspot2	-lp1,	0,	unID,	lp1,	2		:	unID = unID + 1
+
+!	두번째 선의 각도 핫스팟
+add2	-lp1,	0
+	hotspot2	-lp2/2,					0,					unID,	lp2_a,	4+128	:	unID = unID + 1
+	hotspot2	-cos(lp2_a)*(lp2/2),	-sin(lp2_a)*lp2/2,	unID,	lp2_a,	5		:		unID = unID + 1
+	hotspot2	0,						0,					unID,	lp2_a,	6		:		unID = unID + 1
+del 1
+
+!	두번째 선의 길이 핫스팟
+add2	-lp1,	0
+	rot2	lp2_a
+		hotspot2	0,		0,	unID,	lp2,	1+1024	:	unID = unID + 1
+		hotspot2	1,		0,	unID,	lp2,	3		:	unID = unID + 1
+		hotspot2	-lp2,	0,	unID,	lp2,	2		:	unID = unID + 1
+	del 1
+del 1
+
+!	그리기
+_xPos_1 = 0
+if	bLineCut	then	_xPos_1 = -lenLineCut
+
+	!	첫번째 선
+	line2	_xPos_1,	0,	-lp1,	0
+
+	!	두번째 선
+	add2	-lp1,	0
+		rot2	lp2_a
+			line2	0,	0,	-lp2,	0
+		del 1
+	del 1
+
+!	마커
+!-----------------------------------------------------------------------------------------------
+add2	-(lp1 + lp2*cos(lp2_a)),	-lp2*sin(lp2_a)
+
+	!	마커 위치 : 안쪽
+	if	iMarkerPos = Pos_Inside	then
+		!	우측 돌출선의 길이 핫스팟
+		hotspot2	0,				0,	unID,	rightOverhang,	1+128+1024	:	unID = unID + 1
+		hotspot2	1,				0,	unID,	rightOverhang,	3			:	unID = unID + 1
+		hotspot2	-rightOverhang,	0,	unID,	rightOverhang,	2			:	unID = unID + 1
+
+		line2	0,	0,	-rightOverhang,	0
+
+			add2	-rightOverhang,	0
+
+				!	마커 그리기
+				if	bMarkerHead	then
+
+					!	마커크기
+					hotspot2	0,				0,	unID,	markerSize,	1+128+1024	:	unID = unID + 1
+					hotspot2	1,				0,	unID,	markerSize,	3			:	unID = unID + 1
+					hotspot2	-markerSize,	0,	unID,	markerSize,	2			:	unID = unID + 1
+
+					!	마커 수평선
+					line_type	marker_line
+					line2	0,	0,	-markerSize,	0
+
+					!	마커 유형 : 원형
+					if	iMarkerType = Marker_Circle	then
+						drawindex	20
+
+						!	수직선/수평선
+						add2	-rMarker,	rMarker
+							hotspot2	0,	0,				unID,	TopOverhang,	1+128+1024	:	unID = unID+1
+							hotspot2	0,	-1,				unID,	TopOverhang,	3			:	unID = unID+1
+							hotspot2	0,	TopOverhang,	unID,	TopOverhang,	2			:	unID = unID+1
+						del 1
+
+						add2	-rMarker,	0
+							line_type	marker_line
+							line2	0,	rMarker + TopOverhang,	0,	-(rMarker + TopOverhang)
+						del 1
+
+						!	원
+						line_type	head_line
+
+						add2	-rMarker,	0
+							for	i = 1	to	4
+								if	i = 1 | i = 3	then
+									_fillType = MarkerFill_1
+									_fillPen = fillPen_1
+									_backPen = backPen_1
+								endif
+								if	i = 2 | i = 4	then
+									_fillType = MarkerFill_2
+									_fillPen = fillPen_2
+									_backPen = backPen_2
+								endif
+
+								fill	_fillType
+
+								put	rMarker,	0,	1,
+									0,			0,	900,
+									rMarker,	90,	4000+1,
+									0,			0,	1
+
+								poly2_b	nsp/3, 1 + 2*bMarkerFill + 4, _fillPen, _backPen,	get(nsp)
+
+								rot2	90
+							next	i
+
+							del 4
+						del 1
+					endif
+
+					!	마커 유형 : 역삼각형
+					if	iMarkerType = Marker_Nabla	then
+						drawindex	20
+
+						_markerWdt = markerSize
+						if	iMarkerDir = Dir_Top	then
+							_markerHgt = rMarker
+						endif
+						if	iMarkerDir = Dir_Bottom	then
+							_markerHgt = -rMarker
+						endif
+
+						line_type	head_line
+						fill		MarkerFill_1
+
+						put	-_markerWdt/2,	0,			1,
+							-_markerWdt,	_markerHgt,	1,
+							0,				_markerHgt,	1
+
+						poly2_b	nsp/3,	1 + 2*bMarkerFill + 4,	fillPen_1,	backPen_1,	get(nsp)
+					endif
+
+					!	마커 유형 : 직사각형
+					if	iMarkerType = Marker_Rect	then
+						drawindex	20
+
+						_markerWdt = markerSize
+						if	iMarkerDir = Dir_Top	then
+							_markerHgt = rMarker
+						endif
+						if	iMarkerDir = Dir_Bottom	then
+							_markerHgt = -rMarker
+						endif
+
+						line_type	head_line
+						fill		MarkerFill_1
+
+						put	0,				0,			1,
+							-_markerWdt,	0,			1,
+							-_markerWdt,	_markerHgt,	1,
+							0,				_markerHgt,	1
+
+						poly2_b	nsp/3,	1 + 2*bMarkerFill + 4,	fillPen_1,	backPen_1,	get(nsp)
+					endif
+				endif
+
+				!	텍스트 및 라인
+				if	bMarkerHead	then	add2	-markerSize,	0
+
+					!	Marker Offset
+					hotspot2	0,					0,	unID,	lenMarkerOffset,	1+128+1024	:	unID = unID + 1
+					hotspot2	1,					0,	unID,	lenMarkerOffset,	3			:	unID = unID + 1
+					hotspot2	-lenMarkerOffset,	0,	unID,	lenMarkerOffset,	2			:	unID = unID + 1
+
+					add2	-lenMarkerOffset,	0
+
+						!	텍스트
+						pen		textPen
+
+							!	라벨 상부
+							style "topLabelStyle"
+							add2	0,	(textSize_Top/1000*GLOB_SCALE)/3
+								text2	-topMovement,	-adjustY_Top,	top_LabelText
+							del 1
+
+							!	라벨 하부
+							style "bottomLabelStyle"
+							add2	0,	-(textSize_Bottom/1000*GLOB_SCALE)/3
+								text2	-bottomMovement,	-adjustY_Bottom,	bottom_LabelText
+							del 1
+
+						!	라인
+						pen	linePen
+
+						hotspot2	0,			0,	unID,	xTextPos,	1+128+1024,	xTextPos	:	unID = unID + 1
+						hotspot2	1,			0,	unID,	xTextPos,	3,			xTextPos	:	unID = unID + 1
+						hotspot2	-xTextPos,	0,	unID,	xTextPos,	2,			xTextPos	:	unID = unID + 1
+
+						line2	0,	0,	-xTextPos,	0
+
+						add2	-xTextPos,	0
+							hotspot2	0,				0,	unID,	leftOverhang,	1+128+1024	:	unID = unID + 1
+							hotspot2	1,				0,	unID,	leftOverhang,	3			:	unID = unID + 1
+							hotspot2	-leftOverhang,	0,	unID,	leftOverhang,	2			:	unID = unID + 1
+
+							line2	0,	0,	-leftOverhang,	0
+						del 1
+
+					del 1
+				if	bMarkerHead	then	del 1
+			del 1
+	endif
+
+	!	마커 위치 : 바깥쪽
+	if	iMarkerPos = Pos_Outside	then		! 마커 위치 : 바깥쪽
+		!	우측 돌출선의 길이 핫스팟
+		hotspot2	0,				0,	unID,	rightOverhang,	1+128+1024	:	unID = unID + 1
+		hotspot2	1,				0,	unID,	rightOverhang,	3			:	unID = unID + 1
+		hotspot2	-rightOverhang,	0,	unID,	rightOverhang,	2			:	unID = unID + 1
+
+		line2	0,	0,	-rightOverhang,	0
+
+		add2	-rightOverhang,	0
+
+			!	텍스트
+			pen		textPen
+
+				!	라벨 상부
+				style "topLabelStyle"
+				add2	0,	(textSize_Top/1000*GLOB_SCALE)/3
+					text2	-topMovement,	-adjustY_Top,	top_LabelText
+				del 1
+
+				!	라벨 하부
+				style "bottomLabelStyle"
+				add2	0,	-(textSize_Bottom/1000*GLOB_SCALE)/3
+					text2	-bottomMovement,	-adjustY_Bottom,	bottom_LabelText
+				del 1
+
+			!	라인
+			pen	linePen
+
+			hotspot2	0,			0,	unID,	xTextPos,	1+128+1024,	xTextPos	:	unID = unID + 1
+			hotspot2	1,			0,	unID,	xTextPos,	3,			xTextPos	:	unID = unID + 1
+			hotspot2	-xTextPos,	0,	unID,	xTextPos,	2,			xTextPos	:	unID = unID + 1
+
+			line2	0,	0,	-xTextPos,	0
+
+			add2	-xTextPos,	0
+
+				if	bMarkerHead	then
+					!	Marker Offset
+					hotspot2	0,					0,	unID,	lenMarkerOffset,	1+128+1024	:	unID = unID + 1
+					hotspot2	1,					0,	unID,	lenMarkerOffset,	3			:	unID = unID + 1
+					hotspot2	-lenMarkerOffset,	0,	unID,	lenMarkerOffset,	2			:	unID = unID + 1
+
+					add2	-lenMarkerOffset,	0
+
+						!	마커크기
+						hotspot2	0,				0,	unID,	markerSize,	1+128+1024	:	unID = unID + 1
+						hotspot2	1,				0,	unID,	markerSize,	3			:	unID = unID + 1
+						hotspot2	-markerSize,	0,	unID,	markerSize,	2			:	unID = unID + 1
+
+						!	마커 수평선
+						line_type	marker_line
+						line2	0,	0,	-markerSize,	0
+
+						!	마커 유형 : 원형
+						if	iMarkerType = Marker_Circle	then
+							drawindex	20
+
+							!	수직선/수평선
+							add2	-rMarker,	rMarker
+								hotspot2	0,	0,				unID,	TopOverhang,	1+128+1024	:	unID = unID+1
+								hotspot2	0,	-1,				unID,	TopOverhang,	3			:	unID = unID+1
+								hotspot2	0,	TopOverhang,	unID,	TopOverhang,	2			:	unID = unID+1
+							del 1
+
+							add2	-rMarker,	0
+								line_type	marker_line
+								line2	0,	rMarker + TopOverhang,	0,	-(rMarker + TopOverhang)
+							del 1
+
+							!	원
+							line_type	head_line
+
+							add2	-rMarker,	0
+								for	i = 1	to	4
+									if	i = 1 | i = 3	then
+										_fillType = MarkerFill_1
+										_fillPen = fillPen_1
+										_backPen = backPen_1
+									endif
+									if	i = 2 | i = 4	then
+										_fillType = MarkerFill_2
+										_fillPen = fillPen_2
+										_backPen = backPen_2
+									endif
+
+									fill	_fillType
+
+									put	rMarker,	0,	1,
+										0,			0,	900,
+										rMarker,	90,	4000+1,
+										0,			0,	1
+
+									poly2_b	nsp/3, 1 + 2*bMarkerFill + 4, _fillPen, _backPen,	get(nsp)
+
+									rot2	90
+								next	i
+
+								del 4
+							del 1
+						endif
+
+						!	마커 유형 : 역삼각형
+						if	iMarkerType = Marker_Nabla	then
+							drawindex	20
+
+							_markerWdt = markerSize
+							if	iMarkerDir = Dir_Top	then
+								_markerHgt = rMarker
+							endif
+							if	iMarkerDir = Dir_Bottom	then
+								_markerHgt = -rMarker
+							endif
+
+							line_type	head_line
+							fill		MarkerFill_1
+
+							put	-_markerWdt/2,	0,			1,
+								-_markerWdt,	_markerHgt,	1,
+								0,				_markerHgt,	1
+
+							poly2_b	nsp/3,	1 + 2*bMarkerFill + 4,	fillPen_1,	backPen_1,	get(nsp)
+						endif
+
+						!	마커 유형 : 직사각형
+						if	iMarkerType = Marker_Rect	then		! 마커 유형 : 역삼각형
+							drawindex	20
+
+							_markerWdt = markerSize
+							if	iMarkerDir = Dir_Top	then
+								_markerHgt = rMarker
+							endif
+							if	iMarkerDir = Dir_Bottom	then
+								_markerHgt = -rMarker
+							endif
+
+							line_type	head_line
+							fill		MarkerFill_1
+
+							put	0,				0,			1,
+								-_markerWdt,	0,			1,
+								-_markerWdt,	_markerHgt,	1,
+								0,				_markerHgt,	1
+
+							poly2_b	nsp/3,	1 + 2*bMarkerFill + 4,	fillPen_1,	backPen_1,	get(nsp)
+						endif
+
+					del 1
+				endif
+
+				!	좌측 돌출 라인
+				if	bMarkerHead	then	add2	-(markerSize + lenMarkerOffset),	0
+					hotspot2	0,				0,	unID,	leftOverhang,	1+128+1024	:	unID = unID + 1
+					hotspot2	1,				0,	unID,	leftOverhang,	3			:	unID = unID + 1
+					hotspot2	-leftOverhang,	0,	unID,	leftOverhang,	2			:	unID = unID + 1
+
+					line2	0,	0,	-leftOverhang,	0
+				if	bMarkerHead	then	del 1
+			del 1
+		del 1
+	endif
+del 1

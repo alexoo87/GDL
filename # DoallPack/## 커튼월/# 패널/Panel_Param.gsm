@@ -1,0 +1,248 @@
+!===============================================================================================
+!	패널
+!===============================================================================================
+!	기본값 Lock
+!-----------------------------------------------------------------------------------------------
+lock	"A", "B", "ZZYZX"
+
+!	패널 두께
+!-----------------------------------------------------------------------------------------------
+! values	"pnlThk"	range	[eps,	]
+
+!	패널 추가 높이
+!-----------------------------------------------------------------------------------------------
+values	"addHgtL"	range	[0,	]
+values	"addHgtR"	range	[0,	]
+
+!	기울임 방법
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMethod_Tilt"	Tilt_Angle,		stMethod_Tilt[Tilt_Angle],
+							Tilt_Length,	stMethod_Tilt[Tilt_Length]
+
+if	iMethod_Tilt = Tilt_Angle	then
+	lock	"lTilt"
+	hideparameter	"lTilt"
+endif
+
+if	iMethod_Tilt = Tilt_Length	then
+	lock	"aTilt"
+	hideparameter	"aTilt"
+endif
+
+values	"aTilt"	range	(-89,	89)
+
+_lTiltRange = pnlHgt*tan(89)
+values	"lTilt"	range	[-_lTiltRange,	_lTiltRange]
+
+!	포인트 좌표
+!-----------------------------------------------------------------------------------------------
+!	Point1(원점 : 0, 0, 0)
+for	i = 1	to	3
+	parameters	matrixPoint[1][i] = 0
+next	i
+
+!	높이값 입
+_pnlHgt = pnlHgt
+
+for	i = 1	to	4
+	if	i = 1 | i = 4	then
+		parameters	matrixPoint[i][3] = 0
+	endif
+	if	i = 2 | i = 3	then
+		if	i = 2	then	parameters	matrixPoint[i][3] = _pnlHgt + addHgtL
+		if	i = 3	then	parameters	matrixPoint[i][3] = _pnlHgt + addHgtR
+	endif
+next	i
+
+!	포인트 y좌표
+_yPos = 0
+if	iMethod_Tilt = Tilt_Angle	then
+	_yPos = -pnlHgt*tan(aTilt)
+endif
+
+if	iMethod_Tilt = Tilt_Length	then
+	_yPos = -lTilt
+endif
+
+for	i = 1	to	4
+	if	i = 1 | i = 4	then
+		parameters	matrixPoint[i][2] = 0
+	endif
+	if	i = 2 | i = 3	then
+		if	i = 2	then	parameters	matrixPoint[i][2] = _yPos + addHgtL*_yPos/pnlHgt
+		if	i = 3	then	parameters	matrixPoint[i][2] = _yPos + addHgtR*_yPos/pnlHgt
+	endif
+next	i
+
+!	Point2의 X좌표는 Point3의 X좌표를 넘어갈 수 없다
+if	matrixPoint[2][1] - matrixPoint[3][1] > eps	then
+	parameters	matrixPoint[2][1] = matrixPoint[3][1] - eps*100
+endif
+
+!	Point4의 X좌표는 Point1의 X좌표를 넘어갈 수 없다
+if	matrixPoint[1][1] - matrixPoint[4][1] > eps	then
+	parameters	matrixPoint[4][1] = matrixPoint[1][1] + eps*100
+endif
+
+!	패널 분할 개수
+!-----------------------------------------------------------------------------------------------
+_nMax = 10
+dim	_nDivide[]
+for	i = 1	to	_nMax
+	_nDivide[i] = i
+next	i
+
+values	"nDivide"	_nDivide
+
+!	패널 분할 높이
+!-----------------------------------------------------------------------------------------------
+if	nDivide < 2	then
+	parameters	bEqualHgt = 1
+	lock			"bEqualHgt", "gapDivide"
+	hideparameter	"bEqualHgt", "gapDivide"
+endif
+
+values	"divideHgt"	range	[OffsetB,	pnlHgt - OffsetT]
+if	bEqualHgt	then
+	lock			"divideHgt"
+	hideparameter	"divideHgt"
+
+	for	i = 1	to	nDivide + 1
+		_tempHgt = pnlHgt/nDivide
+		parameters	divideHgt[i] = _tempHgt*i
+	next	i
+else
+	if	nDivide > 3	then
+		if	divideHgt[1] - divideHgt[2] > eps	then
+			parameters	divideHgt[1] = divideHgt[2] - eps*100
+		endif
+		if	divideHgt[2] - divideHgt[3] > eps	then
+			parameters	divideHgt[2] = divideHgt[3] - eps*100
+		endif
+
+		if	nDivide > 4	then
+			if	divideHgt[3] - divideHgt[4] > eps	then
+				parameters	divideHgt[3] = divideHgt[4] - eps*100
+			endif
+
+			if	nDivide > 5	then
+				if	divideHgt[4] - divideHgt[5] > eps	then
+					parameters	divideHgt[4] = divideHgt[5] - eps*100
+				endif
+
+				if	nDivide > 6	then
+					if	divideHgt[5] - divideHgt[6] > eps	then
+						parameters	divideHgt[5] = divideHgt[6] - eps*100
+					endif
+
+					if	nDivide > 7	then
+						if	divideHgt[6] - divideHgt[7] > eps	then
+							parameters	divideHgt[6] = divideHgt[7] - eps*100
+						endif
+
+						if	nDivide > 8	then
+							if	divideHgt[7] - divideHgt[8] > eps	then
+								parameters	divideHgt[7] = divideHgt[8] - eps*100
+							endif
+
+							if	nDivide > 9	then
+								if	divideHgt[8] - divideHgt[9] > eps	then
+									parameters	divideHgt[8] = divideHgt[9] - eps*100
+								endif
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	endif
+endif
+
+!	패널 분할 간격
+!-----------------------------------------------------------------------------------------------
+values	"gapDivide"		range	[0,	0.100]
+values	"gapHalfDivide"	range	[0,	0.050]
+
+if	GLOB_MODPAR_NAME = "gapHalfDivide"	then
+	for	i = 1	to	_nMax
+		parameters	gapDivide[i] = gapHalfDivide[i]*2
+	next	i
+endif
+
+if	GLOB_MODPAR_NAME = "gapDivide"	then
+	for	i = 1	to	_nMax
+		parameters	gapHalfDivide[i] = gapDivide[i]/2
+	next	i
+endif
+
+!===============================================================================================
+!	2D Display Options
+!===============================================================================================
+values	"gs_symb_display_option"		stDisplayOptions
+values	"gs_symb_show_projection_to"	stProjectionTypes
+
+if	AC_symb_display_option = 3 | AC_symb_display_option = 5	then
+	hideparameter	"gs_use_3D_view_attributes"
+	lock			"gs_use_3D_view_attributes"
+endif
+
+if	gs_use_3D_view_attributes	then
+	hideparameter	"AC_uncut_pen"
+	lock			"AC_uncut_pen"
+endif
+
+if	not(AC_symb_display_option = 1 | AC_symb_display_option = 2)	then
+	hideparameter	"gs_sect_pen",
+					"gs_cut_fill_type",
+					"gs_cut_fill_fg",
+					"gs_cut_fill_bg"
+endif
+
+if	AC_symb_display_option = 3 | AC_symb_display_option = 4 | AC_symb_display_option = 5	then
+	hideparameter	"gs_symb_show_projection_to"
+	lock			"gs_symb_show_projection_to"
+endif
+
+if	AC_symb_display_option = 3 | AC_symb_display_option = 5	then
+	hideparameter	"AC_cut_linetype"
+	lock			"AC_cut_linetype"
+endif
+
+if	AC_symb_display_option = 1 | AC_symb_display_option = 3 | AC_symb_display_option = 4	then
+	hideparameter	"AC_overhead_linetype", "AC_overhead_pen"
+	lock			"AC_overhead_linetype", "AC_overhead_pen"
+endif
+
+if	AC_symb_display_option = 4	then
+	hideparameter	"AC_cut_linetype"
+	lock			"AC_cut_linetype"
+endif
+
+if	AC_symb_display_option = 5	then
+	hideparameter	"gs_fill_type", "gs_fill_pen", "gs_back_pen"
+	lock			"gs_fill_type", "gs_fill_pen", "gs_back_pen"
+endif
+
+values	"gs_symb_display_option"		stDisplayOptions
+values	"gs_symb_show_projection_to"	stProjectionTypes
+! ==============================================================================
+
+
+!===============================================================================================
+!	Elevation(전개도)
+!===============================================================================================
+!	창호입면도
+values{2}	"iWinElev"	WinElev_ON,		stWinElev[WinElev_ON],
+						WinElev_OFF,	stWinElev[WinElev_OFF],
+						WinElev_MVO,	stWinElev[WinElev_MVO]
+
+if	not(_iWinElev = WinElev_ON)	then
+	parameters	bGuideLine = 0
+	lock			"bGuideLine", "zPosGuide", "bCenterLine"
+	hideparameter	"bGuideLine", "zPosGuide", "bCenterLine"
+endif
+
+if	not(bGuideLine)	then
+	lock			"xPosGuide", "yPosGuide", "aGuide"
+	hideparameter	"xPosGuide", "yPosGuide", "aGuide"
+endif

@@ -1,0 +1,558 @@
+!===========================================================================================
+!	제목
+!===========================================================================================
+ui_dialog	"U자형 계단 설정"
+
+
+!===========================================================================================
+!	기본설정
+!===========================================================================================
+ui_page	1,	-1,	"계단 기본설정 - 1",	"uiTab_StairStartEndSymb_flat(1)"
+!-------------------------------------------------------------------------------------------
+
+	!	기본설정
+	posY = 20
+
+		ui_style	0,	0
+		ui_outfield	"(1) 계단너비 1",	20, posY	:	posY = posY + 26
+		ui_outfield	"(2) 계단너비 2",	20, posY	:	posY = posY + 26
+		ui_outfield	"(3) 디딤판너비",	20, posY	:	posY = posY + 26
+		ui_outfield	"(4) Offset 1",		20, posY	:	posY = posY + 26
+		ui_outfield	"(5) Offset 2",		20, posY	:	posY = posY + 26
+		ui_outfield	"(6) Stairwell",	20, posY	:	posY = posY + 26
+		ui_outfield	"(7) 계단참너비",	20, posY	:	posY = posY + 26
+		ui_outfield	"(8) Riser 1st",	20, posY	:	posY = posY + 26
+		ui_outfield	"(9) Riser 2nd",	20, posY	:	posY = posY + 26
+
+	posY = 15
+		ui_infield	"strWdt1",		115, posY, 80, 20	:	posY = posY + 26
+		ui_infield	"strWdt2",		115, posY, 80, 20	:	posY = posY + 26
+		ui_infield	"strTrd",		115, posY, 80, 20	:	posY = posY + 26
+		ui_infield	"strOff1",		115, posY, 80, 20	:	posY = posY + 26
+		ui_infield	"strOff2",		115, posY, 80, 20	:	posY = posY + 26
+		ui_infield	"strWell",		115, posY, 80, 20	:	posY = posY + 26
+		ui_infield	"strLndWdt",	115, posY, 80, 20	:	posY = posY + 26
+		ui_infield	"strRsrN1",		115, posY, 80, 20	:	posY = posY + 26
+		ui_infield	"strRsrN2",		115, posY, 80, 20	:	posY = posY + 26
+
+	ui_separator	215, 10, 215, 246
+
+	!	계단기준점
+	posX = 235
+	posY = 20
+
+		ui_style	0,	1
+		ui_outfield	"계단생성기준",	posX, posY
+
+	posY = 15
+
+		ui_infield	"iStrRef",	posX+90, posY, 95, 20
+
+	!	UI_image
+	posX = 230
+	posY = 50
+	
+	ui_pict	"u_stair_1-1",	posX, posY, 200, 200, 1+2
+
+
+
+!-------------------------------------------------------------------------------------------
+ui_page	2,	-1,	"계단 기본설정 - 2",	"uiTab_StairTread_flat(1)"
+!-------------------------------------------------------------------------------------------
+
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"계단높이 산정방법",	10, 10, 424, 115
+
+		!	계단높이 산정방법(1열)
+		posY = 40
+
+			ui_style	0,	0
+			ui_outfield	"산정방법",			25, posY	:	posY = posY + 26
+			ui_outfield	"(1) Riser",		25, posY	:	posY = posY + 26
+			ui_outfield	"(2) 디딤판두께",	25, posY	:	posY = posY + 26
+
+		posY = 35
+
+			ui_infield	"iCalcHgt",	120, posY, 100, 20	:	posY = posY + 26
+			ui_infield	"strRsr",	120, posY, 100, 20	:	posY = posY + 26
+			ui_infield	"strThk",	120, posY, 100, 20	:	posY = posY + 26
+
+		!	계단높이 산정방법(2열)
+		posX = 240
+		posY = 40
+
+			ui_outfield	"계단높이",		posX, posY	:	posY = posY + 26
+			ui_outfield	"Riser 1st",	posX, posY	:	posY = posY + 26
+			ui_outfield	"Riser 2nd",	posX, posY	:	posY = posY + 26
+
+		posY = 35
+
+			ui_infield	"ZZYZX",		posX+70, posY, 100, 20	:	posY = posY + 26
+			ui_infield	"strRsrN1",		posX+70, posY, 100, 20	:	posY = posY + 26
+			ui_infield	"strRsrN2",		posX+70, posY, 100, 20	:	posY = posY + 26
+
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"최하층 바닥 옵션",	10, 130, 210, 130
+	ui_infield	"bLowFlr",			110, 128, 15, 15
+
+		!	최하층 바닥 옵션(1열)
+		posY = 155
+
+			ui_style	0,	0
+			ui_outfield	"(a) 바닥두께",			25, posY	:	posY = posY + 26
+			ui_outfield	"(b) 바닥너비",			25, posY	:	posY = posY + 26
+			ui_outfield	"(3) 하부슬라브 두께",	25, posY	:	posY = posY + 26
+			ui_outfield	"(4) 상부슬라브 두께",	25, posY	:	posY = posY + 26
+
+		posY = 150
+
+			ui_infield	"lowFlrThk",	150, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"lowFlrWdt",	150, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"bLndThk",		150, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"uLndThk",		150, posY, 60, 20	:	posY = posY + 26
+
+	!	UI_image
+	posX = 230
+	posY = 150
+
+	if	not(bLowFlr)	then	ui_pict	"u-stair_2-1",	posX, posY, 200, 100, 1+2
+	if	bLowFlr			then	ui_pict	"u-stair_2-2",	posX, posY, 200, 100, 1+2
+
+
+
+!-------------------------------------------------------------------------------------------
+ui_page	3,	-1,	"계단참 설정"
+!-------------------------------------------------------------------------------------------
+
+	!	계단참 유형
+	ui_style	0,	1
+	ui_outfield	"계단참 유형",	15, 15
+
+	ui_infield	"iLndType",	100, 10, 330, 50,
+					1, "u-stair_3-6", 5, 1,
+					60, 65, 35, 20,
+					lndType_Flat,		"Flat",
+					lndType_1step,		"1step",
+					lndType_2step_L,	"2step_L",
+					lndType_2step_R,	"2step_R",
+					lndType_3step,		"3step"
+
+
+
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"세부설정",	10, 90, 190, 165
+
+		! 세부설정
+		posY = 125
+
+			ui_style	0,	0
+			ui_outfield	"(1) 계단참 너비",	25, posY	:	posY = posY + 30
+			ui_outfield	"(2) 계단참 두께",	25, posY	:	posY = posY + 30
+			ui_outfield	"(3) 추가너비 L",	25, posY	:	posY = posY + 30
+			ui_outfield	"(4) 추가너비 R",	25, posY	:	posY = posY + 30
+
+		posY = 120
+
+			ui_infield	"strLndWdt",	122, posY, 70, 20	:	posY = posY + 30
+			ui_infield	"strLndThk",	122, posY, 70, 20	:	posY = posY + 30
+			ui_infield	"addRange_L",	122, posY, 70, 20	:	posY = posY + 30
+			ui_infield	"addRange_R",	122, posY, 70, 20	:	posY = posY + 30
+
+	!	UI_image
+	posX = 210
+	posY = 75
+
+	ui_pict	"u-stair_3-1",	posX, posY, 250, 200, 1+2
+
+
+
+!-------------------------------------------------------------------------------------------
+ui_page	4,	-1,	"마감재 설정"
+!-------------------------------------------------------------------------------------------
+
+	!	마감재 On/Off
+	ui_style	0,	1
+	ui_outfield	"마감재 On/Off",	15, 10
+	ui_infield	"bFns",				95, 6, 20, 20
+
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"세부설정",	15, 35, 190, 230
+
+		!	세부설정
+		posY = 65
+
+			ui_style	0,	0
+			ui_outfield	"(1) 수평재 두께",	30, posY	:	posY = posY + 28
+			ui_outfield	"(2) 바탕재 두께",	30, posY	:	posY = posY + 28
+			ui_outfield	"(3) 수직재 두께",	30, posY	:	posY = posY + 28
+			ui_outfield	"(4) 마감코 길이",	30, posY	:	posY = posY + 28
+			ui_outfield	"(5) 하부 마감재",	30, posY	:	posY = posY + 28
+			ui_outfield	"(6) 상부 마감재",	30, posY	:	posY = posY + 28
+
+		posY = 60
+
+			ui_infield	"fnsThk",		130, posY, 65, 20	:	posY = posY + 28
+			ui_infield	"basThk",		130, posY, 65, 20	:	posY = posY + 28
+			ui_infield	"vfnsThk",		130, posY, 65, 20	:	posY = posY + 28
+			ui_infield	"fnsNosing",	130, posY, 65, 20	:	posY = posY + 28
+			ui_infield	"bFnsThk",		130, posY, 65, 20	:	posY = posY + 28
+			ui_infield	"uFnsThk",		130, posY, 65, 20	:	posY = posY + 28
+
+	!	UI_image
+	posX = 210
+	posY = 15
+
+	ui_pict	"u-stair_4-3",	posX, posY, 250, 240, 1+2
+
+
+
+!-------------------------------------------------------------------------------------------
+ui_page	5,	-1,	"2D 표현 설정",	"uiTab_2DRepr_flat(1)"
+!-------------------------------------------------------------------------------------------
+
+	!	기본설정(1열)
+	posY = 10
+
+		ui_style	0,	1
+		ui_outfield	"2D표현",	10, posY	:	posY = posY + 26
+
+		ui_style	0,	0
+		ui_outfield	"상부층 2D표현",	15, posY	:	posY = posY + 26
+		ui_outfield	"작업층 2D표현",	15, posY	:	posY = posY + 26
+		ui_outfield	"외곽선 On/Off",	15, posY	:	posY = posY + 26
+		ui_outfield	"Non-slip 표현",	15, posY	:	posY = posY + 26
+
+		ui_style	0,	1
+		ui_outfield	"All Relevant Stories",	10, posY	:	posY = posY + 26
+
+		ui_style	0,	0
+		ui_outfield	"상부레벨",	15, posY	:	posY = posY + 26
+		ui_outfield	"하부레벨",	15, posY	:	posY = posY + 26
+
+	posY = 31
+
+		ui_infield	"iUprFlr",		110, posY, 70, 20	:	posY = posY + 26
+		ui_infield	"iWrkFlr",		110, posY, 70, 20
+		if	iWrkFlr=wrkFlr_Cut	then	ui_infield	"bWrkBrk",	190, posY, 20, 20	ui_tooltip	"작업층 Break Line On/Off"
+
+	posY = posY + 26
+
+		ui_infield	"bLine_Out",	110, posY, 20, 20	:	posY = posY + 26
+		ui_infield	"bNonSlp",		110, posY, 20, 20	:	posY = posY + 26
+
+	posY = posY + 26
+
+		ui_infield	"ac_toplevel",		80, posY, 70, 20	ui_tooltip	"All relevant stories 선택시 Homestory에서 보여야되는 상부 높이 입력"	:	posY = posY + 26
+		ui_infield	"ac_bottomlevel",	80, posY, 70, 20	ui_tooltip	"All relevant stories 선택시 Homestory에서 보여야되는 하부 높이 입력"	:	posY = posY + 26
+
+	ui_separator	215, 10, 215, 246
+
+	!	기본설정(2열)
+	posX = 225
+	posY = 10
+
+		ui_style	0,	1
+		ui_outfield	"2D 펜 설정",	posX+10, posY	:	posY = posY + 26
+
+		ui_style	0,	0
+		ui_outfield	"윤곽선 펜",	posX+15, posY	:	posY = posY + 26
+		ui_outfield	"논슬립 펜",	posX+15, posY	:	posY = posY + 26
+		ui_outfield	"기타 펜",		posX+15, posY	:	posY = posY + 26
+
+		ui_style	0,	1
+		ui_outfield	"텍스트 On/Off",	posX+10, posY	:	posY = posY + 26
+
+		ui_style	0,	0
+		ui_outfield	"폰트 타입",	posX+15, posY	:	posY = posY + 26
+		ui_outfield	"텍스트 크기",	posX+15, posY	:	posY = posY + 26
+		ui_outfield	"텍스트 각도",	posX+15, posY	:	posY = posY + 26
+		ui_outfield	"텍스트 펜",	posX+15, posY	:	posY = posY + 26
+
+	posY = 31
+
+		ui_infield	"strPen",		posX+80, posY, 70, 20	:	posY = posY + 26
+		ui_infield	"nslpPen",		posX+80, posY, 70, 20	:	posY = posY + 26
+		ui_infield	"etcPen",		posX+80, posY, 70, 20	:	posY = posY + 26
+
+		ui_infield	"bTxt",		posX+110, posY, 70, 20	:	posY = posY + 26
+
+		ui_infield	"stFontType",	posX+90, posY, 100, 20	:	posY = posY + 26
+		ui_infield	"TextSize",		posX+90, posY, 70, 20	:	posY = posY + 26
+		ui_infield	"txtAng",		posX+90, posY, 70, 20	:	posY = posY + 26
+		ui_infield	"TextPen",		posX+90, posY, 70, 20	:	posY = posY + 26
+
+
+!-------------------------------------------------------------------------------------------
+ui_page	6,	-1,	"평면치수"
+!-------------------------------------------------------------------------------------------
+
+	!	평면 치수
+	ui_style	0,	1
+	ui_outfield	"작업층 평면 치수",	10, 15
+	ui_outfield	"상부층 평면 치수", 230, 15
+
+	ui_infield	"iDimPlan_Wrk",	100, 10, 80, 20
+	ui_infield	"iDimPlan_Upr",	320, 10, 80, 20
+
+	ui_separator	210, 10, 210, 195
+	ui_separator	10, 195, 434, 195
+
+		!	작업층 평면 치수
+		posY = 40
+
+			ui_style	0,	0
+			ui_outfield	"치수선 위치", 			15, posY	:	posY = posY + 26
+			ui_outfield	"치수선 오프셋 (좌)", 	15, posY	:	posY = posY + 26
+			ui_outfield	"보조선 오프셋 (좌)", 	15, posY	:	posY = posY + 26
+			ui_outfield	"치수선 오프셋 (우)", 	15, posY	:	posY = posY + 26
+			ui_outfield	"보조선 오프셋 (우)", 	15, posY	:	posY = posY + 26
+
+			ui_style	0,	4
+			ui_outfield	"보조선 원 반지름",		10, posY	:	posY = posY + 26
+
+		posY = 35
+
+			ui_style	0,	0
+			ui_infield	"iDimLct_Wrk",		125, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"dimOffset_WrkL",	125, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"dimWitness_WrkL",	125, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"dimOffset_WrkR",	125, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"dimWitness_WrkR",	125, posY, 60, 20	:	posY = posY + 26
+
+			ui_infield	"dimCircle",		125, posY, 60, 20	:	posY = posY + 26
+
+		!	상부층 평면 치수
+		posX = 220
+		posY = 40
+
+			ui_style	0,	0
+			ui_outfield	"치수선 위치",			posX+15, posY	:	posY = posY + 26
+			ui_outfield	"치수선 오프셋 (좌)",	posX+15, posY	:	posY = posY + 26
+			ui_outfield	"보조선 오프셋 (좌)",	posX+15, posY	:	posY = posY + 26
+			ui_outfield	"치수선 오프셋 (우)",	posX+15, posY	:	posY = posY + 26
+			ui_outfield	"보조선 오프셋 (우)",	posX+15, posY	:	posY = posY + 26
+
+			ui_outfield	"특정 스케일에서만 보이기",	posX, posY	:	posY = posY + 26
+
+		posY = 35
+
+			ui_infield	"iDimLct_Upr",		posX+125, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"dimOffset_UprL",	posX+125, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"dimWitness_UprL",	posX+125, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"dimOffset_UprR",	posX+125, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"dimWitness_UprR",	posX+125, posY, 60, 20	:	posY = posY + 26
+
+			ui_infield	"bViewScale",	posX+130, posY, 20, 22
+			ui_infield	"iViewScale",	posX+150, posY, 40, 20	ui_tooltip	"스케일이 1/n일 때, n값 입력"
+
+	!	텍스트 및 펜 설정
+	ui_style	0,	1
+	ui_outfield	"텍스트 및 펜 설정",	10, 205
+
+		posY = 228
+
+			ui_style	0,	0
+			ui_outfield	"폰트",			15, posY	:	posY = posY + 23
+			ui_outfield	"텍스트 크기",	15, posY	:	posY = posY + 23
+
+		posY = 228
+
+			ui_outfield	"치수 펜",		235, posY	:	posY = posY + 23
+			ui_outfield	"텍스트 펜",	235, posY	:	posY = posY + 23
+
+		posY = 223
+
+			ui_infield	"stFontType",	60, posY, 125, 20	:	posY = posY + 23
+			ui_infield	"dimTxtSize",	100, posY, 85, 20	:	posY = posY + 23
+
+		posY = 223
+
+			ui_infield	"dimPen",		320, posY, 85, 20	:	posY = posY + 23
+			ui_infield	"dimTxtPen",	320, posY, 85, 20	:	posY = posY + 23
+
+!-------------------------------------------------------------------------------------------
+ui_page	7,	-1,	"단면치수 및 법규검토"
+!-------------------------------------------------------------------------------------------
+
+	!	작업층
+	ui_style	0,	1
+	ui_outfield	"작업층 설정",		15, 10
+	ui_infield	"iSectDim_Wrk",		95, 5, 85, 20
+
+		!	작업층 단면치수
+		posY = 35
+
+			ui_style	0,	0
+			ui_outfield	"치수선 오프셋",	20, posY	:	posY = posY + 26
+			ui_outfield	"보조선 오프셋",	20, posY	:	posY = posY + 26
+
+		posY = 30
+
+			ui_infield	"sectDimOffset_Wrk",	110, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"sectDimWitness_Wrk",	110, posY, 60, 20	:	posY = posY + 26
+
+	!	상부층
+	ui_style	0,	1
+	ui_outfield	"상부층 설정",		15, 90
+	ui_infield	"iSectDim_Upr",		95, 85, 85, 20
+
+		!	상부층 단면치수
+		posY = 115
+
+			ui_style	0,	0
+			ui_outfield	"치수선 오프셋",	20, posY	:	posY = posY + 26
+			ui_outfield	"보조선 오프셋",	20, posY	:	posY = posY + 26
+			ui_outfield	"보조선 원 반지름",	15, posY	:	posY = posY + 26
+
+		posY = 110
+
+			ui_infield	"sectDimOffset_Upr",	110, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"sectDimWitness_Upr",	110, posY, 60, 20	:	posY = posY + 26
+			ui_infield	"sectDimCircle",		120, posY, 50, 20	:	posY = posY + 26
+
+	!	법규검토
+	ui_style	0,	1
+	ui_groupbox	"법규검토 On/Off",	15, 200, 414, 60
+	ui_infield	"bLawCheck",		140, 196, 20, 20
+
+		!	세부설정
+		posY = 230
+
+			ui_style	0,	0
+			ui_outfield	"법규검토 높이",	30, posY
+			ui_outfield	"법규검토 펜",		230, posY
+
+		posY = 225
+
+			ui_infield	"lawCheckHgt",		120, posY, 80, 20
+			ui_infield	"lawCheckPen",		310, posY, 80, 20
+
+	ui_separator	210, 10, 210, 180
+
+	!	텍스트 설정
+	posX = 215
+
+	ui_style	0,	1
+	ui_outfield	"텍스트 및 펜 설정",	posX+15, 10
+
+		!	텍스트 및 펜 설정
+		posY = 35
+
+			ui_style	0,	0
+			ui_outfield	"폰트",				posX+20, posY	:	posY = posY + 30
+			ui_outfield	"텍스트 크기",		posX+20, posY	:	posY = posY + 30
+			ui_outfield	"치수 펜",			posX+20, posY	:	posY = posY + 30
+			ui_outfield	"텍스트 펜",		posX+20, posY	:	posY = posY + 30
+			ui_outfield	"텍스트 좌우반전",	posX+20, posY	:	posY = posY + 30
+
+		posY = 30
+
+			ui_infield	"stFontType",		posX+70, posY, 120, 20	:	posY = posY + 30
+			ui_infield	"sectDimTxtSize",	posX+100, posY, 90, 20	:	posY = posY + 30
+			ui_infield	"dimPen",			posX+100, posY, 90, 20	:	posY = posY + 30
+			ui_infield	"dimTxtPen",		posX+100, posY, 90, 20	:	posY = posY + 30
+			ui_infield	"sectDimMul",		posX+120, posY+1, 20, 20	:	posY = posY + 30
+
+
+
+!-------------------------------------------------------------------------------------------
+ui_page	8,	-1,	"핸드레일 설정",	"uiTab_StairRail_flat(1)"
+!-------------------------------------------------------------------------------------------
+
+	!	그룹박스
+	ui_style	0,	1
+	ui_groupbox	"세부설정",	15, 65, 414, 200
+
+	ui_outfield	"핸드레일",		10, 27
+	ui_outfield	"계단참 연결",	260, 27, 75, 20	ui_tooltip	"계단참 라이브러리와 결합되는 부분"
+
+	!	변수들
+	ui_style	0,	0
+
+		ui_outfield	"Inside",	75, 20, 50, 20
+		ui_outfield	"1st",		130, 0, 50, 20
+		ui_outfield	"2nd",		157, 0, 50, 20
+		ui_outfield	"3rd",		185, 0, 50, 20
+		ui_outfield	"Top",		213, 0, 50, 20
+		ui_outfield	"Outside",	75, 40, 50, 20
+		ui_outfield	"상 부",	345, 20, 30, 20	ui_tooltip	"계단참 라이브러리와 결합되는 부분 : 상부"
+		ui_outfield	"하 부",	345, 40, 30, 20	ui_tooltip	"계단참 라이브러리와 결합되는 부분 : 하부"
+
+			ui_infield		"IhndOF_1st",	135, 16, 20, 20	
+			ui_infield		"IhndOF_2nd",	163, 16, 20, 20	
+			ui_infield		"IhndOF_3rd",	190, 16, 20, 20	
+			ui_infield		"IhndOF_top",	218, 16, 20, 20	ui_tooltip	"최상층 핸드레일 On/Off"
+			ui_infield		"OhndOF_1st",	135, 36, 20, 20
+			ui_infield		"OhndOF_2nd",	163, 36, 20, 20
+			ui_infield		"OhndOF_3rd",	190, 36, 20, 20
+			ui_infield		"bAttachTop",	385, 16, 20, 20	ui_tooltip	"계단참 라이브러리와 결합되는 부분 : 상부"
+			ui_infield		"bAttachBtm",	385, 36, 20, 20	ui_tooltip	"계단참 라이브러리와 결합되는 부분 : 하부"
+
+		ui_outfield	"반지름",	35, 95, 40, 20
+		ui_outfield	"높이",		155, 95, 30, 20
+
+			ui_infield	"hndRd",	80, 90, 65, 20
+			ui_infield	"hndHgt",	190, 90, 75, 20
+
+		ui_outfield	"(1) 바깥쪽 핸드레일 오프셋",	35, 130, 165, 20
+		ui_outfield	"(2) 안쪽 핸드레일 오프셋",		35, 160, 165, 20
+		ui_outfield	"(3) 계단참_1 오프셋",			35, 190, 120, 20
+		ui_outfield	"입/단면 핸드레일",				35, 230, 105, 20
+
+
+			ui_infield	"OhndOff",		200, 125, 65, 20
+			ui_infield	"IhndOff",		200, 155, 65, 20
+			ui_infield	"stwOffset",	200, 185, 65, 20
+			ui_infield	"iRailSect",	135, 226, 70, 20
+			ui_infield	"hndPen",		215, 226, 50, 20	ui_tooltip	"입/단면 핸드레일 펜 색"
+
+	!	그림
+	ui_pict	"ui_4",	275, 95, 140, 155, 1+2
+
+
+
+!-------------------------------------------------------------------------------------------
+ui_page	9,	-1,	"단면 설정 및 재질",	"uiTab_3DRepr_flat(1)"
+!-------------------------------------------------------------------------------------------
+!	1열
+vrt = 0
+fieldID = 100
+
+ui_listfield	1,	5,	vrt+5,	425,	259,	1,	"title",	"value"	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"구조체 단면"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"strPenS",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"strFill",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"strFillPen",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"strFillPenBg",	1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"마감재 단면"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"fnsPenS",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"fnsFill",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"fnsFillPen",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"fnsFillPenBg",	1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"바탕재 단면"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"basPenS",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"basFill",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"basFillPen",	1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"basFillPenBg",	1	:	fieldID = fieldID + 1
+
+	ui_listitem	fieldID,	1,	"",	0,	"",	"재질 설정"	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"strMat",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"fnsMat",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"vFnsMat",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"basMat",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"hndMat",		1	:	fieldID = fieldID + 1
+
+ui_listfield	2,	5,	vrt+259,	425,	1,	0
+
+
+
+
+
+

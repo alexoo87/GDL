@@ -1,0 +1,427 @@
+!===============================================================================================
+!	회전문
+!===============================================================================================
+
+!===============================================================================================
+!	기본설정
+!===============================================================================================
+
+!	원점
+! circle2	0,	0,	0.01
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+
+!===============================================================================================
+!	2D hotspot
+!===============================================================================================
+
+	!-----------------------------------------------------------------------------------------------
+	!	TYPE1
+	!-----------------------------------------------------------------------------------------------
+	if	iDoorType = DOORTYPE_4PANEL	then
+		!	문너비
+		hotspot2	0,		0,	unID,	A,	1+256	:	unID=unID+1
+		hotspot2	-1,		0,	unID,	A,	3		:	unID=unID+1
+		hotspot2	A,		0,	unID,	A,	2		:	unID=unID+1
+
+		hotspot2	0,		B,	unID,	A,	1+256	:	unID=unID+1
+		hotspot2	-1,		B,	unID,	A,	3		:	unID=unID+1
+		hotspot2	A,		B,	unID,	A,	2		:	unID=unID+1
+
+		hotspot2	0,		0,	unID,	B,	1+256	:	unID=unID+1
+		hotspot2	0,		-1,	unID,	B,	3		:	unID=unID+1
+		hotspot2	0,		B,	unID,	B,	2		:	unID=unID+1
+
+		hotspot2	A,		0,	unID,	B,	1+256	:	unID=unID+1
+		hotspot2	A,		-1,	unID,	B,	3		:	unID=unID+1
+		hotspot2	A,		B,	unID,	B,	2		:	unID=unID+1
+
+		!	hotspot(접점 맞추기)
+		hotspot2	0,			doorPosY_1,	unID,	doorPosX_1,	1+128	:	unID=unID+1
+		hotspot2	-1,			doorPosY_1,	unID,	doorPosX_1,	3		:	unID=unID+1
+		hotspot2	doorPosX_1,	doorPosY_1,	unID,	doorPosX_1,	2		:	unID=unID+1
+
+		hotspot2	doorPosX_1,	0,			unID,	doorPosY_1,	1+128	:	unID=unID+1
+		hotspot2	doorPosX_1,	-1,			unID,	doorPosY_1,	3		:	unID=unID+1
+		hotspot2	doorPosX_1,	doorPosY_1,	unID,	doorPosY_1,	2		:	unID=unID+1
+
+		hotspot2	0,			doorPosY_2,	unID,	doorPosX_2,	1+128	:	unID=unID+1
+		hotspot2	-1,			doorPosY_2,	unID,	doorPosX_2,	3		:	unID=unID+1
+		hotspot2	doorPosX_2,	doorPosY_2,	unID,	doorPosX_2,	2		:	unID=unID+1
+
+		hotspot2	doorPosX_2,	0,			unID,	doorPosY_2,	1+128	:	unID=unID+1
+		hotspot2	doorPosX_2,	-1,			unID,	doorPosY_2,	3		:	unID=unID+1
+		hotspot2	doorPosX_2,	doorPosY_2,	unID,	doorPosY_2,	2		:	unID=unID+1
+	endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	TYPE2
+	!-----------------------------------------------------------------------------------------------
+	if	iDoorType = DOORTYPE_3PANEL	then
+		!	회전문 반지름
+		hotspot2	0,			0,	unID,	doorRad,	1+128	:	unID = unID + 1
+		hotspot2	-1,			0,	unID,	doorRad,	3		:	unID = unID + 1
+		hotspot2	doorRad,	0,	unID,	doorRad,	2		:	unID = unID + 1
+
+		!	측면 두께
+		add2	doorRad,	0
+			hotspot2	0,			0,	unID,	sideThk,	1+128	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	sideThk,	3		:	unID = unID + 1
+			hotspot2	sideThk,	0,	unID,	sideThk,	2		:	unID = unID + 1
+		del 1
+
+		!	문 너비
+		add2	0,	yPosEnd_1
+			hotspot2	0,			0,	unID,	halfWdt,	1+128,	doorWdt	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	halfWdt,	3				:	unID = unID + 1
+			hotspot2	halfWdt,	0,	unID,	halfWdt,	2,	doorWdt		:	unID = unID + 1
+
+			hotspot2	0,			0,	unID,	halfWdt,	1+128,	doorWdt	:	unID = unID + 1
+			hotspot2	1,			0,	unID,	halfWdt,	3				:	unID = unID + 1
+			hotspot2	-halfWdt,	0,	unID,	halfWdt,	2,	doorWdt		:	unID = unID + 1
+		del 1
+
+		add2	0,	-yPosEnd_2
+			hotspot2	0,			0,	unID,	halfWdt,	1+128,	doorWdt	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	halfWdt,	3				:	unID = unID + 1
+			hotspot2	halfWdt,	0,	unID,	halfWdt,	2,	doorWdt		:	unID = unID + 1
+
+			hotspot2	0,			0,	unID,	halfWdt,	1+128,	doorWdt	:	unID = unID + 1
+			hotspot2	1,			0,	unID,	halfWdt,	3				:	unID = unID + 1
+			hotspot2	-halfWdt,	0,	unID,	halfWdt,	2,	doorWdt		:	unID = unID + 1
+		del 1
+
+		!	유리 끝 라인
+		hotspot2	0,	0,			unID,	yPosEnd_1,	1+128	:	unID = unID + 1
+		hotspot2	0,	-1,			unID,	yPosEnd_1,	3		:	unID = unID + 1
+		hotspot2	0,	yPosEnd_1,	unID,	yPosEnd_1,	2		:	unID = unID + 1
+
+		hotspot2	0,	0,			unID,	yPosEnd_2,	1+128	:	unID = unID + 1
+		hotspot2	0,	1,			unID,	yPosEnd_2,	3		:	unID = unID + 1
+		hotspot2	0,	-yPosEnd_2,	unID,	yPosEnd_2,	2		:	unID = unID + 1
+	endif
+
+!===============================================================================================
+!	회전문
+!===============================================================================================
+
+!-----------------------------------------------------------------------------------------------
+!	TYPE1
+!-----------------------------------------------------------------------------------------------
+if	iDoorType = DOORTYPE_4PANEL	then
+	!	프레임
+	!-----------------------------------------------------------------------------------------------
+		! 좌측 아래
+		gosub	"Frame2D"
+		
+		
+		! 좌측 위
+		add2	0,	B
+			mul2	1,	-1
+				gosub	"Frame2D"
+			del 1
+		del 1
+		
+		
+		! 우측 아래
+		add2	A,	0
+			mul2	-1,	1
+				gosub	"Frame2D"
+			del 1
+		del 1
+		
+		
+		! 우측 위
+		add2	A,	B
+			mul2	-1,	-1
+				gosub	"Frame2D"
+			del 1
+		del 1
+
+	!	문 + 유리
+	!-----------------------------------------------------------------------------------------------
+	add2	A/2,	B/2
+
+	hotspot2	0,	0
+
+		! 문 / 센터기둥
+		pen		Door2DPen
+		fill	65
+		
+		FillPen = 0
+		BackgroundPen = 0
+
+			! 문
+			put	DoorRad,	0,		1,
+				0,			0,		900,
+				DoorRad,	180,	4000+1,
+				-DoorRad,	0,		1,
+				0,			0,		900,
+				DoorRad,	180,	4000+1
+
+				poly2_B	nsp/3,	1+2,	FillPen,	BackgroundPen,	get(nsp)
+
+			! 센터기둥
+			put	ColumnRad,	0,		1,
+				0,			0,		900,
+				ColumnRad,	180,	4000+1,
+				-ColumnRad,	0,		1,
+				0,			0,		900,
+				ColumnRad,	180,	4000+1
+
+				poly2_	nsp/3,	1,	get(nsp)
+
+		! 유리문
+		rot2	45
+			gosub	"GlassDoor2D"
+		del 1
+
+		rot2	135
+			gosub	"GlassDoor2D"
+		del 1
+
+		rot2	-45
+			gosub	"GlassDoor2D"
+		del 1
+
+		rot2	-135
+			gosub	"GlassDoor2D"
+		del 1
+
+	del 1
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	TYPE2
+!-----------------------------------------------------------------------------------------------
+if	iDoorType = DOORTYPE_3PANEL	then
+		!	회전문/센터기둥
+		pen		Door2DPen
+		fill	65
+		
+		FillPen = 0
+		BackgroundPen = 0
+
+			!	회전문
+			put	(doorRad + sideThk),	0,		1,
+				0,						0,		900,
+				(doorRad + sideThk),	180,	4000+1,
+				-(doorRad + sideThk),	0,		1,
+				0,						0,		900,
+				(doorRad + sideThk),	180,	4000+1
+
+				poly2_B	nsp/3,	1+2,	FillPen,	BackgroundPen,	get(nsp)
+
+			!	센터기둥
+			put	ColumnRad,	0,		1,
+				0,			0,		900,
+				ColumnRad,	180,	4000+1,
+				-ColumnRad,	0,		1,
+				0,			0,		900,
+				ColumnRad,	180,	4000+1
+
+				poly2_	nsp/3,	1,	get(nsp)
+
+
+		!	유리
+		pen	Glass2DPen
+
+		_yPosGlsIn = sqr((doorRad + sideThk)^2 - (doorWdt/2)^2)
+		_yPosGlsOut = sqr((doorRad + sideThk)^2 - (doorWdt/2 + frameWdt)^2)
+
+			!	상부
+			line2	doorWdt/2,				yPosEnd_1,	doorWdt/2,				_yPosGlsIn
+			line2	doorWdt/2 + frameWdt,	yPosEnd_1,	doorWdt/2 + frameWdt,	_yPosGlsOut
+
+			mul2	-1,	1
+				line2	doorWdt/2,				yPosEnd_1,	doorWdt/2,				_yPosGlsIn
+				line2	doorWdt/2 + frameWdt,	yPosEnd_1,	doorWdt/2 + frameWdt,	_yPosGlsOut
+			del 1
+
+			!	하부
+			line2	doorWdt/2,				-yPosEnd_2,	doorWdt/2,				-_yPosGlsIn
+			line2	doorWdt/2 + frameWdt,	-yPosEnd_2,	doorWdt/2 + frameWdt,	-_yPosGlsOut
+
+			mul2	-1,	1
+				line2	doorWdt/2,				-yPosEnd_2,	doorWdt/2,				-_yPosGlsIn
+				line2	doorWdt/2 + frameWdt,	-yPosEnd_2,	doorWdt/2 + frameWdt,	-_yPosGlsOut
+			del 1
+
+		!	좌/우측면
+			!	각도 구하기
+			_radIn = doorRad
+			_radOut = doorRad + sideThk
+
+			_aDoorIn = asn((doorWdt/2)/(doorRad + sideThk))
+			_aDoorOut = asn((doorWdt/2 + frameWdt)/(doorRad + sideThk))
+			_aBetween = (_aDoorOut - _aDoorIn)
+
+			!	프레임
+			pen	Frame2DPen
+
+			put	_radOut,				0,						1,
+				0,						0,						900,
+				_radOut,				_aBetween,				4000+1,
+				_radIn*cos(_aBetween),	_radIn*sin(_aBetween),	1,
+				0,						0,						900,
+				_radIn,					-_aBetween,				4000+1
+
+			rot2	90 - _aDoorOut
+				poly2_	nsp/3,	1+4,	use(nsp)
+
+				rot2	_aDoorIn + _aDoorOut
+					poly2_	nsp/3,	1+4,	use(nsp)
+				del 1
+			del 1
+
+			rot2	-90 + _aDoorIn
+				poly2_	nsp/3,	1+4,	use(nsp)
+
+				rot2	-(_aDoorIn + _aDoorOut)
+					poly2_	nsp/3,	1+4,	get(nsp)
+				del 1
+			del 1
+
+			!	유리
+			pen	Glass2DPen
+
+			rot2	-90
+				arc2	0,	0,	_radOut,			_aDoorOut,	180 - _aDoorOut
+				arc2	0,	0,	_radOut - glassThk,	_aDoorOut,	180 - _aDoorOut
+				arc2	0,	0,	_radIn + glassThk,	_aDoorOut,	180 - _aDoorOut
+				arc2	0,	0,	_radIn,				_aDoorOut,	180 - _aDoorOut
+
+				rot2	180
+					arc2	0,	0,	_radOut,			_aDoorOut,	180 - _aDoorOut
+					arc2	0,	0,	_radOut - glassThk,	_aDoorOut,	180 - _aDoorOut
+					arc2	0,	0,	_radIn + glassThk,	_aDoorOut,	180 - _aDoorOut
+					arc2	0,	0,	_radIn,				_aDoorOut,	180 - _aDoorOut
+				del 1
+			del 1
+
+		!	회전문 날개
+		_offsetWdt = 0.040
+		_shutOffThk = doorThk/4
+		_shutOffWdt = 0.050
+		_aWingOut = asn((doorThk/2)/ColumnRad)
+		_aWingIn = asn((glassThk/2)/ColumnRad)
+
+		rot2	60
+			for	i = 1	to	3
+				gosub	"doorWings"
+
+				rot2	120
+			next	i
+
+			del 3
+		del 1
+endif
+
+
+
+end
+
+
+
+!===============================================================================================
+!	Sub-routine
+!===============================================================================================
+"Frame2D":
+!-----------------------------------------------------------------------------------------------
+pen		Frame2DPen
+fill	65
+
+FillPen = 0
+BackgroundPen = 0
+
+put	0,																				0,											1,
+	(FrameWdt/2)+FrameThk/tan(67.5),												0,											1,
+	((FrameWdt/2)+FrameThk/tan(67.5))+((FrameWdt/2)+FrameThk/tan(67.5))*cos(45),	((FrameWdt/2)+FrameThk/tan(67.5))*sin(45),	1,
+	FrameWdt/2+(FrameWdt/2)*cos(45),												FrameThk+(FrameWdt/2)*sin(45),				1,
+	FrameWdt/2,																		FrameThk,									1,
+	0,																				FrameThk,									1,
+	0,																				0,											1
+
+	poly2_B	nsp/3,	1+2,	FillPen,	BackgroundPen,	use(nsp)
+
+	! hotline
+	for	i=1	to	(nsp/3)-2
+		hotline2	get(2)+(use(1)-get(1)),	use(2)
+	next i
+		hotline2	get(2)+(use(1)-get(1)),	get(2)+(use(1)-get(1))
+
+
+	pen		Glass2DPen
+
+	put	((FrameWdt/2)+FrameThk/tan(67.5))+((FrameWdt/2)+FrameThk/tan(67.5))*cos(45),	((FrameWdt/2)+FrameThk/tan(67.5))*sin(45),	1,
+		doorPosX_1,																		doorPosY_1,									1,
+		A/2,																			B/2,										900,
+		A/2-(DoorRad+0.100),															B/2,										3000
+	
+		poly2_B	nsp/3,	1,	FillPen,	BackgroundPen,	get(nsp)
+	
+	put	FrameWdt/2+(FrameWdt/2)*cos(45),												FrameThk+(FrameWdt/2)*sin(45),				1,
+		doorPosX_2,																		doorPosY_2,									1,
+		A/2,																			B/2,										900,
+		A/2-(DoorRad+0.150),															B/2,										3000
+	
+		poly2_B	nsp/3,	1,	FillPen,	BackgroundPen,	get(nsp)
+
+return
+
+
+
+!-----------------------------------------------------------------------------------------------
+"GlassDoor2D":
+!-----------------------------------------------------------------------------------------------
+pen		Glass2DPen
+
+	! 변수정의
+	LengthTmp=(ColumnRad)^2-(DoorThk/2)^2
+	LengthTmp=SQR(LengthTmp)
+
+	add2	LengthTmp,	-DoorThk/2
+		line2	0,	0,	DoorRad-LengthTmp,	0
+
+		add2	0,	DoorThk
+			line2	0,	0,	DoorRad-LengthTmp,	0
+		del 1
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"doorWings":
+!-----------------------------------------------------------------------------------------------
+	!	문
+	pen	Door2DPen
+
+	put	ColumnRad*cos(_aWingOut),				doorThk/2,	1,
+		doorRad - (_offsetWdt + _shutOffWdt),	doorThk/2,	1,
+		doorRad - (_offsetWdt + _shutOffWdt),	-doorThk/2,	1,
+		ColumnRad*cos(_aWingOut),				-doorThk/2,	1
+
+	poly2_	nsp/3,	1,	get(nsp)
+
+	line2	doorRad - (_offsetWdt + _shutOffWdt + 0.030),	doorThk/2,
+			doorRad - (_offsetWdt + _shutOffWdt + 0.030),	-doorThk/2
+
+	put	doorRad - (_offsetWdt + _shutOffWdt),	_shutOffThk/2,	1,
+		doorRad - _offsetWdt,					_shutOffThk/2,	1,
+		doorRad - _offsetWdt,					-_shutOffThk/2,	1,
+		doorRad - (_offsetWdt + _shutOffWdt),	-_shutOffThk/2,	1
+
+	poly2_	nsp/3,	1,	get(nsp)
+
+	!	유리
+	pen	Glass2DPen
+
+	put	ColumnRad*cos(_aWingIn),						glassThk/2,		1,
+		doorRad - (_offsetWdt + _shutOffWdt + 0.030),	glassThk/2,		0,
+		doorRad - (_offsetWdt + _shutOffWdt + 0.030),	-glassThk/2,	1,
+		ColumnRad*cos(_aWingIn),						-glassThk/2,	1
+
+	poly2_	nsp/3,	1,	get(nsp)
+
+return

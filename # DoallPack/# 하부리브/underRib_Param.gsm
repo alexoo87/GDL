@@ -1,0 +1,148 @@
+!===============================================================================================
+!	하부리브
+!===============================================================================================
+
+!	구조/건축 둘 중 하나는 켜져있도록
+!-----------------------------------------------------------------------------------------------
+if	not(bFinish) & not(bProfile)	then
+	parameters	bProfile = 1
+endif
+
+!	프로파일 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iPrfType"	PROFILE_TRAPEZOID,	stProfile[PROFILE_TRAPEZOID],
+						PROFILE_TRIANGLE,	stProfile[PROFILE_TRIANGLE]
+
+if	iPrfType = PROFILE_TRIANGLE	then
+	hideparameter	"prfWdtOut"
+endif
+
+!	리브 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iRibType"	RIB_VERTICAL,	stRib[RIB_VERTICAL],
+						RIB_ARC,		stRib[RIB_ARC],
+						RIB_FREE,		stRib[RIB_FREE]
+
+if	not(iRibType = RIB_ARC)	then
+	lock			"distWP", "aRib", "aRot", "bCutP"
+	hideparameter	"distWP", "aRib", "aRot", "bCutP"
+
+	parameters	bCutP = 0
+else
+	lock			"ribHgt"
+	hideparameter	"ribHgt"
+
+	if	not(bCutP)	then
+		lock			"xPosCutP", "yPosCutP", "zPosCutP", "cutPWdt", "cutPHgt"
+		hideparameter	"xPosCutP", "yPosCutP", "zPosCutP", "cutPWdt", "cutPHgt"
+	endif
+
+	if	not(bCutP_A)	then
+		lock			"xPosCutP_A", "yPosCutP_A", "zPosCutP_A", "coorCutP_A"
+		hideparameter	"xPosCutP_A", "yPosCutP_A", "zPosCutP_A", "coorCutP_A"
+	endif
+endif
+
+if	not(iRibType = RIB_FREE)	then
+	lock			"nSplit", "xPosRib", "yPosRib", "zPosRib", "aPartRib"
+	hideparameter	"nSplit", "xPosRib", "yPosRib", "zPosRib", "aPartRib"
+else
+	if	bEqualZ	then
+		lock	"zPosRib"
+	endif
+endif
+
+!	마감 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iFnsType"	FINISH_TYPE1,	stFinish[FINISH_TYPE1],
+						FINISH_TYPE2,	stFinish[FINISH_TYPE2]
+
+if	not(bFinish)	then
+	lock			"iFnsType", "fnsOff", "fnsLth", "fnsWdtOut", "fnsWdtIn", "fnsThk"
+	hideparameter	"iFnsType", "fnsOff", "fnsLth", "fnsWdtOut", "fnsWdtIn", "fnsThk"
+endif
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDisplay"	DISPLAY_CUTPLANE,		stDisplay[DISPLAY_CUTPLANE],
+						DISPLAY_PROJECTED,		stDisplay[DISPLAY_PROJECTED],
+						DISPLAY_WITHOVERHEAD,	stDisplay[DISPLAY_WITHOVERHEAD],
+						DISPLAY_OUTLINES,		stDisplay[DISPLAY_OUTLINES],
+						DISPLAY_OVERHEAD,		stDisplay[DISPLAY_OVERHEAD]
+
+if	not(iDisplay = DISPLAY_CUTPLANE | iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD)	then
+	lock			"cutPen", "cutFill", "cutFillPen", "cutBackPen"
+	hideparameter	"cutPen", "cutFill", "cutFillPen", "cutBackPen"
+endif
+
+if	not(iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_OVERHEAD)	then
+	lock			"overPen", "overLT"
+	hideparameter	"overPen", "overLT"
+endif
+
+if	not(iDisplay = DISPLAY_PROJECTED | iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_OUTLINES)	then
+	lock			"btmPen", "btmFill", "btmFillPen", "btmBackPen"
+	hideparameter	"btmPen", "btmFill", "btmFillPen", "btmBackPen"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+values{2}	"iProjectTo"	PROJECTTO_FLOORPLAN,	stProjectTo[PROJECTTO_FLOORPLAN],
+							PROJECTTO_ABSOLUTE,		stProjectTo[PROJECTTO_ABSOLUTE],
+							PROJECTTO_ENTIRE,		stProjectTo[PROJECTTO_ENTIRE]
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	변수 범위
+!-----------------------------------------------------------------------------------------------
+
+!	Resolution
+values	"iResol"	range	(0,	)
+
+!	단면 프로파일
+values	"prfLth"	range	[0.100,	]
+values	"prfWdtOut"	range	(0,	]
+values	"prfWdtIn"	range	(0,	]
+values	"prfThk"	range	(0,	]
+
+!	건축 마감
+values	"fnsLth"	range	[0.100,	]
+values	"fnsWdtOut"	range	(0,	]
+values	"fnsWdtIn"	range	(0,	]
+values	"fnsThk"	range	(0,	]
+
+!	리브
+values	"distWP"	range	(0,	)
+values	"ribHgt"	range	(0,	)
+values	"nSplit"	range	[1,	]
+
+values	"cutPWdt"	range	(0,	)
+values	"cutPHgt"	range	(0,	)
+
+!	zPosRib
+values	"zPosRib"	range	[0,	ribHgt]
+if	GLOB_MODPAR_NAME = "zPosRib" | GLOB_MODPAR_NAME = "nSplit" | GLOB_MODPAR_NAME = "ribHgt"	then
+	parameters	zPosRib[1] = 0
+	parameters	zPosRib[(nSplit + 1)] = ribHgt
+
+	_offsetValue = 0.050
+
+	for	i = 2	to	(nSplit + 1)
+		if	zPosRib[i] - zPosRib[i - 1] < -eps	then
+			parameters	zPosRib[i] = zPosRib[i - 1] + _offsetValue,
+						zPosRib[i - 1] = zPosRib[i - 1]
+		endif
+	next	i
+
+	for	i = 1	to	nSplit
+		if	zPosRib[i] - zPosRib[i + 1] > eps	then
+			parameters	zPosRib[i] = zPosRib[i + 1] - _offsetValue
+		endif
+	next	i
+endif
+
+!	건축 Cut Plane 좌표
+	if	coorCutP_A[1][1] - _something < eps	then
+
+	endif

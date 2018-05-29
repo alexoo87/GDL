@@ -1,0 +1,962 @@
+
+!======================================================================================================
+!	Window Maker 20
+!======================================================================================================
+!   DATE : 2017/3/29 WED
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Genaral
+!----------------------------------------------------------------------------------------------
+unID = 10
+
+!	Cutting Level
+! if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+! 	mFrameWidth_bot = mFrameWidth_insert_out/2
+! endif
+! if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+! 	mFrameWidth_bot = mFrameWidth_insert_hori/2
+! endif
+
+!	Type - Cutting Level
+if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+	_LayoutHeight = mLayoutHeight + mFrameWidth_insert_hori_out
+	_outsideWidth = mFrameWidth_insert_hori_out
+	_insideWidth = mFrameWidth_insert_hori_in
+endif
+if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+	_LayoutHeight = mLayoutHeight + mFrameWidth_insert_out
+	_outsideWidth = mFrameWidth_insert_out
+	_insideWidth = mFrameWidth_insert_in
+endif
+
+m2Dcut_level = GLOB_CUTPLANES_INFO[1] 
+
+!	Over Elevation
+if	m2Dcut_level < eps	then
+	end
+endif
+
+!	Below Elevation
+if	m2Dcut_level - _LayoutHeight > -eps	then
+	end
+endif
+
+
+
+	!  Frame 
+	!----------------------------------------------------------------------------------------------
+	!	Find Cutting Outside Frame
+	dim	iFrame_outside_2d_index[]
+
+	if	mLayout_outFrame_pos[1][POS_X] < eps	then
+		_start = 1
+		_end = iLayout_outFrame_num
+		_step = 1
+	endif
+	if	mLayout_outFrame_pos[1][POS_X] > eps	then
+		_start = iLayout_outFrame_num
+		_end = 1
+		_step = -1
+	endif
+
+	for i = _start	to	_end	step	_step
+		if	mLayout_outFrame_length[i] > EPS	then
+			if	(aLayout_outFrame_angle[i] > 90-EPS	and	aLayout_outFrame_angle[i] < 90+EPS)	then
+				if	abs(mLayout_outFrame_pos[i][POS_Y] + mLayout_outFrame_length[i] - mLayoutHeight) < EPS	then
+					if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) - _insideWidth/2 <= m2Dcut_level	then
+						if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_outFrame_length[i] + _outsideWidth/2 >= m2Dcut_level	then
+							iFrame_outside_2d_index[1] = i
+						endif
+					endif
+				else
+					if	mLayout_outFrame_pos[i][POS_Y] < EPS	then
+						if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) - _outsideWidth/2 <= m2Dcut_level	then
+							if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_outFrame_length[i] + _outsideWidth/2 > m2Dcut_level	then
+								iFrame_outside_2d_index[1] = i
+							endif
+						endif
+					else
+						if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) - _outsideWidth/2 <= m2Dcut_level	then
+							if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_outFrame_length[i] + _outsideWidth/2 > m2Dcut_level	then
+								iFrame_outside_2d_index[1] = i
+							endif
+						endif
+					endif
+				endif
+			endif
+			if	(aLayout_outFrame_angle[i] > 270-EPS and aLayout_outFrame_angle[i] < 270+EPS)	then
+				if	abs(mLayout_outFrame_pos[i][POS_Y] - mLayoutHeight) < EPS	then
+					if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) + _outsideWidth/2 > m2Dcut_level	then
+						if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) - mLayout_outFrame_length[i] - _outsideWidth/2 < m2Dcut_level	then
+							iFrame_outside_2d_index[2] = i
+						endif
+					endif
+				else
+					if	abs(mLayout_outFrame_pos[i][POS_Y] - mLayout_outFrame_length[i]) < EPS	then
+						if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) + _outsideWidth/2 > m2Dcut_level	then
+							if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) - mLayout_outFrame_length[i] - _outsideWidth/2 < m2Dcut_level	then
+								iFrame_outside_2d_index[2] = i
+							endif
+						endif
+					else
+						if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) + _outsideWidth/2 > m2Dcut_level	then
+							if	(mLayout_outFrame_pos[i][POS_Y] + _outsideWidth/2) - mLayout_outFrame_length[i] - _outsideWidth/2 < m2Dcut_level	then
+								iFrame_outside_2d_index[2] = i
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	next i
+	iFrame_outside_2d_index_num = 2
+
+	!	Find Cutting Inside Frame
+	dim	iFrame_inside_2d_index[]
+	n = 1
+	for i = 1	to	iLayout_inFrame_num
+		! if	(aLayout_inFrame_angle[i] > 90-EPS and aLayout_inFrame_angle[i] < 90+EPS) or (aLayout_inFrame_angle[i] > 270-EPS and aLayout_inFrame_angle[i] < 270+EPS)	then
+		! 	if	mLayout_inFrame_pos[i][POS_Y] <= m2Dcut_level	then
+		! 		if	mLayout_inFrame_pos[i][POS_Y] + mLayout_inFrame_length[i] + mFrameWidth_insert_hori_in > m2Dcut_level	then
+		! 			iFrame_inside_2d_index[n] = i
+		! 			n = n+1
+		! 		endif
+		! 	endif
+		! endif
+
+		if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+			if	(aLayout_inFrame_angle[i] > 90-EPS and aLayout_inFrame_angle[i] < 90+EPS) or (aLayout_inFrame_angle[i] > 270-EPS and aLayout_inFrame_angle[i] < 270+EPS)	then
+				if	abs(mLayout_inFrame_pos[i][POS_Y] + mLayout_inFrame_length[i] - mLayoutHeight) < EPS	then
+					if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) - _insideWidth/2 < m2Dcut_level	then
+						if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_inFrame_length[i] + _outsideWidth/2 > m2Dcut_level	then
+							iFrame_inside_2d_index[n] = i
+							n = n + 1
+						endif
+					endif
+				else
+					if	abs(mLayout_inFrame_pos[i][POS_Y]) < EPS	then
+						if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) - _insideWidth/2 < m2Dcut_level	then
+							if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_inFrame_length[i] + _insideWidth/2 > m2Dcut_level + EPS	then
+								iFrame_inside_2d_index[n] = i
+								n = n + 1
+							endif
+						endif
+					else
+						if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) - _insideWidth/2 < m2Dcut_level	then
+							if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_inFrame_length[i] + _insideWidth/2 > m2Dcut_level	then
+								iFrame_inside_2d_index[n] = i
+								n = n + 1
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+		if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+			if	(aLayout_inFrame_angle[i] > 90-EPS and aLayout_inFrame_angle[i] < 90+EPS) or (aLayout_inFrame_angle[i] > 270-EPS and aLayout_inFrame_angle[i] < 270+EPS)	then
+				if	abs(mLayout_inFrame_pos[i][POS_Y] + mLayout_inFrame_length[i] - mLayoutHeight) < EPS	then
+					if	abs(mLayout_inFrame_pos[i][POS_Y]) < EPS	then
+						if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth) <= m2Dcut_level	then
+							if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_inFrame_length[i] - _outsideWidth/2 >= m2Dcut_level	then
+								iFrame_inside_2d_index[n] = i
+								n = n + 1
+							endif
+						endif
+					else
+						if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) - _insideWidth/2 < m2Dcut_level	then
+							if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_inFrame_length[i] - _outsideWidth/2 >= m2Dcut_level	then
+								iFrame_inside_2d_index[n] = i
+								n = n + 1
+							endif
+						endif
+					endif
+				else
+					if	abs(mLayout_inFrame_pos[i][POS_Y]) < EPS	then
+						if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth) <= m2Dcut_level	then
+							if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_inFrame_length[i] + _insideWidth/2 > m2Dcut_level	then
+								iFrame_inside_2d_index[n] = i
+								n = n + 1
+							endif
+						endif
+					else
+						if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) - _insideWidth/2 < m2Dcut_level	then
+							if	(mLayout_inFrame_pos[i][POS_Y] + _outsideWidth/2) + mLayout_inFrame_length[i] + _insideWidth/2 > m2Dcut_level	then
+								iFrame_inside_2d_index[n] = i
+								n = n + 1
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	next i
+	iFrame_inside_2d_index_num = n - 1
+
+	!	오름차순 정렬
+	if	iFrame_inside_2d_index_num >= 1	then
+		dim	iFrame_inside_2d_index_temp[]
+		for n = 1	to	iFrame_inside_2d_index_num
+			iFrame_inside_2d_index_temp[n] = iFrame_inside_2d_index[n]
+		next n
+		for r = 1	to	iFrame_inside_2d_index_num
+			idx_min = 0
+			bInsert_firstValue = 1
+			for n = 1	to	iFrame_inside_2d_index_num
+				idx = iFrame_inside_2d_index_temp[n]
+				if	idx <> 0	then
+					if	bInsert_firstValue	then
+						mMin = mLayout_inFrame_pos[idx][POS_X]
+						bInsert_firstValue = 0
+						idx_min = n
+					else
+						if	mMin-mLayout_inFrame_pos[idx][POS_X] > EPS	then
+							idx_min = n
+						endif
+						mMin = min(mMin, mLayout_inFrame_pos[idx][POS_Y])
+					endif
+				endif
+			next n
+			iFrame_inside_2d_index[r] = iFrame_inside_2d_index_temp[idx_min]
+			iFrame_inside_2d_index_temp[idx_min] = 0
+		next r
+	endif
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Test Script
+!----------------------------------------------------------------------------------------------
+
+	! !	투영 
+	! rot2	180
+	! 	project2	4, 90, 2
+	! del	1
+
+
+	! rot2	aSymbol_rotangle
+	! pen	iText_pen
+
+		! !	방향 계산 
+		! add2	-mLayoutWidth/2, 0
+		! 	circle2	0, 0, 0.1					!	W.P.
+		! 	add2	-0.1, 0
+		! 		text2	0, 0, "W.P."
+		! 	del	1
+		! del	1
+
+
+		! add2	0, -1
+		! text2	0, 0, "SYMB_ROTANGLE"
+		! add2	0, -1
+		! text2	0, 0, SYMB_ROTANGLE
+		! add2	0, -1
+
+		! text2	0, 0, "SYMB_MIRRORED"
+		! add2	0, -1
+		! text2	0, 0, SYMB_MIRRORED
+		! add2	0, -1
+
+		! text2	0, 0, "WIDO_ORIENTATION"
+		! add2	0, -1
+		! text2	0, 0, WIDO_ORIENTATION
+		! add2	0, -1
+
+		! text2	0, 0, "WALL_DIRECTION"
+		! add2	0, -1
+		! text2	0, 0, WALL_DIRECTION
+		! add2	0, -1
+
+		! text2	0, 0, "WIDO_REVEAL_SIDE"
+		! add2	0, -1
+		! text2	0, 0, WIDO_REVEAL_SIDE
+		! add2	0, -1
+
+		! text2	0, 0, "WIDO_SILL"
+		! add2	0, -1
+		! text2	0, 0, WIDO_SILL
+		! add2	0, -1
+
+
+	! 	!	벽 두께
+	! 	text2	0, 0, "mWall_thick_skin_front"
+	! 	add2	0, -1
+	! 	text2	0, 0, mWall_thick_skin_front
+	! 	add2	0, -1		
+
+	! 	text2	0, 0, "mWall_thick_core"
+	! 	add2	0, -1
+	! 	text2	0, 0, mWall_thick_core
+	! 	add2	0, -1		
+
+	! 	text2	0, 0, "mWall_thick_skin_back"
+	! 	add2	0, -1
+	! 	text2	0, 0, mWall_thick_skin_back
+	! 	add2	0, -1		
+
+
+
+	! !	디스플레이 옵션
+
+	! 	text2	0, 0, "ac_hole_display_option"
+	! 	add2	0, -1
+	! 	text2	0, 0, ac_hole_display_option
+	! 	add2	0, -1		
+
+	!	절단면 높이
+	! text2	0, 0, "m2Dcut_level"
+	! add2	0, -1
+	! text2	0, 0, m2Dcut_level
+	! add2	0, -1		
+
+	! text2	0, 0, "GLOB_ELEVATION"
+	! add2	0, -1
+	! text2	0, 0, GLOB_ELEVATION
+	! add2	0, -1		
+
+	! text2	0, 0, "GLOB_CUTPLANES_INFO[1]"
+	! add2	0, -1
+	! text2	0, 0, GLOB_CUTPLANES_INFO[1]
+	! add2	0, -1		
+
+
+	! del	top
+
+
+
+!----------------------------------------------------------------------------------------------
+!  2D Symbol
+!----------------------------------------------------------------------------------------------
+! if	iDetail_2D <> DETAIL_2D_OFF	& (ac_hole_display_option = SYMBOLIC | ac_hole_display_option = OVERHEAD_ALL) then
+if	iDetail_2D <> DETAIL_2D_OFF	 then
+	line_type iAll_line_type
+
+	add2	-mLayoutWidth/2, 0									!	Move Position to Origin
+
+
+		!----------------------------------------------------------------------------------------------
+		!  Wall Hole
+		!----------------------------------------------------------------------------------------------
+		idx1 = iFrame_outside_2d_index[1]
+		idx2 = iFrame_outside_2d_index[2]
+		mWallholeW_OffsetL = mFrame_size_outframe[idx1][1] / 2
+		mWallholeW_OffsetR = mFrame_size_outframe[idx2][1] / 2
+		mWallholeW = abs(mLayout_outFrame_pos[idx1][POS_X] - mLayout_outFrame_pos[idx2][POS_X]) + mWallholeW_OffsetL + mWallholeW_OffsetR
+		mWallholeD = mWall_thick
+		revealD = WIDO_SILL
+
+		if	iSymbol_reveal_side = 0	then
+			add2	0,	-mWallholeD
+		else
+			add2	0,	0
+		endif
+
+		if	SYMB_ROTANGLE >= 180-EPS & SYMB_ROTANGLE <= 180+EPS		then
+			if	WIDO_REVEAL_SIDE = 1	then	add2	0,	-revealD
+			if	WIDO_REVEAL_SIDE = 0	then	add2	0,	revealD
+		endif
+
+		if	SYMB_ROTANGLE >= 0-EPS & SYMB_ROTANGLE <= 0+EPS	then
+			if	WIDO_REVEAL_SIDE = 1	then	add2	0,	-revealD
+			if	WIDO_REVEAL_SIDE = 0	then	add2	0,	revealD
+		endif
+
+			add2	-mWallholeW_OffsetL+mLayout_outFrame_pos[idx1][POS_X], 0
+							si = 1
+				wallhole2	4, 0, 1, 1, 0, 0, 0, 
+							0, 0, si,
+							mWallholeW, 0, si,
+							mWallholeW, mWallholeD, si,
+							0, mWallholeD, si
+
+				pen	WALL_VIEW_PEN
+				wallline2	0, 0, 0, mWallholeD
+				wallline2	mWallholeW, 0, mWallholeW, mWallholeD
+
+				pen	iWall_pen_2D
+				if	(not(WIDO_REVEAL_SIDE) & gs_sill_outside) | (WIDO_REVEAL_SIDE & gs_board_inside)	then	line_type	4
+				line2	0, mWallholeD, mWallholeW, mWallholeD
+				line_type	iAll_line_type
+				if	(WIDO_REVEAL_SIDE & gs_sill_outside) | (not(WIDO_REVEAL_SIDE) & gs_board_inside)	then	line_type	4
+				line2	0, 0, mWallholeW, 0
+				line_type	iAll_line_type
+
+				hotspot2	0,			0,			unID	:	unID = unID + 1
+				hotspot2	mWallholeW,	0,			unID	:	unID = unID + 1
+				hotspot2	mWallholeW,	mWallholeD,	unID	:	unID = unID + 1
+				hotspot2	0,			mWallholeD,	unID	:	unID = unID + 1
+			del	1
+
+		del	1
+
+
+
+		!----------------------------------------------------------------------------------------------
+		!  Frame
+		!----------------------------------------------------------------------------------------------
+		line_type iAll_line_type
+
+		W = 1
+		D = 2
+
+		if	iSymbol_reveal_side = 0	then
+			add2	0,	mWallholeD
+		else
+			add2	0,	0
+		endif
+
+
+			!  Outside Frame
+			!----------------------------------------------------------------------------------------------
+			if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+				mFrameD_sub_flip = mFrameDepth_insert_out
+			endif
+			if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+				mFrameD_sub_flip = mFrameDepth_insert_vert_out
+			endif
+
+			if	iSymbol_reveal_side = 1	then
+				add2	0, mFrameD_sub_flip
+			else
+				add2	0, 0
+			endif
+		
+				!  Vertical Frame
+				!----------------------------------------------------------------------------------------------			
+				!	'iFrame_outside_dir' Index
+				DIR_LEFT = 1
+				DIR_RIGHT = 2
+
+				for i = 1	to	iFrame_outside_2d_index_num
+					idx = iFrame_outside_2d_index[i]
+
+					mFrameW_sub = mFrame_size_outframe[idx][W]
+					mFrameD_sub = mFrame_size_outframe[idx][D]
+
+					if	i = 1	then	iFrame_outside_dir = DIR_LEFT
+					if	i = 2	then	iFrame_outside_dir = DIR_RIGHT
+					add2	mLayout_outFrame_pos[idx][POS_X], 0
+						gosub	"Frame_shape_outside_vert"
+					del	1
+				next i
+
+
+			del	1
+
+
+			!  Inside Frame
+			!----------------------------------------------------------------------------------------------
+			if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+				mFrameD_sub_flip = mFrameDepth_insert_out
+			endif
+			if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+				mFrameD_sub_flip = mFrameDepth_insert_vert_out
+			endif
+
+			if	iSymbol_reveal_side = 1	then
+				add2	0, mFrameD_sub_flip
+			else
+				add2	0, 0
+			endif
+
+
+				!  Vertical Frame
+				!----------------------------------------------------------------------------------------------			
+				if	iDetail_2D = DETAIL_2D_SIMPLE | iDetail_2D = DETAIL_2D_MIDDLE 	then
+					for i = 1	to	iFrame_inside_2d_index_num
+						idx = iFrame_inside_2d_index[i]
+
+						if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+							mFrameW_sub = mFrameWidth_insert_in
+							mFrameD_sub = mFrameDepth_insert_in
+							mFrameD_sub_hori = mFrameDepth_insert_in
+						endif
+						if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+							mFrameW_sub = mFrameWidth_insert_vert_out
+							mFrameD_sub = mFrameDepth_insert_vert_out
+							mFrameD_sub_hori = mFrameDepth_insert_hori_in
+						endif
+
+						add2	mLayout_inFrame_pos[idx][POS_X], 0
+							gosub	"Frame_shape_inside"
+						del	1
+					next i
+				endif
+
+				if	iDetail_2D = DETAIL_2D_DETAIL	then
+					for i = 1	to	iFrame_inside_2d_index_num
+						idx = iFrame_inside_2d_index[i]
+
+						mFrameW_sub = mFrame_size_inframe[idx][W]
+						mFrameD_sub = mFrame_size_inframe[idx][D]
+
+						add2	mLayout_inFrame_pos[idx][POS_X], 0
+							gosub	"Frame_shape_inside"
+						del	1
+					next i
+				endif
+
+
+				!  Horizontal Frame
+				!----------------------------------------------------------------------------------------------	
+				if	iDetail_2D = DETAIL_2D_SIMPLE | iDetail_2D = DETAIL_2D_MIDDLE 	then
+					if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+						mFrameW_sub = mFrameWidth_insert_in
+						mFrameD_sub = mFrameDepth_insert_in
+						mFrameD_sub_hori = mFrameDepth_insert_in
+					endif
+					if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+						mFrameW_sub = mFrameWidth_insert_vert_out
+						mFrameD_sub = mFrameDepth_insert_vert_out
+						mFrameD_sub_hori = mFrameDepth_insert_hori_in
+					endif
+
+					mFrameL_sub = mWallholeW
+					mFrameD_sub_hori = mFrameD_sub
+					idx_out = iFrame_outside_2d_index[1]
+					add2	-mWallholeW_OffsetL + mLayout_outFrame_pos[idx_out][POS_X], 0
+						gosub	"Frame_shape_outside_hori"
+					del	1
+				endif
+
+				if	iDetail_2D = DETAIL_2D_DETAIL	then
+					if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+						mFrameW_sub = mFrameWidth_insert_out
+						mFrameD_sub = mFrameDepth_insert_out
+						mFrameD_sub_hori = mFrameDepth_insert_in
+						mFrameW_sub_in = mFrameWidth_insert_in
+					endif
+					if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+						mFrameW_sub = mFrameWidth_insert_vert_out
+						mFrameD_sub = mFrameDepth_insert_vert_out
+						mFrameD_sub_hori = mFrameDepth_insert_hori_in
+						mFrameW_sub_in = mFrameWidth_insert_vert_in
+					endif
+
+					idx_out = iFrame_outside_2d_index[1]
+					if	iFrame_inside_2d_index_num = 0	then
+						mFrameL_sub = mWallholeW - mFrameW_sub*2
+						add2	mLayout_outFrame_pos[idx_out][POS_X]+mFrameW_sub/2, 0
+							gosub	"Frame_shape_outside_hori"
+						del	1
+					else
+						add2	mLayout_outFrame_pos[idx_out][POS_X], 0
+							for i = 1	to	iFrame_inside_2d_index_num+1
+								if	i = 1	then
+									!	First Outside Frame
+									idx = iFrame_inside_2d_index[i]
+									mFrameL_sub =  mLayout_inFrame_pos[idx][POS_X] - mLayout_outFrame_pos[idx_out][POS_X] - mFrameW_sub/2 - mFrameW_sub_in/2
+									add2	mFrameW_sub/2, 0
+										gosub	"Frame_shape_outside_hori"								
+									del	1
+								else
+									if	i > 1 and  i < iFrame_inside_2d_index_num+1 then
+										!	Inside Frame
+										idx = iFrame_inside_2d_index[i]
+										idx_pre = iFrame_inside_2d_index[i-1]
+										mFrameL_sub = (mLayout_inFrame_pos[idx][POS_X]-mLayout_inFrame_pos[idx_pre][POS_X]) - mFrameW_sub_in
+										add2	mLayout_inFrame_pos[idx_pre][POS_X]+mFrameW_sub_in/2-mLayout_outFrame_pos[idx_out][POS_X], 0
+											gosub	"Frame_shape_outside_hori"								
+										del	1										
+									endif
+									if	i = iFrame_inside_2d_index_num+1	then
+										!	Last Outside Frame
+										idx_pre = iFrame_inside_2d_index[i-1]
+										mFrameL_sub = (mWallholeW-mLayout_inFrame_pos[idx_pre][POS_X]) - mFrameW_sub - mFrameW_sub/2 - mFrameW_sub_in/2 + mLayout_outFrame_pos[idx_out][POS_X]
+										add2	mLayout_inFrame_pos[idx_pre][POS_X]+mFrameW_sub_in/2-mLayout_outFrame_pos[idx_out][POS_X], 0
+											gosub	"Frame_shape_outside_hori"								
+										del	1	
+									endif	
+								endif
+							next i
+						del	1
+					endif
+				endif
+
+
+
+			del	1
+
+		del	1
+
+
+
+		!----------------------------------------------------------------------------------------------
+		!  Opening
+		!----------------------------------------------------------------------------------------------
+		if	bOpening | iDetail_2D = DETAIL_2D_MIDDLE	then
+			line_type iAll_line_type
+
+			!  Sash
+			!----------------------------------------------------------------------------------------------
+			if	iSymbol_reveal_side = 1	then
+				add2	0, mFrameD_sub_flip
+			else
+				add2	0, mWallholeD
+			endif	
+
+				if	iDetail_2D = DETAIL_2D_MIDDLE	then
+					mGlassW_sub = mWallholeW
+					if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+						mFrameD_sub = mFrameDepth_insert_out
+						mFrameW_sub = mFrameWidth_insert_out
+					endif
+					if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+						mFrameD_sub = mFrameDepth_insert_vert_out
+						mFrameW_sub = mFrameWidth_insert_vert_out
+					endif
+
+					gosub	"Opening_symbol_middle"
+				endif
+
+
+				if	iDetail_2D = DETAIL_2D_DETAIL	then
+					if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+						mFrameD_sub = mFrameDepth_insert_out
+					endif
+					if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+						mFrameD_sub = mFrameDepth_insert_vert_out
+					endif
+
+					gosub	"Opening_symbol_detail"
+				endif
+
+			del	1
+
+		endif
+	
+	del		1														!	Move Position to Origin
+
+
+endif
+
+
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+
+"Frame_shape_outside_vert"	:
+
+	if	iDetail_2D = DETAIL_2D_SIMPLE | iDetail_2D = DETAIL_2D_MIDDLE 	then
+		if	iFrame_outside_dir = DIR_LEFT	then
+			add2	-mFrameW_sub/2, 0
+			 	gosub	"Frame_shape"
+			del	1
+		endif
+		if	iFrame_outside_dir = DIR_RIGHT	then
+			add2	mFrameW_sub/2, 0
+			 	gosub	"Frame_shape"
+			del	1
+		endif	
+	endif
+	if	iDetail_2D = DETAIL_2D_DETAIL	then
+	 	gosub	"Frame_shape"
+	endif
+
+return
+
+
+
+"Frame_shape_outside_hori"	:
+
+	pen	iFrame_pen_2D
+	rect2	0, 0, mFrameL_sub, -mFrameD_sub_hori
+
+return
+
+
+
+
+"Frame_shape_inside"	:
+
+	gosub	"Frame_shape"
+
+return
+
+
+
+"Frame_shape"	:
+
+	! pen	iFrame_pen_2D
+	! if	iDetail_2D = DETAIL_2D_SIMPLE | iDetail_2D = DETAIL_2D_MIDDLE 	then
+	! 	if	SYMB_ROTANGLE >= 180-EPS & SYMB_ROTANGLE <= 180+EPS	then
+	! 		if	WIDO_REVEAL_SIDE = 1	then	add2	0,	-revealD
+	! 		if	WIDO_REVEAL_SIDE = 0	then	add2	0,	revealD - mFrameD_sub
+	! 	endif
+
+	! 	if	SYMB_ROTANGLE >= 0-EPS & SYMB_ROTANGLE <= 0+EPS	then
+	! 		if	WIDO_REVEAL_SIDE = 1	then	add2	0,	-revealD
+	! 		if	WIDO_REVEAL_SIDE = 0	then	add2	0,	revealD - mFrameD_sub
+	! 	endif
+	! 		line2	0, 0, 0, mFrameD_sub
+	! 	del	1
+	! endif
+	! if	iDetail_2D = DETAIL_2D_DETAIL	then
+	! 	if	iSymbol_reveal_side = 0	then			
+	! 		add2	-mFrameW_sub/2, -mFrameD_sub
+	! 	else
+	! 		add2	-mFrameW_sub/2, 0
+	! 	endif
+	! 		rect2	0, 0, mFrameW_sub, mFrameD_sub
+	! 	del	1
+	! endif
+
+
+	pen	iFrame_pen_2D
+	if	iDetail_2D = DETAIL_2D_SIMPLE | iDetail_2D = DETAIL_2D_MIDDLE 	then
+		if	iFrameEdge = FRAME_EDGE_45DEGREE	then	line2	0, 0, 0, -mFrameDepth_insert_in
+		if	iFrameEdge = FRAME_EDGE_90DEGREE	then	line2	0, 0, 0, -mFrameD_sub
+	endif
+
+	if	iDetail_2D = DETAIL_2D_DETAIL	then
+		add2	-mFrameW_sub/2, 0
+			rect2	0, 0, mFrameW_sub, -mFrameD_sub
+		del	1
+	endif
+
+return
+
+
+
+"Opening_find_index"		:
+
+	dim	iOpening_find_index[]
+	iOpening_find_index_num = 0
+
+	num = 1
+	for i = 1	to	iOpening_num
+		if	mOpening_pos[i][POS_Y] < m2Dcut_level	then
+
+			idx = i
+			gosub	"Opening_calc_size"
+
+			if	mOpening_bot_pos <= m2Dcut_level & mOpening_top_pos >= m2Dcut_level	then
+				iOpening_find_index[num] = i
+				num = num + 1
+			endif
+		endif
+	next i
+	iOpening_find_index_num = num - 1
+
+return
+
+
+
+"Opening_calc_size"	:
+
+
+	!	Bottom Frame Width Offset 
+	if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+		mFrameW_offset = mFrameWidth_insert_out/2
+	endif
+	if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+		mFrameW_offset = mFrameWidth_insert_hori_out/2
+	endif
+
+	!	창호 타입 판별
+	!----------------------------------------------------------------------------------------------------
+	!	iOpening_shape index
+	OPENING_RECT = 1
+	OPENING_UNRECT = 2
+
+	if	iOpening_coordinate_num[idx] = 4	then
+		iOpening_shape = OPENING_RECT
+	else
+		iOpening_shape = OPENING_UNRECT
+	endif	
+
+
+	!	창호 타입별 사이즈 계산
+	!----------------------------------------------------------------------------------------------------
+	mOpening_bot_pos = 0					!	오프닝 하단 높이
+	mOpening_top_pos = 0					!	오프닝 상단 높이
+
+		!	사각창호 
+		!----------------------------------------------------------------------------------------------------
+		if	iOpening_shape = OPENING_RECT	then
+			mOpening_bot_pos = mFrameW_offset + mOpening_pos[idx][POS_Y] + mOpening_offset[idx][4]
+			mOpening_top_pos = mFrameW_offset + mOpening_pos[idx][POS_Y] + mOpening_coordinateY[idx][2] - mOpening_offset[idx][2]
+		endif
+
+		!	이형창호
+		!----------------------------------------------------------------------------------------------------
+		if	iOpening_shape = OPENING_UNRECT	then
+			iNum = iOpening_coordinate_num[idx]
+
+			!	최저 위치
+			for	r = 1	to	iNum
+				if	r = 1	then
+					mOpening_coordinateY_min = mOpening_coordinateY[idx][r]
+					idx_min = 1
+				else
+					if	mOpening_coordinateY_min > mOpening_coordinateY[idx][r]	then
+						mOpening_coordinateY_min = mOpening_coordinateY[idx][r]
+						idx_min = r
+					endif
+				endif
+			next r
+			mOpening_bot_pos = mFrameW_offset + mOpening_pos[idx][POS_Y] + mOpening_coordinateY_min + mOpening_offset[idx][idx_min]
+
+			!	최고 위치
+			for	r = 1	to	iNum
+				if	r = 1	then
+					mOpening_coordinateY_max = mOpening_coordinateY[idx][r]
+					idx_max = 1
+				else
+					if	mOpening_coordinateY_max < mOpening_coordinateY[idx][r]	then
+						mOpening_coordinateY_max = mOpening_coordinateY[idx][r]
+						idx_max = r
+					endif
+				endif
+			next r
+			mOpening_top_pos = mFrameW_offset + mOpening_pos[idx][POS_Y] + mOpening_coordinateY_max - mOpening_offset[idx][idx_max]
+
+		endif
+
+return
+
+
+
+"Opening_symbol_middle"	:
+
+	gosub	"Opening_find_index"
+
+	pen	iGlass_pen_2D
+	add2	-mWallholeW_OffsetL, -mFrameD_sub/2
+
+		iOpening_num_2d = iFrame_inside_2d_index_num + iFrame_outside_2d_index_num - 1
+		idx = 1
+		dim	mOpening_pos_2d[] 
+		for i = 1	to	iOpening_num_2d
+			if	i = 1	then
+				idx_out = iFrame_outside_2d_index[1]
+				mOpening_pos_2d[i] = mLayout_outFrame_pos[idx_out][POS_X]
+			else
+				idx_in = iFrame_inside_2d_index[idx]
+				mOpening_pos_2d[i] = mLayout_inFrame_pos[idx_in][POS_X]
+				idx = idx+1
+			endif			
+		next i
+
+		breakpoint	1
+
+		for i = 1	to	iOpening_num_2d
+
+			!	오프닝 인덱스 찾기
+			idx_open = 1
+			for r = 1	to	iOpening_find_index_num
+				idx_open = iOpening_find_index[r] 
+				if	abs(mOpening_pos[idx_open][POS_X] - mOpening_pos_2d[i]) < EPS then	r = iOpening_find_index_num				!	루프 종료
+			next r
+
+			!	그릴 타입일 경우 라인타입 변경 
+			if	iOpening_type[idx_open][OPENING_OPEN_TYPE] = Type_Grill	then
+				line_type iGlass_louver_line
+			else
+				line_type iAll_line_type
+			endif
+
+			!	오프닝 그리기
+			if	iOpening_find_index_num = 1	then
+				idx_out1 = iFrame_outside_2d_index[1]
+				idx_out2 = iFrame_outside_2d_index[2]
+				mOpeningL = abs(mLayout_outFrame_pos[idx_out1][POS_X]-mLayout_outFrame_pos[idx_out2][POS_X]) + mWallholeW_OffsetL + mWallholeW_OffsetR
+				add2	mOpening_pos_2d[i], 0
+					line2	0, 0, mOpeningL, 0
+				del	1
+			else
+				if	i = 1	then
+					mOpeningL = mOpening_pos_2d[i+1] - mOpening_pos_2d[i] + mWallholeW_OffsetL
+					add2	mOpening_pos_2d[i], 0
+						line2	0, 0, mOpeningL, 0
+					del	1
+				endif
+				if	i > 1  and i < iOpening_num_2d	then
+					mOpeningL = mOpening_pos_2d[i+1] - mOpening_pos_2d[i]
+					add2	mOpening_pos_2d[i] + mWallholeW_OffsetL, 0
+						line2	0, 0, mOpeningL, 0
+					del	1
+				endif
+				if	i = iOpening_num_2d	then
+					idx_out = iFrame_outside_2d_index[2]
+					mOpeningL = mLayout_outFrame_pos[idx_out][POS_X] - mOpening_pos_2d[i] + mWallholeW_OffsetR
+					add2	mOpening_pos_2d[i] + mWallholeW_OffsetL, 0
+						line2	0, 0, mOpeningL, 0
+					del	1
+				endif
+			endif
+		next i
+
+	del	1
+
+
+return
+
+
+
+
+"Opening_symbol_detail"	:
+	
+	gosub	"Opening_find_index"
+
+	dim	mLayout_coordinate_temp[20][2]
+	dim	mLayout_offset_temp[20]
+
+	for i = 1	to	iOpening_find_index_num
+
+		idx = iOpening_find_index[i]
+		for n = 1	to	20
+			mLayout_coordinate_temp[n][POS_X] = mOpening_coordinateX[idx][n]
+			mLayout_coordinate_temp[n][POS_Y] = mOpening_coordinateY[idx][n]
+
+			mLayout_offset_temp[n] = mOpening_offset[idx][n]
+		next n
+
+		if	iOpening_coordinate_num[idx] = 4	then
+			_offset = 0
+		else
+			_offset = _outsideWidth/2
+		endif
+
+		if	iOpening_type[idx][OPENING_WINDOW_DOOR] = OPENING_WINDOW	then
+			if	iOpening_type[idx][OPENING_OPEN_TYPE] <> 0	then
+				call	"Window Maker(Opening_W) 20"	parameters	all		iOpening_index = idx,
+																			mOpening_posX = mOpening_pos[idx][POS_X],
+																			mOpening_posY = mOpening_pos[idx][POS_Y] + _offset,
+																			iCoordinate_num = iOpening_coordinate_num[idx],
+																			mLayout_Coordinate = mLayout_coordinate_temp,
+																			mLayout_Offset = mLayout_offset_temp,
+																			iOpening_type = iOpening_type[idx][OPENING_OPEN_TYPE],
+																			mOpening_sub = mOpening_shape_param[idx],
+																			mOpening_posy_reveal = 0,						!	애드온에서 Edit 모드시만 사용하는 변수
+																			iDirect = iOpening_direct[idx]
+			endif
+		endif
+		if	iOpening_type[idx][OPENING_WINDOW_DOOR] = OPENING_DOOR	then
+			if	iOpening_type[idx][OPENING_OPEN_TYPE] <> 0	and		iOpening_type[i][OPENING_PANEL_TYPE] <> 0	then
+				call	"Window Maker(Opening_D) 20"	parameters	all		iOpening_index = idx,
+																			mOpening_posX = mOpening_pos[idx][POS_X],
+																			mOpening_posY = mOpening_pos[idx][POS_Y],
+																			iCoordinate_num = iOpening_coordinate_num[idx],
+																			mLayout_Coordinate = mLayout_coordinate_temp,
+																			mLayout_Offset = mLayout_offset_temp,
+																			iOpening_type = iOpening_type[idx][OPENING_OPEN_TYPE],
+																			iDoorPanelType = iOpening_type[idx][OPENING_PANEL_TYPE],
+																			mOpening_sub = mOpening_shape_param[idx],
+																			mOpening_posy_reveal = 0,						!	애드온에서 Edit 모드시만 사용하는 변수
+																			iDirect = iOpening_direct[idx]
+			endif
+		endif
+
+	next i
+
+return
+
+

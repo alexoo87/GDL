@@ -1,0 +1,367 @@
+
+unID = 1000
+
+!	변수 정의
+_offsetZ = m_box_Dist
+
+!	가이드레일 각도
+if	not(abs(slpLthL) < eps)	then
+	_aRailL = atn(zzyzx/slpLthL)
+else
+	_aRailL = 90
+endif
+
+if	not(abs(slpLthR) < eps)	then
+	_aRailR = atn(zzyzx/slpLthR)
+else
+	_aRailR = 90
+endif
+
+!	slpLth
+_slpLthL = 0
+if	abs(slpLthL) > eps	then
+	_slpLthL = slpLthL
+endif
+
+_slpLthR = 0
+if	abs(slpLthR) > eps	then
+	_slpLthR = slpLthR
+endif
+
+!	Cut Plane 높이에 따른 비율
+_ratioGuide = (cutPlaneHgt/zzyzx)
+_ratioBox = ((zzyzx + _offsetZ)/zzyzx)
+
+! project2	3,	270,	3
+
+!-----------------------------------------------------------------------------------------------
+!	Hotspot
+!-----------------------------------------------------------------------------------------------
+if	iBoxType = Box_Flush	then
+	hotspot2	0,						m_box_Depth
+	hotspot2	A,						m_box_Depth
+	hotspot2	-m_box_leaf_left,		m_box_Depth
+	hotspot2	A + m_box_leaf_right,	m_box_Depth
+
+	hotspot2	0,					0,	unID,	m_box_leaf_left,	1 + 128	: unID = unID + 1
+	hotspot2	-m_box_leaf_left,	0,	unID,	m_box_leaf_left,	2		: unID = unID + 1
+	hotspot2	1,					0,	unID,	m_box_leaf_left,	3		: unID = unID + 1
+
+	add2	A,	0
+		hotspot2	0,					0,	unID,	m_box_leaf_right,	1 + 128	: unID = unID + 1
+		hotspot2	m_box_leaf_right,	0,	unID,	m_box_leaf_right,	2		: unID = unID + 1
+		hotspot2	-1,					0,	unID,	m_box_leaf_right,	3		: unID = unID + 1
+	del 1
+endif
+
+add2	0,	m_screen_move_y
+	add2	0,	m_guide_width/2
+		hotspot2	0,				0,	unID,	m_Lguide_moveX,	1 + 128	: unID = unID + 1
+		hotspot2	m_Lguide_moveX,	0,	unID,	m_Lguide_moveX,	2		: unID = unID + 1
+		hotspot2	-1,				0,	unID,	m_Lguide_moveX,	3		: unID = unID + 1
+
+		add2	A,	0
+			hotspot2	0,					0,	unID,	m_Rguide_moveX,	1 + 128	: unID = unID + 1
+			hotspot2	-m_Rguide_moveX,	0,	unID,	m_Rguide_moveX,	2		: unID = unID + 1
+			hotspot2	1,					0,	unID,	m_Rguide_moveX,	3		: unID = unID + 1
+		del 1
+	del 1
+del 1
+
+hotspot2	0,	0,				unID,	m_box_Depth,	1 + 128	: unID = unID + 1
+hotspot2	0,	m_box_Depth,	unID,	m_box_Depth,	2		: unID = unID + 1
+hotspot2	0,	-1,				unID,	m_box_Depth,	3		: unID = unID + 1
+
+add2	A,	0
+	hotspot2	0,	0,				unID,	m_box_Depth,	1 + 128	: unID = unID + 1
+	hotspot2	0,	m_box_Depth,	unID,	m_box_Depth,	2		: unID = unID + 1
+	hotspot2	0,	-1,				unID,	m_box_Depth,	3		: unID = unID + 1
+del 1
+
+
+hotspot2	0,	0,	unID,	A,	1 + 256	: unID = unID + 1
+hotspot2	A,	0,	unID,	A,	2		: unID = unID + 1
+hotspot2	-1,	0,	unID,	A,	3		: unID = unID + 1
+
+
+!-----------------------------------------------------------------------------------------------
+!	Box
+!-----------------------------------------------------------------------------------------------
+line_type	gs_line_type
+pen			boxPen
+fill		gs_fill_type
+
+if	bShowBox	then
+	!	매입형
+	if	iBoxType = Box_Flush	then
+		put	_slpLthL*_ratioBox - m_box_leaf_left,		0,				1,
+			A - _slpLthR*_ratioBox + m_box_leaf_right,	0,				1,
+			A - _slpLthR*_ratioBox + m_box_leaf_right,	m_box_Depth,	1,
+			_slpLthL*_ratioBox - m_box_leaf_left,		m_box_Depth,	1,
+			_slpLthL*_ratioBox - m_box_leaf_left,		0,				1
+	endif
+
+	!	노출형
+	if	iBoxType = Box_Surface	then
+		put	_slpLthL*_ratioBox,		0,				15,
+			A - _slpLthR*_ratioBox,	0,				15,
+			A - _slpLthR*_ratioBox,	m_box_Depth,	15,
+			_slpLthL*_ratioBox,		m_box_Depth,	15,
+			_slpLthL*_ratioBox,		0,				15
+	endif
+
+	poly2_b	nsp/3,	1+2,	gs_fill_pen,	gs_back_pen,	use(nsp)
+
+	!	Hotline
+	for	i = 1	to	(nsp/3) - 2
+		hotline2	get(2) + (use(1) - get(1)),	use(2)	: unID = unID + 1
+	next	i
+		hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))	: unID = unID + 1
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	Guide Rail
+!-----------------------------------------------------------------------------------------------
+fill		gs_fill_type
+
+_dumpValue = 0.03
+for	i = 1	to	2
+	add2	-_dumpValue,	0
+		hotspot2	0,	0,					unID,	m_screen_move_y,	1 + 128	: unID = unID + 1
+		hotspot2	0,	m_screen_move_y,	unID,	m_screen_move_y,	2		: unID = unID + 1
+		hotspot2	0,	-1,					unID,	m_screen_move_y,	3		: unID = unID + 1
+	del 1
+
+	add2	A + _dumpValue*2, 0
+next	i
+del 2
+
+!	Guide Rail
+pen	guidePen
+
+_bFill = not(bShowBox)
+add2	0,	m_screen_move_y
+
+	!	외곽선
+	put	_slpLthL*_ratioGuide + m_Lguide_moveX,		0,				1,
+		_slpLthL*_ratioGuide + m_Lguide_moveX,		m_guide_width,	1,
+		A - m_Rguide_moveX - _slpLthR*_ratioGuide,	m_guide_width,	1,
+		A - m_Rguide_moveX - _slpLthR*_ratioGuide,	0,				1,
+		_slpLthL*_ratioGuide + m_Lguide_moveX,		0,				1
+
+	poly2_B	nsp/3,	2*_bFill+4,	gs_fill_pen,	gs_back_pen,	use(nsp)
+
+	!	Hotline
+	for	i = 1	to	(nsp/3) - 2
+		hotline2	get(2) + (use(1) - get(1)),	use(2)	: unID = unID + 1
+	next	i
+		hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))	: unID = unID + 1
+
+	hotspot2	0,	0
+	hotspot2	A,	0
+	hotspot2	0,	m_guide_width
+	hotspot2	A,	m_guide_width
+
+	!	Left
+	if	bGuideRailL	then
+		_bCorner = bCornerL
+		_iDirect_Corner = iDirect_CornerL
+		add2	m_Lguide_moveX,	0
+			add2	_slpLthL*_ratioGuide,	0
+				gosub	"shapeGuideRail"
+			del 1
+		del 1
+
+		if	abs(_slpLthL) > eps	then
+			if	_slpLthL > eps	then
+				put	0,						0,				1,
+					_slpLthL*_ratioGuide,	0,				0,
+					_slpLthL*_ratioGuide,	m_guide_width,	1,
+					0,						m_guide_width,	1
+
+				poly2_	nsp/3,	1+4,	get(nsp)
+			else
+				put	m_guide_depth + _slpLthL*_ratioGuide,	0,				1,
+					m_guide_depth,							0,				1,
+					m_guide_depth,							m_guide_thk,	1,
+					m_guide_depth + _slpLthL*_ratioGuide,	m_guide_thk,	1
+
+				poly2_	nsp/3,	1,	use(nsp)
+
+				add2	0,	m_guide_width
+					mul2	1,	-1
+						poly2_	nsp/3,	1,	get(nsp)
+					del 1
+				del 1
+
+				line2	m_guide_depth - m_rail_depth,	m_guide_thk,	m_guide_depth - m_rail_depth,	m_guide_thk + m_rail_hall
+			endif
+		endif
+	endif
+
+	!	Right
+	if	bGuideRailR	then
+		_bCorner = bCornerR
+		_iDirect_Corner = iDirect_CornerR
+		add2	A - m_Rguide_moveX,	0
+			mul2	-1,	1
+				add2	_slpLthR*_ratioGuide,	0
+					gosub	"shapeGuideRail"
+				del 1
+
+				if	abs(_slpLthR) > eps	then
+					if	_slpLthR > eps	then
+						put	0,						0,				1,
+							_slpLthR*_ratioGuide,	0,				0,
+							_slpLthR*_ratioGuide,	m_guide_width,	1,
+							0,						m_guide_width,	1
+
+						poly2_	nsp/3,	1+4,	get(nsp)
+					else
+						put	m_guide_depth + _slpLthR*_ratioGuide,	0,				1,
+							m_guide_depth,							0,				1,
+							m_guide_depth,							m_guide_thk,	1,
+							m_guide_depth + _slpLthR*_ratioGuide,	m_guide_thk,	1
+
+						poly2_	nsp/3,	1,	use(nsp)
+
+						add2	0,	m_guide_width
+							mul2	1,	-1
+								poly2_	nsp/3,	1,	get(nsp)
+							del 1
+						del 1
+
+						line2	m_guide_depth - m_rail_depth,	m_guide_thk,	m_guide_depth - m_rail_depth,	m_guide_thk + m_rail_hall
+					endif
+				endif
+			del 1
+		del 1
+	endif
+del 1
+
+!	Shutter Line
+pen			gs_cont_pen
+line_type	gs_line_type
+add2	0,	m_screen_move_y
+	_lineLth_Sht = A - (m_Lguide_moveX + m_Rguide_moveX) - (_slpLthL*_ratioGuide + _slpLthR*_ratioGuide)
+	_lineLth_Sht = _lineLth_Sht - (m_guide_depth - m_rail_depth)*2
+
+	add2	m_Lguide_moveX + (m_guide_depth - m_rail_depth) + _slpLthL*_ratioGuide,	0
+		add2	0,	m_guide_width/2 - m_rail_hall/2
+			line2	0,	0,	_lineLth_Sht,	0
+		del 1
+		add2	0,	m_guide_width/2 + m_rail_hall/2
+			line2	0,	0,	_lineLth_Sht,	0
+		del 1
+	del 1
+del 1
+
+
+!	Door
+if	bDoor	then
+	!	Hotspot
+	add2	0,	m_screen_move_y + m_guide_width/2
+		hotspot2	0,			0,	unID,	xDoorPos,	1+128	: unID = unID + 1
+		hotspot2	xDoorPos,	0,	unID,	xDoorPos,	2		: unID = unID + 1
+		hotspot2	-1,			0,	unID,	xDoorPos,	3		: unID = unID + 1
+
+		add2	xDoorPos,	0
+			hotspot2	0,			0,	unID,	doorWdt,	1+128	: unID = unID + 1
+			hotspot2	doorWdt,	0,	unID,	doorWdt,	2		: unID = unID + 1
+			hotspot2	-1,			0,	unID,	doorWdt,	3		: unID = unID + 1
+		del	1
+	del	1
+
+	!	Symbol
+	if	bSymbol2D	then
+		add2	xDoorPos,	m_screen_move_y + m_guide_width/2
+			!	Hinge Position : Left
+			if	iHingePos = HINGE_LEFT	then
+				if	iDirect2D = DIRECT_IN | iDirect2D = DIRECT_ALL	then
+					line2	0,	0,	0,	doorWdt
+					arc2	0,	 0,	doorWdt,	0,	90
+				endif
+				if	iDirect2D = DIRECT_OUT | iDirect2D = DIRECT_ALL	then
+					line2	0,	0,	0,	-doorWdt
+					arc2	0,	 0,	doorWdt,	-90,	0
+				endif
+			endif
+
+			!	Hinge Position : Right
+			if	iHingePos = HINGE_RIGHT	then
+				add2	doorWdt,	0
+					if	iDirect2D = DIRECT_IN | iDirect2D = DIRECT_ALL	then
+						line2	0,	0,	0,	doorWdt
+						arc2	0,	 0,	doorWdt,	90,	180
+					endif
+					if	iDirect2D = DIRECT_OUT | iDirect2D = DIRECT_ALL	then
+						line2	0,	0,	0,	-doorWdt
+						arc2	0,	 0,	doorWdt,	-180,	-90
+					endif
+				del 1
+			endif
+		del 1
+	endif
+endif
+
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"shapeGuideRail":
+!-----------------------------------------------------------------------------------------------
+	!	Hotspot
+	hotspot2	0,	0,				unID,	m_guide_width,	1+128	:	unID = unID + 1
+	hotspot2	0,	-1,				unID,	m_guide_width,	3		:	unID = unID + 1
+	hotspot2	0,	m_guide_width,	unID,	m_guide_width,	2		:	unID = unID + 1
+
+	hotspot2	0,				0,	unID,	m_guide_depth,	1+128	:	unID = unID + 1
+	hotspot2	-1,				0,	unID,	m_guide_depth,	3		:	unID = unID + 1
+	hotspot2	m_guide_depth,	0,	unID,	m_guide_depth,	2		:	unID = unID + 1
+
+	add2	m_guide_depth - m_rail_depth,	m_guide_width/2
+		hotspot2	0,	0,					unID,	m_rail_hall_half,	1+128,	m_rail_hall	:	unID = unID + 1
+		hotspot2	0,	-1,					unID,	m_rail_hall_half,	3					:	unID = unID + 1
+		hotspot2	0,	m_rail_hall_half,	unID,	m_rail_hall_half,	2,	m_rail_hall		:	unID = unID + 1
+
+		hotspot2	0,	0,					unID,	m_rail_hall_half,	1+128,	m_rail_hall	:	unID = unID + 1
+		hotspot2	0,	1,					unID,	m_rail_hall_half,	3					:	unID = unID + 1
+		hotspot2	0,	-m_rail_hall_half,	unID,	m_rail_hall_half,	2,	m_rail_hall		:	unID = unID + 1
+	del 1
+
+	_bLineOff_1 = 1
+	_bLineOff_2 = 1
+	_bLineOff_3 = 1
+	if	_bCorner	then
+		_bLineOff_1 = 0
+	endif
+	if	_bCorner & _iDirect_Corner = CORNER_NORMAL	then
+		_bLineOff_2 = 0
+	endif
+	if	_bCorner & _iDirect_Corner = CORNER_MIRROR	then
+		_bLineOff_3 = 0
+	endif
+
+
+	!	Shape
+	put	0,								0,								_bLineOff_2,
+		m_guide_depth,					0,								1,
+		m_guide_depth,					m_guide_thk,					1,
+		m_guide_depth - m_rail_depth,	m_guide_thk,					1,
+		m_guide_depth - m_rail_depth,	m_guide_width - m_guide_thk,	1,
+		m_guide_depth,					m_guide_width - m_guide_thk,	1,
+		m_guide_depth,					m_guide_width,					_bLineOff_3,
+		0,								m_guide_width,					_bLineOff_1,
+		0,								0,								1
+
+	poly2_	nsp/3,	1+4,	use(nsp)
+
+	!	Hotline
+	for	i = 1	to	(nsp/3) - 2
+		hotline2	get(2) + (use(1) - get(1)),	use(2)	: unID = unID + 1
+	next	i
+		hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))	: unID = unID + 1
+
+return 

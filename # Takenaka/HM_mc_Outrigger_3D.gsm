@@ -1,0 +1,936 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/11/30 WED
+!	VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot	0, 0, 0
+	model	wire
+	circle	0.1
+	circle	0.2
+	model	solid
+endif
+
+if	bTest	then
+	add	-HM_OutrLen/2,	HM_OutrWidth/2,	0
+		hotspot	0,	0,	0
+		circle	0.1
+	del 1
+
+	add	-HM_OutrLen/2,	-HM_OutrWidth/2,	0
+		hotspot	0,	0,	0
+		circle	0.1
+	del 1
+
+	add	HM_OutrLen/2,	HM_OutrWidth/2,	0
+		hotspot	0,	0,	0
+		circle	0.1
+	del 1
+
+	add	HM_OutrLen/2,	-HM_OutrWidth/2,	0
+		hotspot	0,	0,	0
+		circle	0.1
+	del 1
+endif
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+unID = 1000
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+resol HM_3D_resol
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+pen			HM_3D_pen
+material	HM_matBody2
+
+	!	Wheel/Wheel Column
+	!----------------------------------------------------------------------------------------------------
+	_offsetBtm = 0.025
+
+	_wheelCenterY = 0.178
+	_wheelCenterX = 0.250
+	_wheelRad = 0.1975
+	_holeRad = 0.0375
+	_wheelCapLth = 0.940
+	_wheelCapHgt = 0.370
+	_wheelCapWdt = 0.244
+	_wheelCapThk = 0.022
+	_wheelThk = 0.100	!	Temp Value
+	_exWheelCapLth = 0.130
+	_exWheelCapHgt = 0.320
+
+	_colBRad1 = 0.100
+	_colBRad2 = 0.055
+	_colBHgt = 0.180
+	_colTRad = 0.045
+	_colTHgt = 0.172
+
+	addz	_offsetBtm
+		!	Back/Right
+		add	-HM_OutrLen/2,	-HM_OutrWidth/2,	0
+			_wheelType = 1
+			gosub	"wheel_"
+		del 1
+
+		!	Back/Left
+		add	-HM_OutrLen/2,	HM_OutrWidth/2,	0
+			_wheelType = 2
+			mulx	-1
+				gosub	"wheel_"
+			del 1
+		del 1
+
+		!	Front/Right
+		add	HM_OutrLen/2,	-HM_OutrWidth/2,	0
+			_wheelType = 2
+			gosub	"wheel_"
+		del 1
+
+		!	Front/Left
+		add	HM_OutrLen/2,	HM_OutrWidth/2,	0
+			_wheelType = 1
+			gosub	"wheel_"
+		del 1
+	del 1
+
+	!	Beam
+	!----------------------------------------------------------------------------------------------------
+
+		!	beamH
+		_offsetBeamH = _offsetBtm + _wheelCapHgt + _colBHgt + _colTHgt
+		_exBeamHLth = 0.220
+		_beamHWdt = 0.300
+		_beamHThk = 0.025
+
+		put	-_beamHWdt/2,	-(HM_OutrWidth/2 + _exBeamHLth),	15,
+			-_beamHWdt/2,	(HM_OutrWidth/2 + _exBeamHLth),		15,
+			_beamHWdt/2,	(HM_OutrWidth/2 + _exBeamHLth),		15,
+			_beamHWdt/2,	-(HM_OutrWidth/2 + _exBeamHLth),	15
+
+		addz	_offsetBeamH
+			addx	-HM_OutrLen/2
+				prism_	nsp/3,	_beamHThk,	use(nsp)
+			del 1
+
+			addx	HM_OutrLen/2
+				prism_	nsp/3,	_beamHThk,	get(nsp)
+			del 1
+		del 1
+
+		!	TBeamH
+		_offsetTBeamH = _offsetBeamH + _beamHThk
+		_TBeamHHgt = 0.400
+		_TBeamHWdt = 0.300
+		_TBeamHWebThk = 0.014
+		_TBeamHFlangeThk = 0.026
+
+		put	-_TBeamHWebThk/2,	0,								15,
+			-_TBeamHWebThk/2,	_TBeamHHgt - _TBeamHFlangeThk,	15,
+			-_TBeamHWdt/2,		_TBeamHHgt - _TBeamHFlangeThk,	15,
+			-_TBeamHWdt/2,		_TBeamHHgt,						15,
+			_TBeamHWdt/2,		_TBeamHHgt,						15,
+			_TBeamHWdt/2,		_TBeamHHgt - _TBeamHFlangeThk,	15,
+			_TBeamHWebThk/2,	_TBeamHHgt - _TBeamHFlangeThk,	15,
+			_TBeamHWebThk/2,	0,								15
+
+		addz	_offsetTBeamH
+			addx	-HM_OutrLen/2
+				rotx	90
+					addz	-(HM_OutrWidth/2 + _exBeamHLth)
+						prism_	nsp/3,	HM_OutrWidth + _exBeamHLth*2,	use(nsp)
+					del 1
+				del 1
+			del 1
+
+			addx	HM_OutrLen/2
+				rotx	90
+					addz	-(HM_OutrWidth/2 + _exBeamHLth)
+						prism_	nsp/3,	HM_OutrWidth + _exBeamHLth*2,	get(nsp)
+					del 1
+				del 1
+			del 1
+		del 1
+
+		!	BeamV
+		_offsetBeamV = _offsetTBeamH
+		_beamVLct = 1.800
+		_beamVWdt = 0.300
+		_beamVThk = 0.028
+
+		put	-(HM_OutrLen/2 - _beamHWdt/2),	-_beamVWdt/2,	15,
+			-(HM_OutrLen/2 - _beamHWdt/2),	_beamVWdt/2,	15,
+			(HM_OutrLen/2 - _beamHWdt/2),	_beamVWdt/2,	15,
+			(HM_OutrLen/2 - _beamHWdt/2),	-_beamVWdt/2,	15
+
+		addz	_offsetBeamV
+			addy	_beamVLct
+				prism_	nsp/3,	_beamVThk,	use(nsp)
+			del 1
+
+			addy	-_beamVLct
+				prism_	nsp/3,	_beamVThk,	get(nsp)
+			del 1
+		del 1
+
+		!	TBeamV
+		_offsetTBeamV = _offsetBeamV + _beamVThk
+		_TBeamVHgt = 0.3815
+		_TBeamVWdt = 0.300
+		_TBeamVWebThk = 0.014
+		_TBeamVFlangeThk = 0.019
+
+		put	0,								_TBeamVWebThk/2,	15,
+			_TBeamVHgt - _TBeamVFlangeThk,	_TBeamVWebThk/2,	15,
+			_TBeamVHgt - _TBeamVFlangeThk,	_TBeamVWdt/2,		15,
+			_TBeamVHgt,						_TBeamVWdt/2,		15,
+			_TBeamVHgt,						-_TBeamVWdt/2,		15,
+			_TBeamVHgt - _TBeamVFlangeThk,	-_TBeamVWdt/2,		15,
+			_TBeamVHgt - _TBeamVFlangeThk,	-_TBeamVWebThk/2,	15,
+			0,								_TBeamVWebThk/2,	15
+
+		addz	_offsetTBeamV
+			addy	_beamVLct
+				roty	-90
+					addz	-(HM_OutrLen/2 - _beamHWdt/2)
+						prism_	nsp/3,	HM_OutrLen - _beamHWdt,	use(nsp)
+					del 1
+				del 1
+			del 1
+
+			addy	-_beamVLct
+				roty	-90
+					addz	-(HM_OutrLen/2 - _beamHWdt/2)
+						prism_	nsp/3,	HM_OutrLen - _beamHWdt,	get(nsp)
+					del 1
+				del 1
+			del 1
+		del 1
+
+
+	!	Oblique Beam
+	!----------------------------------------------------------------------------------------------------
+	_offsetOlqBeam = _offsetTBeamH
+
+	_aBeam = 34.10
+	_aSubBeam = 90 - _aBeam
+	_olqBeamHgt = 0.400
+	_olqBeamWdt = 0.200
+	_olqBeamLth = (HM_OutrWidth/2 - _beamVLct)/sin(_aBeam)
+	_olqBeamWebThk = 0.006	!	Temp Value
+	_olqBeamFlangeThk = 0.013
+
+	addz	_offsetOlqBeam + _olqBeamHgt
+		!	Back/Right
+		add	-HM_OutrLen/2,	-HM_OutrWidth/2,	0
+			gosub	"ObliqueBeamCoor_"
+
+			!	Cut
+			addx	_beamHWdt/2
+				roty	90
+					cutplane	1,	1,	0,	1
+				del 1
+			del 1
+
+			addy	HM_OutrWidth/2 - _beamVLct - _beamVWdt/2
+				rotx	90
+					cutplane	1,	1,	0,	1
+				del 1
+			del 1
+
+				rotz	-_aSubBeam
+					rotx	-90
+						prism_	nsp/3,	_olqBeamLth,	get(nsp)
+					del 1
+				del 1
+
+			cutend
+			cutend
+		del 1
+
+		!	Front/Right
+		add	HM_OutrLen/2,	-HM_OutrWidth/2,	0
+			gosub	"ObliqueBeamCoor_"
+
+			!	Cut
+			addx	-_beamHWdt/2
+				roty	90
+					cutplane	1,	1,	0,	0
+				del 1
+			del 1
+
+			addy	HM_OutrWidth/2 - _beamVLct - _beamVWdt/2
+				rotx	90
+					cutplane	1,	1,	0,	1
+				del 1
+			del 1
+
+				rotz	_aSubBeam
+					rotx	-90
+						prism_	nsp/3,	_olqBeamLth,	get(nsp)
+					del 1
+				del 1
+
+			cutend
+			cutend
+		del 1
+
+		!	Back/Left
+		add	-HM_OutrLen/2,	HM_OutrWidth/2,	0
+			gosub	"ObliqueBeamCoor_"
+
+			!	Cut
+			addx	_beamHWdt/2
+				roty	90
+					cutplane	1,	1,	0,	1
+				del 1
+			del 1
+
+			addy	-(HM_OutrWidth/2 - _beamVLct - _beamVWdt/2)
+				rotx	90
+					cutplane	1,	1,	0,	0
+				del 1
+			del 1
+
+				rotz	180 + _aSubBeam
+					rotx	-90
+						prism_	nsp/3,	_olqBeamLth,	get(nsp)
+					del 1
+				del 1
+
+			cutend
+			cutend
+		del 1
+
+		!	Front/Left
+		add	HM_OutrLen/2,	HM_OutrWidth/2,	0
+			gosub	"ObliqueBeamCoor_"
+
+			!	Cut
+			addx	-_beamHWdt/2
+				roty	90
+					cutplane	1,	1,	0,	0
+				del 1
+			del 1
+
+			addy	-(HM_OutrWidth/2 - _beamVLct - _beamVWdt/2)
+				rotx	90
+					cutplane	1,	1,	0,	0
+				del 1
+			del 1
+
+				rotz	180 - _aSubBeam
+					rotx	-90
+						prism_	nsp/3,	_olqBeamLth,	get(nsp)
+					del 1
+				del 1
+
+			cutend
+			cutend
+		del 1
+	del 1
+
+
+	!	Bottom Board H
+	!----------------------------------------------------------------------------------------------------
+	_offsetBtmHBoard = 0.872
+
+	_btmBoardHDist = 0.009
+	_btmBoardHWdt = 0.500
+	_btmBoardHThk = 0.050
+	_exBtmBoardHLth = 0.160
+
+	put	-_btmBoardHWdt/2,	-(HM_OutrWidth/2 + _exBtmBoardHLth),	15,
+		-_btmBoardHWdt/2,	(HM_OutrWidth/2 + _exBtmBoardHLth),	15,
+		_btmBoardHWdt/2,	(HM_OutrWidth/2 + _exBtmBoardHLth),	15,
+		_btmBoardHWdt/2,	-(HM_OutrWidth/2 + _exBtmBoardHLth),	15
+
+	addz	_offsetBtmHBoard
+		addx	-(HM_OutrLen/2 + _beamHWdt/2 + _btmBoardHDist + _btmBoardHWdt/2)
+			prism_	nsp/3,	_btmBoardHThk,	use(nsp)
+		del 1
+
+		addx	(HM_OutrLen/2 + _beamHWdt/2 + _btmBoardHDist + _btmBoardHWdt/2)
+			prism_	nsp/3,	_btmBoardHThk,	get(nsp)
+		del 1
+	del 1
+
+		!	HandRail
+		_offsetBtmHRail = _offsetBtmHBoard + 0.010
+
+		_btmHRailHgt = 1.040
+		_btmHRailDpt = 0.050
+		_btmHRailThk = 0.034
+
+		add	-(HM_OutrLen/2 + _beamHWdt/2 + _btmBoardHDist + _btmBoardHWdt),	(HM_OutrWidth/2 + _exBtmBoardHLth),	_offsetBtmHRail
+			rotz	-90
+				call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+															HM_GRailRef = 3,
+															HM_GRailL = HM_OutrWidth + _exBtmBoardHLth*2,
+															HM_GRailH = _btmHRailHgt,
+															HM_GRailD = _btmHRailDpt,
+															HM_GRailT = _btmHRailThk,
+															HM_GRail_cutLeft = 0,
+															HM_GRail_cutRight = 0
+			del 1
+		del 1
+
+		add	(HM_OutrLen/2 + _beamHWdt/2 + _btmBoardHDist + _btmBoardHWdt),	(HM_OutrWidth/2 + _exBtmBoardHLth),	_offsetBtmHRail
+			rotz	-90
+				call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+															HM_GRailRef = 2,
+															HM_GRailL = HM_OutrWidth + _exBtmBoardHLth*2,
+															HM_GRailH = _btmHRailHgt,
+															HM_GRailD = _btmHRailDpt,
+															HM_GRailT = _btmHRailThk,
+															HM_GRail_cutLeft = 0,
+															HM_GRail_cutRight = 0
+			del 1
+		del 1
+
+		!	Ladder
+		_offsetBtmHLdr = _offsetBtmHBoard - 0.700
+
+		_btmHLdrLct = 0.150
+		_btmHLdrWdt = 0.400
+		_btmHLdrHgt = 0.750
+		_btmHLdrRad = 0.0136
+		_btmHLdrDist = 0.350
+
+		_btmHLdrAng = 5.71
+		_btmHLdrObqHgt = 1.005
+
+		add	-(HM_OutrLen/2 + _beamHWdt/2 + _btmBoardHDist + _btmBoardHWdt/2),	-(HM_OutrWidth/2 + _exBtmBoardHLth + _btmHLdrLct),	_offsetBtmHLdr
+			gosub	"btmHLadder_"
+		del 1
+
+		add	(HM_OutrLen/2 + _beamHWdt/2 + _btmBoardHDist + _btmBoardHWdt/2),	(HM_OutrWidth/2 + _exBtmBoardHLth + _btmHLdrLct),	_offsetBtmHLdr
+			gosub	"btmHLadder_"
+		del 1
+
+	!	Bottom Board V
+	!----------------------------------------------------------------------------------------------------
+	_offsetBtmVBoard = 0.622
+
+	_xPosBtmBoardV = 0.150
+	_btmBoardVDist = 0.070
+	_btmBoardVLth = 4.500
+	_btmBoardVWdt = 0.600
+	_btmBoardVThk = 0.100
+
+	put	-_btmBoardVLth/2,	-_btmBoardVWdt/2,	15,
+		-_btmBoardVLth/2,	_btmBoardVWdt/2,	15,
+		_btmBoardVLth/2,	_btmBoardVWdt/2,	15,
+		_btmBoardVLth/2,	-_btmBoardVWdt/2,	15
+
+	addz	_offsetBtmVBoard
+		addx	_xPosBtmBoardV
+			addy	-(_beamVLct + _beamVWdt/2 + _btmBoardVDist + _btmBoardVWdt/2)
+				prism_	nsp/3,	_btmBoardVThk,	use(nsp)
+			del 1
+		del 1
+
+		addx	-_xPosBtmBoardV
+			addy	(_beamVLct + _beamVWdt/2 + _btmBoardVDist + _btmBoardVWdt/2)
+				prism_	nsp/3,	_btmBoardVThk,	get(nsp)
+			del 1
+		del 1
+	del 1
+
+		!	HandRail
+		_offsetBtmVRail = _offsetBtmVBoard - 0.040
+
+		_btmVRailHgt = 1.040
+		_btmVRailDpt = 0.050
+		_btmVRailThk = 0.034
+
+		addz	_offsetBtmVRail
+			gosub	"btmVRail_"
+
+			rotz	180
+				gosub	"btmVRail_"
+			del 1
+		del 1
+
+
+	!	Board
+	!----------------------------------------------------------------------------------------------------
+	_offsetBoard = _offsetTBeamV + _TBeamVHgt
+
+	_boardWdt = HM_OutrLen - _beamHWdt
+	_modWdt = 0.940
+	_nBoard = int(_boardWdt/_modWdt)
+	_boardDist = (_boardWdt - _modWdt*_nBoard)/(_nBoard - 1)
+	_boardWdt = _beamVLct*2 - _beamVWdt
+	_boardThk = 0.025	!	Temp Value
+
+	addz	_offsetBoard - _boardThk
+		addx	-(HM_OutrLen/2 - _beamHWdt/2)
+
+			for	i = 1	to	_nBoard
+				put	0,			-_boardWdt/2,	15,
+					0,			_boardWdt/2,	15,
+					_modWdt,	_boardWdt/2,	15,
+					_modWdt,	-_boardWdt/2,	15
+
+				prism_	nsp/3,	_boardThk,	get(nsp)
+
+				addx	_modWdt + _boardDist
+			next	i
+
+			del _nBoard
+
+		del 1
+	del 1
+
+	!	Column
+	!----------------------------------------------------------------------------------------------------
+	_offsetColumn = _offsetBoard
+
+	dim	_colRad[], _colHgt[]
+
+	_colRad[1] = 1.000
+	_colHgt[1] = 0.9655
+	_colRad[2] = 0.750
+	_colHgt[2] = 0.500
+	_colRad[3] = 1.0535
+	_colHgt[3] = 0.588
+	_colRad[4] = 1.045
+	_colHgt[4] = 0.042
+	_colRad[5] = 1.065
+	_colHgt[5] = 0.090
+	_colRad[6] = 0.960
+	_colHgt[6] = 0.042
+
+	addz	_offsetColumn
+		for	i = 1	to	6
+			cylind	_colHgt[i],	_colRad[i]
+
+			addz	_colHgt[i]
+		next	i
+
+		del 6
+	del 1
+
+	!	Top Board
+	!----------------------------------------------------------------------------------------------------
+	_offsetTopBoard = 2.305
+
+	_topBoardWdt = 3.400
+	_topBoardThk = 0.100
+
+	put	-_topBoardWdt/2,	-_topBoardWdt/2,	15,
+		-_topBoardWdt/2,	_topBoardWdt/2,		15,
+		_topBoardWdt/2,		_topBoardWdt/2,		15,
+		_topBoardWdt/2,		-_topBoardWdt/2,	15,
+		-_topBoardWdt/2,	-_topBoardWdt/2,	-1,
+		0,					0,					900,
+		_colRad[2],			360,				4000+15
+
+
+	addz	_offsetTopBoard
+		prism_	nsp/3,	_topBoardThk,	get(nsp)
+	del 1
+
+		!	HandRail/Ladder
+		_offsetTopRail = _offsetTopBoard - 0.040
+
+		_topRailHgt = 1.040
+		_topRailDpt = 0.050
+		_topRailThk = 0.034
+
+		_offsetTopLdr = _offsetTopBoard - 0.950
+
+		_xPosTopLdr = 0.165
+		_topLdrDist = 0.500
+		_topLdrWdt = 0.400
+		_topLdrHgt1 = 1.875
+		_topLdrHgt2 = 0.925
+		_topLdrRad = 0.0136
+		_topLdrElb = 0.075
+		_nTopLdr = 4
+
+			!	HandRail
+			addz	_offsetTopRail
+				!	Left
+				add	-_topBoardWdt/2,	_topBoardWdt/2,	0
+					rotz	-90
+						call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+																	HM_GRailRef = 3,
+																	HM_GRailL = (_topBoardWdt - _topLdrDist)/2,
+																	HM_GRailH = _topRailHgt,
+																	HM_GRailD = _topRailDpt,
+																	HM_GRailT = _topRailThk,
+																	HM_GRailDist = 0.800,
+																	HM_GRail_cutLeft = 1,
+																	HM_GRail_cutRight = 0
+					del 1
+
+					addy	-(_topBoardWdt + _topLdrDist)/2
+						rotz	-90
+							call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+																		HM_GRailRef = 3,
+																		HM_GRailL = (_topBoardWdt - _topLdrDist)/2,
+																		HM_GRailH = _topRailHgt,
+																		HM_GRailD = _topRailDpt,
+																		HM_GRailT = _topRailThk,
+																		HM_GRailDist = 0.800,
+																		HM_GRail_cutLeft = 0,
+																		HM_GRail_cutRight = 1
+						del 1
+					del 1
+				del 1
+
+				!	Bottom
+				add	-_topBoardWdt/2,	-_topBoardWdt/2,	0
+					call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+																HM_GRailRef = 3,
+																HM_GRailL = _topBoardWdt,
+																HM_GRailH = _topRailHgt,
+																HM_GRailD = _topRailDpt,
+																HM_GRailT = _topRailThk,
+																HM_GRailDist = 0.700,
+																HM_GRail_cutLeft = 1,
+																HM_GRail_cutRight = 1
+				del 1
+
+				!	Right
+				add	_topBoardWdt/2,	-_topBoardWdt/2,	0
+					rotz	180
+						rotz	-90
+							call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+																		HM_GRailRef = 3,
+																		HM_GRailL = (_topBoardWdt - _topLdrDist)/2,
+																		HM_GRailH = _topRailHgt,
+																		HM_GRailD = _topRailDpt,
+																		HM_GRailT = _topRailThk,
+																		HM_GRailDist = 0.800,
+																		HM_GRail_cutLeft = 1,
+																		HM_GRail_cutRight = 0
+						del 1
+
+						addy	-(_topBoardWdt + _topLdrDist)/2
+							rotz	-90
+								call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+																			HM_GRailRef = 3,
+																			HM_GRailL = (_topBoardWdt - _topLdrDist)/2,
+																			HM_GRailH = _topRailHgt,
+																			HM_GRailD = _topRailDpt,
+																			HM_GRailT = _topRailThk,
+																			HM_GRailDist = 0.800,
+																			HM_GRail_cutLeft = 0,
+																			HM_GRail_cutRight = 1
+							del 1
+						del 1
+					del 1
+				del 1
+
+				!	Top
+				add	_topBoardWdt/2,	_topBoardWdt/2,	0
+					rotz	180
+					call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+																HM_GRailRef = 3,
+																HM_GRailL = _topBoardWdt,
+																HM_GRailH = _topRailHgt,
+																HM_GRailD = _topRailDpt,
+																HM_GRailT = _topRailThk,
+																HM_GRailDist = 0.700,
+																HM_GRail_cutLeft = 1,
+																HM_GRail_cutRight = 1
+					del 1
+				del 1
+			del 1
+
+			!	Ladder
+			addz	_offsetTopLdr
+
+				!	Left
+				add	-(_topBoardWdt/2 + _xPosTopLdr),	-_topLdrWdt/2,	0
+					gosub	"topLdr_"
+
+					addz	0.050
+						for	i = 1	to	_nTopLdr
+							rotx	-90
+								cylind	_topLdrWdt,	_topLdrRad
+							del 1
+
+							addz	0.350
+						next	i
+
+						del _nTopLdr
+					del 1
+				del 1
+
+				add	-(_topBoardWdt/2 + _xPosTopLdr),	_topLdrWdt/2,	0
+					gosub	"topLdr_"
+				del 1
+
+				!	Right
+				add	_topBoardWdt/2 + _xPosTopLdr,	-_topLdrWdt/2,	0
+					mulx	-1
+						gosub	"topLdr_"
+
+						addz	0.050
+							for	i = 1	to	_nTopLdr
+								rotx	-90
+									cylind	_topLdrWdt,	_topLdrRad
+								del 1
+
+								addz	0.350
+							next	i
+
+							del _nTopLdr
+						del 1
+					del 1
+				del 1
+
+				add	_topBoardWdt/2 + _xPosTopLdr,	_topLdrWdt/2,	0
+					mulx	-1
+						gosub	"topLdr_"
+					del 1
+				del 1
+			del 1
+
+
+
+
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+"wheel_":
+
+	!	Cap Left/Right
+	addy	-_wheelCapWdt/2
+
+		if	_wheelType = 1	then
+			put	-_wheelCapLth/2,	0,				15,
+				-_wheelCapLth/2,	-_wheelCapHgt,	15,
+				_wheelCapLth/2,		-_wheelCapHgt,	15,
+				_wheelCapLth/2,		0,				15,
+				-_wheelCapLth/2,	0,				-1
+		endif
+
+		if	_wheelType = 2	then
+			put	-_wheelCapLth/2,					0,					15,
+				-_wheelCapLth/2,					-_wheelCapHgt,		15,
+				_wheelCapLth/2,						-_wheelCapHgt,		15,
+				_wheelCapLth/2 + _exWheelCapLth,	-_exWheelCapHgt,	15,
+				_wheelCapLth/2 + _exWheelCapLth,	0,					15,
+				-_wheelCapLth/2,					0,					-1
+		endif
+
+		!	Hole
+		put	-_wheelCenterX,	-_wheelCenterY,	900,
+			_holeRad,		360,			4000+15,
+			_wheelCenterX,	-_wheelCenterY,	900,
+			_holeRad,		360,			4000+15
+
+		rotx	-90
+			prism_	nsp/3,	_wheelCapThk,	use(nsp)
+		del 1
+
+		addy	_wheelCapWdt - _wheelCapThk
+			rotx	-90
+				prism_	nsp/3,	_wheelCapThk,	get(nsp)
+			del 1
+		del 1
+	del 1
+
+	!	Cap Roof
+	addz	_wheelCapHgt - _wheelCapThk
+		put	-_wheelCapLth/2,	-(_wheelCapWdt/2 - _wheelCapThk),	15,
+			-_wheelCapLth/2,	(_wheelCapWdt/2 - _wheelCapThk),	15,
+			_wheelCapLth/2,		(_wheelCapWdt/2 - _wheelCapThk),	15,
+			_wheelCapLth/2,		-(_wheelCapWdt/2 - _wheelCapThk),	15
+
+
+		prism_	nsp/3,	_wheelCapThk,	get(nsp)
+	del 1
+
+	!	Wheel
+	addy	-_wheelCapWdt/2
+		add	-_wheelCenterX,	0,	_wheelCenterY
+			rotx	-90
+				cylind	_wheelCapWdt,	_holeRad
+
+				addz	_wheelCapWdt/2 - _wheelThk/2
+					put	0,			0,		900+15,
+						_wheelRad,	360,	4000
+
+					prism_	nsp/3,	_wheelThk,	get(nsp)
+				del 1
+			del 1
+		del 1
+
+		add	_wheelCenterX,	0,	_wheelCenterY
+			rotx	-90
+				cylind	_wheelCapWdt,	_holeRad
+
+				addz	_wheelCapWdt/2 - _wheelThk/2
+					put	0,			0,		900+15,
+						_wheelRad,	360,	4000
+
+					prism_	nsp/3,	_wheelThk,	get(nsp)
+				del 1
+			del 1
+		del 1
+	del 1
+
+	!	Column
+	addz	_wheelCapHgt
+		cone	_colBHgt,	_colBRad1,	_colBRad2,	90,	90
+
+		addz	_colBHgt
+			cylind	_colTHgt,	_colTRad
+		del 1
+	del 1
+
+return
+
+
+"ObliqueBeamCoor_":
+
+	put	-_olqBeamWdt/2,		0,									15,
+		-_olqBeamWdt/2,		_olqBeamFlangeThk,					15,
+		-_olqBeamWebThk/2,	_olqBeamFlangeThk,					15,
+		-_olqBeamWebThk/2,	_olqBeamHgt - _olqBeamFlangeThk,	15,
+		-_olqBeamWdt/2,		_olqBeamHgt - _olqBeamFlangeThk,	15,
+		-_olqBeamWdt/2,		_olqBeamHgt,						15,
+		_olqBeamWdt/2,		_olqBeamHgt,						15,
+		_olqBeamWdt/2,		_olqBeamHgt - _olqBeamFlangeThk,	15,
+		_olqBeamWebThk/2,	_olqBeamHgt - _olqBeamFlangeThk,	15,
+		_olqBeamWebThk/2,	_olqBeamFlangeThk,					15,
+		_olqBeamWdt/2,		_olqBeamFlangeThk,					15,
+		_olqBeamWdt/2,		0,									15
+
+return
+
+
+"btmHLadder_":
+
+	!	Vertical Bar
+	addx	-_btmHLdrWdt/2
+		cylind	_btmHLdrHgt,	_btmHLdrRad
+	del 1
+
+	addx	_btmHLdrWdt/2
+		cylind	_btmHLdrHgt,	_btmHLdrRad
+	del 1
+
+	!	Horizontal Bar
+	addx	-_btmHLdrWdt/2
+		addz	0.050
+			roty	90
+				cylind	_btmHLdrWdt,	_btmHLdrRad
+			del 1
+
+			addz	_btmHLdrDist
+				roty	90
+					cylind	_btmHLdrWdt,	_btmHLdrRad
+				del 1
+
+				addz	_btmHLdrDist
+					roty	90
+						cylind	_btmHLdrWdt,	_btmHLdrRad
+					del 1
+				del 1
+			del 1
+		del 1
+	del 1
+
+	!	Oblique Bar
+	addz	_btmHLdrHgt
+		addx	-_btmHLdrWdt/2
+			roty	-_btmHLdrAng
+				cylind	_btmHLdrObqHgt,	_btmHLdrRad
+			del 1
+		del 1
+
+		addx	_btmHLdrWdt/2
+			roty	_btmHLdrAng
+				cylind	_btmHLdrObqHgt,	_btmHLdrRad
+			del 1
+		del 1
+	del 1
+
+return
+
+"btmVRail_":
+
+	addx	_xPosBtmBoardV - _btmBoardVLth/2
+		addy	-(_beamVLct + _beamVWdt/2 + _btmBoardVDist)
+			rotz	-90
+				call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+															HM_GRailRef = 3,
+															HM_GRailL = _btmBoardVWdt,
+															HM_GRailH = _btmVRailHgt,
+															HM_GRailD = _btmVRailDpt,
+															HM_GRailT = _btmVRailThk,
+															HM_GRail_cutLeft = 0,
+															HM_GRail_cutRight = 1,
+															HM_GRailhori_show = 0
+			del 1
+		del 1
+
+		addy	-(_beamVLct + _beamVWdt/2 + _btmBoardVDist + _btmBoardVWdt)
+			call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+														HM_GRailRef = 3,
+														HM_GRailL = _btmBoardVLth,
+														HM_GRailH = _btmVRailHgt,
+														HM_GRailD = _btmVRailDpt,
+														HM_GRailT = _btmVRailThk,
+														HM_GRailDist = 1.200,
+														HM_GRail_cutLeft = 1,
+														HM_GRail_cutRight = 1,
+														HM_GRailhori_show = 0
+
+			addx	_btmBoardVLth
+				rotz	90
+					call	"HM_mc_GuardRail.gsm"	parameters	HM_GRailType = 2,
+																HM_GRailRef = 3,
+																HM_GRailL = _btmBoardVWdt,
+																HM_GRailH = _btmVRailHgt,
+																HM_GRailD = _btmVRailDpt,
+																HM_GRailT = _btmVRailThk,
+																HM_GRail_cutLeft = 1,
+																HM_GRail_cutRight = 0,
+																HM_GRailhori_show = 0
+				del 1
+			del 1
+		del 1
+	del 1
+
+return
+
+"topLdr_":
+
+	!	Vertical Bar
+	cylind	_topLdrHgt1,	_topLdrRad
+
+	addz	_topLdrHgt1
+		elbow	_topLdrElb,	180,	_topLdrRad
+
+		add	_topLdrElb*2,	0,	-_topLdrHgt2
+			cylind	_topLdrHgt2,	_topLdrRad
+		del 1
+	del 1
+
+return

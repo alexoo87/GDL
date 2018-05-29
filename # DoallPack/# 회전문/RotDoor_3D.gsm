@@ -1,0 +1,505 @@
+!===============================================================================================
+!	회전문
+!===============================================================================================
+
+
+!===============================================================================================
+!	기본설정
+!===============================================================================================
+resol	60
+
+!===============================================================================================
+!	회전문
+!===============================================================================================
+
+	!-----------------------------------------------------------------------------------------------
+	!	TYPE1
+	!-----------------------------------------------------------------------------------------------
+	if	iDoorType = DOORTYPE_4PANEL	then
+		!	프레임
+		!-----------------------------------------------------------------------------------------------
+			! 좌측 아래
+			gosub	"Frame3D"
+
+			! 좌측 위
+			addy	B
+				muly	-1
+					gosub	"Frame3D"
+				del 1
+			del 1
+
+			! 우측 아래
+			addx	A
+				mulx	-1
+					gosub	"Frame3D"
+				del 1
+			del 1
+
+			! 우측 위
+			addx	A
+				addy	B
+					mulx	-1
+						muly	-1
+							gosub	"Frame3D"
+						del 1
+					del 1
+				del 1
+			del 1
+
+		!	문 + 유리
+		!-----------------------------------------------------------------------------------------------
+		addx	A/2
+			addy	B/2
+				pen			Frame3DPen
+				sect_fill	65,	0,	0,	FrameSectPen
+				material	FrameMat
+
+				cylind	zzyzx-RoofThk,	ColumnRad
+
+					! 덮개
+					addz	zzyzx-RoofThk
+						cylind	RoofThk,	DoorRad+0.100
+					del 1
+
+				rotz	45
+					gosub	"GlassDoor3D"
+				del 1
+
+				rotz	135
+					gosub	"GlassDoor3D"
+				del 1
+
+				rotz	-45
+					gosub	"GlassDoor3D"
+				del 1
+
+				rotz	-135
+					gosub	"GlassDoor3D"
+				del 1
+			del 1
+		del 1
+	endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	TYPE2
+	!-----------------------------------------------------------------------------------------------
+	if	iDoorType = DOORTYPE_3PANEL	then
+		pen			Frame3DPen
+		sect_fill	65,	0,	0,	FrameSectPen
+		material	FrameMat
+
+		cylind	zzyzx - RoofThk,	ColumnRad
+
+		!	루프
+		addz	zzyzx - RoofThk
+			cylind	RoofThk,	(doorRad + sideThk)
+		del 1
+
+		!	회전문 날개
+		_offsetWdt = 0.040
+		_shutOffThk = doorThk/4
+		_shutOffWdt = 0.050
+		_aWingOut = asn((doorThk/2)/ColumnRad)
+		_aWingIn = asn((glassThk/2)/ColumnRad)
+
+		rotz	60
+			for	i = 1	to	3
+				gosub	"doorWings"
+
+				rotz	120
+			next	i
+
+			del 3
+		del 1
+
+		!	좌/우측면 각도 구하기
+		_radIn = doorRad
+		_radOut = doorRad + sideThk
+
+		_aDoorIn = asn((doorWdt/2)/(doorRad + sideThk))
+		_aDoorOut = asn((doorWdt/2 + frameWdt)/(doorRad + sideThk))
+		_aBetween = (_aDoorOut - _aDoorIn)
+		_aSide = 180 - _aDoorOut*2
+
+		!	좌/우측면 프레임
+		pen			Frame3DPen
+		sect_fill	65,	0,	0,	FrameSectPen
+		material	FrameMat
+
+			!	수직프레임
+			put	_radOut,				0,						15,
+				0,						0,						900,
+				_radOut,				_aBetween,				4000+15,
+				_radIn*cos(_aBetween),	_radIn*sin(_aBetween),	15,
+				0,						0,						900,
+				_radIn,					-_aBetween,				4000+15
+
+			rotz	90 - _aDoorOut
+				prism_	nsp/3,	zzyzx - roofThk,	use(nsp)
+
+				rotz	_aDoorIn + _aDoorOut
+					prism_	nsp/3,	zzyzx - roofThk,	use(nsp)
+				del 1
+			del 1
+
+			rotz	-90 + _aDoorIn
+				prism_	nsp/3,	zzyzx - roofThk,	use(nsp)
+
+				rotz	-(_aDoorIn + _aDoorOut)
+					prism_	nsp/3,	zzyzx - roofThk,	get(nsp)
+				del 1
+			del 1
+
+			!	수평 프레임
+			put	_radOut,			0,					15,
+				0,					0,					900,
+				_radOut,			_aSide,				4000+15,
+				_radIn*cos(_aSide),	_radIn*sin(_aSide),	15,
+				0,					0,					900,
+				_radIn,				-_aSide,			4000+15
+
+			rotz	-90 + _aDoorOut
+				prism_	nsp/3,	DoorFrameThk,	use(nsp)
+			del 1
+
+			rotz	90 + _aDoorOut
+				prism_	nsp/3,	DoorFrameThk,	get(nsp)
+			del 1
+
+		!	좌/우측면 유리
+		pen			Glass3DPen
+		sect_fill	16,	0,	0,	GlassSectPen
+		material	GlassMat
+
+			!	바깥쪽 유리
+			put	_radOut,							0,									13,
+				0,									0,									900,
+				_radOut,							_aSide,								4000+13,
+				(_radOut - glassThk)*cos(_aSide),	(_radOut - glassThk)*sin(_aSide),	13,
+				0,									0,									900,
+				(_radOut - glassThk),				-_aSide,							4000+13
+
+			addz	DoorFrameThk
+				rotz	-90 + _aDoorOut
+					prism_	nsp/3,	(zzyzx - roofThk - DoorFrameThk),	use(nsp)
+				del 1
+
+				rotz	90 + _aDoorOut
+					prism_	nsp/3,	(zzyzx - roofThk - DoorFrameThk),	get(nsp)
+				del 1
+			del 1
+
+			!	안쪽 유리
+			put	(_radIn + glassThk),	0,					13,
+				0,						0,					900,
+				(_radIn + glassThk),	_aSide,				4000+13,
+				_radIn*cos(_aSide),		_radIn*sin(_aSide),	13,
+				0,						0,					900,
+				_radIn,					-_aSide,			4000+13
+
+			addz	DoorFrameThk
+				rotz	-90 + _aDoorOut
+					prism_	nsp/3,	(zzyzx - roofThk - DoorFrameThk),	use(nsp)
+				del 1
+
+				rotz	90 + _aDoorOut
+					prism_	nsp/3,	(zzyzx - roofThk - DoorFrameThk),	get(nsp)
+				del 1
+			del 1
+
+		!	문 출입구 y좌표
+		_yPosGlsIn = sqr((doorRad + sideThk)^2 - (doorWdt/2)^2)
+		_yPosGlsOut = sqr((doorRad + sideThk)^2 - (doorWdt/2 + frameWdt)^2)
+
+		!	문 출입구 프레임
+		pen			Frame3DPen
+		sect_fill	65,	0,	0,	FrameSectPen
+		material	FrameMat
+
+			!	상부(2D평면상)
+			put	doorWdt/2,				yPosEnd_1,		15,
+				doorWdt/2,				_yPosGlsIn,		15,
+				doorWdt/2 + frameWdt,	_yPosGlsOut,	15,
+				doorWdt/2 + frameWdt,	yPosEnd_1,		15
+
+			prism_	nsp/3,	DoorFrameThk,	use(nsp)
+
+			addz	zzyzx
+				mulz	-1
+					prism_	nsp/3,	DoorFrameThk,	use(nsp)
+				del 1
+			del 1
+
+			mulx	-1
+				prism_	nsp/3,	DoorFrameThk,	use(nsp)
+
+				addz	zzyzx
+					mulz	-1
+						prism_	nsp/3,	DoorFrameThk,	get(nsp)
+					del 1
+				del 1
+			del 1
+
+			!	하부(2D평면상)
+			put	doorWdt/2,				-yPosEnd_2,		15,
+				doorWdt/2,				-_yPosGlsIn,	15,
+				doorWdt/2 + frameWdt,	-_yPosGlsOut,	15,
+				doorWdt/2 + frameWdt,	-yPosEnd_2,		15
+
+			prism_	nsp/3,	DoorFrameThk,	use(nsp)
+
+			addz	zzyzx
+				mulz	-1
+					prism_	nsp/3,	DoorFrameThk,	use(nsp)
+				del 1
+			del 1
+
+			mulx	-1
+				prism_	nsp/3,	DoorFrameThk,	use(nsp)
+
+				addz	zzyzx
+					mulz	-1
+						prism_	nsp/3,	DoorFrameThk,	get(nsp)
+					del 1
+				del 1
+			del 1
+
+		!	문 출입구 유리
+		pen			Glass3DPen
+		sect_fill	16,	0,	0,	GlassSectPen
+		material	GlassMat
+
+			!	상부(2D평면상)
+			put	doorWdt/2 + (frameWdt - glassThk)/2,	yPosEnd_1,		15,
+				doorWdt/2 + (frameWdt - glassThk)/2,	_yPosGlsIn,		15,
+				doorWdt/2 + (frameWdt + glassThk)/2,	_yPosGlsOut,	15,
+				doorWdt/2 + (frameWdt + glassThk)/2,	yPosEnd_1,		15
+
+			addz	DoorFrameThk
+				prism_	nsp/3,	(zzyzx - DoorFrameThk*2),	use(nsp)
+			del 1
+
+			mulx	-1
+				addz	DoorFrameThk
+					prism_	nsp/3,	(zzyzx - DoorFrameThk*2),	get(nsp)
+				del 1
+			del 1
+
+			!	하부(2D평면상)
+			put	doorWdt/2 + (frameWdt - glassThk)/2,	-yPosEnd_2,		15,
+				doorWdt/2 + (frameWdt - glassThk)/2,	-_yPosGlsIn,	15,
+				doorWdt/2 + (frameWdt + glassThk)/2,	-_yPosGlsOut,	15,
+				doorWdt/2 + (frameWdt + glassThk)/2,	-yPosEnd_2,		15
+
+			addz	DoorFrameThk
+				prism_	nsp/3,	(zzyzx - DoorFrameThk*2),	use(nsp)
+			del 1
+
+			mulx	-1
+				addz	DoorFrameThk
+					prism_	nsp/3,	(zzyzx - DoorFrameThk*2),	get(nsp)
+				del 1
+			del 1
+
+	endif
+
+
+
+end
+
+
+
+!===============================================================================================
+!	Sub-routine
+!===============================================================================================
+"Frame3D":
+!-----------------------------------------------------------------------------------------------
+pen			Frame3DPen
+sect_fill	65,	0,	0,	FrameSectPen
+material	FrameMat
+
+! 최외곽 프레임
+put	0,																				0,											15,
+	(FrameWdt/2)+FrameThk/tan(67.5),												0,											15,
+	((FrameWdt/2)+FrameThk/tan(67.5))+((FrameWdt/2)+FrameThk/tan(67.5))*cos(45),	((FrameWdt/2)+FrameThk/tan(67.5))*sin(45),	15,
+	FrameWdt/2+(FrameWdt/2)*cos(45),												FrameThk+(FrameWdt/2)*sin(45),				15,
+	FrameWdt/2,																		FrameThk,									15,
+	0,																				FrameThk,									15,
+	0,																				0,											1
+
+	prism_	nsp/3,	zzyzx,	get(nsp)
+
+	! 문과 최외곽 프레임 사이 프레임
+	add	doorPosX_2,	doorPosY_2,	0
+		rotz	-45
+			block	0.150,	0.050,	zzyzx
+		del 1
+	del 1
+
+
+	! 유리
+	pen			Glass3DPen
+	sect_fill	16,	0,	0,	GlassSectPen
+	material	GlassMat
+
+		! 변수정의
+		LengthTmp=sqr((doorPosX_2-(FrameWdt/2+(FrameWdt/2)*cos(45)))^2+(doorPosY_2-(FrameThk+(FrameWdt/2)*sin(45)))^2)
+
+		addx	FrameWdt/2+(FrameWdt/2)*cos(45)+(FrameThk/2)*cos(45)
+			addy	FrameThk+(FrameWdt/2)*sin(45)-(FrameThk/2)*sin(45)
+				addz	DoorFrameThk
+					rotz	45
+						block	LengthTmp,	GlassThk,	zzyzx-DoorFrameThk*2
+					del 1
+				del 1
+			del 1
+		del 1
+
+		addz	DoorFrameThk
+				put	doorPosX_2+(0.050/2)*cos(45)+GlassThk/2*cos(45),					doorPosY_2+(0.050/2)*sin(45)+GlassThk/2*sin(45),					15,
+					A/2,																B/2,																900,
+					A/2-(DoorRad+0.125-GlassThk/2),										B/2,																3000,
+					A/2-(DoorRad+0.125+GlassThk/2),										B/2,																15,
+					A/2,																B/2,																900,
+					doorPosX_2+(0.050/2)*cos(45)+GlassThk/2*cos(45)-GlassThk*cos(45),	doorPosY_2+(0.050/2)*sin(45)+GlassThk/2*sin(45)-GlassThk*sin(45),	3000,
+					doorPosX_2+(0.050/2)*cos(45)+GlassThk/2*cos(45),					doorPosY_2+(0.050/2)*sin(45)+GlassThk/2*sin(45),					15
+
+				prism_	nsp/3,	zzyzx-DoorFrameThk*2,	get(nsp)
+		del 1
+					
+	! 프레임
+	pen			Frame3DPen
+	sect_fill	65,	0,	0,	FrameSectPen
+	material	FrameMat
+
+		addx	((FrameWdt/2)+FrameThk/tan(67.5))+((FrameWdt/2)+FrameThk/tan(67.5))*cos(45)
+			addy	((FrameWdt/2)+FrameThk/tan(67.5))*sin(45)
+				rotz	45
+					block	LengthTmp,	FrameThk,	DoorFrameThk
+
+					addz	zzyzx-DoorFrameThk
+						block	LengthTmp,	FrameThk,	DoorFrameThk
+					del 1
+				del 1
+			del 1
+		del 1
+
+		put	doorPosX_2+0.050*cos(45),		doorPosY_2+0.050*sin(45),	15,
+			A/2,							B/2,						900,
+			A/2-(DoorRad+0.100),			B/2,						3000,
+			A/2-(DoorRad+0.150),			B/2,						15,
+			A/2,							B/2,						900,
+			doorPosX_2,						doorPosY_2,					3000,
+			doorPosX_2+0.050*cos(45),		doorPosY_2+0.050*sin(45),	15
+
+		prism_	nsp/3,	DoorFrameThk,	use(nsp)
+
+		addz	zzyzx-DoorFrameThk
+			prism_	nsp/3,	DoorFrameThk,	get(nsp)
+		del 1
+
+return
+
+
+
+!-----------------------------------------------------------------------------------------------
+"GlassDoor3D":
+!-----------------------------------------------------------------------------------------------
+addx	DoorThk/2
+	addy	DoorThk/2
+		rotx	90
+
+			! 문 프레임
+			pen			Frame3DPen
+			sect_fill	65,	0,	0,	FrameSectPen
+			material	FrameMat
+
+			put	0,						0,				15,
+				DoorRad-(DoorThk/2),	0,				15,
+				DoorRad-(DoorThk/2),	zzyzx-RoofThk,	15,
+				0,						zzyzx-RoofThk,	15,
+				0,						0,				-1,
+	
+				DoorFrameThk,						DoorFrameThk,				15,
+				DoorRad-(DoorThk/2)-DoorFrameThk,	DoorFrameThk,				15,
+				DoorRad-(DoorThk/2)-DoorFrameThk,	zzyzx-RoofThk-DoorFrameThk,	15,
+				DoorFrameThk,						zzyzx-RoofThk-DoorFrameThk,	15,
+				DoorFrameThk,						DoorFrameThk,				-1
+	
+				prism_	nsp/3,	DoorThk,	get(nsp)
+
+		del 1
+	del 1
+del 1
+
+addx	DoorThk/2
+	addy	GlassThk/2
+		rotx	90
+
+			! 유리
+			pen			Glass3DPen
+			sect_fill	16,	0,	0,	GlassSectPen
+			material	GlassMat
+
+			put	DoorFrameThk,						DoorFrameThk,		15,
+				DoorRad-(DoorThk/2)-DoorFrameThk,	DoorFrameThk,		15,
+				DoorRad-(DoorThk/2)-DoorFrameThk,	zzyzx-DoorFrameThk,	15,
+				DoorFrameThk,						zzyzx-DoorFrameThk,	15,
+				DoorFrameThk,						DoorFrameThk,		-1
+
+				prism_	nsp/3,	GlassThk,	get(nsp)
+
+		del 1
+	del 1
+del 1
+
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"doorWings":
+!-----------------------------------------------------------------------------------------------
+	!	프레임
+	pen			Frame3DPen
+	sect_fill	65,	0,	0,	FrameSectPen
+	material	FrameMat
+
+	put	ColumnRad*cos(_aWingOut),				doorThk/2,	15,
+		doorRad - (_offsetWdt + _shutOffWdt),	doorThk/2,	15,
+		doorRad - (_offsetWdt + _shutOffWdt),	-doorThk/2,	15,
+		ColumnRad*cos(_aWingOut),				-doorThk/2,	15
+
+	prism_	nsp/3,	DoorFrameThk,	use(nsp)
+
+	addz	zzyzx - roofThk
+		mulz	-1
+			prism_	nsp/3,	DoorFrameThk,	get(nsp)
+		del 1
+	del 1
+
+	put	doorRad - (_offsetWdt + _shutOffWdt),			doorThk/2,	15,
+		doorRad - (_offsetWdt + _shutOffWdt + 0.030),	doorThk/2,	15,
+		doorRad - (_offsetWdt + _shutOffWdt + 0.030),	-doorThk/2,	15,
+		doorRad - (_offsetWdt + _shutOffWdt),			-doorThk/2,	15
+
+	addz	DoorFrameThk
+		prism_	nsp/3,	(zzyzx - roofThk) - DoorFrameThk*2,	get(nsp)
+	del 1
+
+	! 유리
+	pen			Glass3DPen
+	sect_fill	16,	0,	0,	GlassSectPen
+	material	GlassMat
+
+	put	ColumnRad*cos(_aWingIn),						glassThk/2,		15,
+		doorRad - (_offsetWdt + _shutOffWdt + 0.030),	glassThk/2,		15,
+		doorRad - (_offsetWdt + _shutOffWdt + 0.030),	-glassThk/2,	15,
+		ColumnRad*cos(_aWingIn),						-glassThk/2,	15
+
+	addz	DoorFrameThk
+		prism_	nsp/3,	(zzyzx - roofThk) - DoorFrameThk*2,	get(nsp)
+	del 1
+
+
+return

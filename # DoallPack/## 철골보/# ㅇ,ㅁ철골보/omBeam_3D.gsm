@@ -1,0 +1,253 @@
+!===============================================================================================
+!	ㅇ,ㅁ형 철골보
+!===============================================================================================
+
+!===============================================================================================
+!	3D Detail Level
+!===============================================================================================
+if	iDetailLevel = DetailLevel_Detailed	then	resol	32
+if	iDetailLevel = DetailLevel_Simple	then	resol	8
+if	iDetailLevel = DetailLevel_None		then	end
+
+!===============================================================================================
+!	2D Display
+!==============================================================================================
+if	not(_iDisplay = Display_Symoblic) | (_bEditView & _iEditView = Display_Projected)	then
+	if	bSymbol	then
+		if	iProjectTo = ProjectTo_FloorPlan | (iProjectTo = ProjectTo_Absolute & btmPlaneHgt < cutPlaneHgt)	then
+			addz	btmPlaneHgt
+				cutplane{2}	180,	2
+			del 1
+		endif
+
+		addz	cutPlaneHgt
+			cutplane{2}	180*(iProjectType = 2),	1
+		del 1
+
+		if	iProjectTo = ProjectTo_Entire	then
+			addz	topPlaneHgt
+				cutplane{2}	0,	2
+			del 1
+		endif
+	endif
+endif
+
+
+!===============================================================================================
+!	X/Y 회전 및 기준점 설정
+!===============================================================================================
+if	iRotY = Rotation_Top	then
+	if	iBeamType = BeamType_Circle	then
+		_zPos = -beamDia/2
+	endif
+	if	iBeamType = BeamType_Rectangle	then
+		_zPos = -beamHgt/2
+	endif
+endif
+
+if	iRotY = Rotation_Center	then
+	_zPos = 0
+endif
+
+if	iRotY = Rotation_Bottom	then
+	if	iBeamType = BeamType_Circle	then
+		_zPos = beamDia/2
+	endif
+	if	iBeamType = BeamType_Rectangle	then
+		_zPos = beamHgt/2
+	endif
+endif
+
+!	Rotation Y
+_rotLth = beamLth/2
+rotx	90
+	hotspot	_rotLth,			0,	0,					unID,	aRotY,	4	:	unID = unID + 1
+	hotspot	_rotLth*cos(aRotY),	_rotLth*sin(aRotY),	0,	unID,	aRotY,	5	:	unID = unID + 1
+	hotspot	0,					0,	0,					unID,	aRotY,	6	:	unID = unID + 1
+	hotspot	0,					0,	1,					unID,	aRotY,	7	:	unID = unID + 1
+del 1
+
+_nTrans = 0
+
+roty	-aRotY	:	_nTrans = _nTrans + 1
+	addz	_zPos	:	_nTrans = _nTrans + 1
+		rotx	-aRotX	:	_nTrans = _nTrans + 1
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+!	beamLth
+hotspot	0,			0,	0,	unID,	beamLth,	1+256	:	unID = unID + 1
+hotspot	-1,			0,	0,	unID,	beamLth,	3		:	unID = unID + 1
+hotspot	beamLth,	0,	0,	unID,	beamLth,	2		:	unID = unID + 1
+
+!	OffsetL/R
+if	iBeamType = BeamType_Circle	then
+	_yPosOffset = beamDia/2 + 0.050
+endif
+if	iBeamType = BeamType_Rectangle	then
+	_yPosOffset = beamWdt/2 + 0.050
+endif
+
+add	0,	-_yPosOffset,	0.010
+	hotspot	0,			0,	0,	unID,	offsetL,	1+128	:	unID = unID + 1
+	hotspot	-1,			0,	0,	unID,	offsetL,	3		:	unID = unID + 1
+	hotspot	offsetL,	0,	0,	unID,	offsetL,	2		:	unID = unID + 1
+del 1
+
+add	beamLth,	-_yPosOffset,	0.010
+	hotspot	0,			0,	0,	unID,	offsetR,	1+128	:	unID = unID + 1
+	hotspot	1,			0,	0,	unID,	offsetR,	3		:	unID = unID + 1
+	hotspot	-offsetR,	0,	0,	unID,	offsetR,	2		:	unID = unID + 1
+del 1
+
+
+!===============================================================================================
+!	철골보
+!===============================================================================================
+pen			beamPen_Elev
+sect_fill	beamFill,	beamBackPen,	beamFillPen,	beamPen_Sect
+material	matBeam
+
+!	변수 정의
+!-----------------------------------------------------------------------------------------------
+_beamRad = beamDia/2
+
+if	iBeamType = BeamType_Circle	then
+	_yCutPlaneL = _beamRad
+	_yCutPlaneR = _beamRad
+endif
+
+if	iBeamType = BeamType_Rectangle	then
+	_yCutPlaneL = beamWdt/2
+	_yCutPlaneR = beamWdt/2
+
+	if	iCutPlaneL = CutPlane_horz	then
+		_yCutPlaneL = beamHgt/2
+	endif
+
+	if	iCutPlaneR = CutPlane_horz	then
+		_yCutPlaneR = beamHgt/2
+	endif
+endif
+
+!	Cut(Left)
+!-----------------------------------------------------------------------------------------------
+addx	offsetL
+	put	0,						cutCenL,
+		cutLthL1,				-_yCutPlaneL,
+		cutLthL1,				-(_yCutPlaneL + abs(cutCenL)),
+		-(beamLth/2 + offsetL),	-(_yCutPlaneL + abs(cutCenL)),
+		-(beamLth/2 + offsetL),	_yCutPlaneL + abs(cutCenL),
+		cutLthL2,				_yCutPlaneL + abs(cutCenL),
+		cutLthL2,				_yCutPlaneL
+
+	if	iCutPlaneL = CutPlane_horz	then	rotx	-90
+		cutpoly	nsp/2,	get(nsp)
+
+		!	Hotspot
+		addy	-_yCutPlaneL
+			hotspot	0,			0,	0,	unID,	cutLthL1,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	cutLthL1,	3		:	unID = unID + 1
+			hotspot	cutLthL1,	0,	0,	unID,	cutLthL1,	2		:	unID = unID + 1	
+		del 1
+
+		addy	_yCutPlaneL
+			hotspot	0,			0,	0,	unID,	cutLthL2,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	cutLthL2,	3		:	unID = unID + 1
+			hotspot	cutLthL2,	0,	0,	unID,	cutLthL2,	2		:	unID = unID + 1	
+		del 1
+	if	iCutPlaneL = CutPlane_horz	then	del 1
+del 1
+
+!	Cut(Right)
+!-----------------------------------------------------------------------------------------------
+addx	beamLth - offsetR
+	put	0,						cutCenR,
+		cutLthR1,				-_yCutPlaneR,
+		cutLthR1,				-(_yCutPlaneR + abs(cutCenR)),
+		beamLth/2 + offsetR,	-(_yCutPlaneR + abs(cutCenR)),
+		beamLth/2 + offsetR,	_yCutPlaneR + abs(cutCenR),
+		cutLthR2,				_yCutPlaneR + abs(cutCenR),
+		cutLthR2,				_yCutPlaneR
+
+	if	iCutPlaneR = CutPlane_horz	then	rotx	-90
+		cutpoly	nsp/2,	get(nsp)
+
+		!	Hotspot
+		addy	-_yCutPlaneR
+			hotspot	0,			0,	0,	unID,	cutLthR1,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	cutLthR1,	3		:	unID = unID + 1
+			hotspot	cutLthR1,	0,	0,	unID,	cutLthR1,	2		:	unID = unID + 1	
+		del 1
+
+		addy	_yCutPlaneR
+			hotspot	0,			0,	0,	unID,	cutLthR2,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	cutLthR2,	3		:	unID = unID + 1
+			hotspot	cutLthR2,	0,	0,	unID,	cutLthR2,	2		:	unID = unID + 1	
+		del 1
+	if	iCutPlaneR = CutPlane_horz	then	del 1
+del 1
+
+	!	철골보
+	!-----------------------------------------------------------------------------------------------
+	if	iBeamType = BeamType_Circle	then
+		put	_beamRad,	0,		1,
+			0,			0,		900,
+			_beamRad,	180,	4000,
+			-_beamRad,	0,		1,
+			0,			0,		900,
+			_beamRad,	180,	4000,
+			_beamRad,				0,		-1,
+			_beamRad - beamThk,		0,		1,
+			0,						0,		900,
+			_beamRad - beamThk,		180,	4000,
+			-_beamRad + beamThk,	0,		1,
+			0,						0,		900,
+			_beamRad - beamThk,		180,	4000,
+			_beamRad - beamThk,		0,		-1
+	endif
+
+	if	iBeamType = BeamType_Rectangle	then
+		put	-beamHgt/2,	-beamWdt/2,	0,
+			-beamHgt/2,	beamWdt/2,	0,
+			beamHgt/2,	beamWdt/2,	0,
+			beamHgt/2,	-beamWdt/2,	0,
+			-beamHgt/2,				-beamWdt/2,				-1,
+			-beamHgt/2 + beamThk,	-beamWdt/2 + beamThk,	0,
+			-beamHgt/2 + beamThk,	beamWdt/2 - beamThk,	0,
+			beamHgt/2 - beamThk,	beamWdt/2 - beamThk,	0,
+			beamHgt/2 - beamThk,	-beamWdt/2 + beamThk,	0,
+			-beamHgt/2 + beamThk,	-beamWdt/2 + beamThk,	-1
+	endif
+
+	roty	90
+		addz	-beamLth/2
+			extrude	nsp/3,	0,	0,	beamLth*2,	1+2+4+16+32+64+128,	get(nsp)
+		del 1
+	del 1
+
+
+!	Cut End
+!-----------------------------------------------------------------------------------------------
+cutend
+cutend
+
+!===============================================================================================
+!	2D Display
+!==============================================================================================
+if	not(_iDisplay = Display_Symoblic) | (_bEditView & _iEditView = Display_Projected)	then
+	if	bSymbol	then
+		if	iProjectTo = ProjectTo_FloorPlan | (iProjectTo = ProjectTo_Absolute & btmPlaneHgt < cutPlaneHgt)	then
+			cutend
+		endif
+
+		cutend
+
+		if	iProjectTo = ProjectTo_Entire	then
+			cutend
+		endif
+	endif
+endif
+
+del _nTrans

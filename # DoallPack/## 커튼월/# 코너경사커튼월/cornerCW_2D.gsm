@@ -1,0 +1,788 @@
+!===============================================================================================
+!	코너 경사커튼월
+!===============================================================================================
+! project2	3,	270,	3
+
+!	W.P
+hotspot2	0,	0
+
+!	천정도 표현
+!-----------------------------------------------------------------------------------------------
+r = request("floor_plan_option", "", storyViewType)
+
+if	storyViewType > eps	then
+	_frmThk = max(frmThkL, frmThkR)
+
+	hotspot2	0,		_frmThk + gskThk,	unID	:	unID = unID + 1
+	hotspot2	ctwWdt,	_frmThk + gskThk,	unID	:	unID = unID + 1
+	hotspot2	ctwWdt,	0,					unID	:	unID = unID + 1
+
+	pen		ceilPen
+	fill	65
+
+	put	0,										0,					1,
+		ctwWdt,									0,					0,
+		ctwWdt - (_frmThk + gskThk)*tan(aFrmR),	_frmThk + gskThk,	1,
+		-(_frmThk + gskThk)*tan(aFrmL),			_frmThk + gskThk,	0
+
+	poly2_b	nsp/3,	1+2+4,	0,	0,	get(nsp)
+
+	end
+endif
+
+!	벡터 방향
+_dxL = matrixPoint[2][1] - matrixPoint[1][1]
+_dyL = matrixPoint[2][2] - matrixPoint[1][2]
+_dzL = matrixPoint[2][3] - matrixPoint[1][3]
+
+_dxR = matrixPoint[3][1] - matrixPoint[4][1]
+_dyR = matrixPoint[3][2] - matrixPoint[4][2]
+_dzR = matrixPoint[3][3] - matrixPoint[4][3]
+
+!===============================================================================================
+!	가이드 라인
+!===============================================================================================
+if	bGuide	then
+	_guideLth = 2
+
+	if	iFrmTypeL = FrmType_Mullion	then
+		rot2	90 + aFrmL
+			line2		-_guideLth,	0,	_guideLth,	0
+			hotline2	-_guideLth,	0,	_guideLth,	0
+		del 1
+	endif
+
+	if	iFrmTypeR = FrmType_Mullion	then
+		add2	ctwWdt,	0
+			rot2	90 + aFrmR
+				line2		-_guideLth,	0,	_guideLth,	0
+				hotline2	-_guideLth,	0,	_guideLth,	0
+			del 1
+		del 1
+	endif
+endif
+
+strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1),	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	stepHgt_S + stepHgt*(nStep_1 - 1) + stepHgt*(nStep_2 - 1)
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+
+!	ctwWdt
+hotspot2	0,		0,	unID,	ctwWdt,	1+128	:	unID = unID + 1
+hotspot2	-1,		0,	unID,	ctwWdt,	3		:	unID = unID + 1
+hotspot2	ctwWdt,	0,	unID,	ctwWdt,	2		:	unID = unID + 1
+
+
+
+!===============================================================================================
+!	좌/우 프레임
+!===============================================================================================
+
+!	좌측 프레임
+!-----------------------------------------------------------------------------------------------
+dim	_xPosTransL[],	_yPosTransL[]
+
+if	iFrmTypeL = FrmType_Boundary	then
+	_xPosTransL[1] = (frmWdtL + gskWdtL)/2
+	_xPosTransL[2] = (frmWdtL + gskWdtL)/2
+	_xPosTransL[3] = frmWdtL
+	_xPosTransL[4] = frmWdtL
+	_xPosTransL[5] = 0
+	_xPosTransL[6] = 0
+
+	_yPosTransL[1] = 0
+	_yPosTransL[2] = gskThk
+	_yPosTransL[3] = gskThk
+	_yPosTransL[4] = frmThkL + gskThk
+	_yPosTransL[5] = frmThkL + gskThk
+	_yPosTransL[6] = 0
+
+	_nFrmL = 6
+endif
+
+if	iFrmTypeL = FrmType_Mullion	then
+	!	aFrmL Hotspot
+	_spotLthL = (frmThkL + gskThk)
+	hotspot2	0,						_spotLthL,				unID,	aFrmL,	4	:	unID = unID + 1
+	hotspot2	-_spotLthL*sin(aFrmL),	_spotLthL*cos(aFrmL),	unID,	aFrmL,	5	:	unID = unID + 1
+	hotspot2	0,						0,						unID,	aFrmL,	6	:	unID = unID + 1
+
+	!	Point2_X
+	_yPosL = -ctwHgt*tan(aTiltL)
+	add2	0,	_yPosL
+		hotspot2	0,					0,	unID,	matrixPoint[2][1],	1+128	:	unID = unID + 1
+		hotspot2	-1,					0,	unID,	matrixPoint[2][1],	3		:	unID = unID + 1
+		hotspot2	matrixPoint[2][1],	0,	unID,	matrixPoint[2][1],	2		:	unID = unID + 1
+	del 1
+
+	!	Angle
+	_aFrmL = -aFrmL
+	_aSubL = 90 - _aFrmL
+
+	!	Position
+	_referLth = (gskWdtL/2)*tan(_aFrmL)
+	_xPosL_refer = _referLth*cos(_aSubL)
+	_yPosL_refer = _referLth*sin(_aSubL)
+
+	!	Point
+	dim	_frmPointL[][]
+
+		if	iCornerType = CORNER_TYPE1	then
+			if	iMlnType = Mln_Type1	then
+				!	Point1
+				_frmPointL[1][1] = gskWdtL/2
+				_frmPointL[1][2] = 0
+
+				!	Point2
+				_frmPointL[2][1] = gskWdtL/2
+				_frmPointL[2][2] = gskThk/cos(_aFrmL) + (frmWdtL - gskWdtL)/2*tan(_aFrmL)
+
+				!	Point3
+				_frmPointL[3][1] = frmWdtL/2
+				_frmPointL[3][2] = _frmPointL[2][2]
+
+				!	Point4
+				_frmPointL[4][1] = frmWdtL/2
+				_frmPointL[4][2] = _frmPointL[2][2] + frmThkL/cos(_aFrmL)
+
+				!	Point5
+				_frmPointL[5][1] = -frmWdtL/2
+				_frmPointL[5][2] = _frmPointL[4][2]
+
+				!	Point6
+				_frmPointL[6][1] = -frmWdtL/2
+				_frmPointL[6][2] = _frmPointL[2][2]
+
+				!	Point7
+				_frmPointL[7][1] = -gskWdtL/2
+				_frmPointL[7][2] = _frmPointL[2][2]
+
+				!	Point8
+				_frmPointL[8][1] = -gskWdtL/2
+				_frmPointL[8][2] = 0
+
+				_nFrmL = 8
+			endif
+
+			if	iMlnType = Mln_Type2	then
+				!	Point1
+				_frmPointL[1][1] = gskWdtL/2
+				_frmPointL[1][2] = 0
+
+				!	Point2
+				_frmPointL[2][1] = frmWdtL/2
+				_frmPointL[2][2] = ((frmWdtL - gskWdtL)/2)*tan(_aFrmL)
+
+				!	Point3
+				_frmPointL[3][1] = frmWdtL/2
+				_frmPointL[3][2] = _frmPointL[2][2] + gskCapThk/cos(_aFrmL)
+
+				!	Point4
+				_frmPointL[4][1] = gskWdtL/2
+				_frmPointL[4][2] = gskCapThk/cos(_aFrmL)
+
+				!	Point5
+				_frmPointL[5][1] = gskWdtL/2
+				_frmPointL[5][2] = gskThk/cos(_aFrmL) + (frmWdtL - gskWdtL)/2*tan(_aFrmL)
+
+				!	Point6
+				_frmPointL[6][1] = frmWdtL/2
+				_frmPointL[6][2] = _frmPointL[5][2]
+
+				!	Point7
+				_frmPointL[7][1] = frmWdtL/2
+				_frmPointL[7][2] = _frmPointL[5][2] + frmThkL/cos(_aFrmL)
+
+				!	Point8
+				_frmPointL[8][1] = -frmWdtL/2
+				_frmPointL[8][2] = _frmPointL[7][2]
+
+				!	Point9
+				_frmPointL[9][1] = -frmWdtL/2
+				_frmPointL[9][2] = _frmPointL[5][2]
+
+				!	Point10
+				_frmPointL[10][1] = -gskWdtL/2
+				_frmPointL[10][2] = _frmPointL[5][2]
+
+				!	Point11
+				_frmPointL[11][1] = -gskWdtL/2
+				_frmPointL[11][2] = gskCapThk/cos(_aFrmL)
+
+				!	Point12
+				_frmPointL[12][1] = -frmWdtL/2
+				_frmPointL[12][2] = _frmPointL[2][2] + gskCapThk/cos(_aFrmL)
+
+				!	Point13
+				_frmPointL[13][1] = -frmWdtL/2
+				_frmPointL[13][2] = _frmPointL[2][2]
+
+				!	Point14
+				_frmPointL[14][1] = -gskWdtL/2
+				_frmPointL[14][2] = 0
+
+				_nFrmL = 14
+			endif
+		endif
+
+		if	iCornerType = CORNER_TYPE2	then
+			if	iMlnType = Mln_Type1	then
+				!	Point1
+				_frmPointL[1][1] = gskWdtL/2
+				_frmPointL[1][2] = 0
+
+				!	Point2
+				_frmPointL[2][1] = gskWdtL/2
+				_frmPointL[2][2] = gskThk/cos(_aFrmL)
+
+				!	Point3
+				_frmPointL[3][1] = frmWdtL/2
+				_frmPointL[3][2] = gskThk/cos(_aFrmL) + (frmWdtL - gskWdtL)/2*tan(_aFrmL)
+
+				!	Point4
+				_frmPointL[4][1] = frmWdtL/2
+				_frmPointL[4][2] = _frmPointL[3][2] + frmThkL/cos(_aFrmL)
+
+				!	Point5
+				_frmPointL[5][1] = 0
+				_frmPointL[5][2] = _frmPointL[4][2] - (frmWdtL/2)*tan(_aFrmL)
+
+				!	Point6
+				_frmPointL[6][1] = -frmWdtL/2
+				_frmPointL[6][2] = _frmPointL[4][2]
+
+				!	Point7
+				_frmPointL[7][1] = -frmWdtL/2
+				_frmPointL[7][2] = _frmPointL[3][2]
+
+				!	Point8
+				_frmPointL[8][1] = -gskWdtL/2
+				_frmPointL[8][2] = _frmPointL[2][2]
+
+				!	Point9
+				_frmPointL[9][1] = -gskWdtL/2
+				_frmPointL[9][2] = 0
+
+				_nFrmL = 9
+			endif
+
+			if	iMlnType = Mln_Type2	then
+				!	Point1
+				_frmPointL[1][1] = gskWdtL/2
+				_frmPointL[1][2] = 0
+
+				!	Point2
+				_frmPointL[2][1] = frmWdtL/2
+				_frmPointL[2][2] = ((frmWdtL - gskWdtL)/2)*tan(_aFrmL)
+
+				!	Point3
+				_frmPointL[3][1] = frmWdtL/2
+				_frmPointL[3][2] = _frmPointL[2][2] + gskCapThk/cos(_aFrmL)
+
+				!	Point4
+				_frmPointL[4][1] = gskWdtL/2
+				_frmPointL[4][2] = gskCapThk/cos(_aFrmL)
+
+				!	Point5
+				_frmPointL[5][1] = gskWdtL/2
+				_frmPointL[5][2] = gskThk/cos(_aFrmL)
+
+				!	Point6
+				_frmPointL[6][1] = frmWdtL/2
+				_frmPointL[6][2] = gskThk/cos(_aFrmL) + (frmWdtL - gskWdtL)/2*tan(_aFrmL)
+
+				!	Point7
+				_frmPointL[7][1] = frmWdtL/2
+				_frmPointL[7][2] = _frmPointL[6][2] + frmThkL/cos(_aFrmL)
+
+				!	Point8
+				_frmPointL[8][1] = 0
+				_frmPointL[8][2] = _frmPointL[7][2] - (frmWdtL/2)*tan(_aFrmL)
+
+				!	Point9
+				_frmPointL[9][1] = -frmWdtL/2
+				_frmPointL[9][2] = _frmPointL[7][2]
+
+				!	Point10
+				_frmPointL[10][1] = -frmWdtL/2
+				_frmPointL[10][2] = _frmPointL[6][2]
+
+				!	Point11
+				_frmPointL[11][1] = -gskWdtL/2
+				_frmPointL[11][2] = _frmPointL[5][2]
+
+				!	Point12
+				_frmPointL[12][1] = -gskWdtL/2
+				_frmPointL[12][2] = gskCapThk/cos(_aFrmL)
+
+				!	Point13
+				_frmPointL[13][1] = -frmWdtL/2
+				_frmPointL[13][2] = _frmPointL[2][2] + gskCapThk/cos(_aFrmL)
+
+				!	Point14
+				_frmPointL[14][1] = -frmWdtL/2
+				_frmPointL[14][2] = _frmPointL[2][2]
+
+				!	Point15
+				_frmPointL[15][1] = -gskWdtL/2
+				_frmPointL[15][2] = 0
+
+				_nFrmL = 15
+			endif
+		endif
+
+	!	Put	Values
+	for	i = 1	to	_nFrmL
+		!	좌표 회전 / 좌표 이동
+		_xPosTransL[i] = (_frmPointL[i][1])*cos(aFrmL) - (_frmPointL[i][2])*sin(aFrmL) + _xPosL_refer
+		_yPosTransL[i] = (_frmPointL[i][1])*sin(aFrmL) + (_frmPointL[i][2])*cos(aFrmL) + _yPosL_refer
+	next	i
+endif
+
+for	i = 1	to	_nFrmL
+	hotspot2	_xPosTransL[i],			_yPosTransL[i]
+	hotspot2	_xPosTransL[i] + _dxL,	_yPosTransL[i] + _dyL
+next	i
+
+
+!	우측 프레임
+!-----------------------------------------------------------------------------------------------
+dim	_xPosTransR[],	_yPosTransR[]
+
+add2	ctwWdt,	0
+	if	iFrmTypeR = FrmType_Boundary	then
+		_xPosTransR[1] = -(frmWdtR + gskWdtR)/2
+		_xPosTransR[2] = -(frmWdtR + gskWdtR)/2
+		_xPosTransR[3] = -frmWdtR
+		_xPosTransR[4] = -frmWdtR
+		_xPosTransR[5] = 0
+		_xPosTransR[6] = 0
+
+		_yPosTransR[1] = 0
+		_yPosTransR[2] = gskThk
+		_yPosTransR[3] = gskThk
+		_yPosTransR[4] = frmThkR + gskThk
+		_yPosTransR[5] = frmThkR + gskThk
+		_yPosTransR[6] = 0
+
+		_nFrmR = 6
+	endif
+
+	if	iFrmTypeR = FrmType_Mullion	then
+		!	aFrmR Hotspot
+		_spotLthR = (frmThkR + gskThk)
+		hotspot2	0,						_spotLthR,				unID,	aFrmR,	4	:	unID = unID + 1
+		hotspot2	-_spotLthR*sin(aFrmR),	_spotLthR*cos(aFrmR),	unID,	aFrmR,	5	:	unID = unID + 1
+		hotspot2	0,						0,						unID,	aFrmR,	6	:	unID = unID + 1
+
+		!	Point3_X
+		_yPosR = -ctwHgt*tan(aTiltR)
+		add2	-ctwWdt,	_yPosR
+			hotspot2	0,					0,	unID,	matrixPoint[3][1],	1+128	:	unID = unID + 1
+			hotspot2	-1,					0,	unID,	matrixPoint[3][1],	3		:	unID = unID + 1
+			hotspot2	matrixPoint[3][1],	0,	unID,	matrixPoint[3][1],	2		:	unID = unID + 1
+		del 1
+
+		!	Angle
+		_aFrmR = aFrmR
+		_aSubR = 90 - _aFrmR
+
+		!	Position
+		_referLth = (gskWdtR/2)*tan(_aFrmR)
+		_xPosR_refer = _referLth*cos(_aSubR)
+		_yPosR_refer = _referLth*sin(_aSubR)
+
+		!	Point
+		dim	_frmPointR[][]
+
+			if	iCornerType = CORNER_TYPE1	then
+				if	iMlnType = Mln_Type1	then
+					!	Point1
+					_frmPointR[1][1] = -gskWdtR/2
+					_frmPointR[1][2] = 0
+
+					!	Point2
+					_frmPointR[2][1] = -gskWdtR/2
+					_frmPointR[2][2] = gskThk/cos(_aFrmR) + (frmWdtR - gskWdtR)/2*tan(_aFrmR)
+
+					!	Point3
+					_frmPointR[3][1] = -frmWdtR/2
+					_frmPointR[3][2] = _frmPointR[2][2]
+
+					!	Point4
+					_frmPointR[4][1] = -frmWdtR/2
+					_frmPointR[4][2] = _frmPointR[2][2] + frmThkR/cos(_aFrmR)
+
+					!	Point5
+					_frmPointR[5][1] = frmWdtR/2
+					_frmPointR[5][2] = _frmPointR[4][2]
+
+					!	Point6
+					_frmPointR[6][1] = frmWdtR/2
+					_frmPointR[6][2] = _frmPointR[2][2]
+
+					!	Point7
+					_frmPointR[7][1] = gskWdtR/2
+					_frmPointR[7][2] = _frmPointR[2][2]
+
+					!	Point8
+					_frmPointR[8][1] = gskWdtR/2
+					_frmPointR[8][2] = 0
+
+					_nFrmR = 8
+				endif
+
+				if	iMlnType = Mln_Type2	then
+					!	Point1
+					_frmPointR[1][1] = -gskWdtR/2
+					_frmPointR[1][2] = 0
+
+					!	Point2
+					_frmPointR[2][1] = -frmWdtR/2
+					_frmPointR[2][2] = ((frmWdtR - gskWdtR)/2)*tan(_aFrmR)
+
+					!	Point3
+					_frmPointR[3][1] = -frmWdtR/2
+					_frmPointR[3][2] = _frmPointR[2][2] + gskCapThk/cos(_aFrmR)
+
+					!	Point4
+					_frmPointR[4][1] = -gskWdtR/2
+					_frmPointR[4][2] = gskCapThk/cos(_aFrmR)
+
+					!	Point5
+					_frmPointR[5][1] = -gskWdtR/2
+					_frmPointR[5][2] = gskThk/cos(_aFrmR) + (frmWdtR - gskWdtR)/2*tan(_aFrmR)
+
+					!	Point6
+					_frmPointR[6][1] = -frmWdtR/2
+					_frmPointR[6][2] = _frmPointR[5][2]
+
+					!	Point7
+					_frmPointR[7][1] = -frmWdtR/2
+					_frmPointR[7][2] = _frmPointR[5][2] + frmThkR/cos(_aFrmR)
+
+					!	Point8
+					_frmPointR[8][1] = frmWdtR/2
+					_frmPointR[8][2] = _frmPointR[7][2]
+
+					!	Point9
+					_frmPointR[9][1] = frmWdtR/2
+					_frmPointR[9][2] = _frmPointR[5][2]
+
+					!	Point10
+					_frmPointR[10][1] = gskWdtR/2
+					_frmPointR[10][2] = _frmPointR[5][2]
+
+					!	Point11
+					_frmPointR[11][1] = gskWdtR/2
+					_frmPointR[11][2] = gskCapThk/cos(_aFrmR)
+
+					!	Point12
+					_frmPointR[12][1] = frmWdtR/2
+					_frmPointR[12][2] = _frmPointR[2][2] + gskCapThk/cos(_aFrmR)
+
+					!	Point13
+					_frmPointR[13][1] = frmWdtR/2
+					_frmPointR[13][2] = _frmPointR[2][2]
+
+					!	Point14
+					_frmPointR[14][1] = gskWdtR/2
+					_frmPointR[14][2] = 0
+
+					_nFrmR = 14
+				endif
+			endif
+
+			if	iCornerType = CORNER_TYPE2	then
+				if	iMlnType = Mln_Type1	then
+					!	Point1
+					_frmPointR[1][1] = -gskWdtR/2
+					_frmPointR[1][2] = 0
+
+					!	Point2
+					_frmPointR[2][1] = -gskWdtR/2
+					_frmPointR[2][2] = gskThk/cos(_aFrmR)
+
+					!	Point3
+					_frmPointR[3][1] = -frmWdtR/2
+					_frmPointR[3][2] = gskThk/cos(_aFrmR) + (frmWdtR - gskWdtR)/2*tan(_aFrmR)
+
+					!	Point4
+					_frmPointR[4][1] = -frmWdtR/2
+					_frmPointR[4][2] = _frmPointR[3][2] + frmThkR/cos(_aFrmR)
+
+					!	Point5
+					_frmPointR[5][1] = 0
+					_frmPointR[5][2] = _frmPointR[4][2] - (frmWdtR/2)*tan(_aFrmR)
+
+					!	Point6
+					_frmPointR[6][1] = frmWdtR/2
+					_frmPointR[6][2] = _frmPointR[4][2]
+
+					!	Point7
+					_frmPointR[7][1] = frmWdtR/2
+					_frmPointR[7][2] = _frmPointR[3][2]
+
+					!	Point8
+					_frmPointR[8][1] = gskWdtR/2
+					_frmPointR[8][2] = _frmPointR[2][2]
+
+					!	Point9
+					_frmPointR[9][1] = gskWdtR/2
+					_frmPointR[9][2] = 0
+
+					_nFrmR = 9
+				endif
+
+				if	iMlnType = Mln_Type2	then
+					!	Point1
+					_frmPointR[1][1] = -gskWdtR/2
+					_frmPointR[1][2] = 0
+
+					!	Point2
+					_frmPointR[2][1] = -frmWdtR/2
+					_frmPointR[2][2] = ((frmWdtR - gskWdtR)/2)*tan(_aFrmR)
+
+					!	Point3
+					_frmPointR[3][1] = -frmWdtR/2
+					_frmPointR[3][2] = _frmPointR[2][2] + gskCapThk/cos(_aFrmR)
+
+					!	Point4
+					_frmPointR[4][1] = -gskWdtR/2
+					_frmPointR[4][2] = gskCapThk/cos(_aFrmR)
+
+					!	Point5
+					_frmPointR[5][1] = -gskWdtR/2
+					_frmPointR[5][2] = gskThk/cos(_aFrmR)
+
+					!	Point6
+					_frmPointR[6][1] = -frmWdtR/2
+					_frmPointR[6][2] = gskThk/cos(_aFrmR) + (frmWdtR - gskWdtR)/2*tan(_aFrmR)
+
+					!	Point7
+					_frmPointR[7][1] = -frmWdtR/2
+					_frmPointR[7][2] = _frmPointR[6][2] + frmThkR/cos(_aFrmR)
+
+					!	Point8
+					_frmPointR[8][1] = 0
+					_frmPointR[8][2] = _frmPointR[7][2] - (frmWdtR/2)*tan(_aFrmR)
+
+					!	Point9
+					_frmPointR[9][1] = frmWdtR/2
+					_frmPointR[9][2] = _frmPointR[7][2]
+
+					!	Point10
+					_frmPointR[10][1] = frmWdtR/2
+					_frmPointR[10][2] = _frmPointR[6][2]
+
+					!	Point11
+					_frmPointR[11][1] = gskWdtR/2
+					_frmPointR[11][2] = _frmPointR[5][2]
+
+					!	Point12
+					_frmPointR[12][1] = gskWdtR/2
+					_frmPointR[12][2] = gskCapThk/cos(_aFrmR)
+
+					!	Point13
+					_frmPointR[13][1] = frmWdtR/2
+					_frmPointR[13][2] = _frmPointR[2][2] + gskCapThk/cos(_aFrmR)
+
+					!	Point14
+					_frmPointR[14][1] = frmWdtR/2
+					_frmPointR[14][2] = _frmPointR[2][2]
+
+					!	Point15
+					_frmPointR[15][1] = gskWdtR/2
+					_frmPointR[15][2] = 0
+
+					_nFrmR = 15
+				endif
+			endif
+
+		!	Put	Values
+		for	i = 1	to	_nFrmR
+			!	좌표 회전 / 좌표 이동
+			_xPosTransR[i] = (_frmPointR[i][1])*cos(aFrmR) - (_frmPointR[i][2])*sin(aFrmR) - _xPosR_refer
+			_yPosTransR[i] = (_frmPointR[i][1])*sin(aFrmR) + (_frmPointR[i][2])*cos(aFrmR) + _yPosR_refer
+		next	i
+	endif
+
+	for	i = 1	to	_nFrmR
+		hotspot2	_xPosTransR[i],			_yPosTransR[i]
+		hotspot2	_xPosTransR[i] + _dxR,	_yPosTransR[i] + _dyR
+	next	i
+del 1
+
+
+!===============================================================================================
+!	Projected Views
+!===============================================================================================
+gs_cutplane_height = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[1]
+gs_top_range_height = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[2]
+
+if	gs_symb_show_projection_to = stProjectionTypes[1]	then
+	gs_bottom_range_height = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[3]	! To Floor Plan Range
+else
+	gs_bottom_range_height = GLOB_CUTPLANES_INFO[4]											! Absolute Display Limit
+endif
+
+doCutplane = (AC_symb_display_option = 1 | AC_symb_display_option = 2 | AC_symb_display_option = 6)
+
+!	Draw View Edges
+!-----------------------------------------------------------------------------------------------
+pen			AC_uncut_pen
+line_type	1
+
+if	AC_symb_display_option = 5	then
+	pen			AC_overhead_pen
+	line_type	AC_overhead_linetype
+endif
+
+if	AC_symb_display_option <> 6	then
+	project2{3}	3,	270,	2+32*(AC_symb_display_option = 5 | not(gs_use_3D_view_attributes)),	8,
+		parameters	gs_2D_projection		= doCutplane,
+					gs_2D_projection_type	= 1,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+
+!	Draw View Polygons
+!-----------------------------------------------------------------------------------------------
+if	AC_symb_display_option <> 5 & AC_symb_display_option <> 6	then
+
+	pen		gs_fill_pen
+	fill	gs_fill_type
+
+	project2{3}	3,	270,	3+32+1024+2048,	4,
+					gs_back_pen,
+		parameters	gs_2D_projection		= doCutplane,
+					gs_2D_projection_type	= 2,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+
+!	Draw Overhead View
+!-----------------------------------------------------------------------------------------------
+if	AC_symb_display_option = 2	then
+
+	pen			AC_overhead_pen
+	line_type	AC_overhead_linetype
+
+	project2{3}	3,	270,	2+32,	2+8,
+					gs_back_pen,
+		parameters	gs_2D_projection		= doCutplane,
+					gs_2D_projection_type	= 3,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+
+!	Draw Cut Lines
+!-----------------------------------------------------------------------------------------------
+if	doCutplane	then
+
+	pen				gs_cont_pen
+	line_type		AC_cut_linetype
+	line_property	2
+	project2{3}	3,	270,	2+16+256+4096,	2,
+					gs_back_pen,
+		parameters	gs_2D_projection		= 1,
+					gs_2D_projection_type	= 4,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+
+!	Draw Cut Polygons
+!-----------------------------------------------------------------------------------------------
+if	doCutplane	then
+
+	pen		gs_cont_pen
+	fill	gs_fill_type
+
+	project2{3}	3,	270,	3+32+512,	1,
+					gs_back_pen,
+		parameters	gs_2D_projection		= 1,
+					gs_2D_projection_type	= 5,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+!	하부 입면 라인
+!-----------------------------------------------------------------------------------------------
+if	AC_symb_display_option = 6	then
+	pen	frmPen_Sect
+
+	_ratioCut = (gs_cutplane_height/ctwHgt)
+
+	if	iFrmTypeL = FrmType_Boundary	then
+		_xPosIdx = 3
+	endif
+	if	iFrmTypeL = FrmType_Mullion	then
+		if	iCornerType = CORNER_TYPE1	then
+			if	iMlnType = Mln_Type1	then
+				_xPosIdx = 3
+			endif
+			if	iMlnType = Mln_Type2	then
+				_xPosIdx = 6
+			endif
+		endif
+		if	iCornerType = CORNER_TYPE2	then
+			if	iMlnType = Mln_Type1	then
+				_xPosIdx = 3
+			endif
+			if	iMlnType = Mln_Type2	then
+				_xPosIdx = 6
+			endif
+		endif
+	endif
+
+	add2	0,	gskThk
+		!	라인 1
+		line2	_xPosTransL[_xPosIdx] + _dxL*_ratioCut,	_dyL*_ratioCut,	ctwWdt + _xPosTransR[_xPosIdx] + _dxR*_ratioCut,	_dyR*_ratioCut
+
+		!	라인 2
+		line2	_xPosTransL[(_xPosIdx + 1)] + _dxL*_ratioCut,	_dyL*_ratioCut + frmThkL,	ctwWdt + _xPosTransR[(_xPosIdx + 1)] + _dxR*_ratioCut,	_dyR*_ratioCut + frmThkR
+	del 1
+endif
+
+
+
+!===============================================================================================
+!	Elevation(전개도)
+!===============================================================================================
+if	bGuideLine	then
+	!	Hotspot
+	hotspot2	0,			-yPosGuide,	unID,	xPosGuide,	1+128	:	unID = unID + 1
+	hotspot2	-1,			-yPosGuide,	unID,	xPosGuide,	3		:	unID = unID + 1
+	hotspot2	xPosGuide,	-yPosGuide,	unID,	xPosGuide,	2		:	unID = unID + 1
+
+	hotspot2	xPosGuide,	0,			unID,	yPosGuide,	1+128	:	unID = unID + 1
+	hotspot2	xPosGuide,	1,			unID,	yPosGuide,	3		:	unID = unID + 1
+	hotspot2	xPosGuide,	-yPosGuide,	unID,	yPosGuide,	2		:	unID = unID + 1
+
+	_xStartPoint = min(matrixPoint[1][1],	matrixPoint[2][1])
+	_xEndpoint = max(matrixPoint[3][1],	matrixPoint[4][1])
+
+	_guide = 0.100
+	add2	xPosGuide,	-yPosGuide
+		hotspot2	_guide,				0,					unID,	aGuide,	4	:	unID = unID + 1
+		hotspot2	_guide*cos(aGuide),	_guide*sin(aGuide),	unID,	aGuide,	5	:	unID = unID + 1
+		hotspot2	0,					0,					unID,	aGuide,	6	:	unID = unID + 1
+
+		rot2	aGuide
+			line2		_xStartPoint,	0,	_xEndPoint,	0
+			hotline2	_xStartPoint,	0,	_xEndPoint,	0
+
+			hotspot2	_xStartPoint,	0
+			hotspot2	_xEndPoint,	0
+		del 1
+	del 1
+endif

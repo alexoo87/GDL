@@ -1,0 +1,369 @@
+
+!======================================================================================================
+!	Window Maker 20
+!======================================================================================================
+!   DATE : 2017/3/29 WED
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------
+!  General
+!----------------------------------------------------------------------------------------------
+EPS = 0.00001
+
+iLayout_arrayMax = vardim1(mLayout_outFrame_pos)
+iDim_arrayMax = vardim1(mDim_outFrame_hori)
+
+
+	!	Layout 
+	!------------------------------------------------------------------------------------------------------
+	!	Outside/Inside Index
+	LAYOUT_OUTSIDE = 1
+	LAYOUT_INSIDE = 2
+
+	!	Position Index
+	POS_X = 1 
+	POS_Y = 2
+
+
+	!	Frame
+	!------------------------------------------------------------------------------------------------------
+	!	Insert Frame Size Type (iFrameSize_insert Index)
+	FRAMESIZE_INSERT_OUT_INSIDE = 1
+	FRAMESIZE_INSERT_VERT_HORI = 2
+	FRAMESIZE_INSERT_CUSTOM = 3
+
+	!	Frame Edge Type (iFrameEdge Index)
+	FRAME_EDGE_45DEGREE = 1
+	FRAME_EDGE_90DEGREE = 2
+
+	!	Frame Side Type 
+	FRAME_SIDE_OUTSIDE = 1
+	FRAME_SIDE_INSIDE = 2
+
+	!	OutSide Frame Section Plane Type
+	FRAME_SECT_NONE = 1
+	FRAME_SECT_LEFT_SHORT = 2
+	FRAME_SECT_LEFT_LONG = 3	
+	FRAME_SECT_RIGHT_SHORT = 4
+	FRAME_SECT_RIGHT_LONG = 5	
+	FRAME_SECT_BOTH_LSRS = 6
+	FRAME_SECT_BOTH_LLRS = 7
+	FRAME_SECT_BOTH_LSRL = 8
+	FRAME_SECT_BOTH_LLRL = 9
+	
+	!	InSide Frame Section Plane Type (Boolean)
+	bFRAME_SECT_NONE = 0
+	bFRAME_SECT_LEFT_UP = 0
+	bFRAME_SECT_LEFT_DOWN = 0	
+	bFRAME_SECT_RIGHT_UP = 0
+	bFRAME_SECT_RIGHT_DOWN = 0	
+
+
+	!	Dimension
+	!------------------------------------------------------------------------------------------------------
+	!	Dimension Type
+	DIM_HORI = 1
+	DIM_VERT = 2
+
+
+	!	Opening
+	!------------------------------------------------------------------------------------------------------
+	!	Opening Type (iOpening_type Index)
+	OPENING_WINDOW_DOOR = 1
+	OPENING_OPEN_TYPE = 2
+	OPENING_PANEL_TYPE = 3
+
+	!	DOOR / WINDOW
+	OPENING_WINDOW = 1
+	OPENING_DOOR = 2
+
+	!	Opening-Window Type (iOpening_window_index Index)
+	Type_FixedGlass = 1
+	Type_Spandrel = 2
+	Type_SideHung = 3
+	Type_SideHung_M = 4
+	Type_TiltTurn = 5
+	Type_TiltTurn_M = 6
+	Type_BottomHung = 7
+	Type_TopHung = 8
+	Type_HorPivot = 9
+	Type_VerPivot = 10
+	Type_Sliding3 = 11
+	Type_Sliding4 = 12
+	Type_Sliding6 = 13
+	Type_Grill = 14
+	Type_VerPivot_M = 16
+	Type_DoubleSideHung = 18
+	Type_DoubleTiltTurn = 19
+	Type_DoubleTiltTurn_M = 20
+	Type_SlidingHor = 21
+	Type_SlidingHor_M = 22
+	Type_DoubleSlidingHor = 23
+	Type_DoubleSlidingHor_M = 24
+	Type_SlidingVer = 25
+	Type_DoubleSlidingVer = 26
+	Type_Double_GS = 27
+	Type_Double_GS_M = 28
+
+	dim	iOpening_window_index[]
+		iOpening_window_index[1] = Type_FixedGlass
+		iOpening_window_index[2] = Type_Spandrel
+		iOpening_window_index[4] = Type_SideHung
+		iOpening_window_index[5] = Type_SideHung_M
+		iOpening_window_index[6] = Type_TiltTurn
+		iOpening_window_index[7] = Type_TiltTurn_M
+		iOpening_window_index[8] = Type_BottomHung
+		iOpening_window_index[9] = Type_TopHung
+		iOpening_window_index[10] = Type_HorPivot
+		iOpening_window_index[12] = Type_VerPivot
+		iOpening_window_index[20] = Type_Sliding3
+		iOpening_window_index[21] = Type_Sliding4
+		iOpening_window_index[22] = Type_Sliding6
+		iOpening_window_index[3] = Type_Grill
+		iOpening_window_index[11] = Type_VerPivot_M
+		iOpening_window_index[13] = Type_DoubleSideHung
+		iOpening_window_index[14] = Type_DoubleTiltTurn
+		iOpening_window_index[15] = Type_DoubleTiltTurn_M
+		iOpening_window_index[16] = Type_SlidingHor
+		iOpening_window_index[17] = Type_SlidingHor_M
+		iOpening_window_index[18] = Type_DoubleSlidingHor
+		iOpening_window_index[19] = Type_DoubleSlidingHor_M
+		iOpening_window_index[23] = Type_SlidingVer
+		iOpening_window_index[24] = Type_DoubleSlidingVer
+		iOpening_window_index[25] = Type_Double_GS
+		iOpening_window_index[26] = Type_Double_GS_M
+
+
+	!	Opening-Door Type (iOpening_door_index Index)
+	Type_Door = 1
+	Type_DoubleDoor = 2
+	Type_DoubleDoor_A = 3
+	Type_SlidingDoor = 4
+	Type_MetalDoor = 5
+	Type_MetalDoubleDoor = 6
+
+	dim	iOpening_door_index[]
+		iOpening_door_index[1] = Type_Door
+		iOpening_door_index[2] = Type_DoubleDoor
+		iOpening_door_index[3] = Type_DoubleDoor_A
+		iOpening_door_index[4] = Type_SlidingDoor
+		iOpening_door_index[5] = Type_MetalDoor
+		iOpening_door_index[6] = Type_MetalDoubleDoor
+
+
+
+
+
+	!	2D Representation
+	!------------------------------------------------------------------------------------------------------
+	!	2D Detail Index (iDetail_2D)
+	DETAIL_2D_MVO = 1
+	DETAIL_2D_SIMPLE = 2
+	DETAIL_2D_MIDDLE = 3
+	DETAIL_2D_DETAIL = 4
+	DETAIL_2D_OFF = 5
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  MVO
+!----------------------------------------------------------------------------------------------
+	!	2D Representation
+	!------------------------------------------------------------------------------------------------------
+	!	2D Detail Transfer in MVO
+	if	iDetail_2D = DETAIL_2D_MVO	then
+		success = LIBRARYGLOBAL ("LG_DWSymbSettings", "iWindowMVODetlevel2D", reqWindowMVODetlevel2D)
+		if success > 0 then
+			iMVODetlevel2D = reqWindowMVODetlevel2D
+		endif
+
+		!	'iMVODetlevel2D' Index
+		! 31 = `Detailed`
+		! 22 = `Middle 2`
+		! 21 = `Middle 1`
+		! 13 = `Simple 2 (Wall Centerline)`
+		! 11 = `Simple 1`
+
+		!	Value Transfer
+		if	iMVODetlevel2D = 31 | iMVODetlevel2D = 22	then	iDetail_2D = DETAIL_2D_DETAIL
+		if	iMVODetlevel2D = 21							then	iDetail_2D = DETAIL_2D_MIDDLE
+		if	iMVODetlevel2D = 13 | iMVODetlevel2D = 11	then	iDetail_2D = DETAIL_2D_SIMPLE
+	endif
+
+
+
+!----------------------------------------------------------------------------------------------
+!  General Caculation
+!----------------------------------------------------------------------------------------------
+
+	!	Wall Thickness
+	!------------------------------------------------------------------------------------------------------
+		!	Wall Total Thickness
+		!------------------------------------------------------------------------------------------------------
+		wallthickTmp = 0
+
+		for	i = 1	to	WALL_SKINS_NUMBER
+			wallthickTmp = wallthickTmp + WALL_SKINS_PARAMS[i][2]
+		next i
+
+		if	WALL_COMPS_NAME = ""	then	
+			mWall_thick = WALL_THICKNESS
+		else
+			mWall_thick = wallthickTmp
+		endif
+
+
+		!	Wall Sub Thickness
+		!------------------------------------------------------------------------------------------------------
+		!	WALL_SKINS_PARAMS Index	
+		THICK = 2
+		CORE_STATUS = 6
+
+		!	CORE_STATUS Index
+		CORE_STATUS_CORE = 1
+		CORE_STATUS_CORE2 = 3
+
+		!	Wall Sub Thickness
+		mWall_thick_skin_front = 0
+		mWall_thick_core = 0
+		mWall_thick_skin_back = 0
+		for i = 1	to	WALL_SKINS_NUMBER
+			WALL_STATUS = WALL_SKINS_PARAMS[i][CORE_STATUS]		
+			if	(WALL_STATUS >= CORE_STATUS_CORE-EPS & WALL_STATUS <= CORE_STATUS_CORE+EPS) | (WALL_STATUS >= CORE_STATUS_CORE2-EPS & WALL_STATUS <= CORE_STATUS_CORE2+EPS)	then
+				mWall_thick_core = mWall_thick_core+WALL_SKINS_PARAMS[i][THICK]
+			else
+				if	mWall_thick_core < EPS	then
+					mWall_thick_skin_front = mWall_thick_skin_front + WALL_SKINS_PARAMS[i][THICK]
+				else
+					mWall_thick_skin_back = mWall_thick_skin_back + WALL_SKINS_PARAMS[i][THICK]
+				endif	
+			endif		
+		next i
+
+
+
+
+	!	Layout 
+	!------------------------------------------------------------------------------------------------------
+		!	Layout Number Caculation
+		!------------------------------------------------------------------------------------------------------		
+		!	Outside 		
+		for i = 4	to	iLayout_arrayMax
+			if	i <= iLayout_arrayMax-3	then
+				if	mLayout_outFrame_pos[i][POS_X] < EPS	and	mLayout_outFrame_pos[i][POS_Y] < EPS	then
+					if	mLayout_outFrame_pos[i+1][POS_X] < EPS	and	mLayout_outFrame_pos[i+1][POS_Y] < EPS	then
+						if	mLayout_outFrame_pos[i+2][POS_X] < EPS	and	mLayout_outFrame_pos[i+2][POS_Y] < EPS	then
+							iLayout_outFrame_num = i-1
+							i = iLayout_arrayMax
+						endif	
+					endif	
+				endif		
+			endif	
+		next i
+
+		! !	Inside 		
+		! for i = 1	to	iLayout_arrayMax
+		! 	if	i <= iLayout_arrayMax-3	then
+		! 		if	mLayout_inFrame_pos[i][POS_X] < EPS	and	mLayout_inFrame_pos[i][POS_Y] < EPS	then
+		! 			if	mLayout_inFrame_pos[i+1][POS_X] < EPS	and	mLayout_inFrame_pos[i+1][POS_Y] < EPS	then
+		! 				if	mLayout_inFrame_pos[i+2][POS_X] < EPS	and	mLayout_inFrame_pos[i+2][POS_Y] < EPS	then
+		! 					iLayout_inFrame_num = i-1
+		! 					i = iLayout_arrayMax
+		! 				endif	
+		! 			endif	
+		! 		endif		
+		! 	endif	
+		! next i
+
+
+		!	Layout Size
+		!------------------------------------------------------------------------------------------------------		
+		temp_posx_min = 0
+		temp_posx_max = 0
+		temp_posy_min = 0
+		temp_posy_max = 0	
+		for i = 1	to	iLayout_outFrame_num
+			temp_posx_min = min(temp_posx_min, mLayout_outFrame_pos[i][POS_X])
+			temp_posx_max = max(temp_posx_max, mLayout_outFrame_pos[i][POS_X])
+			temp_posy_min = min(temp_posy_min, mLayout_outFrame_pos[i][POS_Y])
+			temp_posy_max = max(temp_posy_max, mLayout_outFrame_pos[i][POS_Y])						
+		next	i
+		mLayoutWidth = temp_posx_max-temp_posx_min
+		mLayoutHeight = temp_posy_max-temp_posy_min
+
+
+		! !	Total Size 
+		! !------------------------------------------------------------------------------------------------------
+		! if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+		! 	mTotalWidth = mLayoutWidth + mFrameWidth_insert_out
+		! 	mTotalHeight = mLayoutHeight + mFrameWidth_insert_out
+		! endif
+		! if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+		! 	mTotalWidth = mLayoutWidth + mFrameWidth_insert_vert
+		! 	mTotalHeight = mLayoutHeight + mFrame_size_horiW
+		! endif
+
+
+
+	!	Status
+	!------------------------------------------------------------------------------------------------------
+	aSymbol_rotangle = SYMB_ROTANGLE
+	stSymbol_orientation = WIDO_ORIENTATION
+	iSymbol_reveal_side = WIDO_REVEAL_SIDE
+	iSymbol_mirrored = SYMB_MIRRORED
+
+
+
+!----------------------------------------------------------------------------------------------
+!  General Macro
+!----------------------------------------------------------------------------------------------
+
+	!	Board & Sill
+	!------------------------------------------------------------------------------------------------------
+		!	Board & Sill Switch
+		!------------------------------------------------------------------------------------------------------	
+		bBoardSill = 0
+
+		!	하단 프레임이 모두 0 레벨에 위치 되어있을때만 활성화
+		for i = 1	to	iLayout_outFrame_num
+			if	mLayout_outFrame_length[i] > EPS	then
+				if	aLayout_outFrame_angle[i] > 180-EPS & aLayout_outFrame_angle[i] < 180+EPS	then
+					if	mLayout_outFrame_pos[i][POS_Y] < EPS	then
+						bBoardSill = 1
+					else
+						bBoardSill = 0
+						i = iLayout_outFrame_num
+					endif
+				endif
+			endif
+		next i
+
+		!	Board & Sill Batch
+		!------------------------------------------------------------------------------------------------------	
+		if	bBoardSill	then
+
+			!	define WIDO_FRAME_THICKNESS
+			if	iFrameEdge = FRAME_EDGE_45DEGREE	then
+				WIDO_FRAME_THICKNESS = mFrameDepth_insert_out
+			endif
+			if	iFrameEdge = FRAME_EDGE_90DEGREE	then
+				WIDO_FRAME_THICKNESS = mFrameDepth_insert_hori_out
+			endif
+
+			!	2D Detail Level
+			if	iDetail_2D = DETAIL_2D_MVO		then	_iDWDet2D = 1
+			if	iDetail_2D = DETAIL_2D_SIMPLE	then	_iDWDet2D = 7
+			if	iDetail_2D = DETAIL_2D_MIDDLE	then	_iDWDet2D = 4
+			if	iDetail_2D = DETAIL_2D_DETAIL	then	_iDWDet2D = 3
+			if	iDetail_2D = DETAIL_2D_OFF		then	_iDWDet2D = 8
+
+			!	Window 형태가 사각형일 경우에만 작동
+			call	"Window Maker(SB)"	parameters	all	iDWDet2D = _iDWDet2D
+
+			!	reset WIDO_FRAME_THICKNESS
+			WIDO_FRAME_THICKNESS = 0
+
+		endif

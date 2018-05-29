@@ -1,0 +1,1500 @@
+!===============================================================================================
+!	이형 계단
+!===============================================================================================
+
+!	Resolution
+resol 12
+
+!	계단 기울기 구하기
+ _strAng = strRsr/strTrd
+ _strAng = atn(_strAng)
+
+!	Stair status
+str_1st = 1
+str_2nd = 2
+
+!	Model Value
+Entire_Model = 1
+Core_Only = 2
+
+if	GLOB_STRUCTURE_DISPLAY = 0	then
+	_modelValue = Entire_Model
+else
+	_modelValue = Core_Only
+endif
+
+!	수직마감재 + 바탕재 두께 변수 정의
+if	not(bFns)	then
+	_vFnsThk = 0
+	_hFnsThk = 0
+	_bFnsThk = 0
+	_uFnsThk = 0
+else
+	_vFnsThk = vFnsThk
+	_hFnsThk = hFnsThk
+	_bFnsThk = bFnsThk
+	_uFnsThk = uFnsThk
+endif
+
+!	계단참 2D 좌표 Riser 개수는 하나씩 제외했었음
+_nRsr1 = nRsr1 - 1
+_nRsr2 = nRsr2 - 1
+
+
+!	기울어진 각도 계산
+str_Ang_L = 0
+str_Ang_R = 0
+
+if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+	_calcTan_L = xOffsetL/(strTrd*_nRsr1)
+	_calcAng_L = atn(_calcTan_L)
+	str_Ang_L = _calcAng_L
+endif
+
+if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+	_calcTan_R = xOffsetR/(strTrd*_nRsr2)
+	_calcAng_R = atn(_calcTan_R)
+	str_Ang_R = _calcAng_R
+endif
+
+!	핸드레일용 구
+group	"Handrail"
+	material	hndMat
+	sphere	hndRd
+endgroup
+
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+
+!===============================================================================================
+!	구조(Structure)
+!===============================================================================================
+
+	pen			strPenS
+	sect_fill	strFill,	strBackPen,	strFillPen,	strPenS
+	material	strMat
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단_1st
+	!-----------------------------------------------------------------------------------------------
+		!	좌표이동 _ 시작
+		!-----------------------------------------------------------------------------------------------
+			_nTrans = 0
+			if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+				add	-xOffsetL,	0,	0	:	_nTrans = _nTrans + 1
+
+				! if	iOffsetL = Point_Start	then
+				! 	add	strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+				! 		rotz	-str_Ang_L	:	_nTrans = _nTrans + 1
+				! 	add	-strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+				! endif
+				if	iOffsetL = Point_End	then
+					add	strWdtL,	strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+						rotz	str_Ang_L	:	_nTrans = _nTrans + 1
+					add	-strWdtL,	-strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+				endif
+			endif
+
+		!	마감재 On _ 좌표이동
+		!-----------------------------------------------------------------------------------------------
+			_nTrans_Fns = 0
+			addy	_vFnsThk	:	_nTrans_Fns = _nTrans_Fns + 1
+			addz	-_hFnsThk	:	_nTrans_Fns = _nTrans_Fns + 1
+
+		!	Hotspot
+		!-----------------------------------------------------------------------------------------------
+			!	하부 슬래브 두께
+			addz	_hFnsThk - _bFnsThk
+				hotspot	0,	0,	0,			unID,	bLndThk,	1	:	unID = unID + 1
+				hotspot	0,	0,	1,			unID,	bLndThk,	3	:	unID = unID + 1
+				hotspot	0,	0,	-bLndThk,	unID,	bLndThk,	2	:	unID = unID + 1
+			del 1
+
+			!	단 높이
+			if	iCalcHgt = Calc_Rsr_nRsr	then
+				hotspot	0,	0,	0,		unID,	strRsr,	1	:	unID = unID + 1
+				hotspot	0,	0,	-1,		unID,	strRsr,	3	:	unID = unID + 1
+				hotspot	0,	0,	strRsr,	unID,	strRsr,	2	:	unID = unID + 1
+			endif
+
+			!	계단 너비
+			addz	strRsr
+				hotspot	0,			0,	0,	unID,	strWdtL,	1 + 128	:	unID = unID + 1
+				hotspot	-1,			0,	0,	unID,	strWdtL,	3		:	unID = unID + 1
+				hotspot	strWdtL,	0,	0,	unID,	strWdtL,	2		:	unID = unID + 1
+
+				hotspot	0,	0,		0,	unID,	strTrd,	1 + 128	:	unID = unID + 1
+				hotspot	0,	-1,		0,	unID,	strTrd,	3		:	unID = unID + 1
+				hotspot	0,	strTrd,	0,	unID,	strTrd,	2		:	unID = unID + 1
+
+				addx	strWdtL
+					hotspot	0,	0,		0,	unID,	strTrd,	1 + 128	:	unID = unID + 1
+					hotspot	0,	-1,		0,	unID,	strTrd,	3		:	unID = unID + 1
+					hotspot	0,	strTrd,	0,	unID,	strTrd,	2		:	unID = unID + 1
+				del 1
+			del 1
+
+		!	구조 그리기
+		!-----------------------------------------------------------------------------------------------
+			for	i = 1	to	nRsr1
+				_maxValue = strThk/cos(_strAng)
+
+				if	i = 1	then
+					_pointX1 = strRsr - strThk/cos(_strAng)
+					
+					if	bLndThk <= _maxValue	then
+						_pointX2 = -bLndThk
+
+						_pointY2 = _maxValue - bLndThk
+						_pointY2 = _pointY2/tan(_strAng)
+						if	_pointX1 < _pointX2	then	_pointX1 = _pointX2
+						if	_pointY2 > strTrd	then	_pointY2 = strTrd
+
+						put	strRsr,		0,			15,
+							strRsr,		strTrd,		10,
+							_pointX1,	strTrd,		13,
+							_pointX2,	_pointY2,	13,
+							_pointX2,	0,			15
+					endif
+					if	bLndThk > _maxValue	then
+						_pointX2 = -bLndThk + (_hFnsThk - _bFnsThk)
+
+						_pointY2 = bLndThk - (_hFnsThk - _bFnsThk) - _maxValue
+						_pointY2 = -_pointY2/tan(_strAng)
+
+						! put	strRsr,		0,			15,
+						! 	strRsr,		strTrd,		10,
+						! 	_pointX1,	strTrd,		13,
+						! 	_pointX2,	_pointY2,	15,
+						! 	0,			_pointY2,	15,
+						! 	0,			0,			15
+
+						put	strRsr,					0,			15,
+							strRsr,					strTrd,		10,
+							_pointX1,				strTrd,		13,
+							_pointX2,				_pointY2,	15,
+							_hFnsThk - _bFnsThk,	_pointY2,	15,
+							_hFnsThk - _bFnsThk,	0,			15
+					endif
+				endif
+
+				if	i # 1 & i # nRsr1	then
+					_bCut = (strRsr + bLndThk) < _maxValue
+
+					if	i = 2 & _bCut	then
+						_pointX1 = strRsr - strThk/cos(_strAng)
+						_pointX2 = -(strRsr + bLndThk)
+
+						_pointY2 = _maxValue - (strRsr + bLndThk)
+						_pointY2 = _pointY2/tan(_strAng)
+
+						put	strRsr,		0,			15,
+							strRsr,		strTrd,		10,
+							_pointX1,	strTrd,		13,
+							_pointX2,	_pointY2,	15,
+							_pointX2,	0,			8,
+							0,			0,			15
+					else
+						_pointX1 = strRsr - strThk/cos(_strAng)
+						_pointX2 = -strThk/cos(_strAng)
+
+						put	0,			0,		15,
+							strRsr,		0,		15,
+							strRsr,		strTrd,	10,
+							_pointX1,	strTrd,	13,
+							_pointX2,	0,		8
+					endif
+				endif
+
+				if	i = nRsr1	then
+					_pointX1 = strRsr - lndThk
+					_pointX2 = -strThk/cos(_strAng)
+
+					_pointY1 = abs(_maxValue - lndThk)
+					_pointY1 = strTrd + _pointY1/tan(_strAng)
+
+					put	0,			0,			15,
+						_pointX1,	0,			8,
+						_pointX1,	_pointY1,	13,
+						_pointX2,	0,			8
+				endif
+
+				roty	-90
+					prism_	nsp/3,	-strWdtL,	get(nsp)
+				del 1
+
+				add	0,	strTrd,	strRsr
+
+			next	i
+
+			del nRsr1
+
+		!	마감재 On _ 좌표이동
+		!-----------------------------------------------------------------------------------------------
+			del _nTrans_Fns
+
+		!	좌표이동 _ 끝
+		!-----------------------------------------------------------------------------------------------
+			del _nTrans
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단참
+	!-----------------------------------------------------------------------------------------------
+		add	0,	-_vFnsThk,	strRsr*nRsr1 - lndThk
+
+		!	마감재 On _ 좌표이동
+		!-----------------------------------------------------------------------------------------------
+			_nTrans_Fns = 0
+			addy	_vFnsThk	:	_nTrans_Fns = _nTrans_Fns + 1
+			addz	-_hFnsThk	:	_nTrans_Fns = _nTrans_Fns + 1
+
+			!	OffsetL
+			!-----------------------------------------------------------------------------------------------
+			_strWdtL_X = strWdtL*cos(str_Ang_L)
+			_strWdtL_Y = strWdtL*sin(str_Ang_L)
+
+			_strOff1_X = strOff1*tan(str_Ang_L)
+			_strOff1_Y = strOff1
+
+			_fnsThkL = _vFnsThk
+			_fnsThkL_X = _vFnsThk*tan(str_Ang_L)
+			_fnsThkL_Y = _vFnsThk
+
+			_vFnsThkL = vFnsThk !+ basThk
+			_vFnsThkL_X = _vFnsThkL*tan(str_Ang_L)
+			_vFnsThkL_Y = vFnsThk !+ basThk
+
+			_strLndL_X = (_strWdtL_Y + lndWdt)*tan(str_Ang_L)
+
+			_smallL = (strTrd*_nRsr1)/cos(str_Ang_L) - (strTrd*_nRsr1)
+			_smallL_X = _smallL*sin(str_Ang_L)
+			_smallL_Y = _smallL*cos(str_Ang_L)
+
+			_subL = _strOff1_Y + _smallL_Y - _strWdtL_Y + lndWdt
+			_subL_X = _subL*tan(str_Ang_L)
+
+			if	iOffsetL = Point_Off	then
+				put	strWdtL,	strTrd*_nRsr1 + strOff1 + _vFnsThkL_Y,	15,
+					strWdtL,	strTrd*_nRsr1 + _fnsThkL_Y,				12,
+					0,			strTrd*_nRsr1 + _fnsThkL_Y,				15,
+					0,			strTrd*_nRsr1 + strOff1 + lndWdt,		15
+			endif
+			! if	iOffsetL = Point_Start	then
+			! 	put	strWdtL + _strOff1_X + _vFnsThkL_X,					strTrd*_nRsr1 + _strOff1_Y + _vFnsThkL_Y,				15,
+			! 		strWdtL - _smallL_X + _fnsThkL_X,					strTrd*_nRsr1 - _smallL_Y + _fnsThkL_Y,					8,
+			! 		strWdtL - (_smallL_X + _strWdtL_X) + _fnsThkL_X,	strTrd*_nRsr1 - _smallL_Y + _strWdtL_Y + _fnsThkL_Y,	15,
+			! 		strWdtL - (_smallL_X + _strWdtL_X) + _subL_X,		strTrd*_nRsr1 + _strOff1_Y + lndWdt,					15
+			! endif
+			if	iOffsetL = Point_End	then
+				put	strWdtL - (xOffsetL + _strOff1_X + _vFnsThkL_X),				strTrd*_nRsr1 + strOff1 + _vFnsThkL_Y,		15,
+					strWdtL - (xOffsetL + _fnsThkL_X),								strTrd*_nRsr1 + _fnsThkL_Y,					12,
+					strWdtL - (xOffsetL + _strWdtL_X + _fnsThkL_X),					strTrd*_nRsr1 - _strWdtL_Y + _fnsThkL_Y,	15,
+					strWdtL - (xOffsetL + _strWdtL_X + _strOff1_X + _strLndL_X),	strTrd*_nRsr1 + strOff1 + lndWdt,			15
+			endif
+
+			!	OffsetR
+			!-----------------------------------------------------------------------------------------------
+			_strWdtR_X1 = strWdtR*cos(str_Ang_R)	!	짧은 X
+			_strWdtR_X2 = strWdtR/cos(str_Ang_R)	!	긴 X
+			_strWdtR_Y = strWdtR*sin(str_Ang_R)
+
+			_strOff2_X = strOff2*tan(str_Ang_R)
+			_strOff2_Y = strOff2
+
+			_fnsThkR = _vFnsThk
+			_fnsThkR_X = _vFnsThk*tan(str_Ang_R)
+			_fnsThkR_Y = _vFnsThk
+
+			_vFnsThkR = vFnsThk + basThk
+			_vFnsThkR_X = _vFnsThkR*tan(str_Ang_R)
+			_vFnsThkR_Y = vFnsThk + basThk
+
+			_strLndR_X = (_strWdtR_Y + lndWdt)*tan(str_Ang_R)
+
+			_smallR = (strTrd*_nRsr2)/cos(str_Ang_R) - (strTrd*_nRsr2)
+			_smallR_X = _smallR*sin(str_Ang_R)
+			_smallR_Y = _smallR*cos(str_Ang_R)
+			
+			_subR = _strOff2_Y + _smallR_Y - _strWdtR_Y + lndWdt
+			_subR_X = _subR*tan(str_Ang_R)
+
+			if	iOffsetR = Point_Off	then
+				put	strWdtL + strWell + strWdtR,		strTrd*_nRsr1 + strOff1 + lndWdt,					15,
+					strWdtL + strWell + strWdtR,		strTrd*_nRsr1 + strOff1 - _fnsThkL_Y - strOff2,	8 + 64,
+					strWdtL + strWell,					strTrd*_nRsr1 + strOff1 - _fnsThkL_Y - strOff2,	15 + 64,
+					strWdtL + strWell,					strTrd*_nRsr1 + strOff1 + _vFnsThkR_Y,				15
+			endif
+			if	iOffsetR = Point_Start	then
+				put	strWdtL + strWell + xOffsetR + _strOff2_X + _strWdtR_X1 + _strLndR_X,	strTrd*_nRsr1 + strOff1 + lndWdt,								15,
+					strWdtL + strWell + xOffsetR + _strWdtR_X1 - _fnsThkR_X,				strTrd*_nRsr1 + strOff1 - (_strWdtR_Y + strOff2 + _fnsThkL_Y),	8 + 64,
+					strWdtL + strWell + xOffsetR - _fnsThkR_X,								strTrd*_nRsr1 + strOff1 - (strOff2 + _fnsThkL_Y),				15 + 64,
+					strWdtL + strWell + xOffsetR + _strOff2_X + _vFnsThkR_X,				strTrd*_nRsr1 + strOff1 + _vFnsThkR_Y,							15
+			endif
+			! if	iOffsetR = Point_End	then
+			! 	put	strWdtL + strWell + _strWdtR_X1 - _subR_X,					strTrd*_nRsr1 + _strOff1_Y + lndWdt,												1,
+			! 		strWdtL + strWell + _strWdtR_X1 + _smallR_X + _fnsThkR_X,	strTrd*_nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y - _strWdtR_Y + _fnsThkR_Y),	0,
+			! 		strWdtL + strWell + _smallR_X + _fnsThkR_X,					strTrd*_nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y + _fnsThkR_Y),					1,
+			! 		strWdtL + strWell - _strOff2_X - _vFnsThkR_X,				strTrd*_nRsr1 + _strOff1_Y + _vFnsThkL_Y,											1
+			! endif
+
+			prism_	nsp/3,	lndThk,	get(nsp)
+
+		!	마감재 On _ 좌표이동
+		!-----------------------------------------------------------------------------------------------
+			del _nTrans_Fns
+
+		del 1
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단_2nd
+	!-----------------------------------------------------------------------------------------------
+		!	위치 맞추기 _ 시작
+		!-----------------------------------------------------------------------------------------------
+		add	strWdtL + strWell + strWdtR,	strTrd*_nRsr1 + strOff1 - strOff2,	strRsr*nRsr1
+			rotz	180
+
+		!	좌표이동 _ 시작
+		!-----------------------------------------------------------------------------------------------
+		_nTrans = 0
+		if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+			add	-xOffsetR,	0,	0	:	_nTrans = _nTrans + 1
+
+			if	iOffsetR = Point_Start	then
+				add	strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+					rotz	-str_Ang_R	:	_nTrans = _nTrans + 1
+				add	-strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+			endif
+			! if	iOffsetR = Point_End	then
+			! 	add	strWdtR,	strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+			! 		rotz	str_Ang_R	:	_nTrans = _nTrans + 1
+			! 	add	-strWdtR,	-strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+			! endif
+		endif
+
+		!	Hotspot
+		!-----------------------------------------------------------------------------------------------
+			!	계단 전체 높이
+			if	iCalcHgt = Calc_Hgt_nRsr	then
+				add	0,	strTrd*nRsr2,	-strRsr*nRsr1
+					hotspot	0,	0,	0,		unID,	zzyzx,	1	:	unID = unID + 1
+					hotspot	0,	0,	-1,		unID,	zzyzx,	3	:	unID = unID + 1
+					hotspot	0,	0,	zzyzx,	unID,	zzyzx,	2	:	unID = unID + 1
+				del 1
+			endif
+
+			!	상부 슬라브 두께
+			if	not(bFns)	then
+				add	0,	strTrd*(nRsr2 - 1),	strRsr*nRsr2
+					hotspot	0,	0,	0,			unID,	uLndThk,	1	:	unID = unID + 1
+					hotspot	0,	0,	1,			unID,	uLndThk,	3	:	unID = unID + 1
+					hotspot	0,	0,	-uLndThk,	unID,	uLndThk,	2	:	unID = unID + 1
+
+					addx	strWdtR
+						hotspot	0,	0,	0,			unID,	uLndThk,	1	:	unID = unID + 1
+						hotspot	0,	0,	1,			unID,	uLndThk,	3	:	unID = unID + 1
+						hotspot	0,	0,	-uLndThk,	unID,	uLndThk,	2	:	unID = unID + 1
+					del 1
+				del 1
+			endif
+
+		!	마감재 On _ 좌표이동
+		!-----------------------------------------------------------------------------------------------
+			_nTrans_Fns = 0
+			addy	_vFnsThk	:	_nTrans_Fns = _nTrans_Fns + 1
+			addz	-_hFnsThk	:	_nTrans_Fns = _nTrans_Fns + 1
+
+		!	구조 그리기
+		!-----------------------------------------------------------------------------------------------
+			for	i = 1	to	nRsr2
+				_maxValue = strThk/cos(_strAng)
+
+				if	i = 1	then
+					_pointX1 = strRsr - strThk/cos(_strAng)
+					
+					if	lndThk <= _maxValue	then
+						_pointX2 = -lndThk
+
+						_pointY2 = _maxValue - lndThk
+						_pointY2 = _pointY2/tan(_strAng)
+						if	_pointX1 < _pointX2	then	_pointX1 = _pointX2
+						if	_pointY2 > strTrd	then	_pointY2 = strTrd
+
+						put	strRsr,		0,			15,
+							strRsr,		strTrd,		8,
+							_pointX1,	strTrd,		13,
+							_pointX2,	_pointY2,	15,
+							_pointX2,	0,			8,
+							0,			0,			15
+					endif
+					if	lndThk > _maxValue	then
+						_pointX2 = -lndThk
+
+						_pointY2 = _maxValue
+						_pointY2 = -_pointY2/tan(_strAng)
+
+						put	strRsr,		0,			15,
+							strRsr,		strTrd,		8,
+							_pointX1,	strTrd,		13,
+							_pointX2,	_pointY2,	15,
+							0,			_pointY2,	8,
+							0,			0,			15
+					endif
+				endif
+
+				if	i # 1 & i # nRsr2	then
+					_pointX1 = strRsr - strThk/cos(_strAng)
+					_pointX2 = -strThk/cos(_strAng)
+
+					put	0,			0,		15,
+						strRsr,		0,		15,
+						strRsr,		strTrd,	10,
+						_pointX1,	strTrd,	13,
+						_pointX2,	0,		8
+				endif
+
+				if	i = nRsr2	then
+					_pointX1 = strRsr - uLndThk + _hFnsThk - _uFnsThk
+					_pointX2 = -strThk/cos(_strAng)
+
+					_pointY1 = (uLndThk - _hFnsThk + _uFnsThk) - _maxValue
+					_pointY1 = strTrd - _pointY1/tan(_strAng)
+
+					put	_pointX1,	0,			8,
+						_pointX1,	_pointY1,	13,
+						_pointX2,	0,			8
+				endif
+
+				roty	-90
+					prism_	nsp/3,	-strWdtR,	get(nsp)
+				del 1
+
+				add	0,	strTrd,	strRsr
+
+			next	i
+
+			del nRsr2
+
+		!	마감재 On _ 좌표이동
+		!-----------------------------------------------------------------------------------------------
+			del _nTrans_Fns
+
+		!	좌표이동 _ 끝
+		!-----------------------------------------------------------------------------------------------
+			del _nTrans
+
+
+		!	위치 맞추기 _ 끝
+		!-----------------------------------------------------------------------------------------------
+			del 1
+		del 1
+
+
+!===============================================================================================
+!	바탕
+!===============================================================================================
+
+	pen			basPenS
+	sect_fill	basFill,	basBackPen,	basFillPen,	basPenS
+	material	basMat
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단_1st
+	!-----------------------------------------------------------------------------------------------
+		!	좌표이동
+		!-----------------------------------------------------------------------------------------------
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단참
+	!-----------------------------------------------------------------------------------------------
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단_2nd
+	!-----------------------------------------------------------------------------------------------
+		!	좌표이동
+		!-----------------------------------------------------------------------------------------------
+
+
+!===============================================================================================
+!	마감(Finish)
+!===============================================================================================
+
+	if	bFns & _modelValue = Entire_Model	then
+
+	pen			fnsPenS
+	sect_fill	fnsFill,	fnsBackPen,	fnsFillPen,	fnsPenS
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단_1st
+	!-----------------------------------------------------------------------------------------------
+		!	좌표이동 _ 시작
+		!-----------------------------------------------------------------------------------------------
+			_nTrans = 0
+			if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+				add	-xOffsetL,	0,	0	:	_nTrans = _nTrans + 1
+
+				! if	iOffsetL = Point_Start	then
+				! 	add	strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+				! 		rotz	-str_Ang_L	:	_nTrans = _nTrans + 1
+				! 	add	-strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+				! endif
+				if	iOffsetL = Point_End	then
+					add	strWdtL,	strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+						rotz	str_Ang_L	:	_nTrans = _nTrans + 1
+					add	-strWdtL,	-strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+				endif
+			endif
+
+		!	Hotspot
+		!-----------------------------------------------------------------------------------------------
+			!	하부 마감 두께
+			hotspot	0,	0,	0,			unID,	bFnsThk,	1	:	unID = unID + 1
+			hotspot	0,	0,	1,			unID,	bFnsThk,	3	:	unID = unID + 1
+			hotspot	0,	0,	-bFnsThk,	unID,	bFnsThk,	2	:	unID = unID + 1
+
+			!	수직 마감 두께
+			hotspot	0,	0,			0,	unID,	vFnsThk,	1	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	vFnsThk,	3	:	unID = unID + 1
+			hotspot	0,	vFnsThk,	0,	unID,	vFnsThk,	2	:	unID = unID + 1
+
+			!	수평 마감 두께
+			addz	strRsr
+				hotspot	0,	0,	0,			unID,	hFnsThk,	1	:	unID = unID + 1
+				hotspot	0,	0,	1,			unID,	hFnsThk,	3	:	unID = unID + 1
+				hotspot	0,	0,	-hFnsThk,	unID,	hFnsThk,	2	:	unID = unID + 1
+
+				hotspot	0,	0,			0,	unID,	fnsNosing,	1	:	unID = unID + 1
+				hotspot	0,	1,			0,	unID,	fnsNosing,	3	:	unID = unID + 1
+				hotspot	0,	-fnsNosing,	0,	unID,	fnsNosing,	2	:	unID = unID + 1
+			del 1
+
+		!	마감재 그리기
+		!-----------------------------------------------------------------------------------------------
+		
+			!	수평마감재 그리기
+			!-----------------------------------------------------------------------------------------------
+			material	hFnsMat
+			addz	strRsr - hFnsThk
+
+				for	i = 1	to	nRsr1
+
+					if	i #	nRsr1	then
+						put	0,			-fnsNosing,			15,
+							hFnsThk,	-fnsNosing,			15,
+							hFnsThk,	strTrd + vFnsThk,	15,
+							0,			strTrd + vFnsThk,	15
+					endif
+
+					if	i = nRsr1	then
+						put	0,			-fnsNosing,	15,
+							hFnsThk,	-fnsNosing,	13,
+							hFnsThk,	vFnsThk,	8,
+							0,			vFnsThk,	15
+					endif
+
+					roty	-90
+						prism_	nsp/3,	-strWdtL,	get(nsp)
+					del 1
+
+					add	0,	strTrd,	strRsr
+
+				next	i
+
+				del nRsr1
+
+			del 1
+
+			!	수직마감재 그리기
+			!-----------------------------------------------------------------------------------------------
+			material	vFnsMat
+
+				for	i = 1	to	nRsr1
+
+					if	i # nRsr1	then
+						put	0,					0,			15,
+							strRsr - hFnsThk,	0,			15,
+							strRsr - hFnsThk,	vFnsThk,	15,
+							0,					vFnsThk,	15
+					endif
+
+					if	i = nRsr1	then
+						put	0,					0,			15,
+							strRsr - hFnsThk,	0,			15,
+							strRsr - hFnsThk,	vFnsThk,	15,
+							0,					vFnsThk,	15
+					endif
+
+					roty	-90
+						prism_	nsp/3,	-strWdtL,	get(nsp)
+					del 1
+
+					add	0,	strTrd,	strRsr
+
+				next	i
+
+				del	nRsr1
+
+
+		!	좌표이동 _ 끝
+		!-----------------------------------------------------------------------------------------------
+			del _nTrans
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단참
+	!-----------------------------------------------------------------------------------------------
+		material	hFnsMat
+
+		add	0,	0,	strRsr*nRsr1 - hFnsThk
+
+			!	OffsetL
+			!-----------------------------------------------------------------------------------------------
+			_strWdtL_X = strWdtL*cos(str_Ang_L)
+			_strWdtL_Y = strWdtL*sin(str_Ang_L)
+
+			_strOff1_X = strOff1*tan(str_Ang_L)
+			_strOff1_Y = strOff1
+
+			_fnsThkL_X = 0
+			_fnsThkL_Y = 0
+
+			_vFnsThkL = vFnsThk + basThk
+			_vFnsThkL_X = _vFnsThkL*tan(str_Ang_L)
+			_vFnsThkL_Y = vFnsThk + basThk
+
+			_strLndL_X = (_strWdtL_Y + lndWdt)*tan(str_Ang_L)
+
+			_smallL = (strTrd*_nRsr1)/cos(str_Ang_L) - (strTrd*_nRsr1)
+			_smallL_X = _smallL*sin(str_Ang_L)
+			_smallL_Y = _smallL*cos(str_Ang_L)
+
+			_subL = _strOff1_Y + _smallL_Y - _strWdtL_Y + lndWdt
+			_subL_X = _subL*tan(str_Ang_L)
+
+			if	iOffsetL = Point_Off	then
+				put	strWdtL,	strTrd*_nRsr1 + strOff1 + _vFnsThkL,	15,
+					strWdtL,	strTrd*_nRsr1 + _fnsThkL_Y,				9,
+					0,			strTrd*_nRsr1 + _fnsThkL_Y,				13,
+					0,			strTrd*_nRsr1 + strOff1 + lndWdt,		15
+			endif
+			! if	iOffsetL = Point_Start	then
+			! 	put	strWdtL + _strOff1_X + _vFnsThkL_X,					strTrd*_nRsr1 + _strOff1_Y + _vFnsThkL_Y,				15,
+			! 		strWdtL - _smallL_X + _fnsThkL_X,					strTrd*_nRsr1 - _smallL_Y + _fnsThkL_Y,					8,
+			! 		strWdtL - (_smallL_X + _strWdtL_X) + _fnsThkL_X,	strTrd*_nRsr1 - _smallL_Y + _strWdtL_Y + _fnsThkL_Y,	15,
+			! 		strWdtL - (_smallL_X + _strWdtL_X) + _subL_X,		strTrd*_nRsr1 + _strOff1_Y + lndWdt,					15
+			! endif
+			if	iOffsetL = Point_End	then
+				put	strWdtL - (xOffsetL + _strOff1_X + _vFnsThkL_X),				strTrd*_nRsr1 + strOff1 + _vFnsThkL,		15,
+					strWdtL - (xOffsetL + _fnsThkL_X),								strTrd*_nRsr1 + _fnsThkL_Y,					11,
+					strWdtL - (xOffsetL + _strWdtL_X + _fnsThkL_X),					strTrd*_nRsr1 - _strWdtL_Y + _fnsThkL_Y,	15,
+					strWdtL - (xOffsetL + _strWdtL_X + _strOff1_X + _strLndL_X),	strTrd*_nRsr1 + strOff1 + lndWdt,			15
+			endif
+
+			!	OffsetR
+			!-----------------------------------------------------------------------------------------------
+			_strWdtR_X1 = strWdtR*cos(str_Ang_R)	!	짧은 X
+			_strWdtR_X2 = strWdtR/cos(str_Ang_R)	!	긴 X
+			_strWdtR_Y = strWdtR*sin(str_Ang_R)
+
+			_strOff2_X = strOff2*tan(str_Ang_R)
+			_strOff2_Y = strOff2
+
+			_fnsThkR_X = 0
+			_fnsThkR_Y = 0
+
+			_vFnsThkR = vFnsThk + basThk
+			_vFnsThkR_X = _vFnsThkR*tan(str_Ang_R)
+			_vFnsThkR_Y = vFnsThk + basThk
+
+			_strLndR_X = (_strWdtR_Y + lndWdt)*tan(str_Ang_R)
+
+			_smallR = (strTrd*nRsr2)/cos(str_Ang_R) - (strTrd*nRsr2)
+			_smallR_X = _smallR*sin(str_Ang_R)
+			_smallR_Y = _smallR*cos(str_Ang_R)
+			
+			_subR = _strOff2_Y + _smallR_Y - _strWdtR_Y + lndWdt
+			_subR_X = _subR*tan(str_Ang_R)
+
+			if	iOffsetR = Point_Off	then
+				put	strWdtL + strWell + strWdtR,		strTrd*_nRsr1 + strOff1 + lndWdt,				15,
+					strWdtL + strWell + strWdtR,		strTrd*_nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	8 + 64,
+					strWdtL + strWell,					strTrd*_nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	15 + 64,
+					strWdtL + strWell,					strTrd*_nRsr1 + strOff1 + _vFnsThkR,			15
+			endif
+			if	iOffsetR = Point_Start	then
+				put	strWdtL + strWell + xOffsetR + _strOff2_X + _strWdtR_X1 + _strLndR_X,	strTrd*_nRsr1 + strOff1 + lndWdt,								15,
+					strWdtL + strWell + xOffsetR + _strWdtR_X1 - _fnsThkR_X,				strTrd*_nRsr1 + strOff1 - (_strWdtR_Y + strOff2 + _fnsThkR_Y),	8 + 64,
+					strWdtL + strWell + xOffsetR - _fnsThkR_X,								strTrd*_nRsr1 + strOff1 - (strOff2 + _fnsThkR_Y),				15 + 64,
+					strWdtL + strWell + xOffsetR + _strOff2_X + _vFnsThkR_X,				strTrd*_nRsr1 + strOff1 + _vFnsThkR,							15
+			endif
+			! if	iOffsetR = Point_End	then
+			! 	put	strWdtL + strWell + _strWdtR_X1 - _subR_X,					strTrd*_nRsr1 + _strOff1_Y + lndWdt,												1,
+			! 		strWdtL + strWell + _strWdtR_X1 + _smallR_X + _fnsThkR_X,	strTrd*_nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y - _strWdtR_Y + _fnsThkR_Y),	0,
+			! 		strWdtL + strWell + _smallR_X + _fnsThkR_X,					strTrd*_nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y + _fnsThkR_Y),				1,
+			! 		strWdtL + strWell - _strOff2_X - _vFnsThkR_X,				strTrd*_nRsr1 + _strOff1_Y + _vFnsThkL_Y,										1
+			! endif
+
+			prism_	nsp/3,	hFnsThk,	get(nsp)
+
+
+		del 1
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단_2nd
+	!-----------------------------------------------------------------------------------------------
+		!	위치 맞추기 _ 시작
+		!-----------------------------------------------------------------------------------------------
+		add	strWdtL + strWell + strWdtR,	strTrd*_nRsr1 + strOff1 - strOff2,	strRsr*nRsr1
+			rotz	180
+
+		!	좌표이동 _ 시작
+		!-----------------------------------------------------------------------------------------------
+		_nTrans = 0
+		if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+			add	-xOffsetR,	0,	0	:	_nTrans = _nTrans + 1
+
+			if	iOffsetR = Point_Start	then
+				add	strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+					rotz	-str_Ang_R	:	_nTrans = _nTrans + 1
+				add	-strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+			endif
+			! if	iOffsetR = Point_End	then
+			! 	add	strWdtR,	strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+			! 		rotz	str_Ang_R	:	_nTrans = _nTrans + 1
+			! 	add	-strWdtR,	-strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+			! endif
+		endif
+
+		!	Hotspot
+		!-----------------------------------------------------------------------------------------------
+			!	상부 마감 두께
+			add	0,	strTrd*(nRsr2 - 1) + _vFnsThk,	strRsr*nRsr2
+				hotspot	0,	0,	0,			unID,	uFnsThk,	1	:	unID = unID + 1
+				hotspot	0,	0,	1,			unID,	uFnsThk,	3	:	unID = unID + 1
+				hotspot	0,	0,	-uFnsThk,	unID,	uFnsThk,	2	:	unID = unID + 1
+
+				addx	strWdtR
+					hotspot	0,	0,	0,			unID,	uFnsThk,	1	:	unID = unID + 1
+					hotspot	0,	0,	1,			unID,	uFnsThk,	3	:	unID = unID + 1
+					hotspot	0,	0,	-uFnsThk,	unID,	uFnsThk,	2	:	unID = unID + 1
+				del 1
+			del 1
+
+			!	상부 슬라브 두께
+			add	0,	strTrd*(nRsr2 - 1) + _vFnsThk,	strRsr*nRsr2 - _uFnsThk
+				hotspot	0,	0,	0,			unID,	uLndThk,	1	:	unID = unID + 1
+				hotspot	0,	0,	1,			unID,	uLndThk,	3	:	unID = unID + 1
+				hotspot	0,	0,	-uLndThk,	unID,	uLndThk,	2	:	unID = unID + 1
+
+				addx	strWdtR
+					hotspot	0,	0,	0,			unID,	uLndThk,	1	:	unID = unID + 1
+					hotspot	0,	0,	1,			unID,	uLndThk,	3	:	unID = unID + 1
+					hotspot	0,	0,	-uLndThk,	unID,	uLndThk,	2	:	unID = unID + 1
+				del 1
+			del 1
+
+		!	마감재 그리기
+		!-----------------------------------------------------------------------------------------------
+		
+			!	수평마감재 그리기
+			!-----------------------------------------------------------------------------------------------
+			material	hFnsMat
+
+			!	계단참과 만나는 부분
+			put	0,			0,			13,
+				0,			vFnsThk,	15,
+				-hFnsThk,	vFnsThk,	15,
+				-hFnsThk,	0,			10
+
+			roty	-90
+				prism_	nsp/3,	-strWdtL,	get(nsp)
+			del 1
+
+			addz	strRsr - hFnsThk
+
+				for	i = 1	to	nRsr2
+
+					if	i #	nRsr2	then
+						put	0,			-fnsNosing,			15,
+							hFnsThk,	-fnsNosing,			15,
+							hFnsThk,	strTrd + vFnsThk,	15,
+							0,			strTrd + vFnsThk,	15
+					endif
+
+					if	i = nRsr2	then
+						put	0,			-fnsNosing,	15,
+							hFnsThk,	-fnsNosing,	13,
+							hFnsThk,	vFnsThk,	8,
+							0,			vFnsThk,	15
+					endif
+
+					roty	-90
+						prism_	nsp/3,	-strWdtL,	get(nsp)
+					del 1
+
+					add	0,	strTrd,	strRsr
+
+				next	i
+
+				del nRsr2
+
+			del 1
+
+			!	수직마감재 그리기
+			!-----------------------------------------------------------------------------------------------
+			material	vFnsMat
+
+				for	i = 1	to	nRsr2
+
+					if	i # nRsr2	then
+						put	0,					0,			15,
+							strRsr - hFnsThk,	0,			15,
+							strRsr - hFnsThk,	vFnsThk,	15,
+							0,					vFnsThk,	15
+					endif
+
+					if	i = nRsr2	then
+						put	0,					0,			15,
+							strRsr - hFnsThk,	0,			15,
+							strRsr - hFnsThk,	vFnsThk,	15,
+							0,					vFnsThk,	15
+					endif
+
+					roty	-90
+						prism_	nsp/3,	-strWdtL,	get(nsp)
+					del 1
+
+					add	0,	strTrd,	strRsr
+
+				next	i
+
+				del	nRsr2
+
+
+		!	좌표이동 _ 끝
+		!-----------------------------------------------------------------------------------------------
+			del _nTrans
+
+		!	위치 맞추기 _ 끝
+		!-----------------------------------------------------------------------------------------------
+			del 1
+		del 1
+
+
+		endif
+
+!===============================================================================================
+!	입면/단면 난간(Handrail for Elevation and Section)
+!===============================================================================================
+
+	!	MVO
+	!-------------------------------------------------------------------------------------------
+	success = LIBRARYGLOBAL("MVO_StairSettings",	"iRailSect",	_iRailSect)
+
+	if	success & iRailSect = RailSect_MVO	then
+		_iRailSect = _iRailSect
+	else
+		_iRailSect = iRailSect
+	endif
+	
+
+	!-----------------------------------------------------------------------------------------------
+	!	입면/단면 난간 On/Off
+	!-----------------------------------------------------------------------------------------------
+	_bHnd_Line = 0
+	if	_modelValue = Entire_Model	then
+		if	(GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5) and _iRailSect = RailSect_Line	then
+			_bHnd_Line = 1
+		endif
+	endif
+
+	if	_bHnd_Line	then
+
+		pen	hndLinePen
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단_1st
+		!-----------------------------------------------------------------------------------------------
+			!	좌표이동 _ 시작
+			!-----------------------------------------------------------------------------------------------
+				_nTrans = 0
+				if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+					add	-xOffsetL,	0,	0	:	_nTrans = _nTrans + 1
+
+					! if	iOffsetL = Point_Start	then
+					! 	add	strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+					! 		rotz	-str_Ang_L	:	_nTrans = _nTrans + 1
+					! 	add	-strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+					! endif
+					if	iOffsetL = Point_End	then
+						add	strWdtL,	strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+							rotz	str_Ang_L	:	_nTrans = _nTrans + 1
+						add	-strWdtL,	-strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+					endif
+				endif
+
+
+			!	난간 그리기
+			!-----------------------------------------------------------------------------------------------
+				add	strWdtL - hndOff_In,	-strTrd/2,	0
+
+					lin_	0,	0,	0,	0,	0,	hndHgt
+
+					add	0,	0,	hndHgt
+
+						lin_	0,	0,	0,	0,	strTrd*nRsr1,	strRsr*nRsr1
+
+						add	0,	strTrd*nRsr1,	strRsr*nRsr1
+
+							lin_	0,	0,	0,	0,	0,	-hndHgt
+
+						del 1
+
+					del 1
+
+				del 1
+
+			!	좌표이동 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del _nTrans
+
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단참
+		!-----------------------------------------------------------------------------------------------
+			add	strWdtL - hndOff_In,	strTrd*nRsr1 - strTrd/2 + strOff1,	strRsr*nRsr1
+
+				lin_	0,	0,	0,	0,	0,	hndHgt
+
+				addz	hndHgt
+					lin_	0,	0,	0,	0,	-max(strOff1,	strOff2),	0
+				del 1
+
+			del 1
+
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단_2nd
+		!-----------------------------------------------------------------------------------------------
+			!	위치 맞추기 _ 시작
+			!-----------------------------------------------------------------------------------------------
+			add	strWdtL + strWell + strWdtR,	strTrd*_nRsr1 + strOff1 - strOff2,	strRsr*nRsr1
+				rotz	180
+
+			!	좌표이동 _ 시작
+			!-----------------------------------------------------------------------------------------------
+			_nTrans = 0
+			if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+				add	-xOffsetR,	0,	0	:	_nTrans = _nTrans + 1
+
+				if	iOffsetR = Point_Start	then
+					add	strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+						rotz	-str_Ang_R	:	_nTrans = _nTrans + 1
+					add	-strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+				endif
+				! if	iOffsetR = Point_End	then
+				! 	add	strWdtR,	strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+				! 		rotz	str_Ang_R	:	_nTrans = _nTrans + 1
+				! 	add	-strWdtR,	-strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+				! endif
+			endif
+
+			!	난간 그리기
+			!-----------------------------------------------------------------------------------------------
+				add	strWdtR - hndOff_In,	-strTrd/2,	0
+
+					lin_	0,	0,	0,	0,	0,	hndHgt
+
+					add	0,	0,	hndHgt
+
+						lin_	0,	0,	0,	0,	strTrd*nRsr2,	strRsr*nRsr2
+
+						add	0,	strTrd*nRsr2,	strRsr*nRsr2
+
+							lin_	0,	0,	0,	0,	0,	-hndHgt
+
+						del 1
+
+					del 1
+
+				del 1
+
+
+			!	좌표이동 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del _nTrans
+
+			!	위치 맞추기 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del 1
+			del 1
+
+	endif
+
+!===============================================================================================
+!	외부난간(Outter Handrail)
+!===============================================================================================
+
+	material	hndMat
+
+	!-----------------------------------------------------------------------------------------------
+	!	외부난간 On/Off
+	!-----------------------------------------------------------------------------------------------
+	_bHnd_Out = 0
+	if	bHnd_Out	then
+		if	_modelValue = Entire_Model	then
+			if	GLOB_VIEW_TYPE = 3 | ((GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5) and _iRailSect = RailSect_3D)	then
+				_bHnd_Out = 1
+			endif
+		endif
+	endif
+
+	if	_bHnd_Out	then
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단_1st
+		!-----------------------------------------------------------------------------------------------
+			!	좌표이동 _ 시작
+			!-----------------------------------------------------------------------------------------------
+				_nTrans = 0
+				if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+					add	-xOffsetL,	0,	0	:	_nTrans = _nTrans + 1
+
+					! if	iOffsetL = Point_Start	then
+					! 	add	strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+					! 		rotz	-str_Ang_L	:	_nTrans = _nTrans + 1
+					! 	add	-strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+					! endif
+					if	iOffsetL = Point_End	then
+						add	strWdtL,	strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+							rotz	str_Ang_L	:	_nTrans = _nTrans + 1
+						add	-strWdtL,	-strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+					endif
+				endif
+
+
+			!	난간 그리기
+			!-----------------------------------------------------------------------------------------------
+			add	hndOff_Out,	-strTrd/2,	0
+
+				for	i = 1	to	nRsr1 + 1
+
+					cylind	hndHgt - hndRd,	hndRd*0.75
+
+					add	0,	strTrd,	strRsr
+
+				next	i
+
+				del nRsr1 + 1
+
+			del 1
+
+			add	hndOff_Out,	-strTrd/2,	hndHgt - hndRd
+				placegroup	sweepgroup{2}("Handrail",	0,	strTrd*nRsr1,	strRsr*nRsr1)
+			del 1
+
+			!	좌표이동 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del _nTrans
+
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단참
+		!-----------------------------------------------------------------------------------------------
+
+			_x1 = hndOff_Out
+
+			addz	strRsr*nRsr1
+
+				!	Point(1,2)
+				if	iOffsetL = Point_Off	then
+					_vertPoint1_X = _x1
+					_vertPoint1_Y = strTrd*_nRsr1 + strTrd/2
+
+					_vertPoint2_X = _x1
+					_vertPoint2_Y = strTrd*_nRsr1 + strOff1 + lndWdt - _x1
+
+					add	_vertPoint1_X,	_vertPoint1_Y,	hndHgt - hndRd
+						placegroup	sweepgroup{2}("Handrail",	_vertPoint2_X - _vertPoint1_X,	_vertPoint2_Y - _vertPoint1_Y,	0)
+					del 1
+
+					add	_vertPoint2_X,	_vertPoint2_Y,	0
+						cylind	hndHgt - hndRd,	hndRd*0.75
+					del 1
+				endif
+
+				if	iOffsetL = Point_End	then
+					_hndPoint1_X = -strTrd/2*sin(str_Ang_L) + _x1*cos(str_Ang_L)
+					_hndPoint1_Y = strTrd/2*cos(str_Ang_L) + _x1*sin(str_Ang_L)
+
+					_hndPoint2_X = _x1*tan(str_Ang_L) + _x1/cos(str_Ang_L)
+					_hndPoint2_Y = -_x1
+
+					_vertPoint1_X = strWdtL - (xOffsetL + _strWdtL_X + _fnsThkL_X) + _hndPoint1_X
+					_vertPoint1_Y = strTrd*_nRsr1 - _strWdtL_Y + _fnsThkL_Y + _hndPoint1_Y
+
+					_vertPoint2_X = strWdtL - (xOffsetL + _strWdtL_X + _strOff1_X + _strLndL_X) + _hndPoint2_X
+					_vertPoint2_Y = strTrd*_nRsr1 + strOff1 + lndWdt + _hndPoint2_Y
+
+					add	_vertPoint1_X,	_vertPoint1_Y,	hndHgt - hndRd
+						placegroup	sweepgroup{2}("Handrail",	_vertPoint2_X - _vertPoint1_X,	_vertPoint2_Y - _vertPoint1_Y,	0)
+					del 1
+
+					add	_vertPoint2_X,	_vertPoint2_Y,	0
+						cylind	hndHgt - hndRd,	hndRd*0.75
+					del 1
+				endif
+
+				!	Point(3,4)
+				if	iOffsetR = Point_Off	then
+					_vertPoint3_X = strWdtL + strWell + strWdtR - _x1
+					_vertPoint3_Y = strTrd*_nRsr1 + strOff1 + lndWdt - _x1
+
+					_vertPoint4_X = strWdtL + strWell + strWdtR - _x1
+					_vertPoint4_Y = strTrd*_nRsr1 + strOff1 - _fnsThkR_Y - strOff2 + strTrd/2
+
+					add	_vertPoint3_X,	_vertPoint3_Y,	hndHgt - hndRd
+						placegroup	sweepgroup{2}("Handrail",	_vertPoint4_X - _vertPoint3_X,	_vertPoint4_Y - _vertPoint3_Y,	0)
+					del 1
+
+					add	_vertPoint3_X,	_vertPoint3_Y,	0
+						cylind	hndHgt - hndRd,	hndRd*0.75
+					del 1
+				endif
+
+				if	iOffsetR = Point_Start	then
+					_hndPoint3_X = -_x1*tan(str_Ang_R) - _x1/cos(str_Ang_R)
+					_hndPoint3_Y = -_x1
+
+					_hndPoint4_X = strTrd/2*sin(str_Ang_R) - _x1*cos(str_Ang_R)
+					_hndPoint4_Y = strTrd/2*cos(str_Ang_R) + _x1*sin(str_Ang_R)
+
+					_vertPoint3_X = strWdtL + strWell + xOffsetR + _strOff2_X + _strWdtR_X1 + _strLndR_X + _hndPoint3_X
+					_vertPoint3_Y = strTrd*_nRsr1 + strOff1 + lndWdt + _hndPoint3_Y
+
+					_vertPoint4_X = strWdtL + strWell + xOffsetR + _strWdtR_X1 - _fnsThkR_X + _hndPoint4_X
+					_vertPoint4_Y = strTrd*_nRsr1 + strOff1 - (_strWdtR_Y + strOff2 + _fnsThkR_Y) + _hndPoint4_Y
+
+					add	_vertPoint3_X,	_vertPoint3_Y,	hndHgt - hndRd
+						placegroup	sweepgroup{2}("Handrail",	_vertPoint4_X - _vertPoint3_X,	_vertPoint4_Y - _vertPoint3_Y,	0)
+					del 1
+
+					add	_vertPoint3_X,	_vertPoint3_Y,	0
+						cylind	hndHgt - hndRd,	hndRd*0.75
+					del 1
+				endif
+
+				!	중간 수평바
+				add	_vertPoint2_X,	_vertPoint2_Y,	hndHgt - hndRd
+					placegroup	sweepgroup{2}("Handrail",	_vertPoint3_X - _vertPoint2_X,	_vertPoint3_Y - _vertPoint2_Y,	0)
+				del 1
+
+			del 1
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단_2nd
+		!-----------------------------------------------------------------------------------------------
+			!	위치 맞추기 _ 시작
+			!-----------------------------------------------------------------------------------------------
+			add	strWdtL + strWell + strWdtR,	strTrd*_nRsr1 + strOff1 - strOff2,	strRsr*nRsr1
+				rotz	180
+
+			!	좌표이동 _ 시작
+			!-----------------------------------------------------------------------------------------------
+			_nTrans = 0
+			if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+				add	-xOffsetR,	0,	0	:	_nTrans = _nTrans + 1
+
+				if	iOffsetR = Point_Start	then
+					add	strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+						rotz	-str_Ang_R	:	_nTrans = _nTrans + 1
+					add	-strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+				endif
+				! if	iOffsetR = Point_End	then
+				! 	add	strWdtR,	strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+				! 		rotz	str_Ang_R	:	_nTrans = _nTrans + 1
+				! 	add	-strWdtR,	-strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+				! endif
+			endif
+
+			!	난간 그리기
+			!-----------------------------------------------------------------------------------------------
+			add	hndOff_Out,	-strTrd/2,	0
+
+				for	i = 1	to	nRsr2 + 1
+
+					cylind	hndHgt - hndRd,	hndRd*0.75
+
+					add	0,	strTrd,	strRsr
+
+				next	i
+
+				del nRsr2 + 1
+
+			del 1
+
+			add	hndOff_Out,	-strTrd/2,	hndHgt - hndRd
+				placegroup	sweepgroup{2}("Handrail",	0,	strTrd*nRsr2,	strRsr*nRsr2)
+			del 1
+
+
+			!	좌표이동 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del _nTrans
+
+			!	위치 맞추기 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del 1
+			del 1
+
+	endif
+
+
+!===============================================================================================
+!	내부난간(Inner Handrail)
+!===============================================================================================
+
+	material	hndMat
+
+	!-----------------------------------------------------------------------------------------------
+	!	외부난간 On/Off
+	!-----------------------------------------------------------------------------------------------
+	_bHnd_In = 0
+	if	bHnd_Out	then
+		if	_modelValue = Entire_Model	then
+			if	GLOB_VIEW_TYPE = 3 | ((GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5) and _iRailSect = RailSect_3D)	then
+				_bHnd_In = 1
+			endif
+		endif
+	endif
+
+	if	_bHnd_In	then
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단_1st
+		!-----------------------------------------------------------------------------------------------
+			!	좌표이동 _ 시작
+			!-----------------------------------------------------------------------------------------------
+				_nTrans = 0
+				if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+					add	-xOffsetL,	0,	0	:	_nTrans = _nTrans + 1
+
+					! if	iOffsetL = Point_Start	then
+					! 	add	strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+					! 		rotz	-str_Ang_L	:	_nTrans = _nTrans + 1
+					! 	add	-strWdtL,	0,	0	:	_nTrans = _nTrans + 1
+					! endif
+					if	iOffsetL = Point_End	then
+						add	strWdtL,	strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+							rotz	str_Ang_L	:	_nTrans = _nTrans + 1
+						add	-strWdtL,	-strTrd*_nRsr1,	0	:	_nTrans = _nTrans + 1
+					endif
+				endif
+
+			!	난간 그리기
+			!-----------------------------------------------------------------------------------------------
+			add	strWdtL - hndOff_In,	-strTrd/2,	0
+
+				for	i = 1	to	nRsr1 + 1
+
+					cylind	hndHgt - hndRd,	hndRd*0.75
+
+					add	0,	strTrd,	strRsr
+
+				next	i
+
+				del nRsr1 + 1
+
+			del 1
+
+			add	strWdtL - hndOff_In,	-strTrd/2,	hndHgt - hndRd
+				placegroup	sweepgroup{2}("Handrail",	0,	strTrd*nRsr1,	strRsr*nRsr1)
+			del 1
+
+			!	좌표이동 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del _nTrans
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단참
+		!-----------------------------------------------------------------------------------------------
+
+			_x1 = hndOff_In
+			_y1 = strTrd/2
+			if	hndOff_Stw - strTrd/2 > -eps	then
+				_y1 = hndOff_Stw
+			endif
+
+			addz	strRsr*nRsr1
+
+				!	Point(1,2)
+				if	iOffsetL = Point_Off	then
+					_vertPoint1_X = strWdtL - _x1
+					_vertPoint1_Y = strTrd*_nRsr1 + _fnsThkL_Y + strTrd/2
+
+					_vertPoint2_X = strWdtL - _x1
+					_vertPoint2_Y = strTrd*_nRsr1 + strOff1 + _y1
+
+					add	_vertPoint1_X,	_vertPoint1_Y,	hndHgt - hndRd
+						if	hndOff_Stw + strOff1 > eps	then
+							placegroup	sweepgroup{2}("Handrail",	_vertPoint2_X - _vertPoint1_X,	_vertPoint2_Y - _vertPoint1_Y,	0)
+						endif
+					del 1
+
+					add	_vertPoint2_X,	_vertPoint2_Y,	0
+						if	hndOff_Stw + strOff1 - strTrd/2 > eps	then
+							cylind	hndHgt - hndRd,	hndRd*0.75
+						endif
+					del 1
+				endif
+
+				if	iOffsetL = Point_End	then
+					_hndPoint1_X = -strTrd/2*sin(str_Ang_L) - _x1*cos(str_Ang_L)
+					_hndPoint1_Y = strTrd/2*cos(str_Ang_L) - _x1*sin(str_Ang_L)
+
+					_hndPoint2_X = -strOff1*tan(str_Ang_L) - _x1/cos(str_Ang_L) - strTrd/2*tan(str_Ang_L)
+					_hndPoint2_Y = strOff1 + _y1
+
+					_vertPoint1_X = strWdtL - xOffsetL + _hndPoint1_X
+					_vertPoint1_Y = strTrd*_nRsr1 + _fnsThkL_Y + _hndPoint1_Y
+
+					_vertPoint2_X = strWdtL - xOffsetL + _hndPoint2_X
+					_vertPoint2_Y = strTrd*_nRsr1 + _fnsThkL_Y + _hndPoint2_Y
+
+					add	_vertPoint1_X,	_vertPoint1_Y,	hndHgt - hndRd
+						placegroup	sweepgroup{2}("Handrail",	_vertPoint2_X - _vertPoint1_X,	_vertPoint2_Y - _vertPoint1_Y,	0)
+					del 1
+
+					add	_vertPoint2_X,	_vertPoint2_Y,	0
+						if	strOff1/cos(str_Ang_L) - strTrd/2 > eps	then
+							cylind	hndHgt - hndRd,	hndRd*0.75
+						endif
+					del 1
+				endif
+
+				!	Point(3,4)
+				if	iOffsetR = Point_Off	then
+					_vertPoint3_X = strWdtL + strWell + _x1
+					_vertPoint3_Y = strTrd*_nRsr1 + strOff1 + _y1
+
+					_vertPoint4_X = strWdtL + strWell + _x1
+					_vertPoint4_Y = strTrd*_nRsr1 + strOff1 - _fnsThkR_Y - strOff2 + strTrd/2
+
+					add	_vertPoint3_X,	_vertPoint3_Y,	hndHgt - hndRd
+						if	hndOff_Stw + strOff2 > eps	then
+							placegroup	sweepgroup{2}("Handrail",	_vertPoint4_X - _vertPoint3_X,	_vertPoint4_Y - _vertPoint3_Y,	0)
+						endif
+					del 1
+
+					add	_vertPoint3_X,	_vertPoint3_Y,	0
+						if	hndOff_Stw + strOff2 - strTrd/2 > eps	then
+							cylind	hndHgt - hndRd,	hndRd*0.75
+						endif
+					del 1
+				endif
+
+				if	iOffsetR = Point_Start	then
+					_hndPoint3_X = strTrd/2*tan(str_Ang_R) + _x1/cos(str_Ang_R)
+					_hndPoint3_Y = _y1
+
+					_hndPoint4_X = strTrd/2*sin(str_Ang_R) + _x1*cos(str_Ang_R)
+					_hndPoint4_Y = strTrd/2*cos(str_Ang_R) - _x1*sin(str_Ang_R)
+
+					_vertPoint3_X = strWdtL + strWell + xOffsetR + _strOff2_X + _hndPoint3_X
+					_vertPoint3_Y = strTrd*_nRsr1 + strOff1 + _hndPoint3_Y
+
+					_vertPoint4_X = strWdtL + strWell + xOffsetR - _fnsThkR_X + _hndPoint4_X
+					_vertPoint4_Y = strTrd*_nRsr1 + strOff1 - (strOff2 + _fnsThkR_Y) + _hndPoint4_Y
+
+					add	_vertPoint3_X,	_vertPoint3_Y,	hndHgt - hndRd
+						placegroup	sweepgroup{2}("Handrail",	_vertPoint4_X - _vertPoint3_X,	_vertPoint4_Y - _vertPoint3_Y,	0)
+					del 1
+
+					add	_vertPoint3_X,	_vertPoint3_Y,	0
+						if	strOff2/cos(str_Ang_R) - strTrd/2 > eps	then
+							cylind	hndHgt - hndRd,	hndRd*0.75
+						endif
+					del 1
+				endif
+
+
+				!	중간 수평바
+				add	_vertPoint2_X,	_vertPoint2_Y,	hndHgt - hndRd
+					placegroup	sweepgroup{2}("Handrail",	_vertPoint3_X - _vertPoint2_X,	_vertPoint3_Y - _vertPoint2_Y,	0)
+				del 1
+
+			del 1
+
+		!-----------------------------------------------------------------------------------------------
+		!	계단_2nd
+		!-----------------------------------------------------------------------------------------------
+			!	위치 맞추기 _ 시작
+			!-----------------------------------------------------------------------------------------------
+			add	strWdtL + strWell + strWdtR,	strTrd*_nRsr1 + strOff1 - strOff2,	strRsr*nRsr1
+				rotz	180
+
+			!	좌표이동 _ 시작
+			!-----------------------------------------------------------------------------------------------
+			_nTrans = 0
+			if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+				add	-xOffsetR,	0,	0	:	_nTrans = _nTrans + 1
+
+				if	iOffsetR = Point_Start	then
+					add	strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+						rotz	-str_Ang_R	:	_nTrans = _nTrans + 1
+					add	-strWdtR,	0,	0	:	_nTrans = _nTrans + 1
+				endif
+				! if	iOffsetR = Point_End	then
+				! 	add	strWdtR,	strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+				! 		rotz	str_Ang_R	:	_nTrans = _nTrans + 1
+				! 	add	-strWdtR,	-strTrd*nRsr2,	0	:	_nTrans = _nTrans + 1
+				! endif
+			endif
+
+			!	난간 그리기
+			!-----------------------------------------------------------------------------------------------
+			add	strWdtR - hndOff_In,	-strTrd/2,	0
+
+				for	i = 1	to	nRsr2 + 1
+
+					cylind	hndHgt - hndRd,	hndRd*0.75
+
+					add	0,	strTrd,	strRsr
+
+				next	i
+
+				del nRsr2 + 1
+
+			del 1
+
+			add	strWdtR - hndOff_In,	-strTrd/2,	hndHgt - hndRd
+				placegroup	sweepgroup{2}("Handrail",	0,	strTrd*nRsr2,	strRsr*nRsr2)
+			del 1
+
+			!	좌표이동 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del _nTrans
+
+			!	위치 맞추기 _ 끝
+			!-----------------------------------------------------------------------------------------------
+				del 1
+			del 1
+
+
+	endif
+
+
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+
+!===============================================================================================
+!	Sub-Routine
+!===============================================================================================

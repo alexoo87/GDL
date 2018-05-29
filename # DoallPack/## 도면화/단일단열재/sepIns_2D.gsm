@@ -1,0 +1,148 @@
+!===============================================================================================
+!	단일단열재
+!===============================================================================================
+
+!	W.P
+hotspot2	0,	0
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+	!	insLth
+	add2	0,	-insThk/2
+		hotspot2	0,		0,	unID,	insLth,	1+256	:	unID = unID + 1
+		hotspot2	-1,		0,	unID,	insLth,	3		:	unID = unID + 1
+		hotspot2	insLth,	0,	unID,	insLth,	2		:	unID = unID + 1
+	del 1
+
+	!	insThk
+	add2	insLth/2,	0
+		hotspot2	0,	0,			unID,	insThk,	1+128	:	unID = unID + 1
+		hotspot2	0,	1,			unID,	insThk,	3		:	unID = unID + 1
+		hotspot2	0,	-insThk,	unID,	insThk,	2		:	unID = unID + 1
+	del 1
+
+	!	offsetL/R
+		!	offsetL
+		hotspot2	0,			0,	unID,	offsetL,	1	:	unID = unID + 1
+		hotspot2	-1,			0,	unID,	offsetL,	3	:	unID = unID + 1
+		hotspot2	offsetL,	0,	unID,	offsetL,	2	:	unID = unID + 1
+
+		!	offsetR
+		add2	insLth,	0
+			hotspot2	0,			0,	unID,	offsetR,	1	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	offsetR,	3	:	unID = unID + 1
+			hotspot2	offsetR,	0,	unID,	offsetR,	2	:	unID = unID + 1
+		del 1
+
+	!	 extLineL/R
+	add2	0,	-insThk
+		!	extLineL
+		hotspot2	0,			0,	unID,	extLineL,	1	:	unID = unID + 1
+		hotspot2	1,			0,	unID,	extLineL,	3	:	unID = unID + 1
+		hotspot2	-extLineL,	0,	unID,	extLineL,	2	:	unID = unID + 1
+
+		!	extLineR
+		add2	insLth,	0
+			hotspot2	0,			0,	unID,	extLineR,	1	:	unID = unID + 1
+			hotspot2	-1,			0,	unID,	extLineR,	3	:	unID = unID + 1
+			hotspot2	extLineR,	0,	unID,	extLineR,	2	:	unID = unID + 1
+		del 1
+	del 1
+
+	!	Switch
+	_switchLth = 0.050
+
+		!	aShortL -> bShortL
+		hotspot2	0,							_switchLth,					unID,	aShortL,	4	:	unID = unID + 1
+		hotspot2	-_switchLth*sin(aShortL),	_switchLth*cos(aShortL),	unID,	aShortL,	5	:	unID = unID + 1
+		hotspot2	0,							0,							unID,	aShortL,	6	:	unID = unID + 1
+
+		add2	insLth,	0
+			hotspot2	0,							_switchLth,					unID,	aShortR,	4		:	unID = unID + 1
+			hotspot2	_switchLth*sin(aShortR),	_switchLth*cos(aShortR),	unID,	aShortR,	5		:	unID = unID + 1
+			hotspot2	0,							0,							unID,	aShortR,	6+512	:	unID = unID + 1
+		del 1
+
+
+!===============================================================================================
+!	외곽선
+!===============================================================================================
+pen		cntPen
+fill	65
+fillPen = 1
+backPen = 0
+
+!	외곽선
+put	-extLineL,			-insThk,	bLeftLine,
+	offsetL,			0,			bTopLine,
+	insLth + offsetR,	0,			bRightLine,
+	insLth + extLineR,	-insThk,	bBottomLine,
+	-extLineL,			-insThk,	0
+
+poly2_b	nsp/3,	1+2,	fillPen,	backPen,	use(nsp)
+
+!	Hotline
+for	i = 1	to	(nsp/3) - 2
+	hotline2	get(2) + (use(1) - get(1)),	use(2)
+next	i
+	hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+!	돌출선
+! add2	0,	-insThk
+! 	line2		0,	0,	-extLineL,	0
+! 	hotline2	0,	0,	-extLineL,	0
+
+! 	add2	insLth,	0
+! 		line2		0,	0,	extLineR,	0
+! 		hotline2	0,	0,	extLineR,	0
+! 	del 1
+! del 1
+
+
+!===============================================================================================
+!	단열재
+!===============================================================================================
+pen	insPen
+
+!	모듈 사이즈
+_xMod = 1.2719
+_yMod = 2.9902
+
+_insLth = 0
+if	not(bShortL)	then
+	_xStart = min(0,	offsetL)
+else
+	_xStart = max(0,	offsetL)
+endif
+if	not(bShortR)	then
+	_xEnd = max(insLth,	(insLth + offsetR))
+else
+	_xEnd = min(insLth,	(insLth + offsetR))
+endif
+_insLth = _xEnd - _xStart
+
+!	모듈 개수
+nFullPeriods = round_int((_insLth/_xMod)/(insThk/_yMod))
+
+if	nFullPeriods = 0	then
+	nFullPeriods = 1
+endif
+
+add2	_xStart,	-insThk
+	mul2	_insLth/_xMod/nFullPeriods,	insThk/_yMod
+
+		for	 i = 1	to	nFullPeriods
+			line2	0.689352273941,		0.891054272652,	1.21845602989,	2.099173069
+			line2	0.0534162521362,	2.099173069,	0.58251953125,	0.891054272652
+			arc2	0.635936498642,		2.35429143906,	0.635936200619,	336.3486495263,	203.6513108595
+			arc2	1.27187228203,		0.635936379433,	0.635936200619,	156.3487128192,	270.0000006833
+			arc2	0, 0.635936141014,	0.635936200619,	270.0000006833,	23.65132121829
+
+			add2	_xMod,	0
+		next	i
+
+		del nFullPeriods
+
+	del 1
+del 1

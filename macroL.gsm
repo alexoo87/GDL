@@ -1,0 +1,47 @@
+!===============================================================================================
+!	VIP service Macro
+!===============================================================================================
+
+!	keyValue : 라이센스 있으면 1, 없으면 0
+!-----------------------------------------------------------------------------------------------
+!	Default
+keyValue = 1
+
+! !	eps
+! eps = 0.0001
+
+! !	만료시간
+! dim	dueDate[3]
+! dueDate[1] = 2018
+! dueDate[2] = 6
+! dueDate[3] = 30
+
+! !	현재시간 추출
+! nowDate = ""
+! ch = open("DateTime",	"",	"%Y,%m,%d")
+! 	n = input(ch,	"",	"",	nowDate)
+! close	ch
+
+! n = split(nowDate,	"%n,%n,%n",	year,	dump1,	month,	dump2,	day)
+
+! !	연도비교
+! if	dueDate[1] - year < -eps	then
+! 	keyValue = 0
+! else
+! 	if	abs(dueDate[1] - year) < eps	then
+! 		if	dueDate[2] - month < -eps	then
+! 			keyValue = 0
+! 		else
+! 			if	abs(dueDate[2] - month) < eps	then
+! 				if	dueDate[3] - day < -eps 	then
+! 					keyValue = 0
+! 				endif
+! 			endif
+! 		endif
+! 	endif
+! endif
+
+
+
+
+end	keyValue

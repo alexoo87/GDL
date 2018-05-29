@@ -1,0 +1,102 @@
+
+
+!======================================================================================================
+!	Window Maker(Opening) 20 
+!======================================================================================================
+!   DATE : 2017/4/12 WED
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Genaral
+!----------------------------------------------------------------------------------------------
+
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Carculation 
+!----------------------------------------------------------------------------------------------
+
+	!	Font
+	!----------------------------------------------------------------------------------------------
+	dim	stFont_types[]
+	nFonts = REQUEST ("FONTNAMES_LIST", "", stFont_types)
+	values	"stFont_type"	stFont_types
+
+	!	Opening Width / Height
+	!----------------------------------------------------------------------------------------------
+	if	iCoordinate_num = 4	then
+		parameters	mOpeningWidth = _OpeningWidth
+		parameters	mOpeningHeight = _OpeningHeight
+	endif
+
+	
+!----------------------------------------------------------------------------------------------
+!  Range / Lock / Hide Parameters
+!----------------------------------------------------------------------------------------------
+
+	!	Define Parameters
+	!----------------------------------------------------------------------------------------------
+	values{2}	"iOpening_type"	Type_FixedGlass,			stOpeningType[Type_FixedGlass],
+								Type_Frameless,				stOpeningType[Type_Frameless],
+								Type_Grill,					stOpeningType[Type_Grill],
+								Type_SideHung,				stOpeningType[Type_SideHung],
+								Type_SideHung_M,			stOpeningType[Type_SideHung_M],
+								Type_TiltTurn,				stOpeningType[Type_TiltTurn],
+								Type_TiltTurn_M,			stOpeningType[Type_TiltTurn_M],
+								Type_BottomHung,			stOpeningType[Type_BottomHung],
+								Type_TopHung,				stOpeningType[Type_TopHung],
+								Type_HorPivot,				stOpeningType[Type_HorPivot],
+								Type_VerPivot,				stOpeningType[Type_VerPivot],
+								Type_VerPivot_M,			stOpeningType[Type_VerPivot_M],
+								Type_DoubleSideHung,		stOpeningType[Type_DoubleSideHung],
+								Type_DoubleTiltTurn,		stOpeningType[Type_DoubleTiltTurn],
+								Type_DoubleTiltTurn_M,		stOpeningType[Type_DoubleTiltTurn_M],
+								Type_SlidingHor,			stOpeningType[Type_SlidingHor],
+								Type_SlidingHor_M,			stOpeningType[Type_SlidingHor_M],
+								Type_DoubleSlidingHor,		stOpeningType[Type_DoubleSlidingHor],
+								Type_DoubleSlidingHor_M,	stOpeningType[Type_DoubleSlidingHor_M],
+								Type_Sliding3,				stOpeningType[Type_Sliding3],
+								Type_Sliding4,				stOpeningType[Type_Sliding4],
+								Type_Sliding6,				stOpeningType[Type_Sliding6],
+								Type_SlidingVer,			stOpeningType[Type_SlidingVer],
+								Type_DoubleSlidingVer,		stOpeningType[Type_DoubleSlidingVer],
+								Type_Double_GS,				stOpeningType[Type_Double_GS]
+
+	values{2} "iDirect"	Direct_Normal,		stDirect[Direct_Normal],
+						Direct_Reversed,	stDirect[Direct_Reversed]
+
+	!	Range Parameters
+	!----------------------------------------------------------------------------------------------
+	values	"mOpening_sub"	range	(gs_sash_thk*1.5,	mOpeningHeight - gs_sash_thk*3.5)
+
+	!	Lock Parameters
+	!----------------------------------------------------------------------------------------------
+!	lock	"mOpeningWidth", "mOpeningHeight", "mOpening_posX", "mOpening_posY"
+	if	iOpening_type # Type_Double_GS	then
+		lock	"mOpening_sub", "aOpeningAngle_sub"
+	endif
+
+	!	Hide Parameters
+	!----------------------------------------------------------------------------------------------
+	if	iOpening_type # Type_Double_GS	then
+		hideparameter	"mOpening_sub", "aOpeningAngle_sub"
+	endif
+
+	!	Status
+	!------------------------------------------------------------------------------------------------------
+	parameters	aSymbol_rotangle = aSymbol_rotangle,
+				stSymbol_orientation = stSymbol_orientation,
+				iSymbol_reveal_side = iSymbol_reveal_side,
+				iSymbol_mirrored = iSymbol_mirrored
+
+
+
+
+
+!======================================================================================================
+end
+!======================================================================================================

@@ -1,0 +1,1137 @@
+!===============================================================================================
+!	난간(직/곡선)
+!===============================================================================================
+!	C.P
+hotspot	0,	0,	0
+
+!	Feedback Mode
+if	GLOB_FEEDBACK_MODE	then	resol	4
+
+!	idx(난간 동자 하부 길이)
+Baluster_SP = 1
+Baluster_BTW = 2
+Baluster_EP = 3
+
+!	idx(3D/단면)
+View_3D = 1
+View_Section = 2
+
+if	GLOB_VIEW_TYPE = 3	then
+	_view = View_3D
+endif
+if	GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5	then
+	_view = View_Section
+endif
+
+!	z축 높이에 따른 원점과의 각도
+_aSlope = 0
+if	zRailPos > eps	then
+	_aSlope = atn(zRailPos/calcLth_2D)
+endif
+
+!	MVO
+success = LIBRARYGLOBAL("MVO_StairSettings",	"iRailSect",	_iRailSect)
+
+if	success & iRailSect = RailSect_MVO	then
+	_iRailSect = _iRailSect
+else
+	_iRailSect = iRailSect
+endif
+
+!===============================================================================================
+!	가이드라인
+!===============================================================================================
+if	bGuide	then
+	!	C.P
+	sphere	0.01
+
+	if	iRailType = Rail_Straight	then
+		!	난간 생성 라인
+		lin_	0,	0,	0,	xRailPos,	yRailPos,	zRailPos
+
+		!	E.P
+		add	xRailPos,	yRailPos,	zRailPos
+			sphere	0.01
+		del 1
+	endif
+
+	if	iRailType = Rail_Curved	then
+		!	난간 생성 라인
+		arc	rRailPos,	0,	aRailPos
+
+		rotz	aRailPos
+			addx	rRailPos
+				lin_	0,	0,	0,	0,	0,	zRailPos
+			del 1
+		del 1
+
+		!	E.P
+		rotz	aRailPos
+			add	rRailPos,	0,	zRailPos
+				sphere	0.01
+			del 1
+		del 1
+
+		!	난간 동자 배치용
+		if	iBalusterPlace = Place_Custom	then
+			if	iDistMethod = DistMethod_Length	then
+				_mod = 0.100
+				_nMod = int(calcLth_2D/_mod) - 1
+
+				addx	rRailPos
+					lin_		0,	0,	0,	0,	calcLth_2D,	0
+
+					!	Ruler
+					for	i = 1	to	_nMod
+						addy	_mod*i
+							hotline	0,	0,	0,	0,	_mod,	0,	unID	:	unID = unID + 1
+						del 1
+					next	i
+
+					hotline	0,	_mod*_nMod,	0,	0,	calcLth_2D,	0,	unID	:	unID = unID + 1
+				del 1
+
+				if	not(iBalusterNum = 0)	then
+					for	i = 1	to	iBalusterNum
+						rotz	eachAng[i]
+							addx	rRailPos
+								hotspot	0,	0,	0
+							del 1
+						del 1
+
+						lin_	rRailPos*cos(eachAng[i]),	rRailPos*sin(eachAng[i]),	0,	rRailPos,	eachLth[i],	0
+						hotline	rRailPos*cos(eachAng[i]),	rRailPos*sin(eachAng[i]),	0,	rRailPos,	eachLth[i],	0,	unID	:	unID = unID + 1
+					next	i
+				endif
+			endif
+		endif
+	endif
+endif
+
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+!	난간 유형 : 직선형
+!-----------------------------------------------------------------------------------------------
+if	iRailType = Rail_Straight	then
+	!	난간 생성 라인
+	!-----------------------------------------------------------------------------------------------
+	hotspot	0,			yRailPos,	zRailPos,	unID,	xRailPos,	1+128	:	unID = unID + 1
+	hotspot	-1,			yRailPos,	zRailPos,	unID,	xRailPos,	3		:	unID = unID + 1
+	hotspot	xRailPos,	yRailPos,	zRailPos,	unID,	xRailPos,	2		:	unID = unID + 1
+
+	hotspot	xRailPos,	0,			zRailPos,	unID,	yRailPos,	1+128	:	unID = unID + 1
+	hotspot	xRailPos,	-1,			zRailPos,	unID,	yRailPos,	3		:	unID = unID + 1
+	hotspot	xRailPos,	yRailPos,	zRailPos,	unID,	yRailPos,	2		:	unID = unID + 1
+
+	hotspot	xRailPos,	yRailPos,	0,			unID,	zRailPos,	1+128	:	unID = unID + 1
+	hotspot	xRailPos,	yRailPos,	-1,			unID,	zRailPos,	3		:	unID = unID + 1
+	hotspot	xRailPos,	yRailPos,	zRailPos,	unID,	zRailPos,	2		:	unID = unID + 1
+
+	!	난간 높이
+	!-----------------------------------------------------------------------------------------------
+	hotspot	0,	0,	0,			unID,	railHgt,	1+128	:	unID = unID + 1
+	hotspot	0,	0,	-1,			unID,	railHgt,	3		:	unID = unID + 1
+	hotspot	0,	0,	railHgt,	unID,	railHgt,	2		:	unID = unID + 1
+
+	add	xRailPos,	yRailPos,	zRailPos
+		hotspot	0,	0,	0,			unID,	railHgt,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	-1,			unID,	railHgt,	3		:	unID = unID + 1
+		hotspot	0,	0,	railHgt,	unID,	railHgt,	2		:	unID = unID + 1
+	del 1
+
+	!	난간 연장 길이
+	!-----------------------------------------------------------------------------------------------
+	rotz	_aLine
+		add -_halfRail,	0,	railHgt
+			hotspot	0,			0,	0,	unID,	exLth_SP,	1+128	:	unID = unID + 1
+			hotspot	1,			0,	0,	unID,	exLth_SP,	3		:	unID = unID + 1
+			hotspot	-exLth_SP,	0,	0,	unID,	exLth_SP,	2		:	unID = unID + 1
+		del 1
+
+		add	xRailPos + _halfRail,	0,	zRailPos + railHgt
+			hotspot	0,			0,	0,	unID,	exLth_EP,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	exLth_EP,	3		:	unID = unID + 1
+			hotspot	exLth_EP,	0,	0,	unID,	exLth_EP,	2		:	unID = unID + 1
+		del 1
+	del 1
+
+	!	난간 동자 간격(배치 방법 : 사용자 정의)
+	!-----------------------------------------------------------------------------------------------
+	if	iBalusterPlace = Place_Custom	then
+		if	not(iBalusterNum = 0)	then
+			rotz	_aLine
+				for	i = 1	to	iBalusterNum
+					_ratioH = eachLth[i]/calcLth_2D
+					_zPos = zRailPos*_ratioH
+
+					hotspot	0,			0,	_zPos,	unID,	eachLth[i],	1+128	:	unID = unID + 1
+					hotspot	-1,			0,	_zPos,	unID,	eachLth[i],	3		:	unID = unID + 1
+					hotspot	eachLth[i],	0,	_zPos,	unID,	eachLth[i],	2		:	unID = unID + 1
+				next	i
+			del 1
+		endif
+	endif
+
+	!	난간 동자 하부 연장 길이
+	!-----------------------------------------------------------------------------------------------
+	_dumpValue = 0.010
+
+	rotz	_aLine
+		addx	_dumpValue
+			!	시작점
+			if	bBaluster_SP	then
+				hotspot	0,	0,	0,				unID,	exBtmLth[1],	1+128	:	unID = unID + 1
+				hotspot	0,	0,	1,				unID,	exBtmLth[1],	3		:	unID = unID + 1
+				hotspot	0,	0,	-exBtmLth[1],	unID,	exBtmLth[1],	2		:	unID = unID + 1
+			endif
+
+			!	사이
+			if	not(iBalusterNum = 0)	then
+				for	i = 1	to	iBalusterNum
+					_ratioH = eachLth[i]/calcLth_2D
+					_zPos = zRailPos*_ratioH
+
+					add	eachLth[i],	0,	_zPos
+						hotspot	0,	0,	0,					unID,	exBtmLth[i + 1],	1+128	:	unID = unID + 1
+						hotspot	0,	0,	1,					unID,	exBtmLth[i + 1],	3		:	unID = unID + 1
+						hotspot	0,	0,	-exBtmLth[i + 1],	unID,	exBtmLth[i + 1],	2		:	unID = unID + 1
+					del 1
+				next	i
+			endif
+
+			!	끝점
+			if	bBaluster_EP	then
+				add	calcLth_2D,	0,	zRailPos
+					hotspot	0,	0,	0,								unID,	exBtmLth[iBalusterNum + 2],	1+128	:	unID = unID + 1
+					hotspot	0,	0,	1,								unID,	exBtmLth[iBalusterNum + 2],	3		:	unID = unID + 1
+					hotspot	0,	0,	-exBtmLth[iBalusterNum + 2],	unID,	exBtmLth[iBalusterNum + 2],	2		:	unID = unID + 1
+				del 1
+			endif
+		del 1
+	del 1
+
+	!	수평재 높이(배치 방법 : 개별)
+	!-----------------------------------------------------------------------------------------------
+	if	iHRailPlace = HRailPlace_Unequal	then
+		if	not(iHRailNum = 0)	then
+			for	i = 1	to	iHRailNum
+				hotspot	0,	0,	0,				unID,	eachDist[i],	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,				unID,	eachDist[i],	3		:	unID = unID + 1
+				hotspot	0,	0,	eachDist[i],	unID,	eachDist[i],	2		:	unID = unID + 1
+
+				add	xRailPos,	yRailPos,	zRailPos
+					hotspot	0,	0,	0,				unID,	eachDist[i],	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,				unID,	eachDist[i],	3		:	unID = unID + 1
+					hotspot	0,	0,	eachDist[i],	unID,	eachDist[i],	2		:	unID = unID + 1
+				del 1
+			next	i
+		endif
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	난간 유형 : 곡선형
+!-----------------------------------------------------------------------------------------------
+if	iRailType = Rail_Curved	then
+	!	난간 생성 라인
+	!-----------------------------------------------------------------------------------------------
+	hotspot	0,			0,	0,	unID,	rRailPos,	1+128	:	unID = unID + 1
+	hotspot	-1,			0,	0,	unID,	rRailPos,	3		:	unID = unID + 1
+	hotspot	rRailPos,	0,	0,	unID,	rRailPos,	2		:	unID = unID + 1
+	
+	hotspot	rRailPos,				0,						0,	unID,	aRailPos,	4+128	:	unID = unID + 1
+	hotspot	rRailPos*cos(aRailPos),	rRailPos*sin(aRailPos),	0,	unID,	aRailPos,	5		:	unID = unID + 1
+	hotspot	0,						0,						0,	unID,	aRailPos,	6		:	unID = unID + 1
+
+	rotz	aRailPos
+		addx	rRailPos
+				hotspot	0,	0,	0,			unID,	zRailPos,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	zRailPos,	3		:	unID = unID + 1
+				hotspot	0,	0,	zRailPos,	unID,	zRailPos,	2		:	unID = unID + 1
+		del 1
+	del 1
+
+	!	난간 높이
+	!-----------------------------------------------------------------------------------------------
+	addx	rRailPos
+		hotspot	0,	0,	0,			unID,	railHgt,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	-1,			unID,	railHgt,	3		:	unID = unID + 1
+		hotspot	0,	0,	railHgt,	unID,	railHgt,	2		:	unID = unID + 1
+	del 1
+
+	rotz	aRailPos
+		addx	rRailPos
+			addz	zRailPos
+				hotspot	0,	0,	0,			unID,	railHgt,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	railHgt,	3		:	unID = unID + 1
+				hotspot	0,	0,	railHgt,	unID,	railHgt,	2		:	unID = unID + 1
+			del 1
+		del 1
+	del 1
+
+
+	!	난간 연장 길이
+	!-----------------------------------------------------------------------------------------------
+	add	rRailPos,	-_halfRail,	railHgt
+		hotspot	0,	0,			0,	unID,	exLth_SP,	1+128	:	unID = unID + 1
+		hotspot	0,	1,			0,	unID,	exLth_SP,	3		:	unID = unID + 1
+		hotspot	0,	-exLth_SP,	0,	unID,	exLth_SP,	2		:	unID = unID + 1
+	del 1
+
+	rotz	aRailPos
+		add	rRailPos,	_halfRail,	zRailPos + railHgt
+			hotspot	0,	0,			0,	unID,	exLth_EP,	1+128	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	exLth_EP,	3		:	unID = unID + 1
+			hotspot	0,	exLth_EP,	0,	unID,	exLth_EP,	2		:	unID = unID + 1
+		del 1
+	del 1
+
+	!	난간 동자 간격(배치 방법 : 사용자 정의)
+	!-----------------------------------------------------------------------------------------------
+	if	iBalusterPlace = Place_Custom	then
+		if	not(iBalusterNum = 0)	then
+			if	iDistMethod = DistMethod_Length	then
+				for	i = 1	to	iBalusterNum
+					addx	rRailPos
+						hotspot	0,	0,			0,	unID,	eachLth[i],	1+128	:	unID = unID + 1
+						hotspot	0,	-1,			0,	unID,	eachLth[i],	3		:	unID = unID + 1
+						hotspot	0,	eachLth[i],	0,	unID,	eachLth[i],	2		:	unID = unID + 1
+					del 1
+				next	i
+			endif
+
+			if	iDistMethod = DistMethod_Angle	then
+				for	i = 1	to	iBalusterNum
+					_ratioH = eachLth[i]/calcLth_2D
+					_zPos = zRailPos*_ratioH
+
+					hotspot	rRailPos,					0,							_zPos,	unID,	eachAng[i],	4+128	:	unID = unID + 1
+					hotspot	rRailPos*cos(eachAng[i]),	rRailPos*sin(eachAng[i]),	_zPos,	unID,	eachAng[i],	5		:	unID = unID + 1
+					hotspot	0,							0,							_zPos,	unID,	eachAng[i],	6		:	unID = unID + 1
+				next	i
+			endif
+		endif
+	endif
+
+
+	!	난간 동자 하부 연장 길이
+	!-----------------------------------------------------------------------------------------------
+	_dumpValue = 0.010
+
+	addy	_dumpValue
+	!	시작점
+	if	bBaluster_SP	then
+		addx	rRailPos
+			hotspot	0,	0,	0,				unID,	exBtmLth[1],	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,				unID,	exBtmLth[1],	3		:	unID = unID + 1
+			hotspot	0,	0,	-exBtmLth[1],	unID,	exBtmLth[1],	2		:	unID = unID + 1
+		del 1
+	endif
+
+	!	사이
+	if	not(iBalusterNum = 0)	then
+		for	i = 1	to	iBalusterNum
+			_ratioH = eachLth[i]/calcLth_2D
+			_zPos = zRailPos*_ratioH
+
+			rotz	eachAng[i]
+				add	rRailPos,	0,	_zPos
+					hotspot	0,	0,	0,					unID,	exBtmLth[i + 1],	1+128	:	unID = unID + 1
+					hotspot	0,	0,	1,					unID,	exBtmLth[i + 1],	3		:	unID = unID + 1
+					hotspot	0,	0,	-exBtmLth[i + 1],	unID,	exBtmLth[i + 1],	2		:	unID = unID + 1
+				del 1
+			del 1
+		next	i
+	endif
+
+	!	끝점
+	if	bBaluster_EP	then
+		rotz	aRailPos
+			add	rRailPos,	0,	zRailPos
+				hotspot	0,	0,	0,								unID,	exBtmLth[iBalusterNum + 2],	1+128	:	unID = unID + 1
+				hotspot	0,	0,	1,								unID,	exBtmLth[iBalusterNum + 2],	3		:	unID = unID + 1
+				hotspot	0,	0,	-exBtmLth[iBalusterNum + 2],	unID,	exBtmLth[iBalusterNum + 2],	2		:	unID = unID + 1
+			del 1
+		del 1
+	endif
+
+	del 1
+
+	!	수평재 높이(배치 방법 : 개별)
+	!-----------------------------------------------------------------------------------------------
+	if	iHRailPlace = HRailPlace_Unequal	then
+		if	not(iHRailNum = 0)	then
+			for	i = 1	to	iHRailNum
+				addx	rRailPos
+					hotspot	0,	0,	0,				unID,	eachDist[i],	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,				unID,	eachDist[i],	3		:	unID = unID + 1
+					hotspot	0,	0,	eachDist[i],	unID,	eachDist[i],	2		:	unID = unID + 1
+				del 1
+
+				rotz	aRailPos
+					add	rRailPos,	0,	zRailPos
+						hotspot	0,	0,	0,				unID,	eachDist[i],	1+128	:	unID = unID + 1
+						hotspot	0,	0,	-1,				unID,	eachDist[i],	3		:	unID = unID + 1
+						hotspot	0,	0,	eachDist[i],	unID,	eachDist[i],	2		:	unID = unID + 1
+					del 1
+				del 1
+			next	i
+		endif
+	endif
+endif
+
+
+!===============================================================================================
+!	난간(3D)
+!===============================================================================================
+pen	railElevPen
+
+!-----------------------------------------------------------------------------------------------
+!	난간 유형 : 직선형
+!-----------------------------------------------------------------------------------------------
+if	iRailType = Rail_Straight	then
+	if	_view = View_3D | (_view = View_Section & _iRailSect = RailSect_3D)	then
+		!	난간 동자
+		!-----------------------------------------------------------------------------------------------
+		group	"_strBaluster"
+			!	시작점
+			if	bBaluster_SP	then
+				_posBaluster = Baluster_SP
+				gosub	"Baluster_"
+			endif
+
+			!	사이
+			for	i = 1	to	iBalusterNum
+				_posBaluster = Baluster_BTW
+				_ratioZ = eachLth[i]/calcLth_2D
+
+				rotz	_aLine
+					addx	eachLth[i]
+						addz	zRailPos*_ratioZ
+							gosub	"Baluster_"
+						del 1
+					del 1
+				del 1
+			next	i
+
+			!	끝점
+			if	bBaluster_EP	then
+				_posBaluster = Baluster_EP
+				add	xRailPos,	yRailPos,	zRailPos
+					gosub	"Baluster_"
+				del 1
+			endif
+		endgroup
+
+		!	수평재
+		!-----------------------------------------------------------------------------------------------
+		group	"_strHRail"
+			gosub	"strHRail_"
+		endgroup
+
+		!	난간
+		!-----------------------------------------------------------------------------------------------
+		group	"_strRail"
+			gosub	"strRail_"
+		endgroup
+
+		!	배치
+		!-----------------------------------------------------------------------------------------------
+		if	not(bBalusterOff)	then	placegroup	subgroup("_strBaluster",	"_strRail")
+		if	not(bHRailOff)		then	placegroup	subgroup("_strHRail",	"_strBaluster")
+		placegroup	"_strRail"
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	난간 유형 : 곡선형
+!-----------------------------------------------------------------------------------------------
+if	iRailType = Rail_Curved	then
+	if	_view = View_3D | (_view = View_Section & _iRailSect = RailSect_3D)	then
+		!	난간 동자
+		!-----------------------------------------------------------------------------------------------
+		group	"_crvBaluster"
+			!	시작점
+			if	bBaluster_SP	then
+				_posBaluster = Baluster_SP
+				addx	rRailPos
+					gosub	"Baluster_"
+				del 1
+			endif
+
+			!	사이
+			for	i = 1	to	iBalusterNum
+				_posBaluster = Baluster_BTW
+				_ratioZ = eachAng[i]/aRailPos
+				rotz	eachAng[i]
+					addx	rRailPos
+						addz	zRailPos*_ratioZ
+							gosub	"Baluster_"
+						del 1
+					del 1
+				del 1
+			next	i
+
+			!	끝점
+			if	bBaluster_EP	then
+				_posBaluster = Baluster_EP
+				rotz	aRailPos
+					addx	rRailPos
+						addz	zRailPos
+							gosub	"Baluster_"
+						del 1
+					del 1
+				del 1
+			endif
+		endgroup
+
+		!	수평재
+		!-----------------------------------------------------------------------------------------------
+		group	"_crvHRail"
+			gosub	"crvHRail_"
+		endgroup
+
+		!	난간
+		!-----------------------------------------------------------------------------------------------
+		group	"_crvRail"
+			gosub	"crvRail_"
+		endgroup
+
+		!	배치
+		!-----------------------------------------------------------------------------------------------
+		if	not(bBalusterOff)	then	placegroup	subgroup("_crvBaluster",	"_crvRail")
+		if	not(bHRailOff)		then	placegroup	subgroup("_crvHRail",	"_crvBaluster")
+		placegroup	"_crvRail"
+	endif
+endif
+
+
+!===============================================================================================
+!	난간(단면/입면)
+!===============================================================================================
+pen	railSectPen
+
+!-----------------------------------------------------------------------------------------------
+!	난간 유형 : 직선형
+!-----------------------------------------------------------------------------------------------
+if	iRailType = Rail_Straight	then
+	if	_view = View_Section & _iRailSect = RailSect_Line	then
+		!	난간 동자
+		!-----------------------------------------------------------------------------------------------
+		if	not(bBalusterOff)	then
+			!	시작점
+			if	bBaluster_SP	then
+				_posBaluster = Baluster_SP
+				gosub	"Baluster_"
+			endif
+
+			!	사이
+			for	i = 1	to	iBalusterNum
+				_posBaluster = Baluster_BTW
+				_ratioZ = eachLth[i]/calcLth_2D
+
+				rotz	_aLine
+					addx	eachLth[i]
+						addz	zRailPos*_ratioZ
+							gosub	"Baluster_"
+						del 1
+					del 1
+				del 1
+			next	i
+
+			!	끝점
+			if	bBaluster_EP	then
+				_posBaluster = Baluster_EP
+				add	xRailPos,	yRailPos,	zRailPos
+					gosub	"Baluster_"
+				del 1
+			endif
+		endif
+
+		!	수평재
+		!-----------------------------------------------------------------------------------------------
+		if	not(bHRailOff)	then
+			gosub	"strHRail_"
+		endif
+
+		!	난간
+		!-----------------------------------------------------------------------------------------------
+		gosub	"strRail_"
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	난간 유형 : 곡선형
+!-----------------------------------------------------------------------------------------------
+if	iRailType = Rail_Curved	then
+	if	_view = View_Section & _iRailSect = RailSect_Line	then
+		!	난간 동자
+		!-----------------------------------------------------------------------------------------------
+		if	not(bBalusterOff)	then
+			!	시작점
+			if	bBaluster_SP	then
+				_posBaluster = Baluster_SP
+				addx	rRailPos
+					gosub	"Baluster_"
+				del 1
+			endif
+
+			!	사이
+			for	i = 1	to	iBalusterNum
+				_posBaluster = Baluster_BTW
+				_ratioZ = eachAng[i]/aRailPos
+				rotz	eachAng[i]
+					addx	rRailPos
+						addz	zRailPos*_ratioZ
+							gosub	"Baluster_"
+						del 1
+					del 1
+				del 1
+			next	i
+
+			!	끝점
+			if	bBaluster_EP	then
+				_posBaluster = Baluster_EP
+				rotz	aRailPos
+					addx	rRailPos
+						addz	zRailPos
+							gosub	"Baluster_"
+						del 1
+					del 1
+				del 1
+			endif
+		endif
+
+		!	수평재
+		!-----------------------------------------------------------------------------------------------
+		if	not(bHRailOff)	then
+			gosub	"crvHRail_"
+		endif
+
+		!	난간
+		!-----------------------------------------------------------------------------------------------
+		gosub	"crvRail_"
+	endif
+endif
+
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+
+!===============================================================================================
+!	Sub-Routine
+!===============================================================================================
+"Baluster_":	!	난간 동자(공통)
+!-----------------------------------------------------------------------------------------------
+material	balusterMat
+
+!	난간 동자 위치(수평)에 따른 변수 정의
+if	_posBaluster = Baluster_SP	then
+	_zPosBaluster = -exBtmLth[1]
+	_railHgt = railHgt + exBtmLth[1]
+endif
+
+if	_posBaluster = Baluster_BTW	then
+	_zPosBaluster = -exBtmLth[i + 1]
+	_railHgt = railHgt + exBtmLth[i + 1]
+endif
+
+if	_posBaluster = Baluster_EP	then
+	_zPosBaluster = -exBtmLth[iBalusterNum + 2]
+	_railHgt = railHgt + exBtmLth[iBalusterNum + 2]
+endif
+
+if	_view = View_3D | (_view = View_Section & _iRailSect = RailSect_3D)	then
+	pen	railElevPen
+	if	iBalusterShape = Shape_Rectangle	then
+		put	-shapeSubWdt/2,	-shapeSubHgt/2,	15,
+			-shapeSubWdt/2,	shapeSubHgt/2,	15,
+			shapeSubWdt/2,	shapeSubHgt/2,	15,
+			shapeSubWdt/2,	-shapeSubHgt/2,	15
+
+		addz	_zPosBaluster
+			prism_	nsp/3,	_railHgt,	get(nsp)
+		del 1
+	endif
+
+	if	iBalusterShape = Shape_Circle	then
+		addz	_zPosBaluster
+			cylind	_railHgt,	shapeSubRad
+		del 1
+	endif
+endif
+
+if	_view = View_Section & _iRailSect = RailSect_Line	then
+	pen	railSectPen
+	if	_posBaluster = Baluster_SP	then
+		lin_	0,	0,	_zPosBaluster,	0,	0,	_railHgt + _zPosBaluster - _halfHgt
+	else
+		lin_	0,	0,	_zPosBaluster,	0,	0,	_railHgt + _zPosBaluster - _halfHgt/cos(_aSlope)
+	endif
+endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"strHRail_":	!	수평재(난간 유형 : 직선형)
+!-----------------------------------------------------------------------------------------------
+material	balusterMat
+
+if	not(iHRailNum = 0)	then
+	for	i = 1	to	iHRailNum
+		!	3D
+		if	_view = View_3D | (_view = View_Section & _iRailSect = RailSect_3D)	then
+			pen	railElevPen
+
+			!	단면
+			put	0,			0,		900,
+				hRailRad,	360,	4000
+
+			_nPoly = 2
+
+			!	Path
+			if	iBalusterNum > eps	then
+				_ratioSP = eachLth[1]/calcLth_2D
+				_ratioEP = eachLth[iBalusterNum]/calcLth_2D
+
+				if	bBaluster_SP	then
+					if	bBaluster_EP	then
+						put	-1,					0,	0,			0,
+							0,					0,	0,			0,
+							calcLth_2D,			0,	zRailPos,	0,
+							calcLth_2D + 1,		0,	zRailPos,	0
+
+						_nPath = 4
+					else
+						put	-1,						0,	0,					0,
+							0,						0,	0,					0,
+							calcLth_2D*_ratioEP,	0,	zRailPos*_ratioEP,	0,
+							calcLth_2D,				0,	zRailPos,			0
+
+						_nPath = 4
+					endif
+				else
+					if	bBaluster_EP	then
+						put	0,						0,	0,					0,
+							calcLth_2D*_ratioSP,	0,	zRailPos*_ratioSP,	0,
+							calcLth_2D,				0,	zRailPos,			0,
+							calcLth_2D + 1,			0,	zRailPos,			0
+
+						_nPath = 4
+					else
+						put	0,						0,	0,					0,
+							calcLth_2D*_ratioSP,	0,	zRailPos*_ratioSP,	0,
+							calcLth_2D*_ratioEP,	0,	zRailPos*_ratioEP,	0,
+							calcLth_2D,				0,	zRailPos,			0
+
+						_nPath = 4
+					endif
+				endif
+			else
+				put	-1,					0,	0,			0,
+					0,					0,	0,			0,
+					calcLth_2D,			0,	zRailPos,	0,
+					calcLth_2D + 1,		0,	zRailPos,	0
+
+				_nPath = 4
+			endif
+
+			!	수평재
+			addz	eachDist[i]
+				rotz	_aLine
+					tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+				del 1
+			del 1
+		endif
+
+		!	Section/Elevation
+		if	_view = View_Section & _iRailSect = RailSect_Line	then
+			pen	railSectPen
+
+			!	변수 정의
+			if	iBalusterNum > eps	then
+				_ratioSP = eachLth[1]/calcLth_2D
+				_ratioEP = eachLth[iBalusterNum]/calcLth_2D
+
+				if	bBaluster_SP	then
+					if	bBaluster_EP	then
+						_xHRailPos_SP = 0
+						_xHRailPos_EP = calcLth_2D
+
+						_zHRailPos_SP = 0
+						_zHRailPos_EP = zRailPos
+					else
+						_xHRailPos_SP = 0
+						_xHRailPos_EP = calcLth_2D*_ratioEP
+
+						_zHRailPos_SP = 0
+						_zHRailPos_EP = zRailPos*_ratioEP
+					endif
+				else
+					if	bBaluster_EP	then
+						_xHRailPos_SP = calcLth_2D*_ratioSP
+						_xHRailPos_EP = calcLth_2D
+
+						_zHRailPos_SP = zRailPos*_ratioSP
+						_zHRailPos_EP = zRailPos
+					else
+						_xHRailPos_SP = calcLth_2D*_ratioSP
+						_xHRailPos_EP = calcLth_2D*_ratioEP
+
+						_zHRailPos_SP = zRailPos*_ratioSP
+						_zHRailPos_EP = zRailPos*_ratioEP
+					endif
+				endif
+			else
+				_xHRailPos_SP = 0
+				_xHRailPos_EP = calcLth_2D
+
+				_zHRailPos_SP = 0
+				_zHRailPos_EP = zRailPos
+			endif
+
+			rotz	_aLine
+				addz	eachDist[i]
+					lin_	_xHRailPos_SP,	0,	_zHRailPos_SP,	_xHRailPos_EP,	0,	_zHRailPos_EP
+				del 1
+			del 1
+		endif
+	next	i
+endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"strRail_":	!	난간(난간 유형 : 직선형)
+!-----------------------------------------------------------------------------------------------
+material	railMat
+
+!	변수 설정
+_xCutPos_SP = abs(_halfRail/tan(aCutRail_SP))
+_xCutPos_EP = abs(_halfRail/tan(aCutRail_EP))
+
+_dumpValue = 0.010
+
+!	Cut_SP
+if	aCutRail_SP < 90	then
+	put	-(_halfRail + exLth_SP + _xCutPos_SP),				-_halfRail,
+		-(_halfRail + exLth_SP + _xCutPos_SP + _dumpValue),	_halfRail,
+		-(_halfRail + exLth_SP - _xCutPos_SP),				_halfRail
+else
+	put	-(_halfRail + exLth_SP + _xCutPos_SP),				_halfRail,
+		-(_halfRail + exLth_SP + _xCutPos_SP + _dumpValue),	-_halfRail,
+		-(_halfRail + exLth_SP - _xCutPos_SP),				-_halfRail
+endif
+
+cutpoly	nsp/2,	get(nsp)
+
+!	Cut_EP
+if	aCutRail_EP < 90	then
+	put	calcLth_2D + (_halfRail + exLth_EP + _xCutPos_EP),				_halfRail,
+		calcLth_2D + (_halfRail + exLth_EP + _xCutPos_EP + _dumpValue),	-_halfRail,
+		calcLth_2D + (_halfRail + exLth_EP - _xCutPos_EP),				-_halfRail
+else
+	put	calcLth_2D + (_halfRail + exLth_EP + _xCutPos_EP),				-_halfRail,
+		calcLth_2D + (_halfRail + exLth_EP + _xCutPos_EP + _dumpValue),	_halfRail,
+		calcLth_2D + (_halfRail + exLth_EP - _xCutPos_EP),				_halfRail
+endif
+
+cutpoly	nsp/2,	get(nsp)
+
+	!	단면
+	if	iRailShape = Shape_Rectangle	then
+		put	-_halfRail,	-_halfHgt,	1,
+			-_halfRail,	_halfHgt,	1,
+			_halfRail,	_halfHgt,	1,
+			_halfRail,	-_halfHgt,	1
+
+		_nPoly = 4
+	endif
+
+	if	iRailShape = Shape_Circle	then
+		put	0,			0,		900,
+			_halfRail,	360,	4000
+
+		_nPoly = 2
+	endif
+
+	!	Path
+	_aPath_SP = (aCutRail_SP - 90)
+	put	-(_halfRail + exLth_SP + 1),							0,	0,			0,
+		-(_halfRail + exLth_SP + _xCutPos_SP),					0,	0,			0,
+		0,														0,	0,			0,
+		calcLth_2D,												0,	zRailPos,	0,
+		calcLth_2D + (_halfRail + exLth_EP + _xCutPos_EP),		0,	zRailPos,	0,
+		calcLth_2D + (_halfRail + exLth_EP + _xCutPos_EP + 1),	0,	zRailPos,	0
+
+	_nPath = 6
+
+	!	난간
+	addz	railHgt
+		rotz	_aLine
+			tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+		del 1
+	del 1
+
+!	Cutend
+cutend
+cutend
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"crvHRail_":	!	수평재(난간 유형 : 곡선형)
+!-----------------------------------------------------------------------------------------------
+material	balusterMat
+
+if	not(iHRailNum = 0)	then
+	for	i = 1	to	iHRailNum
+		!	3D
+		if	_view = View_3D | (_view = View_Section & _iRailSect = RailSect_3D)	then
+			pen	railElevPen
+
+			!	단면
+			put	0,			0,		900,
+				hRailRad,	360,	4000
+
+			_nPoly = 2
+
+			!	Path
+			_resol = int(calcLth_3D/0.200)
+
+			if	iBalusterNum > eps	then
+				if	bBaluster_SP	then
+					if	bBaluster_EP	then
+						_aMod = aRailPos/_resol
+
+						put	rRailPos,	-1,	0,	0,
+							rRailPos,	0,	0,	0
+
+						for	j = 1	to	_resol
+							_aDivide = _aMod*j
+							_ratioH = _aDivide/aRailPos
+
+							put	rRailPos*cos(_aDivide),	rRailPos*sin(_aDivide),	zRailPos*_ratioH,	0
+						next	j
+
+						put	rRailPos*cos(aRailPos),	rRailPos*sin(aRailPos) + 1,	zRailPos,	0
+
+						_nPath = 3 + _resol
+					else
+						_aMod = eachAng[iBalusterNum]/_resol
+						_ratioEP = eachAng[iBalusterNum]/aRailPos
+
+						put	rRailPos,	-1,	0,	0,
+							rRailPos,	0,	0,	0
+
+						for	j = 1	to	_resol
+							_aDivide = _aMod*j
+							_ratioH = _aDivide/aRailPos
+
+							put	rRailPos*cos(_aDivide),	rRailPos*sin(_aDivide),	zRailPos*_ratioH,	0
+						next	j
+
+						put	rRailPos*cos(eachAng[iBalusterNum]),	rRailPos*sin(eachAng[iBalusterNum]) + 1,	zRailPos*_ratioEP,	0
+
+						_nPath = 3 + _resol
+					endif
+				else
+					if	bBaluster_EP	then
+						_aMod = (aRailPos - eachAng[1])/_resol
+						_ratioSP = eachAng[1]/aRailPos
+
+						put	rRailPos,					0,							0,					0,
+							rRailPos*cos(eachAng[1]),	rRailPos*sin(eachAng[1]),	zRailPos*_ratioSP,	0
+
+						for	j = 1	to	_resol
+							_aDivide = eachAng[1] + _aMod*j
+							_ratioH = _aDivide/aRailPos
+
+							put	rRailPos*cos(_aDivide),	rRailPos*sin(_aDivide),	zRailPos*_ratioH,	0
+						next	j
+
+						put	rRailPos*cos(aRailPos),	rRailPos*sin(aRailPos) + 1,	zRailPos,	0
+
+						_nPath = 3 + _resol
+					else
+						_aMod = (eachAng[iBalusterNum] - eachAng[1])/_resol
+						_ratioSP = eachAng[1]/aRailPos
+						_ratioEP = eachAng[iBalusterNum]/aRailPos
+
+						put	rRailPos,					0,							0,					0,
+							rRailPos*cos(eachAng[1]),	rRailPos*sin(eachAng[1]),	zRailPos*_ratioSP,	0
+
+						for	j = 1	to	_resol
+							_aDivide = eachAng[1] + _aMod*j
+							_ratioH = _aDivide/aRailPos
+
+							put	rRailPos*cos(_aDivide),	rRailPos*sin(_aDivide),	zRailPos*_ratioH,	0
+						next	j
+
+						put	rRailPos*cos(eachAng[iBalusterNum]),	rRailPos*sin(eachAng[iBalusterNum]) + 1,	zRailPos*_ratioEP,	0
+
+						_nPath = 3 + _resol
+					endif
+				endif
+			else
+				_aMod = aRailPos/_resol
+
+				put	rRailPos,	-1,	0,	0,
+					rRailPos,	0,	0,	0
+
+				for	j = 1	to	_resol
+					_aDivide = _aMod*j
+					_ratioH = _aDivide/aRailPos
+
+					put	rRailPos*cos(_aDivide),	rRailPos*sin(_aDivide),	zRailPos*_ratioH,	0
+				next	j
+
+				put	rRailPos*cos(aRailPos),	rRailPos*sin(aRailPos) + 1,	zRailPos,	0
+
+				_nPath = 3 + _resol
+			endif
+
+			!	수평재
+			addz	eachDist[i]
+				tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+			del 1
+		endif
+
+		!	Section/Elevation
+		if	_view = View_Section & _iRailSect = RailSect_Line	then
+			pen	railSectPen
+
+			addz	eachDist[i]
+				if	iBalusterNum > eps	then
+					_ratioSP = eachAng[1]/aRailPos
+					_ratioEP = eachAng[iBalusterNum]/aRailPos
+
+					!	시작점
+					lin_	rRailPos,	0,	0,	rRailPos*cos(eachAng[1]),	rRailPos*sin(eachAng[1]),	zRailPos*_ratioSP
+
+					!	사이
+					if	iBalusterNum > 1	then
+						for	j = 1	to	iBalusterNum - 1
+							_ratioNow = eachAng[j]/aRailPos
+							_ratioNext = eachAng[j + 1]/aRailPos
+
+							lin_	rRailPos*cos(eachAng[j]),		rRailPos*sin(eachAng[j]),		zRailPos*_ratioNow,
+									rRailPos*cos(eachAng[j + 1]),	rRailPos*sin(eachAng[j + 1]),	zRailPos*_ratioNext
+						next	j
+					endif
+
+					!	끝점
+					lin_	rRailPos*cos(eachAng[iBalusterNum]),	rRailPos*sin(eachAng[iBalusterNum]),	zRailPos*_ratioEP,
+							rRailPos*cos(aRailPos),					rRailPos*sin(aRailPos),					zRailPos
+				else
+					lin_	rRailPos,	0,	0,	rRailPos*cos(aRailPos),	rRailPos*sin(aRailPos),	zRailPos
+				endif
+			del 1
+		endif
+	next	i
+endif
+
+!-----------------------------------------------------------------------------------------------
+"crvRail_":	!	난간(난간 유형 : 곡선형)
+!-----------------------------------------------------------------------------------------------
+material	railMat
+
+!	변수 설정
+_xCutPos_SP = abs(_halfRail/tan(aCutRail_SP))
+_xCutPos_EP = abs(_halfRail/tan(aCutRail_EP))
+
+_dumpValue = 0.010
+
+!	Cut_SP
+_nTrans = 0
+if	aCutRail_SP < 90	then
+	put	-_halfRail,	_xCutPos_SP,
+		-_halfRail,	-(_xCutPos_SP + _dumpValue),
+		_halfRail,	-_xCutPos_SP
+else
+	put	-_halfRail,	-_xCutPos_SP,
+		_halfRail,	-(_xCutPos_SP + _dumpValue),
+		_halfRail,	_xCutPos_SP
+endif
+
+add	rRailPos,	-(_halfRail + exLth_SP),	0	:	_nTrans = _nTrans + 1
+	cutpoly	nsp/2,	get(nsp)
+add	-rRailPos,	_halfRail + exLth_SP,	0	:	_nTrans = _nTrans + 1
+
+!	Cut_EP
+if	aCutRail_EP < 90	then
+	put	-_halfRail,	_xCutPos_EP,
+		_halfRail,	_xCutPos_EP + _dumpValue,
+		_halfRail,	-_xCutPos_EP
+else
+	put	-_halfRail,	-_xCutPos_EP,
+		-_halfRail,	_xCutPos_EP + _dumpValue,
+		_halfRail,	_xCutPos_EP
+endif
+
+rotz	aRailPos	:	_nTrans = _nTrans + 1
+	add	rRailPos,	_halfRail + exLth_EP,	0	:	_nTrans = _nTrans + 1
+		cutpoly	nsp/2,	get(nsp)
+	add	-rRailPos,	-(_halfRail + exLth_EP),	0	:	_nTrans = _nTrans + 1
+rotz	-aRailPos	:	_nTrans = _nTrans + 1
+
+	!	단면
+	if	iRailShape = Shape_Rectangle	then
+		put	-_halfRail,	-_halfHgt,	1,
+			-_halfRail,	_halfHgt,	1,
+			_halfRail,	_halfHgt,	1,
+			_halfRail,	-_halfHgt,	1
+
+		_nPoly = 4
+	endif
+
+	if	iRailShape = Shape_Circle	then
+		put	0,			0,		900,
+			_halfRail,	360,	4000
+
+		_nPoly = 2
+	endif
+
+	!	Path
+	_aSub = 90 - aRailPos
+	_resol = int(calcLth_3D/0.200)
+	_aMod = aRailPos/_resol
+
+	put	rRailPos,	-(_halfRail + exLth_SP + _xCutPos_SP + 1),	0,	0,
+		rRailPos,	-(_halfRail + exLth_SP + _xCutPos_SP),		0,	0,
+		rRailPos,	0,											0,	0
+
+	for	j = 1	to	_resol
+		_aDivide = _aMod*j
+		_ratioH = _aDivide/aRailPos
+
+		put	rRailPos*cos(_aDivide),	rRailPos*sin(_aDivide),	zRailPos*_ratioH,	0
+	next	j
+
+	put	rRailPos*cos(aRailPos) - (_halfRail + exLth_EP + _xCutPos_EP)*cos(_aSub),
+		rRailPos*sin(aRailPos) + (_halfRail + exLth_EP + _xCutPos_EP)*sin(_aSub),		zRailPos,	0,
+		rRailPos*cos(aRailPos) - (_halfRail + exLth_EP + _xCutPos_EP + 1)*cos(_aSub),
+		rRailPos*sin(aRailPos) + (_halfRail + exLth_EP + _xCutPos_EP + 1)*sin(_aSub),	zRailPos,	0
+
+	_nPath = 5 + _resol
+
+	!	난간
+	addz	railHgt
+		tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+	del 1
+
+!	Cutend
+cutend
+cutend
+
+del _nTrans
+
+return

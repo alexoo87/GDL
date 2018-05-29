@@ -1,0 +1,96 @@
+!===============================================================================================
+!	각도치수
+!===============================================================================================
+
+!	Font
+!-----------------------------------------------------------------------------------------------
+dim	fontnames[]
+r = request("FONTNAMES_LIST", "", fontnames)
+values	"stFontType"	fontnames
+
+!	치수 개수 산정 방법
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDim"	Dim_Setting,	stDim[Dim_Setting],
+					Dim_2D_Plan,	stDim[Dim_2D_Plan]
+
+!	치수 개수
+!-----------------------------------------------------------------------------------------------
+values	"nDim"	range	[1,	]
+
+if	iDim = Dim_Setting	then
+	if	nDim > 1	then
+		for	i = 1	to	100
+			if	i < nDim	then
+				parameters	aSwitch[i] = 60
+			else
+				parameters	aSwitch[i] = 90
+			endif
+		next	i
+	endif
+endif
+
+if	iDim = Dim_2D_Plan	then
+	lock	"nDim"
+
+	_count = 1
+	for	i = 1	to	100
+		if	aSwitch[i] < 60 + eps	then
+			_count = _count + 1
+		endif
+
+		if	aSwitch[i] > 90 - eps	then
+			_count = _count
+		endif
+	next	i
+
+	parameters	nDim = _count
+endif
+
+!	치수 소주점 자릿수
+!-----------------------------------------------------------------------------------------------
+values	"dimDecimal"	0,	1,	2
+
+!	치수 방향 조정기
+!-----------------------------------------------------------------------------------------------
+values	"aDirect"	0,	60
+
+!	치수 개수 조정기
+!-----------------------------------------------------------------------------------------------
+values	"aSwitch"	60,	90
+
+!	접미사 On/Off
+!-----------------------------------------------------------------------------------------------
+values	"aSuffixText"	60,	90
+
+!	변수 범위 정의
+!-----------------------------------------------------------------------------------------------
+values	"spotRad"	range	[eps,	]
+values	"dimAng"	range	(eps,	90]
+values	"customAng"	range	[0,	360]
+values	"dimHgt"	range	[eps,	]
+values	"yDimPos"	range	[eps,	]
+
+values	"dimSV"		range	[0,	]
+values	"entireSV"	range	[0,	]
+
+values	"textSize"	range	[eps,	]
+
+if	not(bCen)	then
+	lock			"cenLth", "yCenPos"
+	hideparameter	"cenLth", "yCenPos"
+endif
+
+!	텍스트 위치
+!-----------------------------------------------------------------------------------------------
+
+!	기본값
+!-----------------------------------------------------------------------------------------------
+for	i = 1	to	100
+	if	dimAng[i] < eps	then
+		parameters	dimAng[i] = 5
+	endif
+
+	if	cenLth[i] < eps	then
+		parameters	cenLth[i] = 10.000
+	endif
+next	i

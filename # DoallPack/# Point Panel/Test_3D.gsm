@@ -1,0 +1,219 @@
+unID = 100
+eps = 0.0001
+
+!	W.P
+hotspot	0,	0,	0,	unID	:	unID = unID + 1
+
+_xOrigin = 0
+_yOrigin = 0
+_zOrigin = 0
+
+_xPosB1 = coordinate_B[1][1]
+_yPosB1 = coordinate_B[1][2]
+_zPosB1 = coordinate_B[1][3]
+
+_xPosB2 = coordinate_B[2][1]
+_yPosB2 = coordinate_B[2][2]
+_zPosB2 = coordinate_B[2][3]
+
+_xPosB3 = coordinate_B[3][1]
+_yPosB3 = coordinate_B[3][2]
+_zPosB3 = coordinate_B[3][3]
+
+_xPosAdd0 = addCoordinate[1][1]
+_yPosAdd0 = addCoordinate[1][2]
+
+_xPosAdd1 = addCoordinate[2][1]
+_yPosAdd1 = addCoordinate[2][2]
+
+_xPosAdd2 = addCoordinate[3][1]
+_yPosAdd2 = addCoordinate[3][2]
+
+! _xPosT1 = coordinate_T[1][1]
+! _yPosT1 = coordinate_T[1][2]
+! _zPosT1 = coordinate_T[1][3]
+
+! _xPosT2 = coordinate_T[2][1]
+! _yPosT2 = coordinate_T[2][2]
+! _zPosT2 = coordinate_T[2][3]
+
+! _xPosT3 = coordinate_T[3][1]
+! _yPosT3 = coordinate_T[3][2]
+! _zPosT3 = coordinate_T[3][3]
+
+!-----------------------------------------------------------------------------------------------
+!	TEST1(Ruled)
+!-----------------------------------------------------------------------------------------------
+! _dumpValue = 1.000
+
+! addz	-_dumpValue
+
+! 	group	"g1"
+! 		!	하부
+! 		put	_xOrigin,	_yOrigin,	0,
+! 			_xPosB1,	_yPosB1,	0,
+! 			_xPosB2,	_yPosB2,	0
+
+! 		!	상부
+! 		put	_xOrigin,	_yOrigin,	_dumpValue + _zOrigin,
+! 			_xPosB1,	_yPosB1,	_dumpValue + _zPosB1,
+! 			_xPosB2,	_yPosB2,	_dumpValue + _zPosB2
+
+! 		ruled	(nsp/3)/2,	1+2+4,	get(nsp)
+
+! 		!	하부
+! 		put	_xOrigin,	_yOrigin,	0,
+! 			_xPosB2,	_yPosB2,	0,
+! 			_xPosB3,	_yPosB3,	0
+
+! 		!	상부
+! 		put	_xOrigin,	_yOrigin,	_dumpValue + _zOrigin,
+! 			_xPosB2,	_yPosB2,	_dumpValue + _zPosB2,
+! 			_xPosB3,	_yPosB3,	_dumpValue + _zPosB3
+
+! 		ruled	(nsp/3)/2,	1+2+4,	get(nsp)
+! 	endgroup
+
+! 	group	"g2"
+! 		!	하부
+! 		put	_xOrigin,	_yOrigin,	0,
+! 			_xPosB1,	_yPosB1,	0,
+! 			_xPosB2,	_yPosB2,	0
+
+! 		!	상부
+! 		put	_xOrigin,	_yOrigin,	_dumpValue + pnlThk + _zOrigin,
+! 			_xPosB1,	_yPosB1,	_dumpValue + pnlThk + _zPosB1,
+! 			_xPosB2,	_yPosB2,	_dumpValue + pnlThk + _zPosB2
+
+! 		ruled	(nsp/3)/2,	1+2+4,	get(nsp)
+
+! 		!	하부
+! 		put	_xOrigin,	_yOrigin,	0,
+! 			_xPosB2,	_yPosB2,	0,
+! 			_xPosB3,	_yPosB3,	0
+
+! 		!	상부
+! 		put	_xOrigin,	_yOrigin,	_dumpValue + pnlThk + _zOrigin,
+! 			_xPosB2,	_yPosB2,	_dumpValue + pnlThk + _zPosB2,
+! 			_xPosB3,	_yPosB3,	_dumpValue + pnlThk + _zPosB3
+
+! 		ruled	(nsp/3)/2,	1+2+4,	get(nsp)
+! 	endgroup
+
+! 	placegroup	subgroup("g2",	"g1")
+! del 1
+
+!-----------------------------------------------------------------------------------------------
+!	Plane
+!-----------------------------------------------------------------------------------------------
+
+!	Hotspot(포인트 이동)
+hotspot	0,					_yPosB1,	_zPosB1,	unID,	coordinate_B[1][1],	1+128	:	unID = unID + 1
+hotspot	-1,					_yPosB1,	_zPosB1,	unID,	coordinate_B[1][1],	3		:	unID = unID + 1
+hotspot	coordinate_B[1][1],	_yPosB1,	_zPosB1,	unID,	coordinate_B[1][1],	2		:	unID = unID + 1
+
+hotspot	_xPosB1,	0,					_zPosB1,	unID,	coordinate_B[1][2],	1+128	:	unID = unID + 1
+hotspot	_xPosB1,	-1,					_zPosB1,	unID,	coordinate_B[1][2],	3		:	unID = unID + 1
+hotspot	_xPosB1,	coordinate_B[1][2],	_zPosB1,	unID,	coordinate_B[1][2],	2		:	unID = unID + 1
+
+hotspot	_xPosB1,	_yPosB1,	0,					unID,	coordinate_B[1][3],	1+128	:	unID = unID + 1
+hotspot	_xPosB1,	_yPosB1,	-1,					unID,	coordinate_B[1][3],	3		:	unID = unID + 1
+hotspot	_xPosB1,	_yPosB1,	coordinate_B[1][3],	unID,	coordinate_B[1][3],	2		:	unID = unID + 1
+
+hotspot	0,					_yPosB2,	_zPosB2,	unID,	coordinate_B[2][1],	1+128	:	unID = unID + 1
+hotspot	-1,					_yPosB2,	_zPosB2,	unID,	coordinate_B[2][1],	3		:	unID = unID + 1
+hotspot	coordinate_B[2][1],	_yPosB2,	_zPosB2,	unID,	coordinate_B[2][1],	2		:	unID = unID + 1
+
+hotspot	_xPosB2,	0,					_zPosB2,	unID,	coordinate_B[2][2],	1+128	:	unID = unID + 1
+hotspot	_xPosB2,	-1,					_zPosB2,	unID,	coordinate_B[2][2],	3		:	unID = unID + 1
+hotspot	_xPosB2,	coordinate_B[2][2],	_zPosB2,	unID,	coordinate_B[2][2],	2		:	unID = unID + 1
+
+hotspot	_xPosB2,	_yPosB2,	0,					unID,	coordinate_B[2][3],	1+128	:	unID = unID + 1
+hotspot	_xPosB2,	_yPosB2,	-1,					unID,	coordinate_B[2][3],	3		:	unID = unID + 1
+hotspot	_xPosB2,	_yPosB2,	coordinate_B[2][3],	unID,	coordinate_B[2][3],	2		:	unID = unID + 1
+
+!	Hotspot(상부 포인트 추가이동)
+add	0,	0,	pnlThk
+	hotspot	0,						_yPosAdd0,	0,	unID,	addCoordinate[1][1],	1+128	:	unID = unID + 1
+	hotspot	-1,						_yPosAdd0,	0,	unID,	addCoordinate[1][1],	3		:	unID = unID + 1
+	hotspot	addCoordinate[1][1],	_yPosAdd0,	0,	unID,	addCoordinate[1][1],	2		:	unID = unID + 1
+
+	hotspot	_xPosAdd0,	0,						0,	unID,	addCoordinate[1][2],	1+128	:	unID = unID + 1
+	hotspot	_xPosAdd0,	-1,						0,	unID,	addCoordinate[1][2],	3		:	unID = unID + 1
+	hotspot	_xPosAdd0,	addCoordinate[1][2],	0,	unID,	addCoordinate[1][2],	2		:	unID = unID + 1
+del 1
+
+add	_xPosB1,	_yPosB1,	pnlThk
+	hotspot	0,						_yPosAdd1,	0,	unID,	addCoordinate[2][1],	1+128	:	unID = unID + 1
+	hotspot	-1,						_yPosAdd1,	0,	unID,	addCoordinate[2][1],	3		:	unID = unID + 1
+	hotspot	addCoordinate[2][1],	_yPosAdd1,	0,	unID,	addCoordinate[2][1],	2		:	unID = unID + 1
+
+	hotspot	_xPosAdd1,	0,						0,	unID,	addCoordinate[2][2],	1+128	:	unID = unID + 1
+	hotspot	_xPosAdd1,	-1,						0,	unID,	addCoordinate[2][2],	3		:	unID = unID + 1
+	hotspot	_xPosAdd1,	addCoordinate[2][2],	0,	unID,	addCoordinate[2][2],	2		:	unID = unID + 1
+del 1
+
+add	_xPosB2,	_yPosB2,	pnlThk
+	hotspot	0,						_yPosAdd2,	0,	unID,	addCoordinate[3][1],	1+128	:	unID = unID + 1
+	hotspot	-1,						_yPosAdd2,	0,	unID,	addCoordinate[3][1],	3		:	unID = unID + 1
+	hotspot	addCoordinate[3][1],	_yPosAdd2,	0,	unID,	addCoordinate[3][1],	2		:	unID = unID + 1
+
+	hotspot	_xPosAdd2,	0,						0,	unID,	addCoordinate[3][2],	1+128	:	unID = unID + 1
+	hotspot	_xPosAdd2,	-1,						0,	unID,	addCoordinate[3][2],	3		:	unID = unID + 1
+	hotspot	_xPosAdd2,	addCoordinate[3][2],	0,	unID,	addCoordinate[3][2],	2		:	unID = unID + 1
+del 1
+
+!	하부면
+put	_xOrigin,	_yOrigin,	_zOrigin,
+	_xPosB1,	_yPosB1,	_zPosB1,
+	_xPosB2,	_yPosB2,	_zPosB2
+
+	plane	nsp/3,	get(nsp)
+
+
+!	상부면
+put	_xOrigin + _xPosAdd0,	_yOrigin + _yPosAdd0,	pnlThk + _zOrigin,
+	_xPosB1 + _xPosAdd1,	_yPosB1 + _yPosAdd1,	pnlThk + _zPosB1,
+	_xPosB2 + _xPosAdd2,	_yPosB2 + _yPosAdd2,	pnlThk + _zPosB2
+
+	plane	nsp/3,	get(nsp)
+
+!	옆면
+
+	!	1st
+	put	_xOrigin,	_yOrigin,	_zOrigin,
+		_xPosB1/2,	_yPosB1/2,	_zPosB1/2,
+		_xOrigin + _xPosAdd0,	_yOrigin + _yPosAdd0,	pnlThk + _zOrigin
+
+	plane	nsp/3,	get(nsp)
+
+	put	_xPosB1,	_yPosB1,	_zPosB1,
+		_xPosB1/2,	_yPosB1/2,	_zPosB1/2,
+		_xPosB1 + _xPosAdd1,	_yPosB1 + _yPosAdd1,	pnlThk + _zPosB1
+
+	plane	nsp/3,	get(nsp)
+
+	put	_xPosB1/2,	_yPosB1/2,	_zPosB1/2,
+		_xPosB1 + _xPosAdd1,	_yPosB1 + _yPosAdd1,	pnlThk + _zPosB1,
+		_xOrigin + _xPosAdd0,	_yOrigin + _yPosAdd0,	pnlThk + _zOrigin
+
+	plane	nsp/3,	get(nsp)
+
+	!	3rd
+	put	_xOrigin,	_yOrigin,	_zOrigin,
+		_xPosB2/2,	_yPosB2/2,	_zPosB2/2,
+		_xOrigin + _xPosAdd0,	_yOrigin + _yPosAdd0,	pnlThk + _zOrigin
+
+	plane	nsp/3,	get(nsp)
+
+	put	_xPosB2,	_yPosB2,	_zPosB2,
+		_xPosB2/2,	_yPosB2/2,	_zPosB2/2,
+		_xPosB2 + _xPosAdd2,	_yPosB2 + _yPosAdd2,	pnlThk + _zPosB2
+
+	plane	nsp/3,	get(nsp)
+
+	put	_xPosB2/2,	_yPosB2/2,	_zPosB2/2,
+		_xPosB2 + _xPosAdd2,	_yPosB2 + _yPosAdd2,	pnlThk + _zPosB2,
+		_xOrigin + _xPosAdd0,	_yOrigin + _yPosAdd0,	pnlThk + _zOrigin
+
+	plane	nsp/3,	get(nsp)

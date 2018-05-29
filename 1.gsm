@@ -1,0 +1,29 @@
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+Display_Projected = 1
+Display_WithOverhead = 2
+Display_Symbolic = 3
+Display_Outlines = 4
+Display_Overhead = 5
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDisplay[]
+		stDisplay[1] = "Projected"
+		stDisplay[2] = "Projected with Overhead"
+		stDisplay[3] = "Symbolic View"
+		stDisplay[4] = "Outlines Only"
+		stDisplay[5] = "Overhead All"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+ProjectTo_FloorPlan = 1
+ProjectTo_Absolute = 2
+ProjectTo_Entire = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stProjectTo[]
+		stProjectTo[1] = "To Floor Plan Range"
+		stProjectTo[2] = "Absolute Display Limit"
+		stProjectTo[3] = "Entire Element"
+endif

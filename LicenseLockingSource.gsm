@@ -1,0 +1,12 @@
+!===============================================================================================
+!	License Locking Source
+
+call	"macroL"	parameters	all	returned_parameters	keyValue
+
+if	not(keyValue)	then
+	hideparameter	all
+	lock			all
+endif
+
+!	License Locking Source
+!===============================================================================================

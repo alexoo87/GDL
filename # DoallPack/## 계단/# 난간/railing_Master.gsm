@@ -1,0 +1,132 @@
+!===============================================================================================
+!	난간(직/곡선)
+!===============================================================================================
+unID = 100
+eps = 0.0001
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+!	난간 유형
+!-----------------------------------------------------------------------------------------------
+Rail_Straight = 1
+Rail_Curved = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stRailType[]
+		stRailType[1] = "직선형"
+		stRailType[2] = "곡선형"
+endif
+
+!	난간/난간 동자 단면 형태
+!-----------------------------------------------------------------------------------------------
+Shape_Rectangle = 1
+Shape_Circle = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stShape[]
+		stShape[1] = "사각형"
+		stShape[2] = "원형"
+endif
+
+!	난간 동자 배치 방법
+!-----------------------------------------------------------------------------------------------
+Place_Length = 1
+Place_Custom = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stBalusterPlace[]
+		stBalusterPlace[1] = "일정한 간격으로 배치"
+		stBalusterPlace[2] = "사용자 정의"
+endif
+
+!	간격 설정 방법
+!-----------------------------------------------------------------------------------------------
+DistMethod_Length = 1
+DistMethod_Angle = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDistMethod[]
+		stDistMethod[1] = "길이"
+		stDistMethod[2] = "각도"
+endif
+
+!	수평재 배치 방법
+!-----------------------------------------------------------------------------------------------
+HRailPlace_Equal = 1
+HRailPlace_Unequal = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stHRailPlace[]
+		stHRailPlace[1] = "자동 등분"
+		stHRailPlace[2] = "사용자 정의"
+endif
+
+!	난간 단면 표현
+!-----------------------------------------------------------------------------------------------
+RailSect_Line = 1
+RailSect_3D = 2
+RailSect_MVO = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stRailSect[]
+		stRailSect[1] = "단선"
+		stRailSect[2] = "3D형상"
+		stRailSect[3] = "by MVO"
+endif
+
+!===============================================================================================
+!	난간 끝 점에 따른 X축과의 각도
+!===============================================================================================
+!	text style
+if	not(GLOB_SCRIPT_TYPE = 5)	then
+	define style	"alert"	"맑은 고딕",	100/GLOB_SCALE,	5,	0
+
+	_aLine = 0
+	if	iRailType = Rail_Straight	then
+		if	xRailPos >= eps	then
+			if	abs(yRailPos) < eps	then
+				_aLine = 0
+			else
+				_aLine = atn(yRailPos/xRailPos)
+			endif
+		endif
+
+		if	abs(xRailPos) < eps	then
+			if	yRailPos >= eps	then
+				_aLine = 90
+			endif
+
+			if	abs(yRailPos) < eps	then
+				style	"alert"
+				text2	0,	0,	"난간의 끝점 좌표가 (0,0)으로 설정되었습니다."
+				end
+			endif
+
+			if	yRailPos <= -eps	then
+				_aLine = 270
+			endif
+		endif
+
+		if	xRailPos <= -eps	then
+			if	abs(yRailPos) < eps	then
+				_aLine = 180
+			else
+				_aLine = 180 + atn(yRailPos/xRailPos)
+			endif
+		endif
+	endif
+endif
+
+!===============================================================================================
+!	공통 내부 변수
+!===============================================================================================
+!	난간 단면 절반 값
+if	iRailShape = Shape_Rectangle	then
+	_halfRail = shapeWdt/2
+	_halfHgt = shapeHgt/2
+endif
+if	iRailShape = Shape_Circle	then
+	_halfRail = shapeRad
+	_halfHgt = shapeRad
+endif

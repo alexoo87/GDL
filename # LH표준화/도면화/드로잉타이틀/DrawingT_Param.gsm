@@ -1,0 +1,26 @@
+!===============================================================================================
+!	드로잉 타이틀
+!===============================================================================================
+
+!	마커 형태
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMarkerShape"	MARKER_RECTANGLE,	stMarkerShape[MARKER_RECTANGLE],
+							MARKER_CIRCLE,		stMarkerShape[MARKER_CIRCLE],
+							MARKER_TRI_RIGHT,	stMarkerShape[MARKER_TRI_RIGHT],
+							MARKER_TRI_UP,		stMarkerShape[MARKER_TRI_UP],
+							MARKER_TRI_DOWN,	stMarkerShape[MARKER_TRI_DOWN]
+
+!	마커 자동크기
+!-----------------------------------------------------------------------------------------------
+if	bAutoSize	then
+	hideparameter	"mrkWdt", "mrkHgt", "mrkRad"
+endif
+
+!	텍스트 내용
+!-----------------------------------------------------------------------------------------------
+values{2}	"iContent"	CONTENT_DRAWING_NAME,	stContent[CONTENT_DRAWING_NAME],
+						CONTENT_CUSTOM_TEXT,	stContent[CONTENT_CUSTOM_TEXT]
+
+if	not(iContent = CONTENT_CUSTOM_TEXT)	then
+	hideparameter	"stCustom"
+endif

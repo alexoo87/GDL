@@ -1,0 +1,81 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/12/07 THU
+!	VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+unID = 1000
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+resol HM_3D_resol
+
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+if	GLOB_VIEW_TYPE = 2	then
+	HM_3D_pen = HM_2D_cranePen
+endif
+pen	HM_3D_pen
+
+	!	Beam
+	!----------------------------------------------------------------------------------------------------
+	if	HM_matWarning = ""	then	
+		material HM_matBeam
+	else
+		material HM_matWarning
+	endif
+
+	!	Start Point
+	put	-HM_Beam_Offset_SP,											HM_Beam_Width/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						HM_Beam_Width/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						HM_Beam_WebT/2,		0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	HM_Beam_WebT/2,		0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	HM_Beam_Width/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP),					HM_Beam_Width/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP),					-HM_Beam_Width/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	-HM_Beam_Width/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	-HM_Beam_WebT/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						-HM_Beam_WebT/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						-HM_Beam_Width/2,	0,
+		-HM_Beam_Offset_SP,											-HM_Beam_Width/2,	0
+
+	!	End Point
+	put	-HM_Beam_Offset_EP,											HM_Beam_Width/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						HM_Beam_Width/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						HM_Beam_WebT/2,		HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	HM_Beam_WebT/2,		HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	HM_Beam_Width/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP),					HM_Beam_Width/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP),					-HM_Beam_Width/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	-HM_Beam_Width/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	-HM_Beam_WebT/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						-HM_Beam_WebT/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						-HM_Beam_Width/2,	HM_Beam_Length,
+		-HM_Beam_Offset_EP,											-HM_Beam_Width/2,	HM_Beam_Length
+
+	roty	90
+		ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+	del 1
+
+!======================================================================================================
+end
+!======================================================================================================
+
+
+
+

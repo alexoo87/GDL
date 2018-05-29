@@ -1,0 +1,52 @@
+!===============================================================================================
+!	회전문
+!===============================================================================================
+
+!	회전문 유형
+values{2}	"iDoorType"	DOORTYPE_4PANEL,	stDoorType[DOORTYPE_4PANEL],
+						DOORTYPE_3PANEL,	stDoorType[DOORTYPE_3PANEL]
+
+if	iDoorType = DOORTYPE_4PANEL	then
+	lock			"doorWdt", "yPosEnd_1", "yPosEnd_2"
+	hideparameter	"doorWdt", "yPosEnd_1", "yPosEnd_2"
+endif
+
+if	iDoorType = DOORTYPE_3PANEL	then
+	lock			"A", "B"
+	hideparameter	"A", "B"
+endif
+
+!===============================================================================================
+!	변수 범위 정의
+!===============================================================================================
+
+values	"A"		range	[DoorRad*2,	]
+values	"B"		range	[DoorRad*2,	]
+values	"ZZYZX"	range	[1,	]
+
+values	"doorPosX_1"	range	[0,	]
+values	"doorPosY_1"	range	[0,	]
+values	"doorPosX_2"	range	[0,	doorPosX_1]
+values	"doorPosY_2"	range	[doorPosY_1,	]
+
+values	"DoorRad"	range	[0,	]
+values	"ColumnRad"	range	[0,	]
+values	"DoorThk"	range	[0,	]
+
+values	"RoofThk"	range	[0,]
+values	"GlassThk"	range	[0,	DoorThk]
+
+values	"FrameThk"	range	[0,	]
+values	"FrameWdt"	range	[0,	]
+
+!	문 너비
+lock			"halfWdt"
+hideparameter	"halfWdt"
+
+if	GLOB_MODPAR_NAME = "halfWdt"	then
+	parameters	doorWdt = halfWdt*2
+else
+	if	GLOB_MODPAR_NAME = "doorWdt"	then
+		parameters	halfWdt = doorWdt/2
+	endif
+endif

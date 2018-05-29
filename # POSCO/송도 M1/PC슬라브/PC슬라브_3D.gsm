@@ -1,0 +1,338 @@
+!===============================================================================================
+!	PC슬라브
+!===============================================================================================
+!	W.P
+hotspot	0,	0,	0,	unID	:	unID = unID + 1
+
+!	슬라브
+!-----------------------------------------------------------------------------------------------
+material	matCon
+pen			penCon
+sect_fill	65,	0,	0,	penCon
+
+	!	변수 정의
+	_endHgt_2 = ribHgt - endHgt
+	_aEnd = atn(endOffset/(slabThk + _endHgt_2))
+	_offset_Lower_L = 0
+	_offset_Lower_R = 0
+	_offset_Upper_L = 0
+	_offset_Upper_R = 0
+
+	if	iRibType_L = RIB_LOWER	then
+		_offset_Lower_L = halfWdt_L - offWdt_L
+	endif
+	if	iRibType_L = RIB_UPPER	then
+		_offset_Upper_L = addLth_L
+	endif
+	if	iRibType_R = RIB_LOWER	then
+		_offset_Lower_R = halfWdt_R - offWdt_R
+	endif
+	if	iRibType_R = RIB_UPPER	then
+		_offset_Upper_R = addLth_R
+	endif
+
+	roty	90
+		addz	_offset_Lower_L
+			!	좌/우 리브 유형이 하부형일 때, 모서리 컷
+			_nCut = 0
+			_cutHgt = 0.020
+			addx	_cutHgt
+				roty	45
+					cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+				del 1
+			del 1
+
+			addz	spanLth_Short - (_offset_Lower_L + _offset_Lower_R)
+				addx	_cutHgt
+					roty	-45
+						cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+					del 1
+				del 1
+			del 1
+
+				!	Draw Slab
+				if	bDrawSlab	then
+					put	0,			endOffset,										15,
+						0,			spanLth_Long - endOffset,						15,
+						slabThk,	spanLth_Long - _endHgt_2*tan(_aEnd),			13,
+						slabThk,	spanLth_Long - (endOffset + ribHgt/tan(54)),	15,
+						slabThk,	endOffset + ribHgt/tan(54),						13,
+						slabThk,	_endHgt_2*tan(_aEnd),							13
+
+					prism_	nsp/3,	spanLth_Short - (_offset_Lower_L + _offset_Lower_R),	get(nsp)
+				endif
+
+			for	c = 1	to	_nCut
+				cutend
+			next	c
+
+			!	Hotspot
+			addz	spanLth_Short/2
+				hotspot	0,	0,			0,	unID,	endOffset,	1+128	:	unID = unID + 1
+				hotspot	0,	-1,			0,	unID,	endOffset,	3		:	unID = unID + 1
+				hotspot	0,	endOffset,	0,	unID,	endOffset,	2		:	unID = unID + 1
+
+				addx	slabThk + ribHgt
+					hotspot	0,			0,	0,	unID,	endHgt,	1+128	:	unID = unID + 1
+					hotspot	1,			0,	0,	unID,	endHgt,	3		:	unID = unID + 1
+					hotspot	-endHgt,	0,	0,	unID,	endHgt,	2		:	unID = unID + 1
+				del 1
+
+				addy	spanLth_Long
+					muly	-1
+						hotspot	0,	0,			0,	unID,	endOffset,	1+128	:	unID = unID + 1
+						hotspot	0,	-1,			0,	unID,	endOffset,	3		:	unID = unID + 1
+						hotspot	0,	endOffset,	0,	unID,	endOffset,	2		:	unID = unID + 1
+
+						addx	slabThk + ribHgt
+							hotspot	0,			0,	0,	unID,	endHgt,	1+128	:	unID = unID + 1
+							hotspot	1,			0,	0,	unID,	endHgt,	3		:	unID = unID + 1
+							hotspot	-endHgt,	0,	0,	unID,	endHgt,	2		:	unID = unID + 1
+						del 1
+					del 1
+				del 1
+			del 1
+		del 1
+	del 1
+
+!	장스팬 끝단
+!-----------------------------------------------------------------------------------------------
+material	matCon
+
+	!	변수 정의
+
+
+	!	끝단의 유형이 하부형일때 컷
+	_nCut = 0
+	_bDrawCutpoly_L = (halfWdt_L - offWdt_L > eps)
+	_bDrawCutpoly_R = (halfWdt_R - offWdt_R > eps)
+	if	iRibType_L = RIB_LOWER & _bDrawCutpoly_L	then
+		addz	-slabThk
+			addx	halfWdt_L - offWdt_L
+				rotx	-90
+					put	0,							0,
+						-(halfWdt_L - offWdt_L),	0,
+						-(halfWdt_L - offWdt_L),	offHgt_L,
+						0,							offHgt_L
+
+					cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+				del 1
+			del 1
+		del 1
+	endif
+	if	iRibType_R = RIB_LOWER & _bDrawCutpoly_R	then
+		addz	-slabThk
+			addx	spanLth_Short
+				rotx	-90
+					put	0,							0,
+						-(halfWdt_R - offWdt_R),	0,
+						-(halfWdt_R - offWdt_R),	offHgt_R,
+						0,							offHgt_R
+
+					cutpoly	nsp/2,	get(nsp)	:	_nCut = _nCut + 1
+				del 1
+			del 1
+		del 1
+	endif
+
+	!	Draw End Shape
+	roty	90
+		addz	_offset_Upper_L
+			put	slabThk,				_endHgt_2*tan(_aEnd),		13,
+				slabThk + _endHgt_2,	0,							15,
+				slabThk + ribHgt,		0,							15,
+				slabThk + ribHgt,		endOffset,					15,
+				slabThk,				endOffset + ribHgt/tan(54),	15
+
+			prism_	nsp/3,	spanLth_Short - (_offset_Upper_L + _offset_Upper_R),	use(nsp)
+
+			addy	spanLth_Long
+				muly	-1
+					prism_	nsp/3,	spanLth_Short - (_offset_Upper_L + _offset_Upper_R),	get(nsp)
+				del 1
+			del 1
+		del 1
+	del 1
+
+	if	_nCut > eps	then
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+	endif
+
+!	단스팬
+!-----------------------------------------------------------------------------------------------
+material	matCon
+
+	!	변수 정의
+	_subWdt = 0.025
+	_bDrawRib = (nRib - 2 > eps)
+
+	_xPosRib = 0
+	if	iRibType_L = RIB_UPPER	then
+		_xPosRib = ribLth_L + addLth_L
+	endif
+	if	iRibType_L = RIB_LOWER	then
+		_xPosRib = halfWdt_L
+	endif
+
+	!	Cut : 장스팬 기울기
+	_nCut = 0
+	addz	-(slabThk + ribHgt)
+		addy	endOffset
+			rotx	54
+				cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+			del 1
+		del 1
+
+		addy	spanLth_Long - endOffset
+			rotx	-54
+				cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+			del 1
+		del 1
+	del 1
+
+
+	!	Draw Rib
+	addz	-slabThk
+		rotx	-90
+			addx	_xPosRib
+				!	좌측 끝단 리브
+				if	iRibType_L = RIB_UPPER	then
+					!	Hotspot
+					addz	spanLth_Long/2
+						addx	-ribLth_L
+							hotspot	0,			0,	0,	unID,	ribLth_L,	1+256	:	unID = unID + 1
+							hotspot	-1,			0,	0,	unID,	ribLth_L,	3		:	unID = unID + 1
+							hotspot	ribLth_L,	0,	0,	unID,	ribLth_L,	2		:	unID = unID + 1
+
+							addx	-addLth_L
+								hotspot	0,			0,	0,	unID,	addLth_L,	1+256	:	unID = unID + 1
+								hotspot	-1,			0,	0,	unID,	addLth_L,	3		:	unID = unID + 1
+								hotspot	addLth_L,	0,	0,	unID,	addLth_L,	2		:	unID = unID + 1
+							del 1
+						del 1
+					del 1
+
+					!	Coordinate
+					gosub	"coordinate_Normal_Rib"
+				endif
+				if	iRibType_L = RIB_LOWER	then
+					!	Hotspot
+					addz	spanLth_Long/2
+						addy	offHgt_L
+							hotspot	0,			0,	0,	unID,	offWdt_L,	1+128	:	unID = unID + 1
+							hotspot	1,			0,	0,	unID,	offWdt_L,	3		:	unID = unID + 1
+							hotspot	-offWdt_L,	0,	0,	unID,	offWdt_L,	2		:	unID = unID + 1
+						del 1
+
+						addx	-halfWdt_L
+							hotspot	0,	0,			0,	unID,	offHgt_L,	1+128	:	unID = unID + 1
+							hotspot	0,	-1,			0,	unID,	offHgt_L,	3		:	unID = unID + 1
+							hotspot	0,	offHgt_L,	0,	unID,	offHgt_L,	2		:	unID = unID + 1
+						del 1
+					del 1
+
+					!	Coordinate
+					put	-halfWdt_L,				offHgt_L,	15,
+						-offWdt_L,				offHgt_L,	15,
+						-offWdt_L,				0,			15,
+						ribWdt/2 + ribRad,		0,			13,
+						ribWdt/2 + ribRad,		ribRad,		900,
+						ribRad,					-90,		4000+13,
+						ribWdt/2 - _subWdt,		ribHgt,		15,
+						-halfWdt_L/2,			ribHgt,		15
+				endif
+
+				prism_	nsp/3,	spanLth_Long,	get(nsp)
+
+					!	Hotspot : ribGap
+					addz	spanLth_Long/2
+						hotspot	0,		0,	0,	unID,	ribGap,	1+128	:	unID = unID + 1
+						hotspot	-1,		0,	0,	unID,	ribGap,	3		:	unID = unID + 1
+						hotspot	ribGap,	0,	0,	unID,	ribGap,	2		:	unID = unID + 1
+					del 1
+
+
+				!	사이 리브
+				if	_bDrawRib	then
+					for	i = 1	to	(nRib - 2)
+						addx	ribGap
+
+						gosub	"coordinate_Normal_Rib"
+
+						prism_	nsp/3,	spanLth_Long,	get(nsp)
+					next	i
+				endif
+
+				!	우측 끝단 리브
+				addx	ribGap
+					if	iRibType_R = RIB_UPPER	then
+						!	Hotspot
+						addz	spanLth_Long/2
+							hotspot	0,			0,	0,	unID,	ribLth_R,	1+256	:	unID = unID + 1
+							hotspot	-1,			0,	0,	unID,	ribLth_R,	3		:	unID = unID + 1
+							hotspot	ribLth_R,	0,	0,	unID,	ribLth_R,	2		:	unID = unID + 1
+
+							addx	ribLth_R
+								hotspot	0,			0,	0,	unID,	addLth_R,	1+256	:	unID = unID + 1
+								hotspot	-1,			0,	0,	unID,	addLth_R,	3		:	unID = unID + 1
+								hotspot	addLth_R,	0,	0,	unID,	addLth_R,	2		:	unID = unID + 1
+							del 1
+						del 1
+
+						!	Coordinate
+						gosub	"coordinate_Normal_Rib"
+					endif
+					if	iRibType_R = RIB_LOWER	then
+						!	Hotspot
+						addz	spanLth_Long/2
+							addy	offHgt_R
+								hotspot	0,			0,	0,	unID,	offWdt_R,	1+128	:	unID = unID + 1
+								hotspot	-1,			0,	0,	unID,	offWdt_R,	3		:	unID = unID + 1
+								hotspot	offWdt_R,	0,	0,	unID,	offWdt_R,	2		:	unID = unID + 1
+							del 1
+
+							addx	halfWdt_R
+								hotspot	0,	0,			0,	unID,	offHgt_R,	1+128	:	unID = unID + 1
+								hotspot	0,	-1,			0,	unID,	offHgt_R,	3		:	unID = unID + 1
+								hotspot	0,	offHgt_R,	0,	unID,	offHgt_R,	2		:	unID = unID + 1
+							del 1
+						del 1
+
+						!	Coordinate
+						put	halfWdt_R,				offHgt_R,	15,
+							offWdt_R,				offHgt_R,	15,
+							offWdt_R,				0,			15,
+							-(ribWdt/2 + ribRad),	0,			13,
+							-(ribWdt/2 + ribRad),	ribRad,		900,
+							ribRad,					90,			4000+13,
+							-(ribWdt/2 - _subWdt),	ribHgt,		15,
+							halfWdt_R/2,			ribHgt,		15
+					endif
+
+					prism_	nsp/3,	spanLth_Long,	get(nsp)
+				del 1
+			del 1
+		del 1
+	del 1
+
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"coordinate_Normal_Rib":
+!-----------------------------------------------------------------------------------------------
+	put	-(ribWdt/2 + ribRad),	0,			8,
+		ribWdt/2 + ribRad,		0,			13,
+		ribWdt/2 + ribRad,		ribRad,		900,
+		ribRad,					-90,		4000+13,
+		ribWdt/2 - _subWdt,		ribHgt,		15,
+		-(ribWdt/2 - _subWdt),	ribHgt,		15,
+		-ribWdt/2,				ribRad,		13,
+		-(ribWdt/2 + ribRad),	ribRad,		900,
+		ribRad,					-90,		4000+13
+
+return

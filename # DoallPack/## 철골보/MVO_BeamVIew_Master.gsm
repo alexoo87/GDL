@@ -1,0 +1,16 @@
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+DISPLAY_PROJECTED = 1
+DISPLAY_WITHOVERHEAD = 2
+DISPLAY_SYMBOLIC = 3
+DISPLAY_OUTLINES = 4
+DISPLAY_OVERHEAD = 5
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDisplay[]
+		stDisplay[1] = "Projected"
+		stDisplay[2] = "Projected with Overhead"
+		stDisplay[3] = "Symbolic View"
+		stDisplay[4] = "Outlines Only"
+		stDisplay[5] = "Overhead All"
+endif

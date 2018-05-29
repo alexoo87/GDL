@@ -1,0 +1,98 @@
+!-----------------------------------------------------------------------------------------------
+!	신규 스크립트
+!-----------------------------------------------------------------------------------------------
+_bTest = 0
+if	_bTest	then
+	project2 3, 270, 2
+endif
+
+!	국내 표기 방식
+if	iPlanView = PLANVIEW_SIMPLE	then
+
+	!	핫스팟
+	!-----------------------------------------------------------------------------------------------
+	unID = 100
+
+	HOTSPOT2	0, 0, unID : unID = unID + 1
+	HOTSPOT2	valve_total_len / 2, 0, unID : unID = unID + 1
+	HOTSPOT2	valve_total_len, 0, unID : unID = unID + 1
+
+
+	!	2D 심볼
+	!-----------------------------------------------------------------------------------------------
+	_mD = pipe_out_d
+	_mL = valve_total_len
+	_mD = _mL						!	너비값과 동일하게 입력
+
+	_mL_symb = mSymbol_size
+	_mD_symb = mSymbol_size
+
+	_mPipeL = (_mL-_mL_symb)/2	
+
+	if abs(ang) < EPS then
+		pen		penLine2
+		add2	_mL/2, 0
+			line2	-_mL_symb/2, -_mD_symb/2, _mL_symb/2, _mD_symb/2
+			line2	-_mL_symb/2, _mD_symb/2, _mL_symb/2, -_mD_symb/2
+			line2	-_mL_symb/2, -_mD_symb/2, -_mL_symb/2, _mD_symb/2
+			line2	_mL_symb/2, -_mD_symb/2, _mL_symb/2, _mD_symb/2
+
+			hotline2	-_mL_symb/2, -_mD_symb/2, _mL_symb/2, _mD_symb/2
+			hotline2	-_mL_sybm/2, _mD_symb/2, _mL_symb/2, -_mD_symb/2
+			hotline2	-_mL_symb/2, -_mD_symb/2, -_mL_symb/2, _mD_symb/2
+			hotline2	_mL_symb/2, -_mD_symb/2, _mL_symb/2, _mD_symb/2			
+		
+			circle2	0, 0, _mL_symb/2*0.1
+
+			line2	0, 0, 0, _mD_symb*0.8
+			add2	0, _mD_symb*0.8
+				line2	0, 0, _mL_symb/2, 0
+			del	1
+
+			!	심볼크기가 실제밸브 크기보다 작을 경우 배관라인 그리기
+			if	_mPipeL > EPS	then
+				pen	penLine1
+				add2	_mL_symb/2, 0
+					line2	0, 0, _mPipeL, 0
+					hotline2	0, 0, _mPipeL, 0
+				del	1
+				add2	-_mL_symb/2, 0
+					line2	0, 0, -_mPipeL, 0
+					hotline2	0, 0, -_mPipeL, 0
+				del	1
+			endif
+
+			!	배경 채우기
+			fill	fillSymbol
+			si = 1
+			put		-_mL_symb/2, -_mD_symb/2, si,
+					-_mL_symb/2, _mD_symb/2, si,
+					_mL_symb/2, _mD_symb/2, si,
+					_mL_symb/2, -_mD_symb/2, si
+			poly2_b		nsp/3, 2+4, penFill, penBack,
+						get(nsp)		
+
+		del	1
+	endif	
+	
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	기존 스크립트
+!-----------------------------------------------------------------------------------------------
+if	iPlanView = PLANVIEW_DETAIL	then
+
+	unID = 100
+
+	PEN		gs_cont_pen
+	FILL	gs_fill_type
+
+	HOTSPOT2	0, 0, unID : unID = unID + 1
+	HOTSPOT2	valve_total_len / 2, 0, unID : unID = unID + 1
+	HOTSPOT2	valve_total_len, 0, unID : unID = unID + 1
+
+	PROJECT2{2}		3, 270, 3+32, gs_back_pen, 0, 0, 0
+
+
+endif

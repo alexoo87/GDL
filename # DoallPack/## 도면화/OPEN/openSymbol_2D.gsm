@@ -1,0 +1,56 @@
+!===============================================================================================
+!	OPEN심볼
+!===============================================================================================
+
+!	Hotspot
+!-----------------------------------------------------------------------------------------------
+hotspot2	0,		0,	unID,	symWdt,	1+256	:	unID = unID + 1
+hotspot2	-1,		0,	unID,	symWdt,	3		:	unID = unID + 1
+hotspot2	symWdt,	0,	unID,	symWdt,	2		:	unID = unID + 1
+
+hotspot2	0,		symHgt,	unID,	symWdt,	1+256	:	unID = unID + 1
+hotspot2	-1,		symHgt,	unID,	symWdt,	3		:	unID = unID + 1
+hotspot2	symWdt,	symHgt,	unID,	symWdt,	2		:	unID = unID + 1
+
+hotspot2	0,	0,		unID,	symHgt,	1+256	:	unID = unID + 1
+hotspot2	0,	-1,		unID,	symHgt,	3		:	unID = unID + 1
+hotspot2	0,	symHgt,	unID,	symHgt,	2		:	unID = unID + 1
+
+hotspot2	symWdt,	0,		unID,	symHgt,	1+256	:	unID = unID + 1
+hotspot2	symWdt,	-1,		unID,	symHgt,	3		:	unID = unID + 1
+hotspot2	symWdt,	symHgt,	unID,	symHgt,	2		:	unID = unID + 1
+
+!	Text
+!-----------------------------------------------------------------------------------------------
+define style	"sty_Text"	stFontType,	textSize,	8,	0
+
+	r = request("Height_of_style",	"sty_Text",	_textHgt,	_descent,	_leading)
+
+	adjustY = textSize/2 + _descent + _leading
+	adjustY = adjustY/1000*GLOB_SCALE
+
+add2	symWdt/2,	symHgt/2 - adjustY
+	pen		textPen
+	style	"sty_Text"
+
+	text2	0,	0,	customText
+del 1
+
+!	Symbol
+!-----------------------------------------------------------------------------------------------
+fill	65
+fillPen = 1
+backPen = 0
+
+put	0,		0,		1,
+	symWdt,	0,		1,
+	symWdt,	symHgt,	1,
+	0,		symHgt,	1
+
+poly2_b	nsp/3,	2+4,	fillPen,	backPen,	get(nsp)
+
+pen			symPen
+line_type	symLt
+
+line2	0,	0,		symWdt,	symHgt
+line2	0,	symHgt,	symWdt,	0

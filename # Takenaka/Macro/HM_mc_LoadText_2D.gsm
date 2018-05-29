@@ -1,0 +1,239 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/11/23 THU
+!	VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot2	0, 0
+	circle2	0, 0, 0.1
+	circle2	0, 0, 0.2
+endif
+
+if	bTest	then
+
+
+endif
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+define style{2} "HM_style" HM_2D_textFont, HM_2D_textSize/1000*GLOB_SCALE,0
+define style	"HM_style_2"	HM_2D_textFont,	HM_2D_textSize/100*GLOB_SCALE,	1,	0
+r = request("Height_of_style",	"HM_style_2",	textHeight)
+_textHeight = textHeight/1000*GLOB_SCALE
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Symbol
+!----------------------------------------------------------------------------------------------------
+style "HM_style"
+pen HM_2D_textPen
+
+	!	Load Text(Before Feedback)
+	!----------------------------------------------------------------------------------------------------
+	! _baseX = HM_CraneWidth/2
+	! _baseY = -HM_CraneDepth/2
+
+	! add2	_baseX, _baseY
+
+	! 	!	Hotspot
+	! 	hotspot2 	0, 					HM_2D_text_posy, 	unID, HM_2D_text_posx, 1 + 128		: unID = unID + 1			
+	! 	hotspot2 	HM_2D_text_posx, 	HM_2D_text_posy, 	unID, HM_2D_text_posx, 2			: unID = unID + 1		
+	! 	hotspot2 	-1, 				HM_2D_text_posy, 	unID, HM_2D_text_posx, 3			: unID = unID + 1	
+	! 	hotspot2 	HM_2D_text_posx, 				0, 		unID, HM_2D_text_posy, 1 + 128		: unID = unID + 1			
+	! 	hotspot2 	HM_2D_text_posx, 	HM_2D_text_posy, 	unID, HM_2D_text_posy, 2			: unID = unID + 1		
+	! 	hotspot2 	HM_2D_text_posx, 				-1, 	unID, HM_2D_text_posy, 3			: unID = unID + 1	
+
+	! 	!	Text
+	! 	add2	HM_2D_text_posx, HM_2D_text_posy
+	! 		gosub	"textBlock"
+	! 	del	1
+
+	! del	1
+
+	!	Load Text(After Feedback1)
+	!----------------------------------------------------------------------------------------------------
+	! _offsetAng = 30
+
+	! !	Hotspot : HM_2D_text_Ang
+	! rot2	HM_WorkingAng + _offsetAng
+	! 	hotspot2	HM_WorkingR,						0,									unID, HM_2D_text_Ang, 4+128	: unID = unID + 1
+	! 	hotspot2	HM_WorkingR*cos(HM_2D_text_Ang),	HM_WorkingR*sin(HM_2D_text_Ang), 	unID, HM_2D_text_Ang, 5		: unID = unID + 1
+	! 	hotspot2	0,									0,									unID, HM_2D_text_Ang, 6		: unID = unID + 1
+	! del 1
+
+	! rot2	HM_WorkingAng + _offsetAng + HM_2D_text_Ang
+	! 	line2	0,	0,	HM_WorkingR,	0
+
+	! 	!	_judge
+	! 	if	_RatedLoad - HM_SLweight > eps	then
+	! 		_judge = " > "
+	! 	else
+	! 		if	abs(_RatedLoad - HM_SLweight) < eps	then
+	! 			_judge = " = "
+	! 		else
+	! 			_judge = " < "
+	! 		endif
+	! 	endif
+
+	! 	!	Rotate Angle
+	! 	_totalAng = (HM_WorkingAng + _offsetAng + HM_2D_text_Ang) MOD 360
+	! 	_upperAnchor = 9
+	! 	_bottomAnchor = 3
+	! 	_rotAng = 0
+	! 	if	_totalAng - 90 > eps & _totalAng - 270 < eps	then
+	! 		_upperAnchor = 7
+	! 		_bottomAnchor = 1
+	! 		_rotAng = 180
+	! 	endif
+
+	! 	paragraph	"pgText_Upper"	1,	0,	0,	0,	1
+	! 				_text_info_values[1] + " " + _text_info_values[3] + "\n"
+	! 				_text_info_values[2] + ", " + _text_info_values[4]
+	! 	endparagraph
+
+	! 	paragraph	"pgText_Bottom"	1,	0,	0,	0,	1
+	! 				_text_info_values[5] + _judge + _text_info_values[7]
+	! 	endparagraph
+
+	! 	textblock	"tbText_Upper"	0,	_upperAnchor,	0,	1,	1,	0,
+	! 				"pgText_Upper"
+	! 	textblock	"tbText_Bottom"	0,	_bottomAnchor,	0,	1,	1,	0,
+	! 				"pgText_Bottom"
+
+
+	! 	add2	HM_WorkingR,	0
+	! 		rot2	_rotAng
+	! 			richtext2	0,	0,	"tbText_Upper"
+	! 			richtext2	0,	0,	"tbText_Bottom"
+	! 		del 1
+	! 	del 1
+	! del 1
+
+	!	Load Text(After Feedback2)
+	!----------------------------------------------------------------------------------------------------
+	style	"HM_style_2"
+	_offsetAng = 30
+
+	!	Hotspot : HM_2D_text_Ang
+	rot2	HM_WorkingAng + _offsetAng
+		hotspot2	HM_WorkingR,						0,									unID, HM_2D_text_Ang, 4+128	: unID = unID + 1
+		hotspot2	HM_WorkingR*cos(HM_2D_text_Ang),	HM_WorkingR*sin(HM_2D_text_Ang), 	unID, HM_2D_text_Ang, 5		: unID = unID + 1
+		hotspot2	0,									0,									unID, HM_2D_text_Ang, 6		: unID = unID + 1
+	del 1
+
+	rot2	HM_WorkingAng + _offsetAng + HM_2D_text_Ang
+		line2	0,	0,	HM_WorkingR,	0
+
+		!	Hotspot : HM_2D_text_posx
+		hotspot2	0,					0,	unID,	HM_2D_text_posx,	1+128	:	unID = unID + 1
+		hotspot2	-1,					0,	unID,	HM_2D_text_posx,	3		:	unID = unID + 1
+		hotspot2	HM_2D_text_posx,	0,	unID,	HM_2D_text_posx,	2		:	unID = unID + 1
+
+		!	Rotate Angle
+		_totalAng = (HM_WorkingAng + _offsetAng + HM_2D_text_Ang) MOD 360
+		_anchor = 8
+		_rotAng = 0
+		if	_totalAng - 90 > eps & _totalAng - 270 < eps	then
+			_rotAng = 180
+		endif
+
+		!	String Width
+		_maxStWdt = 0
+		for	i = 2	to	6
+			if	i = 2	then
+				_maxStWdt = stw(_text_info_title[i]) + stw(_text_info_values[i - 1])
+				_maxTitleWdt = stw(_text_info_title[i])
+			endif
+			if	i # 2	then
+				_nowStWdt = stw(_text_info_title[i]) + stw(_text_info_values[i - 1])
+				_nowTitleWdt = stw(_text_info_title[i])
+				if	_maxStWdt - _nowStWdt < eps	then
+					_maxStWdt = _nowStWdt
+				endif
+				if	_maxTitleWdt - _nowTitleWdt < eps	then
+					_maxTitleWdt = _nowTitleWdt
+				endif
+			endif
+		next	i
+
+		_maxStWdt = _maxStWdt/1000*GLOB_SCALE
+		_maxTitleWdt = _maxTitleWdt/1000*GLOB_SCALE
+
+		add2	HM_2D_text_posx,	0
+			rot2	_rotAng
+				add2	0,	_textHeight*6
+					add2	-_maxStWdt/2,	0
+						for	iRow = 1	to	6
+							text2	0,	0,	_text_info_title[iRow]
+							add2	0,	-_textHeight
+						next iRow
+
+						del 6
+
+						add2	_maxTitleWdt,	0
+							for	iRow = 1	to	5
+								add2	0,	-_textHeight
+								text2	0,	0,	_text_info_values[iRow]
+							next iRow
+
+							del	5
+						del 1
+					del 1
+				del 1
+			del 1
+		del 1
+	del 1
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+
+"textBlock"	:
+
+	paragraph "HM_Paragraph" 1, 0, 0, 0, 1
+			   _text_info_values[1]
+			   "\n"
+			   _text_info_values[2]
+			   "\n"
+			   _text_info_values[3]
+			   "\n"
+			   _text_info_values[4]
+			   "\n"
+			   _text_info_values[5]
+			   "\n"
+			   _text_info_values[6]
+	endparagraph
+
+
+	textblock "HM_TextBlock"  0, 1, 0, 1, 1, 0,
+			   "HM_Paragraph"
+
+	n = request ("TEXTBLOCK_INFO", "HM_TextBlock", _textW, _textH)
+	richtext2  0,0, "HM_TextBlock"
+
+return
+
+	
+	
+

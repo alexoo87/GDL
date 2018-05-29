@@ -1,0 +1,47 @@
+!-----------------------------------------------------------------------------------------------
+!	MVO UI
+!-----------------------------------------------------------------------------------------------
+startX = 10
+startY = 10
+
+ui_dialog	"철골보 2D View 옵션",	600,	70
+
+ui_page	1
+
+	ui_style	2,	0
+
+	!	Entire
+	ui_outfield	"Floor Plan Display",	startX, startY
+
+	posX = startX + 5
+	posY = startY + 20
+
+	ui_infield	"iDisplayEntire",	posX,	posY,	110,	19
+
+	posX = startX + 130
+
+	ui_separator	posX,	startY,	posX,	70 - startY
+
+	posX = posX + 15
+
+	!	Core
+	ui_outfield	"Floor Plan Display(Core)",	posX, startY
+
+	posX = posX + 5
+	posY = startY + 20
+
+	ui_infield	"iDisplayCore",	posX,	posY,	110,	19
+
+	posX = startX + 280
+
+	ui_separator	posX,	startY,	posX,	70 - startY
+
+	posX = posX + 15
+
+	!	편집용 View
+	ui_outfield	"편집용 View On/Off",	posX, startY
+
+	posX = posX + 105
+	posY = startY - 4
+
+	ui_infield	"bEditView",	posX,	posY,	19,	19

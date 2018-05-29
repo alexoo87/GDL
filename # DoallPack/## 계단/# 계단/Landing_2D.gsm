@@ -1,0 +1,312 @@
+!===============================================================================================
+!	기본설정
+!===============================================================================================
+eps = 0.0001
+unID = 100
+
+
+!	외곽선 라인 On/Off
+!-----------------------------------------------------------------------------------------------
+_bLine_Out = 0
+if	bLine_Out	then
+	_bLine_Out= 1
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	2D표현 끄기
+!-----------------------------------------------------------------------------------------------
+if	not(bRep2D)	then
+	fill	65
+
+	put	0,				-(strOffsetL + VectTmp),	1,
+		0,				B + addRange_L,				1,
+		A,				B + addRange_R,				1,
+		A,				-(strOffsetR - VectTmp),	1,
+		A - strWdtR,	-(strOffsetR - VectTmp),	1,
+		A - strWdtR,	0,							1,
+		strWdtL,		0,							1,
+		strWdtL,		-(strOffsetL + VectTmp),	1
+
+	poly2_B	nsp/3,	2+4,	0,	0,	get(nsp)
+
+	end
+endif
+
+
+!===============================================================================================
+!	계단참 - 외곽선
+!===============================================================================================
+
+	landingFillPen = 0
+	landingFillPenBg = 0
+
+	pen	landingPen
+	fill	65
+
+		put	0,				-(strOffsetL + VectTmp),	_bLine_Out,
+			0,				B + addRange_L,				_bLine_Out,
+			A,				B + addRange_R,				_bLine_Out,
+			A,				-(strOffsetR - VectTmp),	1,
+			A - strWdtR,	-(strOffsetR - VectTmp),	1,
+			A - strWdtR,	0,							1,
+			strWdtL,		0,							1,
+			strWdtL,		-(strOffsetL + VectTmp),	1
+
+		poly2_B	nsp/3,	1+ 2 + 4,	landingFillPen,	landingFillPenBg,	use(nsp)
+
+
+		!	hotline
+		!-----------------------------------------------------------------------------------------------
+		for	i = 1	to	(nsp/3) - 2
+			hotline2	get(2) + (use(1) - get(1)),	use(2)	:	unID = unID + 1
+		next i
+			hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))	:	unID = unID + 1
+
+
+		!	hotspot
+		!-----------------------------------------------------------------------------------------------
+			add2	0,	-(strOffsetL + VectTmp)
+				hotspot2	0,			0,	unID,	strWdtL,	1+256	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	strWdtL,	3		:	unID = unID + 1
+				hotspot2	strWdtL,	0,	unID,	strWdtL,	2		:	unID = unID + 1
+			del 1
+
+			add2	A/2,	0
+				hotspot2	0,	0,	unID,	B,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,	unID,	B,	3		:	unID = unID + 1
+				hotspot2	0,	B,	unID,	B,	2		:	unID = unID + 1
+			del 1
+
+			add2	strWdtL,	0
+				hotspot2	0,			0,	unID,	strWell,	1+256	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	strWell,	3		:	unID = unID + 1
+				hotspot2	strWell,	0,	unID,	strWell,	2		:	unID = unID + 1
+			del 1
+
+			add2	strWdtL/2,	0
+				hotspot2	0,	0,				unID,	strOffsetL,	1+128	:	unID = unID + 1
+				hotspot2	0,	1,				unID,	strOffsetL,	3		:	unID = unID + 1
+				hotspot2	0,	-strOffsetL,	unID,	strOffsetL,	2		:	unID = unID + 1
+			del 1
+
+			add2	strWdtL + strWell,	-(strOffsetR - VectTmp)
+				hotspot2	0,			0,	unID,	strWdtR,	1+256	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	strWdtR,	3		:	unID = unID + 1
+				hotspot2	strWdtR,	0,	unID,	strWdtR,	2		:	unID = unID + 1
+			del 1
+
+			add2	A - strWdtR/2,	0
+				hotspot2	0,	0,				unID,	strOffsetR,	1+128	:	unID = unID + 1
+				hotspot2	0,	1,				unID,	strOffsetR,	3		:	unID = unID + 1
+				hotspot2	0,	-strOffsetR,	unID,	strOffsetR,	2		:	unID = unID + 1
+			del 1
+
+			add2	0,	B
+				hotspot2	0,	0,			unID,	addRange_L,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	addRange_L,	3		:	unID = unID + 1
+				hotspot2	0,	addRange_L,	unID,	addRange_L,	2		:	unID = unID + 1
+			del 1
+
+			add2	A,	B
+				hotspot2	0,	0,			unID,	addRange_R,	1+128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	addRange_R,	3		:	unID = unID + 1
+				hotspot2	0,	addRange_R,	unID,	addRange_R,	2		:	unID = unID + 1
+			del 1
+
+
+!===============================================================================================
+!	난간
+!===============================================================================================
+
+	pen	landingPen
+
+	!	안쪽 난간
+	!-----------------------------------------------------------------------------------------------
+	if	bHandIn and GLOB_STRUCTURE_DISPLAY = 0	then
+		handOffsetTmp = handOffset_in
+		endOffsetLTmp = endOffsetL_in
+		endOffsetRTmp = endOffsetR_in
+
+		if	strOffsetL >= 0 and strOffsetR >= 0	then
+			put	-(handOffsetTmp + handRad),			-(strOffsetL + endOffsetLTmp),		1,
+				-(handOffsetTmp - handRad),			-(strOffsetL + endOffsetLTmp),		1,
+				-(handOffsetTmp - handRad),			handOffset_Stw - handRad,			1,
+				strWell + (handOffsetTmp-handRad),	handOffset_Stw - handRad,			1,
+				strWell + (handOffsetTmp-handRad),	-(strOffsetR + endOffsetRTmp),		1,
+				strWell + (handOffsetTmp+handRad),	-(strOffsetR + endOffsetRTmp),		1,
+				strWell + (handOffsetTmp+handRad),	handOffset_Stw + handRad,			1,
+				-(handOffsetTmp + handRad),			handOffset_Stw + handRad,			1,
+				-(handOffsetTmp + handRad),			-(strOffsetL + endOffsetLTmp),		1
+		endif
+
+		if	strOffsetL < 0 and strOffsetR >= 0	then
+			put	-(handOffsetTmp + handRad),				-(strOffsetL + endOffsetLTmp),				1,
+				-(handOffsetTmp - handRad),				-(strOffsetL + endOffsetLTmp),				1,
+				-(handOffsetTmp - handRad),				-strOffsetL + (handOffsetTmp - handRad),	1,
+				handOffsetTmp - handRad,				-strOffsetL + (handOffsetTmp - handRad),	1,
+				handOffsetTmp - handRad,				handOffsetTmp - handRad,					1,
+				strWell + (handOffsetTmp - handRad),	handOffsetTmp - handRad,					1,
+				strWell + (handOffsetTmp - handRad),	-(strOffsetR + endOffsetRTmp),				1,
+				strWell + (handOffsetTmp + handRad),	-(strOffsetR + endOffsetRTmp),				1,
+				strWell + (handOffsetTmp + handRad),	handOffsetTmp + handRad,					1,
+				handOffsetTmp + handRad,				handOffsetTmp + handRad,					1,
+				handOffsetTmp + handRad,				-strOffsetL + (handOffsetTmp + handRad),	1,
+				-(handOffsetTmp + handRad),				-strOffsetL + (handOffsetTmp + handRad),	1,
+				-(handOffsetTmp + handRad),				-strOffsetL - endOffsetLTmp,				1
+		endif
+
+		if	strOffsetL >= 0 and strOffsetR < 0	then
+			put	-(handOffsetTmp + handRad),				-(strOffsetL + endOffsetLTmp),				1,
+				-(handOffsetTmp - handRad),				-(strOffsetL + endOffsetLTmp),				1,
+				-(handOffsetTmp - handRad),				handOffsetTmp - handRad,					1,
+				strWell - (handOffsetTmp - handRad),	handOffsetTmp - handRad,					1,
+				strWell - (handOffsetTmp - handRad),	-strOffsetR + (handOffsetTmp*2 - handRad),	1,
+				strWell + (handOffsetTmp - handRad),	-strOffsetR + (handOffsetTmp*2 - handRad),	1,
+				strWell + (handOffsetTmp - handRad),	-strOffsetR - endOffsetRTmp,				1,
+				strWell + (handOffsetTmp + handRad),	-strOffsetR - endOffsetRTmp,				1,
+				strWell + (handOffsetTmp + handRad),	-strOffsetR + (handOffsetTmp*2 + handRad),	1,
+				strWell - (handOffsetTmp + handRad),	-strOffsetR + (handOffsetTmp*2 + handRad),	1,
+				strWell - (handOffsetTmp + handRad),	handOffsetTmp + handRad,					1,
+				-(handOffsetTmp + handRad),				handOffsetTmp + handRad,					1,
+				-(handOffsetTmp + handRad),				-(strOffsetL + endOffsetLTmp),				1
+		endif
+
+		if	strOffsetL < 0 and strOffsetR < 0	then
+			put	-(handOffsetTmp + handRad),				-(strOffsetL + endOffsetLTmp),				1,
+				-(handOffsetTmp - handRad),				-(strOffsetL + endOffsetLTmp),				1,
+				-(handOffsetTmp - handRad),				-strOffsetL + (handOffsetTmp - handRad),	1,
+				handOffsetTmp - handRad,				-strOffsetL + (handOffsetTmp - handRad),	1,
+				handOffsetTmp - handRad,				handOffsetTmp - handRad,					1,
+				strWell - (handOffsetTmp - handRad),	handOffsetTmp - handRad,					1,
+				strWell - (handOffsetTmp - handRad),	-strOffsetR + (handOffsetTmp*2 - handRad),	1,
+				strWell + (handOffsetTmp - handRad),	-strOffsetR + (handOffsetTmp*2 - handRad),	1,
+				strWell + (handOffsetTmp - handRad),	-strOffsetR - endOffsetRTmp,				1,
+				strWell + (handOffsetTmp + handRad),	-strOffsetR - endOffsetRTmp,				1,
+				strWell + (handOffsetTmp + handRad),	-strOffsetR + (handOffsetTmp*2 + handRad),	1,
+				strWell - (handOffsetTmp + handRad),	-strOffsetR + (handOffsetTmp*2 + handRad),	1,
+				strWell - (handOffsetTmp + handRad),	handOffsetTmp + handRad,					1,
+				handOffsetTmp + handRad,				handOffsetTmp + handRad,					1,
+				handOffsetTmp + handRad,				-strOffsetL + (handOffsetTmp + handRad),	1,
+				-(handOffsetTmp + handRad),				-strOffsetL + (handOffsetTmp + handRad),	1,
+				-(handOffsetTmp + handRad),				-(strOffsetL + endOffsetLTmp),				1
+		endif
+
+		add2	strWdtL,	0
+
+			poly2_	nsp/3,	1+4,	use(nsp)
+
+
+			!	hotline2
+			!-----------------------------------------------------------------------------------------------
+			for	i = 1	to	(nsp/3) - 2
+				hotline2    get(2) + (use(1) - get(1)),    use(2)	:	unID = unID + 1
+			next i
+				hotline2    get(2) + (use(1) - get(1)),    get(2) + (use(1) - get(1))	:	unID = unID + 1
+
+		del 1
+
+
+			!	hotspot
+			!-----------------------------------------------------------------------------------------------
+			add2	strWdtL,	0
+				add2	0,	-strOffsetL - endOffsetL_in + handRad
+					hotspot2	0,				0,	unID,	handOffset_in,	1+128	:	unID = unID + 1
+					hotspot2	1,				0,	unID,	handOffset_in,	3		:	unID = unID + 1
+					hotspot2	-handOffset_in,	0,	unID,	handOffset_in,	2		:	unID = unID + 1
+				del 1
+	
+				add2	-handOffset_in,	-strOffsetL
+					hotspot2	0,	0,				unID,	endOffsetL_in,	1+128	:	unID = unID + 1
+					hotspot2	0,	1,				unID,	endOffsetL_in,	3		:	unID = unID + 1
+					hotspot2	0,	-endOffsetL_in,	unID,	endOffsetL_in,	2		:	unID = unID + 1
+				del 1
+			del 1
+
+			add2	strWdtL + strWell,	0
+				add2	0,	-strOffsetR - endOffsetR_in + handRad
+					hotspot2	0,				0,	unID,	handOffset_in,	1+128	:	unID = unID + 1
+					hotspot2	-1,				0,	unID,	handOffset_in,	3		:	unID = unID + 1
+					hotspot2	handOffset_in,	0,	unID,	handOffset_in,	2		:	unID = unID + 1
+				del 1
+
+				add2	handOffset_in,	-strOffsetR
+					hotspot2	0,	0,				unID,	endOffsetR_in,	1+128	:	unID = unID + 1
+					hotspot2	0,	1,				unID,	endOffsetR_in,	3		:	unID = unID + 1
+					hotspot2	0,	-endOffsetR_in,	unID,	endOffsetR_in,	2		:	unID = unID + 1
+				del 1
+			del 1
+
+	endif
+
+
+	!	바깥쪽 난간
+	!-----------------------------------------------------------------------------------------------
+	if	bHandOut and GLOB_STRUCTURE_DISPLAY = 0	then
+		handOffsetTmp = handOffset_out
+		endOffsetLTmp = endOffsetL_out
+		endOffsetRTmp = endOffsetR_out
+
+		! 계단참 폭 추가에 따른 변수
+		posY1 = ((addRange_R - addRange_L)/A)*(handOffsetTmp - handRad) + addRange_L
+		posY2 = ((addRange_R - addRange_L)/A)*(A - handOffsetTmp + handRad) + addRange_L
+		posY3 = ((addRange_R - addRange_L)/A)*(A - handOffsetTmp - handRad) + addRange_L
+		posY4 = ((addRange_R - addRange_L)/A)*(handOffsetTmp + handRad) + addRange_L
+
+		put	handOffsetTmp - handRad,		-(strOffsetL + endOffsetLTmp),				1,
+			handOffsetTmp + handRad,		-(strOffsetL + endOffsetLTmp),				1,
+			handOffsetTmp + handRad,		(B + posY4) - (handOffsetTmp + handRad),	1,
+			A - (handOffsetTmp + handRad),	(B + posY3) - (handOffsetTmp + handRad),	1,
+			A - (handOffsetTmp + handRad),	-(strOffsetR + endOffsetRTmp),				1,
+			A - (handOffsetTmp - handRad),	-(strOffsetR + endOffsetRTmp),				1,
+			A - (handOffsetTmp - handRad),	(B + posY2) - (handOffsetTmp - handRad),	1,
+			handOffsetTmp - handRad,		(B + posY1) - (handOffsetTmp - handRad),	1,
+			handOffsetTmp - handRad,		-(strOffsetL + endOffsetLTmp),				1
+
+		poly2_	nsp/3,	1+4,	use(nsp)
+
+
+			!	hotline2
+			!-----------------------------------------------------------------------------------------------
+			for	i = 1	to	(nsp/3) - 2
+				hotline2    get(2) + (use(1) - get(1)),    use(2)	:	unID = unID + 1
+			next i
+				hotline2    get(2) + (use(1) - get(1)),    get(2) + (use(1) - get(1))	:	unID = unID + 1
+
+
+			!	hotspot
+			!-----------------------------------------------------------------------------------------------
+			add2	0,	-strOffsetL - endOffsetL_out + handRad
+				hotspot2	0,				0,	unID,	handOffset_out,	1+128	:	unID = unID + 1
+				hotspot2	-1,				0,	unID,	handOffset_out,	3		:	unID = unID + 1
+				hotspot2	handOffset_out,	0,	unID,	handOffset_out,	2		:	unID = unID + 1
+			del 1
+
+			add2	handOffset_out,	-strOffsetL
+				hotspot2	0,	0,					unID,	endOffsetL_out,	1+128	:	unID = unID + 1
+				hotspot2	0,	1,					unID,	endOffsetL_out,	3		:	unID = unID + 1
+				hotspot2	0,	-endOffsetL_out,	unID,	endOffsetL_out,	2		:	unID = unID + 1
+			del 1
+
+			add2	A,	-strOffsetR - endOffsetR_out + handRad
+				hotspot2	0,					0,	unID,	handOffset_out,	1+128	:	unID = unID + 1
+				hotspot2	1,					0,	unID,	handOffset_out,	3		:	unID = unID + 1
+				hotspot2	-handOffset_out,	0,	unID,	handOffset_out,	2		:	unID = unID + 1
+			del 1
+
+			add2	A - handOffset_out,	-strOffsetR
+				hotspot2	0,	0,					unID,	endOffsetR_out,	1+128	:	unID = unID + 1
+				hotspot2	0,	1,					unID,	endOffsetR_out,	3		:	unID = unID + 1
+				hotspot2	0,	-endOffsetR_out,	unID,	endOffsetR_out,	2		:	unID = unID + 1
+			del 1
+
+	endif
+
+
+
+
+
+
+
+
+
+			

@@ -1,0 +1,68 @@
+!===============================================================================================
+!	ㅁ형 철골 기둥
+!===============================================================================================
+
+!	재질 정보
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMatInfo"	MAT_INFO_SS400,		stMatInfo[MAT_INFO_SS400],
+						MAT_INFO_SM490,		stMatInfo[MAT_INFO_SM490],
+						MAT_INFO_SM490A,	stMatInfo[MAT_INFO_SM490A],
+						MAT_INFO_SHN400,	stMatInfo[MAT_INFO_SHN400],
+						MAT_INFO_SHN490,	stMatInfo[MAT_INFO_SHN490],
+						MAT_INFO_SN490,		stMatInfo[MAT_INFO_SN490]
+
+!	호칭 치수
+!-----------------------------------------------------------------------------------------------
+_nDecimal = 0
+_stFormat = "%." + str(_nDecimal,	1,	0) + "mm"
+_stProfile = "ㅁ-" + str(_stFormat, colWdt_1) + "X" + str(_stFormat, colWdt_2) + "X" + str(_stFormat, colThk)
+
+parameters	stProfile = _stProfile
+lock	"stProfile"
+
+!	철골기둥 관련
+!-----------------------------------------------------------------------------------------------
+values	"colWdt_1"	range	(0,	)
+values	"colWdt_2"	range	(0,	)
+
+_minColWdt = min(colWdt_1, colWdt_2)
+values	"colThk"	range	(0,	_minColWdt/2)
+
+values	"colHgt"	range	(0,	)
+
+!	자르기 축
+!-----------------------------------------------------------------------------------------------
+values{2}	"iCutAxisT"	AXIS_X,	stCutAxis[AXIS_X],
+						AXIS_Y,	stCutAxis[AXIS_Y]
+
+values{2}	"iCutAxisB"	AXIS_X,	stCutAxis[AXIS_X],
+						AXIS_Y,	stCutAxis[AXIS_Y]
+
+_bCutOption = ((abs(xTrans) < eps) & (abs(yTrans) < eps))
+
+if	not(_bCutOption)	then
+	lock	"tTopPlane", "tBtmPlane"
+endif
+
+if	iCutAxisT = AXIS_X	then
+	_range_Center = colWdt_1/2
+endif
+if	iCutAxisT = AXIS_Y	then
+	_range_Center = colWdt_2/2
+endif
+values	"posCenterT"	range	[-_range_Center,	_range_Center]
+
+values	"cutLthT_1"	range	(-(colHgt/2),	colHgt/2)
+values	"cutLthT_2"	range	(-(colHgt/2),	colHgt/2)
+
+
+if	iCutAxisB = AXIS_X	then
+	_range_Center = colWdt_1/2
+endif
+if	iCutAxisB = AXIS_Y	then
+	_range_Center = colWdt_2/2
+endif
+values	"posCenterB"	range	[-_range_Center,	_range_Center]
+
+values	"cutLthB_1"	range	(-(colHgt/2),	colHgt/2)
+values	"cutLthB_2"	range	(-(colHgt/2),	colHgt/2)

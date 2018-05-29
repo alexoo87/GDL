@@ -1,0 +1,228 @@
+
+!=======================================================================================
+!	변수 정의
+!=======================================================================================
+!	철골보(라이브러리), 벽, 슬라브 치수 -> ID
+!---------------------------------------------------------------------------------------
+if	GLOB_ELEM_TYPE = 1 or GLOB_ELEM_TYPE = 12	then
+	parameters iType = OBJECT_BEAM
+endif
+
+if	GLOB_ELEM_TYPE = 5	then
+	parameters iType = OBJECT_WALL
+endif
+
+if	GLOB_ELEM_TYPE = 7	then
+	parameters iType = OBJECT_SLAB
+endif
+
+if	GLOB_ELEM_TYPE = 6	then
+	parameters iType = OBJECT_COLUMN
+endif
+
+
+!	변수 설정하기
+!---------------------------------------------------------------------------------------
+
+	!	객체타입
+	!---------------------------------------------------------------------------------------
+	values{2}	"iType"	OBJECT_COLUMN,	stObjectType[OBJECT_COLUMN],
+						OBJECT_WALL,	stObjectType[OBJECT_WALL],
+						OBJECT_BEAM,	stObjectType[OBJECT_BEAM],
+						OBJECT_SLAB,	stObjectType[OBJECT_SLAB]
+	
+	!	심볼타입
+	!---------------------------------------------------------------------------------------
+	values{2}	"iSymbType"	SYMB_RECT,		stSymbType[SYMB_RECT],
+							SYMB_DIAMOND,	stSymbType[SYMB_DIAMOND],
+							SYMB_CIRCLE,	stSymbType[SYMB_CIRCLE],
+							SYMB_ELLIPSE,	stSymbType[SYMB_ELLIPSE],
+							SYMB_STADIUM,	stSymbType[SYMB_STADIUM],
+							SYMB_PENTAGON,	stSymbType[SYMB_PENTAGON],
+							SYMB_HEXAGON,	stSymbType[SYMB_HEXAGON],
+							SYMB_FLAG,		stSymbType[SYMB_FLAG],
+							SYMB_NONE,		stSymbType[SYMB_NONE]
+	
+	!	라벨타입
+	!---------------------------------------------------------------------------------------
+	dim	_iLabelType[],	_stLabelType[]
+
+	if	GLOB_ELEM_TYPE = 6 or GLOB_ELEM_TYPE = 12	then
+		_iLabelType[1] = LABEL_ID
+		_iLabelType[2] = LABEL_SIZE
+		_iLabelType[3] = LABEL_CUSTOM
+
+		_stLabelType[1] = stLabelType[LABEL_ID]
+		_stLabelType[2] = stLabelType[LABEL_SIZE]
+		_stLabelType[3] = stLabelType[LABEL_CUSTOM]
+	endif
+	
+	if	GLOB_ELEM_TYPE = 1 or GLOB_ELEM_TYPE = 5 or GLOB_ELEM_TYPE = 7	then
+		_iLabelType[1] = LABEL_ID
+		_iLabelType[2] = LABEL_CUSTOM
+
+		_stLabelType[1] = stLabelType[LABEL_ID]
+		_stLabelType[2] = stLabelType[LABEL_CUSTOM]
+	endif
+
+	values{2} "iLabelType"	_iLabelType,	_stLabelType
+
+	!	데크슬라브 배근방향
+	!---------------------------------------------------------------------------------------
+	values{2}	"iDeckSlabSymb"	DECKSLAB_NONE,		stDeckSlaB[DECKSLAB_NONE],
+								DECKSLAB_BOTTOM,	stDeckSlaB[DECKSLAB_BOTTOM],
+								DECKSLAB_RIGHT,		stDeckSlaB[DECKSLAB_RIGHT]
+
+	parameters	lengthBottom = halfBottom*2
+	parameters	lengthRight = halfRight*2
+
+	if	GLOB_ELEM_TYPE <> 7	then
+		lock	"iDeckSlabSymb"
+	endif
+
+	!	AC_CustomReadability On
+	!---------------------------------------------------------------------------------------
+	if	AC_CustomReadability < eps	then
+		parameters	AC_CustomReadability = 1
+	endif
+
+
+
+
+!	LB_name 변수에 글로벌ID 변수넣기
+!---------------------------------------------------------------------------------------
+parameters	LB_name = GLOB_ID
+
+
+
+!=======================================================================================
+!	변수 숨기기/LOCK
+!=======================================================================================
+	!	A, B 파라미터 사용 안함
+	!---------------------------------------------------------------------------------------
+	lock	"A", "B"
+
+	!	객체 타입 / ID 자동 입력
+	!---------------------------------------------------------------------------------------
+	lock	"iType", "LB_name"
+
+	!	심볼 형태 : 원 / 육각형 일때 높이변수 잠금
+	!---------------------------------------------------------------------------------------
+	if	iSymbType = SYMB_CIRCLE | iSymbType = SYMB_PENTAGON | iSymbType = SYMB_HEXAGON	then
+		lock	"LabelHeight"
+	endif
+	
+	!	커스텀 문자
+	!---------------------------------------------------------------------------------------
+	if	iLabelType # LABEL_CUSTOM	then
+		hideparameter	"LB_custom"
+		lock			"LB_custom"
+	endif
+
+	if	iLabelType # LABEL_ID	then
+		hideparameter	"LB_name"
+	endif
+	
+	!	라벨 오프셋 : 길이
+	!---------------------------------------------------------------------------------------
+	if	not(bLabelOffset)	then
+		hideparameter	"LabelOffsetLth",	"offsetH"
+		lock			"LabelOffsetLth",	"offsetH"
+	endif
+	
+	!	슬라브 : 오프셋 사용안함
+	!---------------------------------------------------------------------------------------
+	if	GLOB_ELEM_TYPE = 7	then
+		parameters		bLabelOffset = 0
+		hideparameter	"bLabelOffset"
+		lock			"bLabelOffset"
+	endif
+
+	if	iDeckSlabSymb = DECKSLAB_NONE	then
+		hideparameter	"offsetBottom", "lengthBottom", "offsetRight", "lengthRight"
+	endif
+
+	if	iDeckSlabSymb = DECKSLAB_BOTTOM	then
+		hideparameter	"offsetRight", "lengthRight"
+	endif
+
+	if	iDeckSlabSymb = DECKSLAB_RIGHT	then
+		hideparameter	"offsetBottom", "lengthBottom"
+	endif
+
+	!	자동크기 설정시 변수 LOCK
+	!---------------------------------------------------------------------------------------
+	if	bAutoSize	then
+		lock	"LabelWidth", "LabelHeight"
+	endif
+
+	!	심볼 타입 : 플래그
+	if	not(iSymbType = SYMB_FLAG)	then
+		lock			"bMirrorFlag"
+		hideparameter	"bMirrorFlag"
+	endif
+
+	!	지시선
+	!---------------------------------------------------------------------------------------
+	values	"nLeaderLine"	1, 2
+
+	values	"LineLth_Main"		range	(0,	)
+	values	"LineLth_Main_2"	range	(0,	)
+	values	"LineLth_Sub"	range	(0,	)
+	values	"LineLth_Sub_2"	range	(0,	)
+	values	"aLeaderLine"	0, 90, 180, 270, 360
+	values	"aLeaderLine_2"	0, 90, 180, 270, 360
+
+	if	GLOB_MODPAR_NAME = "aLeaderLine"	then
+		if	abs(aLeaderLine - aLeaderLine_2) < eps	then
+			parameters	aLeaderLine_2 = aLeaderLine_2,
+						aLeaderLine = aLeaderLine_2 + 90
+		endif
+	else
+		if	abs(aLeaderLine - aLeaderLine_2) < eps	then
+			parameters	aLeaderLine = aLeaderLine,
+						aLeaderLine_2 = aLeaderLine + 90
+		endif
+	endif
+
+	if	GLOB_MODPAR_NAME = "aLeaderLine_2"	then
+		if	abs(aLeaderLine - aLeaderLine_2) < eps	then
+			parameters	aLeaderLine = aLeaderLine,
+						aLeaderLine_2 = aLeaderLine + 90
+		endif
+	endif
+
+	! values	"aLineLth"		range	[0,	135],	180,	range	[225,	360)
+	! values	"aLineLth_2"	range	[0,	135],	180,	range	[225,	360)
+	values	"aLineLth"		range	[-135,	135],	180
+	values	"aLineLth_2"	range	[-135,	135],	180
+
+	if	not(bLeaderLine)	then
+		lock			"aLeaderLine", "LineLth_Main", "aLineLth", "LineLth_Sub", "aLeaderLine_2", "LineLth_Main_2", "aLineLth_2", "LineLth_Sub_2", \
+						"rLeader", "penLeader", "posLeaderLine", "nLeaderLine", \
+						"bLeftLine", "leftLineLct", "leftLineLth_Main", "aLeftLineLth", "leftLineLth_Sub", \
+						"bRightLine", "rightLineLct", "rightLineLth_Main", "aRightLineLth", "rightLineLth_Sub"
+		hideparameter	"aLeaderLine", "LineLth_Main", "aLineLth", "LineLth_Sub", "aLeaderLine_2", "LineLth_Main_2", "aLineLth_2", "LineLth_Sub_2", \
+						"rLeader", "penLeader", "posLeaderLine", "nLeaderLine", \
+						"bLeftLine", "leftLineLct", "leftLineLth_Main", "aLeftLineLth", "leftLineLth_Sub", \
+						"bRightLine", "rightLineLct", "rightLineLth_Main", "aRightLineLth", "rightLineLth_Sub"
+	endif
+
+	!	보조선
+	!---------------------------------------------------------------------------------------
+	values{2}	"bLeftLine"	45,	"Off",
+							90,	"On"
+
+	values{2}	"bRightLine"	45,	"Off",
+								90,	"On"
+
+	values	"leftLineLct"	range	(0,	)
+	values	"rightLineLct"	range	(0,	)
+
+	values	"leftLineLth_Main"	range	(0,	)
+	values	"leftLineLth_Sub"	range	(0,	)
+	values	"rightLineLth_Main"	range	(0,	)
+	values	"rightLineLth_Sub"	range	(0,	)
+
+	values	"aLeftLineLth"	range	[0,	135],	range	[225,	360)
+	values	"aRightLineLth"	range	[0,	135],	range	[225,	360)

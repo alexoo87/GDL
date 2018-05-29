@@ -1,0 +1,177 @@
+!===============================================================================================
+!	콘센트 21
+!===============================================================================================
+
+!	LH표준화 라이브러리 표현
+!-----------------------------------------------------------------------------------------------
+	!	Define Text
+	if	iSocketContent = SOCKET_CONTENT_ELEC | iSocketContent = SOCKET_CONTENT_ELEC_SHUTDOWN	then
+		_anchor = 7
+	endif
+
+	if	iSocketContent = SOCKET_CONTENT_LAN | iSocketContent = SOCKET_CONTENT_LAN_MOSAIC	then
+		_anchor = 8
+	endif
+
+	if	iPlanView = PLANVIEW_MVO	then
+		success = LIBRARYGLOBAL("MEP_m_MVO.gsm",	"stFontType",	_stFontType)
+		success = LIBRARYGLOBAL("MEP_m_MVO.gsm",	"fontSize",		_fontSize)
+
+		if	success > eps	then
+			define style	"styFont_MVO"	_stFontType,	_fontSize,	_anchor,	0
+			style	"styFont_MVO"
+
+			r = request("Height_of_style", "styFont_MVO",	_textHgt,	_descent, _leading)
+
+			adjustY = 0 + _descent + _leading
+			adjustY = adjustY/1000*GLOB_SCALE
+		endif
+
+		r = LIBRARYGLOBAL("MEP_m_MVO.gsm",	"iPlanView",	_iPlanView)
+
+		_iPlanView = _iPlanView
+	else
+		define style	"styFont_Local"	stFontType,	fontSize,	_anchor,	0
+		style	"styFont_Local"
+
+		r = request("Height_of_style", "styFont_Local",	_textHgt,	_descent, _leading)
+
+		adjustY = 0 + _descent + _leading
+		adjustY = adjustY/1000*GLOB_SCALE
+
+		_iPlanView = iPlanView
+	endif
+
+	if	_iPlanView = PLANVIEW_KOR	then
+		add2	socketWdt/2,	0
+			if	iSocketContent = SOCKET_CONTENT_ELEC | iSocketContent = SOCKET_CONTENT_ELEC_SHUTDOWN	then
+				!	Parameters
+				_rBCircle = 0.0014*GLOB_SCALE
+				_rSCircle = 0.00015*GLOB_SCALE
+				_xPosSCircle = 0.0005*GLOB_SCALE
+				_yPosSCircle = 0.0005*GLOB_SCALE
+				_gap_bLine = _rBCircle/6
+				_gap_sLine = _rSCircle/2
+
+				!	Text
+				pen	textPen
+
+				add2	_rBCircle,	_rBCircle*2 - adjustY
+					text2	0,	0,	nSocket
+				del 1
+
+				!	Hotspot
+				hotspot2	0,	_rBCircle
+				hotspot2	0,	_rBCircle*2
+				hotspot2	0,	0
+				hotspot2	_rBCircle,	_rBCircle
+				hotspot2	-_rBCircle,	_rBCircle
+
+
+				!	Symbol
+				pen		gs_cont_pen
+				fill	gs_fill_type
+
+				add2	0,	_rBCircle
+					!	원
+					put	0,			0,		900,
+						_rBCircle,	360,	4000+1
+
+					poly2_b	nsp/3,	1+2+4,	gs_fill_pen,	gs_back_pen,	get(nsp)
+
+					!	선
+					if	iSocketContent = SOCKET_CONTENT_ELEC	then
+						for	i = 1	to	6
+							_yPosLine = -_gap_bLine*(i - 1)
+							_xPosLine = sqr(_rBCircle^2 - _yPosLine^2)
+							_xPosLine = abs(_xPosLine)
+
+							line2	-_xPosLine,	_yPosLine,	_xPosLine,	_yPosLine
+						next	i
+					endif
+
+					if	iSocketContent = SOCKET_CONTENT_ELEC_SHUTDOWN	then
+						for	i = 1	to	4
+							_yPosLine = -_gap_bLine*(i + 1)
+							_xPosLine = sqr(_rBCircle^2 - _yPosLine^2)
+							_xPosLine = abs(_xPosLine)
+
+							line2	-_xPosLine,	_yPosLine,	_xPosLine,	_yPosLine
+						next	i
+					endif
+
+					!	작은 원
+					add2	_xPosSCircle,	_yPosSCircle
+						circle2	0,	0,	_rSCircle
+					del 1
+
+					add2	-_xPosSCircle,	_yPosSCircle
+						circle2	0,	0,	_rSCircle
+					del 1
+
+					!	작은 선
+					if	iSocketContent = SOCKET_CONTENT_ELEC_SHUTDOWN	then
+						add2	_xPosSCircle,	_yPosSCircle
+							for	i = 1	to	3
+								_yPosLine = _gap_sLine*(i - 2)
+								_xPosLine = sqr(_rSCircle^2 - _yPosLine^2)
+								_xPosLine = abs(_xPosLine)
+
+								line2	-_xPosLine,	_yPosLine,	_xPosLine,	_yPosLine
+							next	i
+						del 1
+
+						add2	-_xPosSCircle,	_yPosSCircle
+							for	i = 1	to	3
+								_yPosLine = _gap_sLine*(i - 2)
+								_xPosLine = sqr(_rSCircle^2 - _yPosLine^2)
+								_xPosLine = abs(_xPosLine)
+
+								line2	-_xPosLine,	_yPosLine,	_xPosLine,	_yPosLine
+							next	i
+						del 1
+					endif
+				del 1
+			endif
+
+			if	iSocketContent = SOCKET_CONTENT_LAN | iSocketContent = SOCKET_CONTENT_LAN_MOSAIC	then
+				!	Parameters
+				_xPosLine_1 = 0.00180*GLOB_SCALE
+				_xPosLine_2 = 0.00115*GLOB_SCALE
+				_yPosLine_1 = 0.00200*GLOB_SCALE
+				_yPosLine_2 = _yPosLine_1 + 0.00125*GLOB_SCALE
+
+				_yPosText = 0.0001*GLOB_SCALE
+
+				!	Text
+				pen	textPen
+
+				!	Hotspot
+				add2	0,	_yPosText
+					text2	0,	0,	nSocket
+				del 1
+
+				!	Symbol
+				pen		gs_cont_pen
+				fill	gs_fill_type
+
+				put	-_xPosLine_1,	0,				1,
+					-_xPosLine_1,	_yPosLine_1,	1,
+					-_xPosLine_2,	_yPosLine_1,	1,
+					-_xPosLine_2,	_yPosLine_2,	1,
+					_xPosLine_2,	_yPosLine_2,	1,
+					_xPosLine_2,	_yPosLine_1,	1,
+					_xPosLine_1,	_yPosLine_1,	1,
+					_xPosLine_1,	0,				1
+
+				poly2_b	nsp/3,	1+2+4,	gs_fill_pen,	gs_back_pen,	get(nsp)
+			endif
+		del 1
+	endif
+
+	if	_iPlanView = PLANVIEW_ARCHICAD	then
+		pen		gs_cont_pen
+		fill	gs_fill_type
+
+		project2{2}	3,	270,	3+32,	gs_back_pen,	0,	0,	0
+	endif

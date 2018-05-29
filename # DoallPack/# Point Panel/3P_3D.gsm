@@ -1,0 +1,311 @@
+
+unID = 1000
+
+hotspot	0,	0,	0
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+if	bSymbol	then
+	_n2Dcut = 0
+	if	iProjectTo = PROJECTTO_FLOORPLAN | (iProjectTo = PROJECTTO_ABSOLUTE & btmPlaneHgt < cutPlaneHgt)	then
+		addz	btmPlaneHgt
+			cutplane{2}	180,	2	:	_n2Dcut = _n2Dcut + 1
+		del 1
+	endif
+
+	addz	cutPlaneHgt
+		cutplane{2}	180*(iProjectType = 2),	1	:	_n2Dcut = _n2Dcut + 1
+	del 1
+
+	if	iProjectTo = PROJECTTO_FLOORPLAN | (iProjectTo = PROJECTTO_ABSOLUTE & btmPlaneHgt < cutPlaneHgt)	then
+		addz	topPlaneHgt
+			cutplane{2}	0,	2	:	_n2Dcut = _n2Dcut + 1
+		del 1
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	3Point Panel
+!-----------------------------------------------------------------------------------------------
+tempV = 0.03
+tempP = max((moY01 + tempV),	(moY02 + tempV))
+
+roty	-90
+	x1 = tempP*cos(xang)
+	y1 = tempP*sin(xang)
+
+	hotspot	tempP,	0,	0,	unID,	xang,	4 + 128	:	unID = unID + 1
+	hotspot	x1,		y1,	0,	unID,	xang,	5		:	unID = unID + 1
+	hotspot	0,		0,	0,	unID,	xang,	6		:	unID = unID + 1	
+	hotspot	0,		0,	1,	unID,	xang,	7		:	unID = unID + 1
+del 1
+
+rotx	-xang
+	rotx	90
+		pen			gs_3D_pen
+		material	gs_mat
+
+		if	m_3d_type = "Volume"	then
+			!	Hotspot
+			hotspot	0,	0,	-depth
+
+			gosub	"movingHotspot"
+			addz -depth
+				gosub	"movingHotspot"
+			del 1
+
+			!	Shape
+			put	0,		0,		15,
+				moX01,	moY01,	15,
+				moX02,	moY02,	15,
+				0,		0,		15
+
+			prism_	nsp/3, -depth, get(nsp)
+		endif
+
+		if	m_3d_type = "Volume(+Z)"	then
+			!	Hotspot
+			hotspot	0,	0,	-depth
+			gosub	"movingHotspotZ"
+
+			!	Shape
+			_dumpValue = 1.000
+			group	"gVolume_Solid"
+				pen			gs_3D_pen
+				material	gs_mat
+
+				!	하부
+				put	0,		0,		0,
+					moX01,	moY01,	0,
+					moX02,	moY02,	0
+
+				!	상부
+				put	0,		0,		_dumpValue,
+					moX01,	moY01,	(_dumpValue + moZ01),
+					moX02,	moY02,	(_dumpValue + moZ02)
+
+				ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+			endgroup
+
+			group	"gVolume_Base"
+				pen			gs_3D_pen
+				material	gs_mat
+
+				!	하부
+				put	0,		0,		0,
+					moX01,	moY01,	0,
+					moX02,	moY02,	0
+
+				!	상부
+				put	0,		0,		(_dumpValue + depth),
+					moX01,	moY01,	(_dumpValue + depth + moZ01),
+					moX02,	moY02,	(_dumpValue + depth + moZ02)
+
+				ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+			endgroup
+
+			mulz	-1
+				addz	-_dumpValue
+
+					!	Cut
+					_hPos = depth + 0.020
+					_nCutPlane = 0
+					addz	_dumpValue
+						!	1st
+						_xLength_1 = moX01
+						_yLength_1 = moY01
+						_zLength_1 = moZ01
+
+						_xyLength_1 = sqr(_xLength_1^2 + _yLength_1^2)
+						_xyzLength_1 = sqr(_xyLength_1^2 + _zLength_1^2)
+
+						_aHorizon_1 = atn(_yLength_1/_xLength_1)
+						_aVertical_1 = atn(_zLength_1/_xyLength_1)
+
+						rotz	_aHorizon_1
+							roty	-_aVertical_1
+								addz	cutLct_1
+									addx	_xyzLength_1/2
+										hotspot	0,	0,					_hPos,				unID,	aCut_1,	4 + 128	:	unID = unID + 1
+										hotspot	0,	_hPos*sin(aCut_1),	_hPos*cos(aCut_1),	unID,	aCut_1,	5		:	unID = unID + 1
+										hotspot	0,	0,					0,					unID,	aCut_1,	6		:	unID = unID + 1
+										hotspot	1,	0,					0,					unID,	aCut_1,	7		:	unID = unID + 1
+									del 1
+
+									rotx	90 - aCut_1
+										cutplane	1,	1,	0,	0	:	_nCutPlane = _nCutPlane + 1
+										! gosub	"testPlane"
+									del 1
+								del 1
+							del 1
+						del 1
+
+						!	2nd
+						_xLength_2 = abs(moX02 - moX01)
+						_yLength_2 = moY02 - moY01
+						_zLength_2 = moZ02 - moZ01
+
+						_xyLength_2 = sqr(_xLength_2^2 + _yLength_2^2)
+						_xyzLength_2 = sqr(_xyLength_2^2 + _zLength_2^2)
+
+						_aHorizon_2 = atn(_yLength_2/_xLength_2)
+						_aVertical_2 = atn(_zLength_2/_xyLength_2)
+
+						add	moX01,	moY01,	moZ01
+							rotz	180 - _aHorizon_2
+								roty	-_aVertical_2
+									addz	cutLct_2
+										addx	_xyzLength_2/2
+											hotspot	0,	0,					_hPos,				unID,	aCut_2,	4 + 128	:	unID = unID + 1
+											hotspot	0,	_hPos*sin(aCut_2),	_hPos*cos(aCut_2),	unID,	aCut_2,	5		:	unID = unID + 1
+											hotspot	0,	0,					0,					unID,	aCut_2,	6		:	unID = unID + 1
+											hotspot	1,	0,					0,					unID,	aCut_2,	7		:	unID = unID + 1
+										del 1
+
+										rotx	90 - aCut_2
+											cutplane	1,	1,	0,	0	:	_nCutPlane = _nCutPlane + 1
+											! gosub	"testPlane"
+										del 1
+									del 1
+								del 1
+							del 1
+						del 1
+
+						!	3rd
+						_xLength_3 = abs(moX02)
+						_yLength_3 = -moY02
+						_zLength_3 = -moZ02
+
+						_xyLength_3 = sqr(_xLength_3^2 + _yLength_3^2)
+						_xyzLength_3 = sqr(_xyLength_3^2 + _zLength_3^2)
+
+						_aHorizon_3 = atn(_yLength_3/_xLength_3)
+						_aVertical_3 = atn(_zLength_3/_xyLength_3)
+
+						add	moX02,	moY02,	moZ02
+							rotz	180 - _aHorizon_3
+								roty	-_aVertical_3
+									addz	cutLct_3
+										addx	_xyzLength_3/2
+											hotspot	0,	0,					_hPos,				unID,	aCut_3,	4 + 128	:	unID = unID + 1
+											hotspot	0,	_hPos*sin(aCut_3),	_hPos*cos(aCut_3),	unID,	aCut_3,	5		:	unID = unID + 1
+											hotspot	0,	0,					0,					unID,	aCut_3,	6		:	unID = unID + 1
+											hotspot	1,	0,					0,					unID,	aCut_3,	7		:	unID = unID + 1
+										del 1
+
+										rotx	90 - aCut_3
+											cutplane	1,	1,	0,	0	:	_nCutPlane = _nCutPlane + 1
+											! gosub	"testPlane"
+										del 1
+									del 1
+								del 1
+							del 1
+						del 1
+					del 1
+
+					placegroup	subgroup("gVolume_Base",	"gVolume_Solid")
+
+					!	Cut end
+					if	_nCutPlane > eps	then
+						for	c = 1	to	_nCutPlane
+							cutend
+						next	c
+					endif
+				del 1
+			del 1
+		endif
+
+		if	m_3d_type = "Surface"	then
+			!	Hotspot
+			hotspot	0,	0,	-depth
+			gosub	"movingHotspot"
+
+			put	0,		0,		0,
+				moX01,	moY01,	0,
+				moX02,	moY02,	0,
+				0,		0,		0
+
+			plane	nsp/3, get(nsp)
+		endif
+	del 1
+del 1
+
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+if	bSymbol	then
+	for	i = 1	to	_n2Dcut
+		cutend
+	next	i
+endif
+
+
+
+end
+
+
+
+!-----------------------------------------------------------------------------------------------
+"movingHotspot":
+!-----------------------------------------------------------------------------------------------
+	hotspot	0,		moY01,	0,	unID,	moX01,	1+128	:	unID = unID + 1
+	hotspot	moX01,	moY01,	0,	unID,	moX01,	2		:	unID = unID + 1
+	hotspot	-1,		moY01,	0,	unID,	moX01,	3		:	unID = unID + 1
+
+	hotspot	moX01,	0,		0,	unID,	moY01,	1+128	:	unID = unID + 1
+	hotspot	moX01,	moY01,	0,	unID,	moY01,	2		:	unID = unID + 1
+	hotspot	moX01,	-1,		0,	unID,	moY01,	3		:	unID = unID + 1
+
+	hotspot	0,		moY02,	0,	unID,	moX02,	1+128	:	unID = unID + 1
+	hotspot	moX02,	moY02,	0,	unID,	moX02,	2		:	unID = unID + 1
+	hotspot	-1,		moY02,	0,	unID,	moX02,	3		:	unID = unID + 1
+
+	hotspot	moX02,	0,		0,	unID,	moY02,	1+128 	:	unID = unID + 1
+	hotspot	moX02,	moY02,	0,	unID,	moY02,	2		:	unID = unID + 1
+	hotspot	moX02,	-1,		0,	unID,	moY02,	3		:	unID = unID + 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"movingHotspotZ":
+!-----------------------------------------------------------------------------------------------
+	!	Point1
+	hotspot	0,		moY01,	-moZ01,	unID,	moX01,	1+128	:	unID = unID + 1
+	hotspot	moX01,	moY01,	-moZ01,	unID,	moX01,	2		:	unID = unID + 1
+	hotspot	-1,		moY01,	-moZ01,	unID,	moX01,	3		:	unID = unID + 1
+
+	hotspot	moX01,	0,		-moZ01,	unID,	moY01,	1+128	:	unID = unID + 1
+	hotspot	moX01,	moY01,	-moZ01,	unID,	moY01,	2		:	unID = unID + 1
+	hotspot	moX01,	-1,		-moZ01,	unID,	moY01,	3		:	unID = unID + 1
+
+	hotspot	moX01,	moY01,	0,		unID,	moZ01,	1+128	:	unID = unID + 1
+	hotspot	moX01,	moY01,	-moZ01,	unID,	moZ01,	2		:	unID = unID + 1
+	hotspot	moX01,	moY01,	1,		unID,	moZ01,	3		:	unID = unID + 1
+
+	!	Point2
+	hotspot	0,		moY02,	-moZ02,	unID,	moX02,	1+128	:	unID = unID + 1
+	hotspot	moX02,	moY02,	-moZ02,	unID,	moX02,	2		:	unID = unID + 1
+	hotspot	-1,		moY02,	-moZ02,	unID,	moX02,	3		:	unID = unID + 1
+
+	hotspot	moX02,	0,		-moZ02,	unID,	moY02,	1+128 	:	unID = unID + 1
+	hotspot	moX02,	moY02,	-moZ02,	unID,	moY02,	2		:	unID = unID + 1
+	hotspot	moX02,	-1,		-moZ02,	unID,	moY02,	3		:	unID = unID + 1
+
+	hotspot	moX02,	moY02,	0,		unID,	moZ02,	1+128	:	unID = unID + 1
+	hotspot	moX02,	moY02,	-moZ02,	unID,	moZ02,	2		:	unID = unID + 1
+	hotspot	moX02,	moY02,	1,		unID,	moZ02,	3		:	unID = unID + 1
+
+return
+
+
+"testPlane":
+
+	put	0,	0,	0,
+		1,	0,	0,
+		1,	1,	0,
+		0,	1,	0
+
+	plane nsp/3, get(nsp)
+
+return

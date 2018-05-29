@@ -1,0 +1,19 @@
+
+!	기본 변수 잠금
+!-----------------------------------------------------------------------------------------------
+lock	"AC_MarkerSize"
+
+
+!	Marker Head
+!-----------------------------------------------------------------------------------------------
+values{2}	"iFirstMarkerHead"	Marker_Circle,	stMarkerHead[Marker_Circle],
+								Marker_Flag,	stMarkerHead[Marker_Flag]
+
+values{2}	"iSecondMarkerHead"	Marker_Circle,	stMarkerHead[Marker_Circle],
+								Marker_Flag,	stMarkerHead[Marker_Flag]
+
+!	AC_EnableNoLink
+!-----------------------------------------------------------------------------------------------
+if	not(AC_EnableNoLink)	then
+	parameters	AC_EnableNoLink = 1
+endif

@@ -1,0 +1,367 @@
+!===============================================================================================
+!	패널
+!===============================================================================================
+
+
+!===============================================================================================
+!	공통 변수
+!===============================================================================================
+!	W.P = Point 1
+hotspot	0,	0,	0
+
+!	포인트 좌표
+_yPos = 0
+_xPos = (matrixPoint[4][1] - matrixPoint[1][1])/2
+if	iMethod_Tilt = Tilt_Angle	then
+	_yPos = -pnlHgt*tan(aTilt)
+endif
+
+if	iMethod_Tilt = Tilt_Length	then
+	_yPos = -lTilt
+endif
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+!	패널 전체 높이
+addy	_yPos
+	hotspot	0,	0,	0,		unID,	pnlHgt,	1	:	unID = unID + 1
+	hotspot	0,	0,	-1,		unID,	pnlHgt,	3	:	unID = unID + 1
+	hotspot	0,	0,	pnlHgt,	unID,	pnlHgt,	2	:	unID = unID + 1
+del 1
+
+!	패널 기울임
+addx	_xPos
+	if	iMethod_Tilt = Tilt_Angle	then
+		rotx	90
+			hotspot	0,	pnlHgt,				0,					unID,	aTilt,	4+128	: unID = unID + 1
+			hotspot	0,	pnlHgt*cos(aTilt),	pnlHgt*sin(aTilt),	unID,	aTilt,	5		: unID = unID + 1
+			hotspot	0,	0,					0,					unID,	aTilt,	6		: unID = unID + 1
+			hotspot	1,	0,					0,					unID,	aTilt,	7		: unID = unID + 1
+		del 1
+	endif
+
+	if	iMethod_Tilt = Tilt_Length	then
+		addz	pnlHgt
+			hotspot	0,	0,		0,	unID,	lTilt,	1	:	unID = unID + 1
+			hotspot	0,	1,		0,	unID,	lTilt,	3	:	unID = unID + 1
+			hotspot	0,	-lTilt,	0,	unID,	lTilt,	2	:	unID = unID + 1
+		del 1
+	endif
+del 1
+
+!	Point2
+addz	pnlHgt + addHgtL
+	addy	matrixPoint[2][2]
+		hotspot	0,					0,	0,	unID,	matrixPoint[2][1],	1	:	unID = unID + 1
+		hotspot	-1,					0,	0,	unID,	matrixPoint[2][1],	3	:	unID = unID + 1
+		hotspot	matrixPoint[2][1],	0,	0,	unID,	matrixPoint[2][1],	2	:	unID = unID + 1
+	del 1
+del 1
+
+	!	addHgtL
+	addz	pnlHgt
+		addy	matrixPoint[2][2]
+			addx	matrixPoint[2][1]
+				hotspot	0,	0,	0,			unID,	addHgtL,	1	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	addHgtL,	3	:	unID = unID + 1
+				hotspot	0,	0,	addHgtL,	unID,	addHgtL,	2	:	unID = unID + 1
+			del 1
+		del 1
+	del 1
+
+!	Point3
+addz	pnlHgt + addHgtR
+	addy	matrixPoint[3][2]
+		hotspot	0,					0,	0,	unID,	matrixPoint[3][1],	1	:	unID = unID + 1
+		hotspot	-1,					0,	0,	unID,	matrixPoint[3][1],	3	:	unID = unID + 1
+		hotspot	matrixPoint[3][1],	0,	0,	unID,	matrixPoint[3][1],	2	:	unID = unID + 1
+	del 1
+del 1
+
+	!	addHgtR
+	addz	pnlHgt
+		addy	matrixPoint[3][2]
+			addx	matrixPoint[3][1]
+				hotspot	0,	0,	0,			unID,	addHgtR,	1	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	addHgtR,	3	:	unID = unID + 1
+				hotspot	0,	0,	addHgtR,	unID,	addHgtR,	2	:	unID = unID + 1
+			del 1
+		del 1
+	del 1
+
+!	Point4
+hotspot	0,					0,	0,	unID,	matrixPoint[4][1],	1	:	unID = unID + 1
+hotspot	-1,					0,	0,	unID,	matrixPoint[4][1],	3	:	unID = unID + 1
+hotspot	matrixPoint[4][1],	0,	0,	unID,	matrixPoint[4][1],	2	:	unID = unID + 1
+
+
+!	분할 패널 높이/간격
+if	nDivide > 1	then
+
+	!	높이
+	if	not(bEqualHgt)	then
+		for	i = 1	to	nDivide - 1
+			_divideHgtC = divideHgt[i]
+
+			_ratioC = _divideHgtC/pnlHgt
+
+			_yPosDivideC = _yPos*_ratioC
+
+			addy	_yPosDivideC
+				hotspot	0,	0,	0,				unID,	divideHgt[i],	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,				unID,	divideHgt[i],	3		:	unID = unID + 1
+				hotspot	0,	0,	divideHgt[i],	unID,	divideHgt[i],	2		:	unID = unID + 1
+			del 1
+		next	i
+	endif
+
+	!	간격
+	for	i = 1	to	nDivide - 1
+		_divideHgtB = divideHgt[i] - gapDivide[i]/2
+		_divideHgtT = divideHgt[i] + gapDivide[i]/2
+		_divideHgtC = divideHgt[i]
+
+		_ratioB = _divideHgtB/pnlHgt
+		_ratioT = _divideHgtT/pnlHgt
+		_ratioC = _divideHgtC/pnlHgt
+
+		_yPosDivideB = _yPos*_ratioB
+		_yPosDivideT = _yPos*_ratioT
+		_yPosDivideC = _yPos*_ratioC
+
+		addy	_yPosDivideC
+			addz	_divideHgtC
+				hotspot	0,	0,	0,					unID,	gapHalfDivide[i],	1+128,	gapDivide[i]	:	unID = unID + 1
+				hotspot	0,	0,	-1,					unID,	gapHalfDivide[i],	3,		gapDivide[i]	:	unID = unID + 1
+				hotspot	0,	0,	gapHalfDivide[i],	unID,	gapHalfDivide[i],	2,		gapDivide[i]	:	unID = unID + 1
+			del 1
+		del 1
+	next	i
+
+endif
+
+!===============================================================================================
+!	2D Display Options
+!===============================================================================================
+!gs_2D_projection_type:
+!	0 - Normal 3D
+!	1 - View Edges
+!	2 - View Polygons
+!	3 - Overhead Edges
+!	4 - Cut Lines
+!	5 - Cut Polygons
+!	6 - Bottom Range Cut Lines
+!	7 - Top Range Cut Lines
+
+if	GLOB_CONTEXT = 2	then
+	if	gs_2D_projection	then
+		if	gs_symb_show_projection_to = stProjectionTypes[1] | (gs_symb_show_projection_to = stProjectionTypes[2] & gs_bottom_range_height < gs_cutplane_height)	then
+			addz gs_bottom_range_height
+				cutplane{2} 180, 2
+			del 1
+		endif
+
+		if	gs_2D_projection_type <> 6	then
+			addz gs_cutplane_height
+				cutplane{2} 180 * (gs_2D_projection_type = 3), 1
+			del 1
+		endif
+
+		if	gs_symb_show_projection_to <> stProjectionTypes[3]	then
+			addz gs_top_range_height
+				cutplane{2} 0, 2
+			del 1
+		endif
+	endif
+endif
+!===============================================================================================
+
+
+!===============================================================================================
+!	유리패널
+!===============================================================================================
+pen			pnlPenElev
+sect_fill	pnlFill,	pnlBackPen,	pnlFillPen,	pnlPenSect
+material	pnlMat
+
+!	변수 정의(Master Script)
+!-----------------------------------------------------------------------------------------------
+
+!	패널 Ruled
+!-----------------------------------------------------------------------------------------------
+group	"Panel"
+	!	하부 좌표
+	put	_OffsetPoint[1][1],	_OffsetPoint[1][2],				0,
+		_OffsetPoint[1][1],	_OffsetPoint[1][2] + pnlThk,	0,
+		_OffsetPoint[4][1],	_OffsetPoint[4][2] + pnlThk,	0,
+		_OffsetPoint[4][1],	_OffsetPoint[4][2],				0
+
+	!	상부 좌표
+	put	_OffsetPoint[2][1],	_OffsetPoint[2][2],				_OffsetPoint[2][3] - OffsetB,
+		_OffsetPoint[2][1],	_OffsetPoint[2][2] + pnlThk,	_OffsetPoint[2][3] - OffsetB,
+		_OffsetPoint[3][1],	_OffsetPoint[3][2] + pnlThk,	_OffsetPoint[3][3] - OffsetB,
+		_OffsetPoint[3][1],	_OffsetPoint[3][2],				_OffsetPoint[3][3] - OffsetB
+
+	addz	OffsetB
+		ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+	del 1
+endgroup
+
+
+!===============================================================================================
+!	패널 분할
+!===============================================================================================
+
+!	분할 Ruled
+!-----------------------------------------------------------------------------------------------
+group	"DividePanel"
+	if	nDivide > 1	then
+		for	i = 1	to	nDivide - 1
+			! if	gapDivide[i] > eps	then
+				_divideHgtB = divideHgt[i] - gapDivide[i]/2
+				_divideHgtT = divideHgt[i] + gapDivide[i]/2
+
+				_ratioBL = _divideHgtB/(pnlHgt + addHgtL)
+				_ratioBR = _divideHgtB/(pnlHgt + addHgtR)
+				_ratioTL = _divideHgtT/(pnlHgt + addHgtL)
+				_ratioTR = _divideHgtT/(pnlHgt + addHgtR)
+
+				_xPosDiv1 = (matrixPoint[2][1] - matrixPoint[1][1])*_ratioBL + OffsetL
+				_yPosDiv1 = matrixPoint[1][2]*_ratioBL
+				_zPosDiv1 = _divideHgtB
+
+				!	하부 좌표
+				put	(matrixPoint[2][1] - matrixPoint[1][1])*_ratioBL + OffsetL,						matrixPoint[2][2]*_ratioBL,				0,
+					(matrixPoint[2][1] - matrixPoint[1][1])*_ratioBL + OffsetL,						matrixPoint[2][2]*_ratioBL + pnlThk,	0,
+					matrixPoint[4][1] - OffsetR + (matrixPoint[3][1] - matrixPoint[4][1])*_ratioBR,	matrixPoint[3][2]*_ratioBR + pnlThk,	0,
+					matrixPoint[4][1] - OffsetR + (matrixPoint[3][1] - matrixPoint[4][1])*_ratioBR,	matrixPoint[3][2]*_ratioBR,				0
+
+				!	상부 좌표
+				put	(matrixPoint[2][1] - matrixPoint[1][1])*_ratioTL + OffsetL,						matrixPoint[2][2]*_ratioTL,				gapDivide[i],
+					(matrixPoint[2][1] - matrixPoint[1][1])*_ratioTL + OffsetL,						matrixPoint[2][2]*_ratioTL + pnlThk,	gapDivide[i],
+					matrixPoint[4][1] - OffsetR + (matrixPoint[3][1] - matrixPoint[4][1])*_ratioTR,	matrixPoint[3][2]*_ratioTR + pnlThk,	gapDivide[i],
+					matrixPoint[4][1] - OffsetR + (matrixPoint[3][1] - matrixPoint[4][1])*_ratioTR,	matrixPoint[3][2]*_ratioTR,				gapDivide[i]
+
+				addz	_divideHgtB
+					ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+				del 1
+			! endif
+		next	i
+	endif
+endgroup
+
+!	조합
+!-----------------------------------------------------------------------------------------------
+entirePanel = subgroup("Panel",	"DividePanel")
+
+placegroup	entirePanel
+
+
+!===============================================================================================
+if	GLOB_CONTEXT = 2	then
+	if	gs_2D_projection	then
+		if	gs_symb_show_projection_to = stProjectionTypes[1] | (gs_symb_show_projection_to = stProjectionTypes[2] & gs_bottom_range_height < gs_cutplane_height)	then	cutend
+		if	gs_2D_projection_type <> 6	then	cutend
+		if	gs_symb_show_projection_to <> stProjectionTypes[3]	then	cutend
+	endif
+endif
+!===============================================================================================
+
+
+!===============================================================================================
+!	Elevation(전개도)
+!===============================================================================================
+
+!	변수 정의
+!	Master Script
+
+!	전개도 그리기
+group	"Elevation"
+	put	_elevPoint[1][1],	_elevPoint[1][2],	0,
+		_elevPoint[2][1],	_elevPoint[2][2],	0,
+		_elevPoint[3][1],	_elevPoint[3][2],	0,
+		_elevPoint[4][1],	_elevPoint[4][2],	0
+
+	extrude	nsp/3,	0,	0,	-_elevThk,	1+2+4+16+32,	get(nsp)
+endgroup
+
+!	분할
+group	"subElevation"
+	if	nDivide > 1	then
+		for	i = 1	to	nDivide - 1
+			if	gapDivide[i] > eps	then
+				_divideHgtB = (divideHgt[i] - gapDivide[i]/2)/cos(_aElev)
+				_divideHgtT = (divideHgt[i] + gapDivide[i]/2)/cos(_aElev)
+
+				put	-_entireLth/2,	_divideHgtB,	0,
+					-_entireLth/2,	_divideHgtT,	0,
+					_entireLth/2,	_divideHgtT,	0,
+					_entireLth/2,	_divideHgtB,	0
+
+				addx	min(_elevPoint[1][1],	_elevPoint[2][1]) + _entireLth/2
+					extrude	nsp/3,	0,	0,	-_elevThk,	1+2+4+16+32,	get(nsp)
+				del 1
+			endif
+		next	i
+	endif
+endgroup
+
+!	Center Line
+group	"CenterLine"
+	if	nDivide > 1	then
+		for	i = 1	to	nDivide - 1
+			_ratioSP = divideHgt[i]/(pnlHgt + addHgtL)
+			_ratioEP = divideHgt[i]/(pnlHgt + addHgtR)
+
+			_xCenterSP = (matrixPoint[2][1] - matrixPoint[1][1])*_ratioSP + OffsetL
+			_xCenterEP = matrixPoint[4][1] - OffsetR + (matrixPoint[3][1] - matrixPoint[4][1])*_ratioEP
+			_xCenterMP = (_xCenterSP + _xCenterEP)/2
+			_divideHgtC = divideHgt[i]/cos(_aElev)
+
+			put	_xCenterSP,	_divideHgtC,	0,
+				_xCenterMP,	_divideHgtC,	0,
+				_xCenterEP,	_divideHgtC,	0
+
+			extrude	nsp/3,	0,	0,	-_elevThk,	1+2+4+16+32,	get(nsp)
+		next	i
+	endif
+endgroup
+
+! if	(_iWinElev = WinElev_ON)	then
+if	(_iWinElev = WinElev_ON) & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
+	!	Hotspot
+	_transX = 0
+	if	abs(xPosGuide) < eps	then	_transX = 0.010
+
+	addx	_transX
+		hotspot	0,			-yPosGuide,	0,	unID,	xPosGuide,	1+128	:	unID = unID + 1
+		hotspot	-1,			-yPosGuide,	0,	unID,	xPosGuide,	3		:	unID = unID + 1
+		hotspot	xPosGuide,	-yPosGuide,	0,	unID,	xPosGuide,	2		:	unID = unID + 1
+	del 1
+
+	add	xPosGuide,	-yPosGuide,	0
+		rotz	aGuide
+			addx	(_elevPoint[1][1] + _elevPoint[4][1])/2
+				hotspot	0,	0,	0,			unID,	zPosGuide,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	zPosGuide,	3		:	unID = unID + 1
+				hotspot	0,	0,	zPosGuide,	unID,	zPosGuide,	2		:	unID = unID + 1
+			del 1
+		del 1
+	del 1
+
+	!	Place Group
+	add	xPosGuide,	-yPosGuide,	zPosGuide
+		rotz	aGuide
+			rotx	90
+				placegroup	subgroup("Elevation",	"subElevation")
+				if	bCenterLine	then
+					placegroup	"CenterLine"
+				endif
+			del 1
+		del 1
+	del 1
+endif
+
+
+end

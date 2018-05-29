@@ -1,0 +1,178 @@
+!===============================================================================================
+!	패널
+!===============================================================================================
+!	W.P
+hotspot2	0,	0
+
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+!	Point2
+if	abs(matrixPoint[2][1]) < eps	then
+	_yOffset = eps*10
+endif
+
+add2	0,	_yOffset
+	hotspot2	0,					0,	unID,	matrixPoint[2][1],	1+128	:	unID = unID + 1
+	hotspot2	-1,					0,	unID,	matrixPoint[2][1],	3		:	unID = unID + 1
+	hotspot2	matrixPoint[2][1],	0,	unID,	matrixPoint[2][1],	2,		matrixPoint[2][1],	"Point2(X)"		:	unID = unID + 1
+del 1
+
+!	Point3
+if	abs(matrixPoint[3][1] - matrixPoint[4][1]) < eps	then
+	_yOffset = eps*10
+endif
+
+add2	0,	_yOffset
+	hotspot2	0,					0,	unID,	matrixPoint[3][1],	1+128	:	unID = unID + 1
+	hotspot2	-1,					0,	unID,	matrixPoint[3][1],	3		:	unID = unID + 1
+	hotspot2	matrixPoint[3][1],	0,	unID,	matrixPoint[3][1],	2,		matrixPoint[3][1],	"Point3(X)"		:	unID = unID + 1
+del 1
+
+!	Point4
+hotspot2	0,					0,	unID,	matrixPoint[4][1],	1+128	:	unID = unID + 1
+hotspot2	-1,					0,	unID,	matrixPoint[4][1],	3		:	unID = unID + 1
+hotspot2	matrixPoint[4][1],	0,	unID,	matrixPoint[4][1],	2,		matrixPoint[4][1],	"Point4(X)"	:	unID = unID + 1
+
+!	Panel Thickness
+add2	matrixPoint[4][1]/2,	0
+	hotspot2	0,	0,		unID,	pnlThk,	1+128	:	unID = unID + 1
+	hotspot2	0,	-1,		unID,	pnlThk,	3		:	unID = unID + 1
+	hotspot2	0,	pnlThk,	unID,	pnlThk,	2		:	unID = unID + 1
+del 1
+
+
+!===============================================================================================
+!	Projected Views
+!===============================================================================================
+gs_cutplane_height = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[1]
+gs_top_range_height = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[2]
+
+if	gs_symb_show_projection_to = stProjectionTypes[1]	then
+	gs_bottom_range_height = GLOB_CSTORY_ELEV - GLOB_HSTORY_ELEV + GLOB_CUTPLANES_INFO[3]	! To Floor Plan Range
+else
+	gs_bottom_range_height = GLOB_CUTPLANES_INFO[4]											! Absolute Display Limit
+endif
+
+doCutplane = (AC_symb_display_option = 1 | AC_symb_display_option = 2)
+
+!	Draw View Edges
+!-----------------------------------------------------------------------------------------------
+pen			AC_uncut_pen
+line_type	1
+
+if	AC_symb_display_option = 5	then
+	pen			AC_overhead_pen
+	line_type	AC_overhead_linetype
+endif
+
+project2{3}	3,	270,	2+32*(AC_symb_display_option = 5 | not(gs_use_3D_view_attributes)),	8,
+	parameters	gs_2D_projection		= doCutplane,
+				gs_2D_projection_type	= 1,
+				gs_cutplane_height		= gs_cutplane_height,
+				gs_top_range_height		= gs_top_range_height,
+				gs_bottom_range_height	= gs_bottom_range_height
+
+
+!	Draw View Polygons
+!-----------------------------------------------------------------------------------------------
+if	AC_symb_display_option <> 5	then
+
+	pen		gs_fill_pen
+	fill	gs_fill_type
+
+	project2{3}	3,	270,	3+32+1024+2048,	4,
+					gs_back_pen,
+		parameters	gs_2D_projection		= doCutplane,
+					gs_2D_projection_type	= 2,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+
+!	Draw Overhead View
+!-----------------------------------------------------------------------------------------------
+if	AC_symb_display_option = 2	then
+
+	pen			AC_overhead_pen
+	line_type	AC_overhead_linetype
+
+	project2{3}	3,	270,	2+32,	2+8,
+					gs_back_pen,
+		parameters	gs_2D_projection		= doCutplane,
+					gs_2D_projection_type	= 3,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+
+!	Draw Cut Lines
+!-----------------------------------------------------------------------------------------------
+if	doCutplane	then
+
+	pen				gs_cont_pen
+	line_type		AC_cut_linetype
+	line_property	2
+	project2{3}	3,	270,	2+16+32+256+4096,	2,
+					gs_back_pen,
+		parameters	gs_2D_projection		= 1,
+					gs_2D_projection_type	= 4,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+
+!	Draw Cut Polygons
+!-----------------------------------------------------------------------------------------------
+if	doCutplane	then
+
+	pen		gs_cont_pen
+	fill	gs_fill_type
+
+	project2{3}	3,	270,	3+32+512,	1,
+					gs_back_pen,
+		parameters	gs_2D_projection		= 1,
+					gs_2D_projection_type	= 5,
+					gs_cutplane_height		= gs_cutplane_height,
+					gs_top_range_height		= gs_top_range_height,
+					gs_bottom_range_height	= gs_bottom_range_height
+endif
+
+!===============================================================================================
+!	Elevation(전개도)
+!===============================================================================================
+if	bGuideLine	then
+	!	Hotspot
+	hotspot2	0,			-yPosGuide,	unID,	xPosGuide,	1+128	:	unID = unID + 1
+	hotspot2	-1,			-yPosGuide,	unID,	xPosGuide,	3		:	unID = unID + 1
+	hotspot2	xPosGuide,	-yPosGuide,	unID,	xPosGuide,	2		:	unID = unID + 1
+
+	hotspot2	xPosGuide,	0,			unID,	yPosGuide,	1+128	:	unID = unID + 1
+	hotspot2	xPosGuide,	1,			unID,	yPosGuide,	3		:	unID = unID + 1
+	hotspot2	xPosGuide,	-yPosGuide,	unID,	yPosGuide,	2		:	unID = unID + 1
+
+	_guide = 0.100
+	add2	xPosGuide,	-yPosGuide
+		hotspot2	_guide,				0,					unID,	aGuide,	4	:	unID = unID + 1
+		hotspot2	_guide*cos(aGuide),	_guide*sin(aGuide),	unID,	aGuide,	5	:	unID = unID + 1
+		hotspot2	0,					0,					unID,	aGuide,	6	:	unID = unID + 1
+
+		rot2	aGuide
+			hotspot2	_elevPoint[1][1],	0,	unID	:	unID = unID + 1
+			hotspot2	_elevPoint[2][1],	0,	unID	:	unID = unID + 1
+			hotspot2	_elevPoint[3][1],	0,	unID	:	unID = unID + 1
+			hotspot2	_elevPoint[4][1],	0,	unID	:	unID = unID + 1
+
+			!	Line
+			_xStart = min(_elevPoint[1][1],	_elevPoint[2][1])
+			_xEnd = max(_elevPoint[3][1],	_elevPoint[4][1])
+
+			line2		_xStart,	0,	_xEnd,	0
+			hotline2	_xStart,	0,	_xEnd,	0
+		del 1
+	del 1
+endif

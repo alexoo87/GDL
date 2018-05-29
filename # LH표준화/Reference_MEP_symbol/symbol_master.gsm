@@ -1,0 +1,32 @@
+!-----------------------------------------------------------------------------------------------
+!	신규 스크립트
+!-----------------------------------------------------------------------------------------------
+!	iPlanView 인덱스
+PLANVIEW_SIMPLE = 1
+PLANVIEW_DETAIL = 2
+PLANVIEW_MVO = 3
+
+if	iPlanView = PLANVIEW_MVO	then	
+	_iPlanView_mvo = 0
+	_penLine1_mvo = 0
+	_penLine2_mvo = 0
+	_mSymbol_size = 0
+	success = LIBRARYGLOBAL ("MEP_m_MVO.gsm", "iPlanView", _iPlanView_mvo)
+	success = LIBRARYGLOBAL ("MEP_m_MVO.gsm", "penLine1", _penLine1_mvo)
+	success = LIBRARYGLOBAL ("MEP_m_MVO.gsm", "penLine2", _penLine2_mvo)
+	success = LIBRARYGLOBAL ("MEP_m_MVO.gsm", "mSymbol_size", _mSymbol_size)
+	iPlanView = _iPlanView_mvo
+	penLine1 = _penLine1_mvo
+	penLine2 = _penLine2_mvo
+	mSymbol_size = _mSymbol_size
+endif
+
+if	_iPlanView_mvo > 0	then
+	bParam_hide = 1
+else
+	bParam_hide = 0
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	기존 스크립트
+!-----------------------------------------------------------------------------------------------

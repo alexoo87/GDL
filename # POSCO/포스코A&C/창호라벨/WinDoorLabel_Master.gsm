@@ -1,0 +1,79 @@
+!===============================================================================================
+!	창호라벨
+!===============================================================================================
+
+eps = 0.0001
+unID = 100
+
+!	폰트명 정의
+!-----------------------------------------------------------------------------------------------
+dim	fontnames[]
+nFonts = request("FONTNAMES_LIST", "", fontnames)
+
+
+!	심볼 타입 이름 정의
+!-----------------------------------------------------------------------------------------------
+SYMBOL_CIRCLE_ID = 1
+SYMBOL_CIRCLE_DIM = 2
+SYMBOL_STADIUM = 3
+
+if	GLOB_SCRIPT_TYPE <> 2 & GLOB_SCRIPT_TYPE <> 3	then
+	dim	stSymbolType[]
+		stSymbolType[1] = "반원형"
+		stSymbolType[2] = "반원형(치수표기)"
+		stSymbolType[3] = "사각원형"
+endif
+
+
+!	소수점 최대 표기자리수
+!-----------------------------------------------------------------------------------------------
+demiPoint_Zero = 1
+demiPoint_First = 2
+demiPoint_Second = 3
+
+if	GLOB_SCRIPT_TYPE <> 2 & GLOB_SCRIPT_TYPE <> 3	then
+	dim	stDemiPoint[]
+		stDemiPoint[1] = "표기하지않음"
+		stDemiPoint[2] = "첫째자리"
+		stDemiPoint[3] = "둘째자리"
+endif
+
+
+!	ID 표기 방법
+!-----------------------------------------------------------------------------------------------
+DispID_Full = 1
+DispID_Name = 2
+
+if	GLOB_SCRIPT_TYPE <> 2 & GLOB_SCRIPT_TYPE <> 3	then
+	dim	stDispID[]
+		stDispID[1] = "전체"
+		stDispID[2] = "'-숫자' 제외"
+endif
+
+
+!	지시선 방향
+!-----------------------------------------------------------------------------------------------
+LineWay_UP = 1
+LineWay_DN = 2
+LineWay_LT = 3
+LineWay_RT = 4
+
+if	GLOB_SCRIPT_TYPE <> 2 & GLOB_SCRIPT_TYPE <> 3	then
+	dim	stLineWay[]
+		stLineWay[1] = "상"
+		stLineWay[2] = "하"
+		stLineWay[3] = "좌"
+		stLineWay[4] = "우"
+endif
+
+
+!	지시선 유형
+!-----------------------------------------------------------------------------------------------
+LineType_Type1 = 1
+LineType_Type2 = 2
+
+if	GLOB_SCRIPT_TYPE <> 2 & GLOB_SCRIPT_TYPE <> 3	then
+	dim	stLineType[]
+		stLineType[1] = "Type1"
+		stLineType[2] = "Type2"
+endif

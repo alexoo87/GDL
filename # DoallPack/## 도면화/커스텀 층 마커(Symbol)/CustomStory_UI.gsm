@@ -1,0 +1,390 @@
+
+UI_DIALOG `커스텀 층 마커 속성(Symbol)`
+
+UI_STYLE		0, 0
+
+UI_CURRENT_PAGE		gs_ui_current_page
+
+!===============================================================================================
+!	Tabpage Selector Control
+!===============================================================================================
+ui_page		gs_ui_current_page
+
+px = 30
+py = 20
+cx = px
+cy = py
+
+ui_infield{3}		"gs_ui_current_page", 0, 0, 295, 25,
+					2, "",
+					0, 0,
+					cx, cy, px, py,
+					"ui_tabpage_marker_head.png",		`일반 설정`,		1
+
+ui_button	UI_PREV, "<<", 305, 2, 32, 21, gs_ui_current_page - 1	! Previous
+ui_button	UI_NEXT, ">>", 337, 2, 32, 21, gs_ui_current_page + 1	! Next
+
+ui_separator	0, 28, 444, 28
+
+
+!===============================================================================================
+!	Page 1 : 일반 설정
+!===============================================================================================
+ui_page		1
+
+if	gs_ui_current_page = 1	then
+	if	gs_ui_sub_tabpage < 1	then gs_ui_sub_tabpage = 1
+	if	gs_ui_sub_tabpage > 2	then gs_ui_sub_tabpage = 2
+
+	ui_infield{3} "gs_ui_sub_tabpage", 380, 0, 64, 25,
+		4, "uiTabsub_1.png",
+		2, 1,
+		0, 0, 28, 21,
+		1, ``, 1,
+		2, ``, 2
+
+	if	gs_ui_sub_tabpage = 1	then
+		ui_style	0,	1
+		ui_infield{3} bMarkerHead, 10, 40, 100, 15,
+			7, "", 2, 0, 0, 0, 0, 0,
+			1, `마커 헤드 보기`, 0,
+			2, `마커 헤드 보기`, 1 \
+			ui_tooltip `마커 헤드 보기`
+
+		ui_style	0,	0
+		ui_outfield `마커 유형`, 165, 65
+		ui_infield{3} iMarkerType, 220, 60, 70, 20,
+			8, "", 3, 1,
+			25, 15, 25, 15,
+			1, stMarkerType[1], Marker_Circle,
+			2, stMarkerType[2], Marker_Nabla,
+			3, stMarkerType[3],	Marker_Rect
+
+		ui_outfield `마커 채우기`, 26, 65
+		ui_infield{3}		strMarkerFill, 100, 60, 46, 21,
+			4, "ui_tri_marker_fill.png", 2, 1,
+			23, 21, 23, 21,
+			1, `Fill Off`, `fillOff`,
+			2, `Fill On`, `fillOn`
+
+		ui_outfield `마커 방향`, 165, 90
+		ui_infield{3}		iMarkerDir, 230, 85, 46, 21,
+			4, "ui_tri_marker_updown.png", 2, 1,
+			23, 21, 23, 21,
+			1, stMarkerDir[1], Dir_Top,
+			2, stMarkerDir[2], Dir_Bottom
+
+		ui_outfield `마커 크기`, 280, 90
+		ui_infield{3}		markerSize, 332, 85, 80, 21
+
+		ui_outfield	`정렬`, 305, 65
+		ui_infield{3}		sPlacement, 332, 60, 47, 20,
+			8, "", 0, 0,
+			0, 0, 0, 0,
+			``, stPlacement[1], stPlacement[1],
+			``, stPlacement[2], stPlacement[2],
+			``, stPlacement[3], stPlacement[3]
+		ui_infield{3}		sAlignment, 382, 60, 60, 20,
+			8, "", 0, 0,
+			0, 0, 0, 0,
+			``, stAlignment[1], stAlignment[1],
+			``, stAlignment[2], stAlignment[2],
+			``, stAlignment[3], stAlignment[3]
+
+		ui_pict "ui_custom_floor_marker_innerLine.png", 320, 150, 80, 35, 1
+		ui_outfield		`선끊기`, 407, 129
+		ui_infield{3}		bLineCut, 410, 145, 15, 20
+		ui_infield{3}		lenLineCut, 402, 168, 45, 15
+		ui_infield{3}		rightOverhang, 322, 187, 35, 15
+		ui_infield{3}		lp1, 370, 133, 35, 15
+		ui_infield{3}		lp2, 375, 187, 35, 15
+		ui_infield{3}		lp2_a, 322, 133, 35, 15
+
+		ui_outfield `마커 위치`, 26, 90
+		ui_infield{3}		iMarkerPos, 86, 85, 60, 20,
+			8, "", 0, 0,
+			0, 0, 0, 0,
+			``, stMarkerPos[1], Pos_Inside,
+			``, stMarkerPos[2], Pos_Outside
+
+		ui_separator	5, 108, 440, 108
+
+		!!! 수평선 위치 조정
+		dim_arrow_pos_y = 240
+
+		if	bMarkerHead	then
+			if	iMarkerPos = Pos_Inside	then
+				if	iMarkerType = Marker_Circle	then ui_pict "ui_marker_head_button.png", 300, 166, 19, 19, 1
+				if	iMarkerType = Marker_Nabla	then ui_pict "ui_marker_head_triangle.png", 300, 166, 19, 19, 1
+				if	iMarkerType = Marker_Rect	then ui_pict "ui_marker_head_Rectangle.png", 300, 166, 19, 19, 1
+
+				ui_separator	30, 175, 299, 175		! 수평선
+
+				ui_pict			"ui_short_horizontal_dim(1).png", 30, dim_arrow_pos_y, 30, 5, 1
+				ui_pict			"ui_long_horizontal_dim(1).png", 61, dim_arrow_pos_y, 239, 5, 1
+
+				ui_infield{3} "leftOverhang", 30, dim_arrow_pos_y + 10, 50, 15
+				ui_infield{3} "xTextPos", 170, dim_arrow_pos_y + 10, 55, 15
+			endif
+			if	iMarkerPos = Pos_Outside	then
+				if	iMarkerType = Marker_Circle	then ui_pict "ui_marker_head_button.png", 60, 166, 19, 19, 1
+				if	iMarkerType = Marker_Nabla	then ui_pict "ui_marker_head_triangle.png", 60, 166, 19, 19, 1
+				if	iMarkerType = Marker_Rect	then ui_pict "ui_marker_head_Rectangle.png", 60, 166, 19, 19, 1
+
+				ui_separator	30, 175, 60, 175		! 수평선
+				ui_separator	80, 175, 319, 175		! 수평선
+
+				ui_pict			"ui_short_horizontal_dim(1).png", 30, dim_arrow_pos_y, 30, 5, 1
+				ui_pict			"ui_long_horizontal_dim(1).png", 81, dim_arrow_pos_y, 239, 5, 1
+
+				ui_infield{3} "leftOverhang", 30, dim_arrow_pos_y + 10, 50, 15
+				ui_infield{3} "xTextPos", 190, dim_arrow_pos_y + 10, 55, 15
+			endif
+		else
+			if	iMarkerPos = Pos_Inside	then
+				ui_separator	30, 175, 299+20, 175		! 수평선
+
+				ui_pict			"ui_short_horizontal_dim(1).png", 30, dim_arrow_pos_y, 30, 5, 1
+				ui_pict			"ui_long_horizontal_dim(1).png", 61, dim_arrow_pos_y, 239, 5, 1
+
+				ui_infield{3} "leftOverhang", 30, dim_arrow_pos_y + 10, 50, 15
+				ui_infield{3} "xTextPos", 170, dim_arrow_pos_y + 10, 55, 15
+			endif
+			if	iMarkerPos = Pos_Outside	then
+				ui_separator	30, 175, 319, 175		! 수평선
+
+				ui_pict			"ui_short_horizontal_dim(1).png", 30, dim_arrow_pos_y, 30, 5, 1
+				ui_pict			"ui_long_horizontal_dim(1).png", 81, dim_arrow_pos_y, 239, 5, 1
+
+				ui_infield{3} "leftOverhang", 30, dim_arrow_pos_y + 10, 50, 15
+				ui_infield{3} "xTextPos", 190, dim_arrow_pos_y + 10, 55, 15
+			endif
+		endif
+
+		ui_separator	325, 210, 440, 210
+		ui_separator	325, 215, 325, 265
+
+		if	bMarkerHead	then
+			if	iMarkerType = Marker_Circle	then
+				ui_pict "ui_marker_head_button_overhang_offset.png", 360, 215, 60, 35, 1
+				ui_infield{3} topOverhang, 328, 215, 30, 15
+			endif
+			if	iMarkerType = Marker_Nabla	then
+				ui_pict "ui_marker_head_triangle_overhang_offset.png", 360, 215, 60, 35, 1
+			endif
+			if	iMarkerType = Marker_Rect	then
+				ui_pict "ui_marker_head_Rectangle_overhang_offset.png", 360, 215, 60, 35, 1
+			endif
+
+			ui_infield{3} lenMarkerOffset, 375, 252, 30, 12
+		endif
+
+		! =============================================================
+		! 라벨 설정 (Top)
+		! =============================================================
+		if	iMarkerPos = Pos_Inside	then ui_offsetX = 0 else ui_offsetX = 20
+		topX = 70 + ui_offsetX
+		topY = 117
+
+		! 층 번호 텍스트 (Top)
+		ui_outfield		`층 번호`, topX, topY
+		ui_infield{3}		iStoryNumberText_Top, topX-8, topY+15, 57, 20,
+			8, "", 0, 0,
+			0, 0, 0, 0,
+			"", stStoryText[1], StoryText_Custom,
+			"", stStoryText[2], StoryText_None
+		if	iStoryNumberText_Top = StoryText_Custom	then
+			ui_infield{3}		strStoryNumberText_Top, topX-8, topY+38, 57, 15
+		endif
+
+		! 분리자 1 (Top)
+		ui_outfield		`Sep1`, topX+48, topY
+		ui_infield{3}	bSeparator1_Top, topX+57, topY+15, 15, 17
+		ui_infield{3}	strSeparator1_Top, topX+51, topY+38, 25, 15
+
+		! 층 이름 | 층 입면 (Top)
+		ui_infield{3}		strStoryNameFirst_Top, topX+80, topY-5, 60, 20,
+			8, "", 0, 0,
+			0, 0, 0, 0,
+			``, stStoryNameFirst[1], stStoryNameFirst[1],
+			``, stStoryNameFirst[2], stStoryNameFirst[2]
+		if	bStoryNameFirst_Top	then
+			ui_infield{3}		iStoryNameText_Top, topX+80, topY+15, 60, 20,
+				8, "", 0, 0,
+				0, 0, 0, 0,
+				"", stStoryText[1], StoryText_Custom,
+				"", stStoryText[2], StoryText_None
+			if	iStoryNameText_Top = StoryText_Custom	then
+				ui_infield{3}		strStoryNameText_Top, topX+80, topY+38, 60, 15
+			endif
+		else
+			ui_infield{3}		iElevationText_Top, topX+80, topY+15, 60, 20,
+				8, "", 0, 0,
+				0, 0, 0, 0,
+				"", stStoryText[1], StoryText_Custom,
+				"", stStoryText[2], StoryText_None
+			if	iElevationText_Top = StoryText_Custom	then
+				ui_infield{3}		strElevationText_Top, topX+80, topY+38, 60, 15
+			endif
+		endif
+
+		! 분리자 2 (Top)
+		ui_outfield		`Sep2`, topX+143, topY
+		ui_infield{3}		bSeparator2_Top, topX+148, topY+15, 15, 17
+		ui_infield{3}		strSeparator2_Top, topX+142, topY+38, 25, 15
+
+		! 층 입면 | 층 이름 (Top)
+		if	bStoryNameFirst_Top	then
+			ui_outfield		stStoryNameFirst[2], topX+180, topY
+			ui_infield{3}		iElevationText_Top, topX+170, topY+15, 60, 20,
+				8, "", 0, 0,
+				0, 0, 0, 0,
+				"", stStoryText[1], StoryText_Custom,
+				"", stStoryText[2], StoryText_None
+			if	iElevationText_Top = StoryText_Custom	then
+				ui_infield{3}		strElevationText_Top, topX+170, topY+38, 60, 15
+			endif
+		else
+			ui_outfield		stStoryNameFirst[1], topX+180, topY
+			ui_infield{3}		iStoryNameText_Top, topX+170, topY+15, 60, 20,
+				8, "", 0, 0,
+				0, 0, 0, 0,
+				"", stStoryText[1], StoryText_Custom,
+				"", stStoryText[2], StoryText_None
+			if	iStoryNameText_Top = StoryText_Custom	then
+				ui_infield{3}		strStoryNameText_Top, topX+170, topY+38, 60, 15
+			endif
+		endif
+
+		! + 기호 보기 (Top)
+		ui_outfield		`+ 기호 보기`, topX-70, topY, 60, 12
+		ui_infield{3}		bShowPlus_Top, topX-45, topY+15, 15, 17
+
+		! =============================================================
+		! 라벨 설정 (Bottom)
+		! =============================================================
+		if	iMarkerPos = Pos_Inside	then ui_offsetX = 0 else ui_offsetX = 20
+		bottomX = 70 + ui_offsetX
+		bottomY = 222
+
+		! 층 번호 텍스트 (Bottom)
+		ui_outfield		`층 번호`, bottomX, bottomY
+		ui_infield{3}		iStoryNumberText_Bottom, bottomX-8, bottomY-25, 57, 20,
+			8, "", 0, 0,
+			0, 0, 0, 0,
+			"", stStoryText[1], StoryText_Custom,
+			"", stStoryText[2], StoryText_None
+		if	iStoryNumberText_Bottom = StoryText_Custom	then
+			ui_infield{3}		strStoryNumberText_Bottom, bottomX-8, bottomY-43, 57, 15
+		endif
+
+		! 분리자 1 (Bottom)
+		ui_outfield		`Sep1`, bottomX+48, bottomY
+		ui_infield{3}		bSeparator1_Bottom, bottomX+57, bottomY-24, 15, 17
+		ui_infield{3}		strSeparator1_Bottom, bottomX+51, bottomY-43, 25, 15
+
+		! 층 이름 | 층 입면 (Bottom)
+		ui_infield{3}		strStoryNameFirst_Bottom, bottomX+80, bottomY-5, 60, 20,
+			8, "", 0, 0,
+			0, 0, 0, 0,
+			``, stStoryNameFirst[1], stStoryNameFirst[1],
+			``, stStoryNameFirst[2], stStoryNameFirst[2]
+		if	bStoryNameFirst_Bottom	then
+			ui_infield{3}		iStoryNameText_Bottom, bottomX+80, bottomY-26, 60, 20,
+				8, "", 0, 0,
+				0, 0, 0, 0,
+				"", stStoryText[1], StoryText_Custom,
+				"", stStoryText[2], StoryText_None
+			if	iStoryNameText_Bottom = StoryText_Custom	then
+				ui_infield{3}		strStoryNameText_Bottom, bottomX+80, bottomY-43, 60, 15
+			endif
+		else
+			ui_infield{3}		iElevationText_Bottom, bottomX+80, bottomY-26, 60, 20,
+				8, "", 0, 0,
+				0, 0, 0, 0,
+				"", stStoryText[1], StoryText_Custom,
+				"", stStoryText[2], StoryText_None
+			if	iElevationText_Bottom = StoryText_Custom	then
+				ui_infield{3}		strElevationText_Bottom, bottomX+80, bottomY-43, 60, 15
+			endif
+		endif
+
+		! 분리자 2 (Bottom)
+		ui_outfield		`Sep2`, bottomX+143, bottomY
+		ui_infield{3}		bSeparator2_Bottom, bottomX+148, bottomY-24, 15, 17
+		ui_infield{3}		strSeparator2_Bottom, bottomX+142, bottomY-43, 25, 15
+
+		! 층 입면 | 층 이름 (Bottom)
+		if	bStoryNameFirst_Bottom	then
+			ui_outfield		stStoryNameFirst[2], bottomX+180, bottomY
+			ui_infield{3}		iElevationText_Bottom, bottomX+170, bottomY-26, 60, 20,
+				8, "", 0, 0,
+				0, 0, 0, 0,
+				"", stStoryText[1], StoryText_Custom,
+				"", stStoryText[2], StoryText_None
+			if	iElevationText_Bottom = StoryText_Custom	then
+				ui_infield{3}		strElevationText_Bottom, bottomX+170, bottomY-43, 60, 15
+			endif
+		else
+			ui_outfield		stStoryNameFirst[1], bottomX+180, bottomY
+			ui_infield{3}		iStoryNameText_Bottom, bottomX+170, bottomY-26, 60, 20,
+				8, "", 0, 0,
+				0, 0, 0, 0,
+				"", stStoryText[1], StoryText_Custom,
+				"", stStoryText[2], StoryText_None
+			if	iStoryNameText_Bottom = StoryText_Custom	then
+				ui_infield{3}		strStoryNameText_Bottom, bottomX+170, bottomY-43, 60, 15
+			endif
+		endif
+
+		! + 기호 보기 (Bottom)
+		ui_outfield		`+ 기호 보기`, bottomX-70, bottomY
+		ui_infield{3}		bShowPlus_Bottom, bottomX-45, bottomY-25, 15, 17
+	endif
+	if	gs_ui_sub_tabpage = 2	then
+		ui_groupbox		`마커 설정`, 5, 35, 430, 110
+		ui_groupbox		`라인 및 텍스트 설정`, 5, 150, 430, 115
+
+		if	iMarkerType = Marker_Circle	then
+			ui_pict			"ui_button_marker_fillType1.png",				25, 55, 50, 20, 1
+			ui_infield{3}		markerFill_1,					105, 55, 90, 20 ui_tooltip `마커 채우기`
+			ui_pict			"ui_button_marker_fillPen1.png",				25, 85, 50, 20, 1
+			ui_infield{3}		fillPen_1,						105, 85, 90, 20 ui_tooltip `마커 펜`
+			ui_pict			"ui_button_marker_fillBackPen1.png",		25, 115, 50, 20, 1
+			ui_infield{3}		backPen_1,					105, 115, 90, 20 ui_tooltip `마커 배경 펜`
+
+			ui_pict			"ui_button_marker_fillType2.png",				25+200, 55, 50, 20, 1
+			ui_infield{3}		markerFill_2,						105+200, 55, 90, 20 ui_tooltip `마커 채우기`
+			ui_pict			"ui_button_marker_fillPen2.png",				25+200, 85, 50, 20, 1
+			ui_infield{3}		fillPen_2,						105+200, 85, 90, 20 ui_tooltip `마커 펜`
+			ui_pict			"ui_button_marker_fillBackPen2.png",		25+200, 115, 50, 20, 1
+			ui_infield{3}		backPen_2,					105+200, 115, 90, 20 ui_tooltip `마커 배경 펜`
+		endif
+		if	iMarkerType = Marker_Nabla	then
+			ui_pict			"ui_tri_marker_fillType.png",			25, 55, 50, 20, 1
+			ui_infield{3}		markerFill_1,					105, 55, 90, 20 ui_tooltip `마커 채우기`
+			ui_pict			"ui_tri_marker_fillPen.png",			25, 85, 50, 20, 1
+			ui_infield{3}		fillPen_1,						105, 85, 90, 20 ui_tooltip `마커 펜`
+			ui_pict			"ui_tri_marker_fillBackPen.png",		25, 115, 50, 20, 1
+			ui_infield{3}		backPen_1,					105, 115, 90, 20 ui_tooltip `마커 배경 펜`
+		endif
+		if	iMarkerType = Marker_Rect	then
+			ui_pict			"ui_rect_marker_fillType.png",			25, 55, 50, 20, 1
+			ui_infield{3}		markerFill_1,					105, 55, 90, 20 ui_tooltip `마커 채우기`
+			ui_pict			"ui_rect_marker_fillPen.png",			25, 85, 50, 20, 1
+			ui_infield{3}		fillPen_1,						105, 85, 90, 20 ui_tooltip `마커 펜`
+			ui_pict			"ui_rect_marker_fillBackPen.png",		25, 115, 50, 20, 1
+			ui_infield{3}		backPen_1,					105, 115, 90, 20 ui_tooltip `마커 배경 펜`
+		endif
+
+		ui_outfield		`외곽선 펜`,						25, 170
+		ui_infield{3}		linePen,					105, 165, 90, 20 ui_tooltip `외곽선 펜`
+		ui_outfield		`텍스트 펜`,						25, 195
+		ui_infield{3}		textPen,					105, 190, 90, 20 ui_tooltip `텍스트 펜`
+		ui_outfield		`텍스트 크기(상)`,					25, 220
+		ui_infield{3}		textSize_Top,					105, 215, 90, 20 ui_tooltip `텍스트 펜`
+		ui_outfield		`텍스트 크기(하)`,					25, 245
+		ui_infield{3}		textSize_Bottom,					105, 240, 90, 20 ui_tooltip `텍스트 펜`
+
+	endif
+endif

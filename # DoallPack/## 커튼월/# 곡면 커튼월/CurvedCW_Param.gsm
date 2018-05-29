@@ -1,0 +1,651 @@
+!===============================================================================================
+!	곡면 커튼월
+!===============================================================================================
+
+
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+!	커튼월 생성 방향
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDirect"	Direct_Out,	stDirect[Direct_Out],
+						Direct_In,	stDirect[Direct_In]
+
+!	분할 방법(각도/길이)
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDivision"	Division_Angle,		stDivision[Division_Angle],
+						Division_Length,	stDivision[Division_Length]
+
+
+	!	멀리언 각도
+	!-----------------------------------------------------------------------------------------------
+	if	iDivision = Division_Angle	then
+		if	bEqualAngle	then
+			_eachAngle = totalAngle/(nMln + 1)
+
+			for	i = 1	to	nMln + 1
+				parameters	eachAngle[i] = _eachAngle*i
+			next i
+
+			lock	"eachAngle"
+		else
+			!	멀리언 각도 범위 값 제한
+			for	i = 1	to	nMln
+				if	eachAngle[i] - eachAngle[i + 1] > -eps	then
+					parameters	eachAngle[i] = eachAngle[i + 1] - eps*10
+				endif
+			next	i
+
+			parameters	eachAngle[nMln + 1] = totalAngle
+		endif
+
+		!	멀리언 간격
+		if	iDirect = Direct_Out	then	_distWP = distWP + (frmThk + gskThk)
+		if	iDirect = Direct_In		then	_distWP = distWP - (frmThk + gskThk)
+
+		for	i = 1	to	nMln + 1
+			if	i = 1	then
+				_aMln = eachAngle[i]/2
+				parameters	distMln[i] = (_distWp*sin(_aMln))*2
+			else
+				_aMln = (eachAngle[i] - eachAngle[i - 1])/2
+				parameters	distMln[i] = (_distWp*sin(_aMln))*2
+			endif
+		next	i
+	endif
+
+	!	멀리언 간격
+	!-----------------------------------------------------------------------------------------------
+	if	iDivision = Division_Length	then
+		dim	_eachAngle[51]
+		_totalAngle = 0
+
+		if	iDirect = Direct_Out	then	_distWP = distWP + (frmThk + gskThk)
+		if	iDirect = Direct_In		then	_distWP = distWP - (frmThk + gskThk)
+
+		for	i = 1	to	nMln + 1
+			_halfDist = distMln[i]/2
+			_sinValue = _halfDist/_distWP
+			_halfAngle = asn(_sinValue)
+			_halfAngle = abs(_halfAngle)
+
+			if	i = 1	then
+				_eachAngle[i] = _halfAngle*2
+			else
+				_eachAngle[i] = _eachAngle[i - 1] + _halfAngle*2
+			endif
+		next	i
+
+		parameters	eachAngle = _eachAngle
+
+		_totalAngle = _eachAngle[nMln + 1]
+		parameters	totalAngle = _totalAngle
+		lock	"totalAngle", "eachAngle", "bEqualAngle"
+	endif
+
+!	멀리언 생성 방향
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMlnDirect"	MlnDirect_LeftHand,		stMlnDirect[MlnDirect_LeftHand],
+							MlnDirect_RightHand,	stMlnDirect[MlnDirect_RightHand]
+
+!	코너프레임 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iCornerL"	Corner_Boundary,	stCorner[Corner_Boundary],
+						Corner_Mullion,		stCorner[Corner_Mullion],
+						Corner_Angled,		stCorner[Corner_Angled]
+
+if	iCornerL # Corner_Angled	then
+	lock	"aFrmL"
+endif
+
+values{2}	"iCornerR"	Corner_Boundary,	stCorner[Corner_Boundary],
+						Corner_Mullion,		stCorner[Corner_Mullion],
+						Corner_Angled,		stCorner[Corner_Angled]
+
+if	iCornerR # Corner_Angled	then
+	lock	"aFrmR"
+endif
+
+values{2}	"iCornerT"	Corner_Boundary,	stCorner[Corner_Boundary],
+						Corner_Transom,		stCorner[Corner_Transom]
+
+values{2}	"iCornerB"	Corner_Boundary,	stCorner[Corner_Boundary],
+						Corner_Transom,		stCorner[Corner_Transom]
+
+!	멀리언 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMlnType"	Mln_Type1,	stMlnType[Mln_Type1],
+						Mln_Type2,	stMlnType[Mln_Type2]
+
+!	트랜섬 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iTrsType"	Trs_Type1,	stMlnType[Trs_Type1],
+						Trs_Type2,	stMlnType[Trs_Type2]
+
+!	패널 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iPanelType"	Panel_Fix,		stPanelType[Panel_Fix],
+							Panel_Fix2,		stPanelType[Panel_Fix2],
+							Panel_Project,	stPanelType[Panel_Project],
+							Panel_Project2,	stPanelType[Panel_Project2],
+							Panel_Smoke,	stPanelType[Panel_Smoke],
+							Panel_Spandrel,	stPanelType[Panel_Spandrel],
+							Panel_Grill,	stPanelType[Panel_Grill],
+							Panel_Panel,	stPanelType[Panel_Panel],
+							Panel_Empty,	stPanelType[Panel_Empty],
+							Panel_Custom1,	stPanelType[Panel_Custom1]
+
+values{2}	"tempPanelType"	Panel_Fix,		stPanelType[Panel_Fix],
+							Panel_Fix2,		stPanelType[Panel_Fix2],
+							Panel_Project,	stPanelType[Panel_Project],
+							Panel_Project2,	stPanelType[Panel_Project2],
+							Panel_Smoke,	stPanelType[Panel_Smoke],
+							Panel_Spandrel,	stPanelType[Panel_Spandrel],
+							Panel_Grill,	stPanelType[Panel_Grill],
+							Panel_Panel,	stPanelType[Panel_Panel],
+							Panel_Empty,	stPanelType[Panel_Empty],
+							Panel_Custom1,	stPanelType[Panel_Custom1]
+
+!	힌지 위치
+!-----------------------------------------------------------------------------------------------
+values{2}	"iHinge"	Hinge_Top,			stHinge[Hinge_Top],
+						Hinge_Bottom,		stHinge[Hinge_Bottom],
+						Hinge_Left,			stHinge[Hinge_Left],
+						Hinge_Right,		stHinge[Hinge_Right],
+						Hinge_TopLeft,		stHinge[Hinge_TopLeft],
+						Hinge_TopRight,		stHinge[Hinge_TopRight],
+						Hinge_BottomLeft,	stHinge[Hinge_BottomLeft],
+						Hinge_BottomRight,	stHinge[Hinge_BottomRight]
+
+values{2}	"tempHinge"	Hinge_Top,			stHinge[Hinge_Top],
+						Hinge_Bottom,		stHinge[Hinge_Bottom],
+						Hinge_Left,			stHinge[Hinge_Left],
+						Hinge_Right,		stHinge[Hinge_Right],
+						Hinge_TopLeft,		stHinge[Hinge_TopLeft],
+						Hinge_TopRight,		stHinge[Hinge_TopRight],
+						Hinge_BottomLeft,	stHinge[Hinge_BottomLeft],
+						Hinge_BottomRight,	stHinge[Hinge_BottomRight]
+
+!	코너프레임 선택
+!-----------------------------------------------------------------------------------------------
+values{2}	"iSelectFrame"	Corner_Left,	stSelectFrame[Corner_Left],
+							Corner_Right,	stSelectFrame[Corner_Right],
+							Corner_Top,		stSelectFrame[Corner_Top],
+							Corner_Bottom,	stSelectFrame[Corner_Bottom]
+
+
+
+!	커튼월 높이
+!-----------------------------------------------------------------------------------------------
+totalHeight = 0
+
+for	i = 1	to	nTrs + 1
+	totalHeight = totalHeight + gapTrs[i]
+next i
+
+parameters	zzyzx = totalHeight
+lock	"zzyzx"
+
+!	폰트
+!-----------------------------------------------------------------------------------------------
+dim	fontnames[]
+r = request("FONTNAMES_LIST", "", fontnames)
+values	"stFontType"	fontnames
+
+
+!	창호 선택 변수
+!-----------------------------------------------------------------------------------------------
+dim	_xSelect[], _ySelect[]
+
+for	i = 1	to	nMln + 1
+	_xSelect[i] = i
+next	i
+for	i = 1	to	nTrs + 1
+	_ySelect[i] = i
+next	i
+
+values "xSelect"	_xSelect
+values "ySelect"	_ySelect
+
+if	GLOB_MODPAR_NAME = "xSelect" | GLOB_MODPAR_NAME = "ySelect" | GLOB_MODPAR_NAME = "iPanelType"	then
+	parameters	tempPanelType = iPanelType[xSelect][ySelect]
+else
+	parameters	iPanelType[xSelect][ySelect] = tempPanelType
+endif
+
+if	GLOB_MODPAR_NAME = "xSelect" | GLOB_MODPAR_NAME = "ySelect" | GLOB_MODPAR_NAME = "iHinge"	then
+	parameters	tempHinge = iHinge[xSelect][ySelect]
+else
+	parameters	iHinge[xSelect][ySelect] = tempHinge
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	문 관련
+!-----------------------------------------------------------------------------------------------
+
+	!	문 유형
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iDoorType"	DoorType_1panel,	stDoorType[DoorType_1panel],
+							DoorType_2panel,	stDoorType[DoorType_2panel]
+
+	!	문 열림 방향
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iOpenDirect"	OpenDirect_Left,	stOpenDirect[OpenDirect_Left],
+								OpenDirect_Right,	stOpenDirect[OpenDirect_Right]
+
+	!	프레임 유형
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iFrameType"	FrameType_1,	stFrameType[FrameType_1],
+								FrameType_2,	stFrameType[FrameType_2]
+
+	!	심볼 위치
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iSymbol"	Symbol_Front,	stSymbol[Symbol_Front],
+							Symbol_Back,	stSymbol[Symbol_Back],
+							Symbol_All,		stSymbol[Symbol_All]
+
+	!	편집할 문 선택
+	!-----------------------------------------------------------------------------------------------
+	dim	_iEditDoor[],	_stEditDoor[]
+	_nDoor = 0
+	for	i = 1	to	nMln + 1
+		if	bDoor[i]	then
+			_nDoor = _nDoor + 1
+			_iEditDoor[_nDoor] = i
+		endif
+	next	i
+
+	if	not(_nDoor)	then
+		_iEditDoor[1] = 1
+		_stEditDoor[1] = "None"
+
+		values{2}	"iEditDoor"	_iEditDoor,	_stEditDoor
+	else
+		values	"iEditDoor"	_iEditDoor
+	endif
+
+	!	변수 Lock
+	!-----------------------------------------------------------------------------------------------
+	lock	"doorWdt", "doorHgt"	!	자동계산
+	if	iDoorType = DoorType_2panel	then
+		lock	"iOpenDirect"
+	endif
+
+	if	iFrameType = FrameType_1	then
+		lock	"frameL", "frameR"
+	endif
+
+	if	not(_nDoor)	then
+		lock	"iDoorType", "iOpenDirect", "iFrameType", "iSymbol"
+		lock	"doorThk", "doorLct", "fixWdtL", "fixWdtR"
+		lock	"frameT", "frameB", "frameL", "frameR"
+	endif
+
+	!	Matrix에 값 넣기
+	!-----------------------------------------------------------------------------------------------
+	if	_nDoor > eps	then
+
+		!	iMatrix_Type
+		if	GLOB_MODPAR_NAME = "iDoorType"	then
+			parameters	iMatrix_Type[iEditDoor][1] = iDoorType
+		else
+			parameters	iDoorType = iMatrix_Type[iEditDoor][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iOpenDirect"	then
+			parameters	iMatrix_Type[iEditDoor][2] = iOpenDirect
+		else
+			parameters	iOpenDirect = iMatrix_Type[iEditDoor][2]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iFrameType"	then
+			parameters	iMatrix_Type[iEditDoor][3] = iFrameType
+		else
+			parameters	iFrameType = iMatrix_Type[iEditDoor][3]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iSymbol"	then
+			parameters	iMatrix_Type[iEditDoor][4] = iSymbol
+		else
+			parameters	iSymbol = iMatrix_Type[iEditDoor][4]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iEditDoor"	then
+			parameters	iDoorType = iMatrix_Type[iEditDoor][1]
+			parameters	iOpenDirect = iMatrix_Type[iEditDoor][2]
+			parameters	iFrameType = iMatrix_Type[iEditDoor][3]
+			parameters	iSymbol = iMatrix_Type[iEditDoor][4]
+		endif
+
+		!	Matrix_Length
+		if	GLOB_MODPAR_NAME = "doorWdt"	then
+			parameters	Matrix_Length[iEditDoor][1] = doorWdt
+		else
+			parameters	doorWdt = Matrix_Length[iEditDoor][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "doorHgt"	then
+			parameters	Matrix_Length[iEditDoor][2] = doorHgt
+		else
+			parameters	doorHgt = Matrix_Length[iEditDoor][2]
+		endif
+
+		if	GLOB_MODPAR_NAME = "doorThk"	then
+			parameters	Matrix_Length[iEditDoor][3] = doorThk
+		else
+			parameters	doorThk = Matrix_Length[iEditDoor][3]
+		endif
+
+		if	GLOB_MODPAR_NAME = "doorLct"	then
+			parameters	Matrix_Length[iEditDoor][4] = doorLct
+		else
+			parameters	doorLct = Matrix_Length[iEditDoor][4]
+		endif
+
+		if	GLOB_MODPAR_NAME = "fixWdtL"	then
+			parameters	Matrix_Length[iEditDoor][5] = fixWdtL
+		else
+			parameters	fixWdtL = Matrix_Length[iEditDoor][5]
+		endif
+
+		if	GLOB_MODPAR_NAME = "fixWdtR"	then
+			parameters	Matrix_Length[iEditDoor][6] = fixWdtR
+		else
+			parameters	fixWdtR = Matrix_Length[iEditDoor][6]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iEditDoor"	then
+			parameters	doorWdt = Matrix_Length[iEditDoor][1]
+			parameters	doorHgt = Matrix_Length[iEditDoor][2]
+			parameters	doorThk = Matrix_Length[iEditDoor][3]
+			parameters	doorLct = Matrix_Length[iEditDoor][4]
+			parameters	fixWdtL = Matrix_Length[iEditDoor][5]
+			parameters	fixWdtR = Matrix_Length[iEditDoor][6]
+		endif
+
+		!	Matrix_Frame
+		if	GLOB_MODPAR_NAME = "frameT"	then
+			parameters	Matrix_Frame[iEditDoor][1] = frameT
+		else
+			parameters	frameT = Matrix_Frame[iEditDoor][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "frameB"	then
+			parameters	Matrix_Frame[iEditDoor][2] = frameB
+		else
+			parameters	frameB = Matrix_Frame[iEditDoor][2]
+		endif
+
+		if	GLOB_MODPAR_NAME = "frameL"	then
+			parameters	Matrix_Frame[iEditDoor][3] = frameL
+		else
+			parameters	frameL = Matrix_Frame[iEditDoor][3]
+		endif
+
+		if	GLOB_MODPAR_NAME = "frameR"	then
+			parameters	Matrix_Frame[iEditDoor][4] = frameR
+		else
+			parameters	frameR = Matrix_Frame[iEditDoor][4]
+		endif
+
+		if	GLOB_MODPAR_NAME = "iEditDoor"	then
+			parameters	frameT = Matrix_Frame[iEditDoor][1]
+			parameters	frameB = Matrix_Frame[iEditDoor][2]
+			parameters	frameL = Matrix_Frame[iEditDoor][3]
+			parameters	frameR = Matrix_Frame[iEditDoor][4]
+		endif
+
+	else	!	Default Value
+
+		! for	i = 1	to	nMln + 1
+		! 	parameters	iMatrix_Type[i][1] = 1
+		! 	parameters	iMatrix_Type[i][2] = 1
+		! 	parameters	iMatrix_Type[i][3] = 1
+		! 	parameters	iMatrix_Type[i][4] = 1
+
+		! 	parameters	Matrix_Length[i][1] = 1.000
+		! 	parameters	Matrix_Length[i][2] = 1.000
+		! 	parameters	Matrix_Length[i][3] = 0.040
+		! 	parameters	Matrix_Length[i][4] = 0.000
+
+		! 	parameters	Matrix_Frame[i][1] = 0.100
+		! 	parameters	Matrix_Frame[i][2] = 0.100
+		! 	parameters	Matrix_Frame[i][3] = 0.100
+		! 	parameters	Matrix_Frame[i][4] = 0.100
+		! next	i
+
+	endif
+
+	!	doorWdt 계산
+	!-----------------------------------------------------------------------------------------------
+	for	i = 1	to	nMln + 1
+
+		!	변수 정의
+		if	nMln < eps	then
+			_frameWdt_SP = frmWdtL
+			_frameWdt_EP = frmWdtR
+			_innerAngle = totalAngle
+		else
+			!	프레임
+			if	i = 1	then
+				_frameWdt_SP = frmWdtL
+				_frameWdt_EP = mlnWdt
+			endif
+
+			if	i # 1 & i # (nMln + 1)	then
+				_frameWdt_SP = mlnWdt
+				_frameWdt_EP = mlnWdt
+			endif
+
+			if	i = (nMln + 1)	then
+				_frameWdt_SP = mlnWdt
+				_frameWdt_EP = frmWdtR
+			endif
+
+			!	내부 각도
+			if	i = 1	then
+				_innerAngle = eachAngle[i]
+			else
+				_innerAngle = eachAngle[i] - eachAngle[i - 1]
+			endif
+		endif
+		_subAngle = 90 - (180 - _innerAngle)/2
+
+		_doorThk = Matrix_Length[i][3]
+		_doorLct = Matrix_Length[i][4]
+
+		!	doorWdt 계산
+		if	iDirect = Direct_Out	then
+			_pointX_SP = distWP + _doorLct
+			_pointY_SP = _frameWdt_SP/2
+
+			_pointX_EP = _pointX_SP*cos(_innerAngle) + _frameWdt_EP/2*sin(_innerAngle)
+			_pointY_EP = _pointX_SP*sin(_innerAngle) - _frameWdt_EP/2*cos(_innerAngle)
+
+			_doorWdtTmp = sqr((_pointX_SP - _pointX_EP)^2 + (_pointY_SP - _pointY_EP)^2)
+		endif
+
+		if	iDirect = Direct_In	then
+			_pointX_SP = distWP - _doorLct
+			_pointY_SP = _frameWdt_SP/2
+
+			_pointX_EP = _pointX_SP*cos(_innerAngle) + _frameWdt_EP/2*sin(_innerAngle)
+			_pointY_EP = _pointX_SP*sin(_innerAngle) - _frameWdt_EP/2*cos(_innerAngle)
+
+			_doorWdtTmp = sqr((_pointX_SP - _pointX_EP)^2 + (_pointY_SP - _pointY_EP)^2)
+		endif
+
+		parameters	Matrix_Length[i][1] = _doorWdtTmp
+
+	next	i
+
+	!	doorHgt 계산
+	!-----------------------------------------------------------------------------------------------
+	if	nTrs < eps	then
+		_halfFrame = frmWdtT/2
+	else
+		_halfFrame = trsWdt/2
+	endif
+
+	for	i = 1	to	nMln + 1
+		_doorHgtTmp = gapTrs[1] - _halfFrame
+
+		parameters	Matrix_Length[i][2] = _doorHgtTmp
+	next	i
+
+	!	Insert Default Value
+	!-----------------------------------------------------------------------------------------------
+	_max = 51
+
+	for	i = 1	to	_max
+		!	iMatrix_Type
+		if	iMatrix_Type[i][1] < eps	then	parameters	iMatrix_Type[i][1] = 1
+		if	iMatrix_Type[i][2] < eps	then	parameters	iMatrix_Type[i][2] = 1
+		if	iMatrix_Type[i][3] < eps	then	parameters	iMatrix_Type[i][3] = 1
+		if	iMatrix_Type[i][4] < eps	then	parameters	iMatrix_Type[i][4] = 1
+
+		!	Matrix_Length
+		if	Matrix_Length[i][3] < eps	then	parameters	Matrix_Length[i][3] = 0.040
+		if	Matrix_Length[i][4] < eps	then	parameters	Matrix_Length[i][4] = 0.080
+
+		!	Matrix_Frame
+		if	Matrix_Frame[i][1] < eps	then	parameters	Matrix_Frame[i][1] = 0.100
+		if	Matrix_Frame[i][2] < eps	then	parameters	Matrix_Frame[i][2] = 0.100
+		if	Matrix_Frame[i][3] < eps	then	parameters	Matrix_Frame[i][3] = 0.100
+		if	Matrix_Frame[i][4] < eps	then	parameters	Matrix_Frame[i][4] = 0.100
+	next	i
+
+!-----------------------------------------------------------------------------------------------
+!	창호입면도
+!-----------------------------------------------------------------------------------------------
+values{2}	"iWinElev"	WinElev_On,		stWinElev[WinElev_On],
+						WinElev_Off,	stWinElev[WinElev_Off],
+						WinElev_MVO,	stWinElev[WinElev_MVO]
+
+if	_iWinElev = WinElev_Off	then
+	parameters	bGuideLine = 0
+	lock	"bGuideLine"
+endif
+
+if	not(bGuideLine)	then
+	lock	"dElev2D", "aElev2D"
+endif
+
+
+!===============================================================================================
+!	변수 범위
+!===============================================================================================
+!	기본설정
+!-----------------------------------------------------------------------------------------------
+values	"distWP"		range	(0,	)
+values	"totalAngle"	range	(0,	)
+values	"frmThk"		range	(0,	)
+values	"gskThk"		range	[0,	)
+values	"capThk"		range	[0,	gskThk - glsThk - offsetGls]
+
+!	프레임
+!-----------------------------------------------------------------------------------------------
+values	"frmWdt"	range	[0,	)
+values	"gskWdt"	range	[0,	]
+
+values	"frmWdtL"	range	[0,	)
+values	"gskWdtL"	range	[0,	]
+
+values	"frmWdtR"	range	[0,	)
+values	"gskWdtR"	range	[0,	]
+
+values	"frmWdtT"	range	[0,	)
+values	"gskWdtT"	range	[0,	]
+
+values	"frmWdtB"	range	[0,	)
+values	"gskWdtB"	range	[0,	]
+
+values	"mlnWdt"	range	[0,	)
+values	"mlnGskWdt"	range	[0,	]
+
+values	"trsWdt"	range	[0,	)
+values	"trsGskWdt"	range	[0,	]
+
+values	"exMlnThk"	range	(0,	]
+values	"exTrsThk"	range	(0,	]
+
+!	멀리언, 트랜섬 개수
+!-----------------------------------------------------------------------------------------------
+values	"nMln"	range	[0,	50]
+values	"nTrs"	range	[0,	50]
+
+!	멀리언 간격
+!-----------------------------------------------------------------------------------------------
+values	"distMln"	range	(0,	)
+
+!	멀리언 각도
+!-----------------------------------------------------------------------------------------------
+values	"eachAngle"	range	(0,	totalAngle]
+
+	!	코너멀리언 각도
+	if	iDirect = Direct_Out	then
+		values	"aFrmL"	range	[0,	80]
+		values	"aFrmR"	range	[-80,	0]
+	else
+		values	"aFrmL"	range	[-80,	0]
+		values	"aFrmR"	range	[0,	80]
+	endif
+
+!	유리
+!-----------------------------------------------------------------------------------------------
+if	iMlnType = Mln_Type2 | iTrsType = Trs_Type2	then
+	values	"glsThk"	range	(0,	gskThk - capThk)
+	values	"offsetGls"	range	[0,	gskThk - capThk - glsThk)
+else
+	values	"glsThk"	range	(0,	gskThk)
+	values	"offsetGls"	range	[0,	gskThk - glsThk)
+endif
+
+!	트랜섬 간격
+!-----------------------------------------------------------------------------------------------
+values	"gapTrs"	range	(0,	]
+
+!	패널
+!-----------------------------------------------------------------------------------------------
+values	"textSize"	range	(0,	)
+
+values	"insThk"	range	(0,	frmThk)
+values	"grlThk"	range	(0,	0.050]
+values	"gapGrl"	range	(0,	0.200]
+values	"grlAng"	range	[-90,	90]
+
+
+!	문 관련
+!-----------------------------------------------------------------------------------------------
+values	"doorThk"	range	(0,	)
+values	"doorLct"	range	(0,	)
+
+values	"fixWdtL"	range	[0,	]
+values	"fixWdtR"	range	[0,	]
+
+values	"frameT"	range	(0,	)
+values	"frameB"	range	(0,	)
+values	"frameL"	range	(0,	)
+values	"frameR"	range	(0,	)
+
+values	"iDoorUI"	1,	2
+
+!	배연창(2D Symbol)
+!-----------------------------------------------------------------------------------------------
+if	not(bSymbol2D)	then
+	lock			"symbolPen", "symbolOffset", "symbolSize"
+	hideparameter	"symbolPen", "symbolOffset", "symbolSize"
+endif
+
+if	symbolPen < eps	then
+	parameters	symbolPen = 1
+endif
+
+values	"symbolOffset"	range	[0,	]
+values	"symbolSize"	range	(0,	)
+
+!	창호입면도
+!-----------------------------------------------------------------------------------------------
+values	"dElev2D"	range	(0,	)
+values	"aElev2D"	range	[0,	totalAngle]

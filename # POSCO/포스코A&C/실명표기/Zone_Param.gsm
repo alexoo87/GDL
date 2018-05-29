@@ -1,0 +1,219 @@
+!-----------------------------------------------------------------------------------------------
+!	공통
+!-----------------------------------------------------------------------------------------------
+lock	"A",	"B"
+! parameters	A = totalStampWidth 
+! parameters	B = totalStampHeight
+
+
+!-----------------------------------------------------------------------------------------------
+!	영역 정보
+!-----------------------------------------------------------------------------------------------
+parameters	roomName = ROOM_NAME,
+			roomNumber = ROOM_NUMBER,
+			bottomLevel = ROOM_BASELEV*1000,
+			subBottomLevel = (ROOM_BASELEV - ROOM_FL_THICK)*1000
+
+lock	"roomName", "roomNumber", "bottomLevel", "subBottomLevel"
+
+
+!-----------------------------------------------------------------------------------------------
+!	텍스트 관련
+!-----------------------------------------------------------------------------------------------
+
+!	텍스트 정렬
+values{2}	"textPos"	2,	"가운데 정렬",
+						1, 	"왼쪽 정렬",
+						3,	"오른쪽 정렬"
+
+!	텍스트 조정 범위
+values	"ROOM_LSIZE"		range	(0,	]
+values	"enterTextSpace"	range	(0,	]
+values	"stampSpaceX"		range	(0,	]
+values	"stampSpaceY"		range	(0,	]
+
+!	자간/장평
+values	"nameSize"	range	(0,	)
+values	"nameSCF"	range	(0,	)
+values	"nameWF"	range	(0,	)
+
+values	"ceilSize"	range	(0,	)
+values	"ceilSCF"	range	(0,	)
+values	"ceilWF"	range	(0,	)
+
+values	"calcSize"	range	(0,	)
+values	"calcSCF"	range	(0,	)
+values	"calcWF"	range	(0,	)
+
+values	"fLevSize"	range	(0,	)
+values	"fLevSCF"	range	(0,	)
+values	"fLevWF"	range	(0,	)
+
+values	"sLevSize"	range	(0,	)
+values	"sLevSCF"	range	(0,	)
+values	"sLevWF"	range	(0,	)
+
+!	텍스트 설정 잠금
+lock	"ROOM_LSIZE"
+
+if	not(bTextName)	then
+	hideparameter	"bCustomName", "stCustomName", "nameSize", "nameSCF", "nameWF"
+else
+	if	not(bCustomName)	then
+		hideparameter	"stCustomName"
+	endif
+endif
+
+if	not(bTextCeil)	then
+	hideparameter	"bCustomCeil", "stCustomCeil", "ceilSize", "ceilSCF", "ceilWF"
+else
+	if	not(bCustomCeil)	then
+		hideparameter	"stCustomCeil"
+	endif
+endif
+
+if	not(bTextCalc)	then
+	hideparameter	"calcSize", "calcSCF", "calcWF"
+endif
+
+if	not(bTextFLev)	then
+	hideparameter	"bCustomFLev", "stCustomFLev", "fLevSize", "fLevSCF", "fLevWF"
+else
+	if	not(bCustomFLev)	then
+		hideparameter	"stCustomFLev"
+	endif
+endif
+
+if	not(bTextSLev)	then
+	hideparameter	"bCustomSLev", "stCustomSLev", "sLevSize", "sLevSCF", "sLevWF"
+else
+	if	not(bCustomSLev)	then
+		hideparameter	"stCustomSLev"
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	스탬프 관련
+!-----------------------------------------------------------------------------------------------
+!	스탬프 타입 정의
+values{2}	"iStampType"	STAMP_TYPE1,	stStampType[STAMP_TYPE1],
+							STAMP_TYPE2,	stStampType[STAMP_TYPE2],
+							STAMP_TYPE3,	stStampType[STAMP_TYPE3],
+							STAMP_TYPE4,	stStampType[STAMP_TYPE4],
+							STAMP_MVO,		stStampType[STAMP_MVO]
+
+!	스탬프 자동크기 변수
+if	not(bAutoSize)	then
+	hideparameter	"stampSpaceX",	"stampSpaceY"
+else
+	hideparameter	"customWidth",	"customHeight"
+endif
+
+!	스탬프 크기
+values	"customWidth"	range	(0,	)
+values	"halfWidth"		range	(0,	)
+if	GLOB_MODPAR_NAME = "customWidth"	then
+	parameters	halfWidth = customWidth/2
+else
+	if	GLOB_MODPAR_NAME = "halfWidth" | GLOB_MODPAR_NAME = ""	then
+		parameters	customWidth = halfWidth*2
+	endif
+endif
+
+values	"customHeight"	range	(0,	)
+values	"entireHeight"	range	(0,	)
+if	_nTextLine = 1	then
+	if	GLOB_MODPAR_NAME = "customHeight" | GLOB_MODPAR_NAME = "iStampType"	then
+		if	_iStampType = STAMP_TYPE1	then
+			_entireHeight = customHeight
+		endif
+		if	_iStampType = STAMP_TYPE2	then
+			_entireHeight = customHeight*2
+		endif
+		if	_iStampType = STAMP_TYPE3 | _iStampType = STAMP_TYPE4	then
+			_entireHeight = customHeight*3
+		endif
+
+		parameters	entireHeight = _entireHeight,
+					halfHeight = entireHeight/2
+	else
+		if	GLOB_MODPAR_NAME = "entireHeight"	then
+			if	_iStampType = STAMP_TYPE1	then
+				_customHeight = entireHeight/(_nTextLine)
+			endif
+			if	_iStampType = STAMP_TYPE2	then
+				_customHeight = entireHeight/(1 + _nTextLine)
+			endif
+			if	_iStampType = STAMP_TYPE3 | _iStampType = STAMP_TYPE4	then
+				_customHeight = entireHeight/(2 + _nTextLine)
+			endif
+
+			parameters	customHeight = _customHeight,
+						halfHeight = entireHeight/2
+		endif
+		if	GLOB_MODPAR_NAME = "halfHeight"	then
+			parameters	entireHeight = halfHeight*2
+
+			if	_iStampType = STAMP_TYPE1	then
+				_customHeight = entireHeight/(_nTextLine)
+			endif
+			if	_iStampType = STAMP_TYPE2	then
+				_customHeight = entireHeight/(1 + _nTextLine)
+			endif
+			if	_iStampType = STAMP_TYPE3 | _iStampType = STAMP_TYPE4	then
+				_customHeight = entireHeight/(2 + _nTextLine)
+			endif
+
+			parameters	customHeight = _customHeight
+		endif
+	endif
+endif
+!	스탬프 채우기 활성화
+if	not(bStampFill)	then
+	lock	"stampFill",	"stampFillPen",	"stampBFillPen"
+	hideparameter	"stampFill",	"stampFillPen",	"stampBFillPen"
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	실내마감재료 정보 관련
+!-----------------------------------------------------------------------------------------------
+
+!	두께 계산
+parameters	slab_thk = slab_baseT + slab_finishT
+parameters	wall_thk = wall_baseT + wall_finishT
+parameters	ceil_thk = ceil_baseT + ceil_finishT
+
+!	두께 변수 잠금
+lock	"slab_thk",	"wall_thk",	"ceil_thk"
+
+!	걸레받이 정보 숨김 / 잠금
+if	board_switch = 1	then
+	hideparameter	"board_base", "board_baseT", "board_finish", "board_finishT", "board_thk", "board_num"
+	lock	"board_base", "board_baseT", "board_finish", "board_finishT", "board_num"
+else
+	hideparameter	"board_baseT", "board_finishT"
+	lock	"board_baseT", "board_finishT"
+endif
+
+!	두께 입력 범위
+values		"slab_baseT"	range	[0,	]
+values		"slab_finishT"	range	[0,	]
+values		"slab_thk"		range	[0,	]
+values		"board_baseT"	range	[0,	]
+values		"board_finishT"	range	[0,	]
+values		"board_thk"		range	[0,	]
+values		"wall_baseT"	range	[0,	]
+values		"wall_finishT"	range	[0,	]
+values		"wall_thk"		range	[0,	]
+values		"ceil_baseT"	range	[0,	]
+values		"ceil_finishT"	range	[0,	]
+values		"ceil_thk"		range	[0,	]
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	UI
+!-----------------------------------------------------------------------------------------------
+
+! UI 페이지 정의
+values	"gs_ui_current_page",	1

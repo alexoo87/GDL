@@ -1,0 +1,98 @@
+!===============================================================================================
+!	Custom H형 철골보
+!===============================================================================================
+eps = 0.0001
+unID = 100
+
+!	중심 위치
+!-----------------------------------------------------------------------------------------------
+ARRANGE_TOP = 1
+ARRANGE_CENTER = 2
+ARRANGE_BOTTOM = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stArrange[]
+		stArrange[1] = "Top"
+		stArrange[2] = "Center"
+		stArrange[3] = "Bottom"
+endif
+
+!	Cutting Plan Type
+!-----------------------------------------------------------------------------------------------
+CutPlane_vert = 1
+CutPlane_horz = 2
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stCutPlane[]
+		stCutPlane[1] = "Vertical Plane"
+		stCutPlane[2] = "Horizontal Plane"
+endif
+
+!	접합 형태
+!-----------------------------------------------------------------------------------------------
+Attach_Moment = 1
+Attach_PIN = 2
+Attach_None = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stAttach[]
+		stAttach[1] = "Moment"
+		stAttach[2] = "PIN"
+		stAttach[3] = "None"
+endif
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+Display_Projected = 1
+Display_WithOverhead = 2
+Display_Symbolic = 3
+Display_Outlines = 4
+Display_Overhead = 5
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDisplay[]
+		stDisplay[1] = "Projected"
+		stDisplay[2] = "Projected with Overhead"
+		stDisplay[3] = "Symbolic View"
+		stDisplay[4] = "Outlines Only"
+		stDisplay[5] = "Overhead All"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+ProjectTo_FloorPlan = 1
+ProjectTo_Absolute = 2
+ProjectTo_Entire = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stProjectTo[]
+		stProjectTo[1] = "To Floor Plan Range"
+		stProjectTo[2] = "Absolute Display Limit"
+		stProjectTo[3] = "Entire Element"
+endif
+
+!	Y축 회전 기준점
+!-----------------------------------------------------------------------------------------------
+Rotation_Top = 1
+Rotation_Center = 2
+Rotation_Bottom = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stRotation[]
+		stRotation[1] = "Top"
+		stRotation[2] = "Center"
+		stRotation[3] = "Bottom"
+endif
+
+!	3D Detail Level
+!-----------------------------------------------------------------------------------------------
+DetailLevel_Detailed = 1
+DetailLevel_Simple = 2
+DetailLevel_None = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDetailLevel[]
+		stDetailLevel[1] = "Detailed"
+		stDetailLevel[2] = "Simple"
+		stDetailLevel[3] = "None"
+endif

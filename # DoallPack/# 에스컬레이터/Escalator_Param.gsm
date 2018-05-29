@@ -1,0 +1,116 @@
+!===============================================================================================
+!	에스컬레이터
+!===============================================================================================
+
+_escLth = escHgt/tan(aEsc)
+
+!	객체 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iObjectType"	OBJECT_ESCALATOR,	stObjectType[OBJECT_ESCALATOR],
+							OBJECT_MOVINGWALK,	stObjectType[OBJECT_MOVINGWALK]
+
+!	에스컬레이터 방향
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDirect"	DIRECT_UP,		stDirect[DIRECT_UP],
+						DIRECT_DOWN,	stDirect[DIRECT_DOWN]
+
+!	에스컬레이터
+values	"nLandStep"	2,	3
+values	"aEsc"	range	[25,	40]
+
+values	"escWdt"		range	(0,	)
+values	"escWdt_Half"	range	(0,	)
+
+if	GLOB_MODPAR_NAME = "escWdt"	then
+	parameters	escWdt_Half = escWdt/2
+endif
+if	GLOB_MODPAR_NAME = "escWdt_Half"	then
+	parameters	escWdt = escWdt_Half*2
+endif
+
+values	"escHgt"	range	[1.000,	)
+
+if	GLOB_MODPAR_NAME = "escHgt"	then
+	parameters	escHgt_Lth = escHgt/sin(aEsc)
+endif
+if	GLOB_MODPAR_NAME = "escHgt_Lth"	then
+	parameters	escHgt = escHgt_Lth*sin(aEsc)
+endif
+
+_minEscThk = 0.020 + stepHgt + stepLth*(1 - cos(aEsc))*tan(aEsc)
+_minEscThk = _minEscThk*cos(aEsc)
+values	"escThk"	range	(_minEscThk,	)
+
+!	디딤판
+values	"stepWdt"	range	(0,	escWdt)
+values	"stepLth"	range	(0,	)
+
+	!	디딤판 높이 자동계산
+	lock	"stepHgt"
+
+	_stepHgt = stepLth*sin(aEsc)
+	parameters	stepHgt = _stepHgt
+
+_minLandThk = 0.020 + stepHgt
+
+values	"lowLandLth"	range	(stepLth*(nLandStep + 1),	)
+values	"lowLandThk"	range	(_minLandThk,	)
+
+values	"uprLandLth"	range	(stepLth*(nLandStep + 1),	)
+values	"uprLandThk"	range	(_minLandThk,	)
+
+!	난간
+_balustradeWdt = (escWdt - stepWdt)/2
+values	"hndHgt"	range	[0.600,	]
+values	"sktHgt"	range	(0,	0.400]
+values	"glsThk"	range	(0,	)
+values	"hndWdt"	range	(0,	)
+values	"hndThk"	range	(0,	)
+values	"hndLct"	range	[-(_balustradeWdt - hndWdt)/2,	(_balustradeWdt - hndWdt)/2]
+
+values	"addHnd_Low"	range	[0,	lowLandLth - stepLth*(nLandStep + 1))
+values	"addHnd_Upr"	range	[0,	uprLandLth - stepLth*(nLandStep + 1))
+
+!	2D 표현 방법
+!-----------------------------------------------------------------------------------------------
+values{2}	"iWrkFlr"	VIEW_OFF,		stViewFlr[VIEW_OFF],
+						VIEW_CUT,		stViewFlr[VIEW_CUT],
+						VIEW_ENTIRE,	stViewFlr[VIEW_ENTIRE]
+
+if	not(iWrkFlr = VIEW_CUT)	then
+	lock	"bWrkBrk", "wrkBrkLct", "aWrkBrk"
+endif
+
+values{2}	"iUprFlr"	VIEW_OFF,		stViewFlr[VIEW_OFF],
+						VIEW_CUT,		stViewFlr[VIEW_CUT],
+						VIEW_ENTIRE,	stViewFlr[VIEW_ENTIRE]
+
+if	not(iUprFlr = VIEW_CUT)	then
+	lock	"bUprBrk", "uprBrkLct", "aUprBrk"
+endif
+
+values	"aWrkBrk"	range	[-45,	45]
+values	"aUprBrk"	range	[-45,	45]
+
+if	abs(aWrkBrk) < eps	then
+	values	"wrkBrkLct"	range	(abs((escWdt/2)*tan(aWrkBrk)) - stepLth*nLandStep,	_escLth - abs((escWdt/2)*tan(aWrkBrk)))
+else
+	values	"wrkBrkLct"	range	(abs((escWdt/2)*tan(aWrkBrk)),	_escLth - abs((escWdt/2)*tan(aWrkBrk)))
+endif
+if	abs(aUprBrk) < eps	then
+	values	"uprBrkLct"	range	(abs((escWdt/2)*tan(aUprBrk)) - stepLth*nLandStep,	_escLth - abs((escWdt/2)*tan(aUprBrk)))
+else
+	values	"uprBrkLct"	range	(abs((escWdt/2)*tan(aUprBrk)),	_escLth - abs((escWdt/2)*tan(aUprBrk)))
+endif
+
+
+!	Text
+!-----------------------------------------------------------------------------------------------
+dim	fontnames[]
+r = request("FONTNAMES_LIST", "", fontnames)
+values	"stFontType"	fontnames
+
+values	"txtSize"	range	(0,	)
+
+values	"wrkTxtLct"	range	[0,	]
+values	"uprTxtLct"	range	[0,	]

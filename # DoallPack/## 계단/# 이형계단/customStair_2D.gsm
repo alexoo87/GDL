@@ -1,0 +1,2130 @@
+!===============================================================================================
+!	이형 계단
+!===============================================================================================
+
+!	계단참이 하나의 게단 역할을 한다
+nRsr1 = nRsr1 - 1
+nRsr2 = nRsr2 - 1
+
+!	Stair status
+str_1st = 1
+str_2nd = 2
+
+!	Story Value
+Story_Current = 1
+Story_Upstairs = 2
+
+!	Model Value
+Entire_Model = 1
+Core_Only = 2
+
+if	GLOB_STRUCTURE_DISPLAY = 0	then
+	_modelValue = Entire_Model
+else
+	_modelValue = Core_Only
+endif
+
+!	수직마감재 + 바탕재 두께 변수 정의
+if	_modelValue = Entire_Model	then
+	_fnsThk = 0
+else
+	if	bFns	then
+		_fnsThk = vFnsThk + basThk
+	endif
+endif
+
+!	논슬립 표현
+_bNonSlip = 0
+if	_modelValue = Entire_Model	then
+	if	bNslp	then
+		_bNonSlip = 1
+	endif
+endif
+
+
+!	핸드레일 변수 정의
+if	_modelValue = Entire_Model	then
+	_bHndLine_Out = 1
+	_bHndLine_In = 1
+
+	if	bHnd_Out	then
+		_bHndLine_Out = 0
+	endif
+	if	bHnd_In	then
+		_bHndLine_In = 0
+	endif
+else
+	_bHndLine_Out = 1
+	_bHndLine_In = 1
+endif
+
+
+!	기울어진 각도 계산
+str_Ang_L = 0
+str_Ang_R = 0
+
+if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+	_calcTan_L = xOffsetL/(strTrd*nRsr1)
+	_calcAng_L = atn(_calcTan_L)
+	str_Ang_L = _calcAng_L
+endif
+
+if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+	_calcTan_R = xOffsetR/(strTrd*nRsr2)
+	_calcAng_R = atn(_calcTan_R)
+	str_Ang_R = _calcAng_R
+endif
+
+!	모델뷰옵션 불러오기
+success = LIBRARYGLOBAL("MVO_StairSettings",	"iDimPlan",	dimSettingValue)
+
+!	텍스트
+define style	"style_Up"	stFontType,	textSize,		2,	0
+define style	"style_Dn"	stFontType,	textSize,		8,	0
+define style{2}	"style_Dim"	stFontType,	dimTextSize,	0
+
+
+!===============================================================================================
+!	계단 1st
+!===============================================================================================
+fill	65
+fillPen = 1
+backPen = 0
+
+!-----------------------------------------------------------------------------------------------
+!	Hotspot
+!-----------------------------------------------------------------------------------------------
+if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+	if	iOffsetL = Point_Start	then	add2	strWdtL,	0
+	if	iOffsetL = Point_End	then	add2	strWdtL,	strTrd*nRsr1
+		hotspot2	0,			0,	unID,	xOffsetL,	1+128	:	unID = unID + 1
+		hotspot2	1,			0,	unID,	xOffsetL,	3		:	unID = unID + 1
+		hotspot2	-xOffsetL,	0,	unID,	xOffsetL,	2		:	unID = unID + 1
+	del 1
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	좌표이동 _ 시작
+!-----------------------------------------------------------------------------------------------
+_nTrans = 0
+if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+	add2	-xOffsetL,	0	:	_nTrans = _nTrans + 1
+
+	! if	iOffsetL = Point_Start	then
+	! 	add2	strWdtL,	0	:	_nTrans = _nTrans + 1
+	! 		rot2	-str_Ang_L	:	_nTrans = _nTrans + 1
+	! 	add2	-strWdtL,	0	:	_nTrans = _nTrans + 1
+	! endif
+	if	iOffsetL = Point_End	then
+		add2	strWdtL,	strTrd*nRsr1	:	_nTrans = _nTrans + 1
+			rot2	str_Ang_L	:	_nTrans = _nTrans + 1
+		add2	-strWdtL,	-strTrd*nRsr1	:	_nTrans = _nTrans + 1
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	Draw
+!-----------------------------------------------------------------------------------------------
+
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+		_status = str_1st
+		_strWdt = strWdtL
+		_nRsr = nRsr1
+		_brkAng = 21.8
+		_rBrkAng = 90 - _brkAng
+
+		if	GLOB_CH_STORY_DIST = 0	then
+			_storyValue = Story_Current
+			_iViewFlr = iWrkFlr
+			_brkLct = wrkBrkLct
+			_bBrk = bWrkBrk
+		endif
+		if	GLOB_CH_STORY_DIST > eps	then
+			_storyValue = Story_Upstairs
+			_iViewFlr = iUprFlr
+			_brkLct = uprBrkLct
+			_bBrk = bUprBrk
+		endif
+
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+		!	Break line
+		add2	_strWdt/2,	0
+			if	_iViewFlr = View_Cut	then
+				if	_storyValue = Story_Current	then
+					hotspot2	0,	0,			unID,	wrkBrkLct,	1 + 128	:	unID = unID + 1
+					hotspot2	0,	-1,			unID,	wrkBrkLct,	3		:	unID = unID + 1
+					hotspot2	0,	wrkBrkLct,	unID,	wrkBrkLct,	2		:	unID = unID + 1
+				endif
+
+				if	_storyValue = Story_Upstairs	then
+					hotspot2	0,	0,			unID,	uprBrkLct,	1 + 128	:	unID = unID + 1
+					hotspot2	0,	-1,			unID,	uprBrkLct,	3		:	unID = unID + 1
+					hotspot2	0,	uprBrkLct,	unID,	uprBrkLct,	2		:	unID = unID + 1
+				endif
+			endif
+		del 1
+
+	!	외곽선
+	!-----------------------------------------------------------------------------------------------
+		gosub	"Outline"
+
+	!	브레이크 라인
+	!-----------------------------------------------------------------------------------------------
+		gosub	"Breakline"
+
+	!	단
+	!-----------------------------------------------------------------------------------------------
+		gosub	"Treadline"
+
+	!	논슬립
+	!-----------------------------------------------------------------------------------------------
+	if	_bNonSlip	then
+		gosub	"Nonslipline"
+	endif
+
+	!	핸드레일
+	!-----------------------------------------------------------------------------------------------
+		gosub	"Handrailline"
+
+	!	텍스트 및 Up/Down
+	!-----------------------------------------------------------------------------------------------
+		gosub	"2DRepresentation"
+
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+		gosub	"CommonHotspot"
+
+	!	Dimension
+	!-----------------------------------------------------------------------------------------------
+		!	공통
+		_nRsr = nRsr1
+		_aText = 90
+		_bDimension = not(bViewScale) | (bViewScale & abs(GLOB_SCALE - iViewScale) < eps)
+
+		!	작업층
+		if	iDimPlan_Wrk = DimPlan_On | (iDimPlan_Wrk = DimPlan_MVO & dimSettingValue = 2)	then
+			if	not(iDimLct_Wrk = DimLct_2nd)	then
+				_dimOffset = dimOffset_WrkL
+				_dimWitness = dimWitness_WrkL
+
+				if	_storyValue = Story_Current	then
+					if	_bDimension	then
+						gosub	"Dimension"
+
+						add2	0,	_fnsThk
+							hotspot2	0,					0,	unID,	dimOffset_WrkL,	1	:	unID = unID + 1
+							hotspot2	1,					0,	unID,	dimOffset_WrkL,	3	:	unID = unID + 1
+							hotspot2	-dimOffset_WrkL,	0,	unID,	dimOffset_WrkL,	2	:	unID = unID + 1
+
+							hotspot2	0,					0,	unID,	dimWitness_WrkL,	1	:	unID = unID + 1
+							hotspot2	1,					0,	unID,	dimWitness_WrkL,	3	:	unID = unID + 1
+							hotspot2	-dimWitness_WrkL,	0,	unID,	dimWitness_WrkL,	2	:	unID = unID + 1
+
+							add2	0,	strTrd*_nRsr
+								hotspot2	0,					0,	unID,	dimOffset_WrkL,	1	:	unID = unID + 1
+								hotspot2	1,					0,	unID,	dimOffset_WrkL,	3	:	unID = unID + 1
+								hotspot2	-dimOffset_WrkL,	0,	unID,	dimOffset_WrkL,	2	:	unID = unID + 1
+
+								hotspot2	0,					0,	unID,	dimWitness_WrkL,	1	:	unID = unID + 1
+								hotspot2	1,					0,	unID,	dimWitness_WrkL,	3	:	unID = unID + 1
+								hotspot2	-dimWitness_WrkL,	0,	unID,	dimWitness_WrkL,	2	:	unID = unID + 1
+							del 1
+						del 1
+					endif
+				endif
+			endif
+		endif
+
+		!	상부층
+		if	iDimPlan_Upr = DimPlan_On | (iDimPlan_Upr = DimPlan_MVO & dimSettingValue = 2)	then
+			if	not(iDimLct_Upr = DimLct_2nd)	then
+				_dimOffset = dimOffset_UprL
+				_dimWitness = dimWitness_UprL
+
+				if	_storyValue = Story_Upstairs	then
+					if	_bDimension	then
+						gosub	"Dimension"
+
+						add2	0,	_fnsThk
+							hotspot2	0,					0,	unID,	dimOffset_UprL,	1	:	unID = unID + 1
+							hotspot2	1,					0,	unID,	dimOffset_UprL,	3	:	unID = unID + 1
+							hotspot2	-dimOffset_UprL,	0,	unID,	dimOffset_UprL,	2	:	unID = unID + 1
+
+							hotspot2	0,					0,	unID,	dimWitness_UprL,	1	:	unID = unID + 1
+							hotspot2	1,					0,	unID,	dimWitness_UprL,	3	:	unID = unID + 1
+							hotspot2	-dimWitness_UprL,	0,	unID,	dimWitness_UprL,	2	:	unID = unID + 1
+
+							add2	0,	strTrd*_nRsr
+								hotspot2	0,					0,	unID,	dimOffset_UprL,	1	:	unID = unID + 1
+								hotspot2	1,					0,	unID,	dimOffset_UprL,	3	:	unID = unID + 1
+								hotspot2	-dimOffset_UprL,	0,	unID,	dimOffset_UprL,	2	:	unID = unID + 1
+
+								hotspot2	0,					0,	unID,	dimWitness_UprL,	1	:	unID = unID + 1
+								hotspot2	1,					0,	unID,	dimWitness_UprL,	3	:	unID = unID + 1
+								hotspot2	-dimWitness_UprL,	0,	unID,	dimWitness_UprL,	2	:	unID = unID + 1
+							del 1
+						del 1
+					endif
+				endif
+			endif
+		endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	좌표이동 _ 끝
+!-----------------------------------------------------------------------------------------------
+del _nTrans
+
+!===============================================================================================
+!	계단참
+!===============================================================================================
+fill	65
+
+!	변수 정의
+_bLine = 1
+_bFill = 1
+if	_iViewFlr = View_None	then
+	_bLine = 0
+endif
+
+!	Hotspot
+	!	Stairwell
+	add2	strWdtL,	strTrd*nRsr1 + strOff1! + vFnsThk + basThk
+		hotspot2	0,			0,	unID,	strWell,	1 + 128	:	unID = unID + 1
+		hotspot2	-1,			0,	unID,	strWell,	3		:	unID = unID + 1
+		hotspot2	strWell,	0,	unID,	strWell,	2		:	unID = unID + 1
+	del 1
+
+	!	계단참 너비
+	add2	strWdtL + strWell/2,	strTrd*nRsr1 + strOff1
+		hotspot2	0,	0,		unID,	lndWdt,	1 + 128	:	unID = unID + 1
+		hotspot2	0,	-1,		unID,	lndWdt,	3		:	unID = unID + 1
+		hotspot2	0,	lndWdt,	unID,	lndWdt,	2		:	unID = unID + 1
+	del 1
+
+!	작업층에서 Cut View일 때는 계단참을 그릴 필요가 없음
+!-----------------------------------------------------------------------------------------------
+if	not(_storyValue = Story_Current & (iWrkFlr = View_Cut | iWrkFlr = View_None)) & not(_storyValue = Story_Upstairs & iUprFlr = View_None)	then
+	pen	strPen
+
+	!	OffsetL
+	!-----------------------------------------------------------------------------------------------
+	_strWdtL_X = strWdtL*cos(str_Ang_L)
+	_strWdtL_Y = strWdtL*sin(str_Ang_L)
+
+	_strOff1_X = strOff1*tan(str_Ang_L)
+	_strOff1_Y = strOff1
+
+	_fnsThkL_X = _fnsThk*sin(str_Ang_L)
+	_fnsThkL_Y = _fnsThk*cos(str_Ang_L)
+
+	_vFnsThkL = vFnsThk + basThk
+	_vFnsThkL_X = _vFnsThkL*tan(str_Ang_L)
+	_vFnsThkL_Y = vFnsThk + basThk
+
+	_strLndL_X = (_strWdtL_Y + lndWdt)*tan(str_Ang_L)
+
+	_smallL = (strTrd*nRsr1)/cos(str_Ang_L) - (strTrd*nRsr1)
+	_smallL_X = _smallL*sin(str_Ang_L)
+	_smallL_Y = _smallL*cos(str_Ang_L)
+
+	_subL = _strOff1_Y + _smallL_Y - _strWdtL_Y + lndWdt
+	_subL_X = _subL*tan(str_Ang_L)
+
+	if	iOffsetL = Point_Off	then
+		put	strWdtL,	strTrd*nRsr1 + strOff1 + _vFnsThkL,	1,
+			strWdtL,	strTrd*nRsr1 + _fnsThkL_Y,			0,
+			0,			strTrd*nRsr1 + _fnsThkL_Y,			bLine_Out,
+			0,			strTrd*nRsr1 + strOff1 + lndWdt,	bLine_Out
+	endif
+	! if	iOffsetL = Point_Start	then
+	! 	put	strWdtL + _strOff1_X + _vFnsThkL_X,					strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y,			1,
+	! 		strWdtL - _smallL_X + _fnsThkL_X,					strTrd*nRsr1 - _smallL_Y + _fnsThkL_Y,				0,
+	! 		strWdtL - (_smallL_X + _strWdtL_X) + _fnsThkL_X,	strTrd*nRsr1 - _smallL_Y + _strWdtL_Y + _fnsThkL_Y,	1,
+	! 		strWdtL - (_smallL_X + _strWdtL_X) + _subL_X,		strTrd*nRsr1 + _strOff1_Y + lndWdt,					1
+	! endif
+	if	iOffsetL = Point_End	then
+		put	strWdtL - (xOffsetL + _strOff1_X + _vFnsThkL_X),				strTrd*nRsr1 + strOff1 + _vFnsThkL,			1,
+			strWdtL - (xOffsetL + _fnsThkL_X),								strTrd*nRsr1 + _fnsThkL_Y,					0,
+			strWdtL - (xOffsetL + _strWdtL_X + _fnsThkL_X),					strTrd*nRsr1 - _strWdtL_Y + _fnsThkL_Y,		bLine_Out,
+			strWdtL - (xOffsetL + _strWdtL_X + _strOff1_X + _strLndL_X),	strTrd*nRsr1 + strOff1 + lndWdt,			bLine_Out
+	endif
+
+	!	OffsetR
+	!-----------------------------------------------------------------------------------------------
+	_strWdtR_X1 = strWdtR*cos(str_Ang_R)	!	짧은 X
+	_strWdtR_X2 = strWdtR/cos(str_Ang_R)	!	긴 X
+	_strWdtR_Y = strWdtR*sin(str_Ang_R)
+
+	_strOff2_X = strOff2*tan(str_Ang_R)
+	_strOff2_Y = strOff2
+
+	_fnsThkR_X = _fnsThk*sin(str_Ang_R)
+	_fnsThkR_Y = _fnsThk*cos(str_Ang_R)
+
+	_vFnsThkR = vFnsThk + basThk
+	_vFnsThkR_X = _vFnsThkR*tan(str_Ang_R)
+	_vFnsThkR_Y = vFnsThk + basThk
+
+	_strLndR_X = (_strWdtR_Y + lndWdt)*tan(str_Ang_R)
+
+	_smallR = (strTrd*nRsr2)/cos(str_Ang_R) - (strTrd*nRsr2)
+	_smallR_X = _smallR*sin(str_Ang_R)
+	_smallR_Y = _smallR*cos(str_Ang_R)
+	
+	_subR = _strOff2_Y + _smallR_Y - _strWdtR_Y + lndWdt
+	_subR_X = _subR*tan(str_Ang_R)
+
+	if	iOffsetR = Point_Off	then
+		put	strWdtL + strWell + strWdtR,		strTrd*nRsr1 + strOff1 + lndWdt,				bLine_Out,
+			strWdtL + strWell + strWdtR,		strTrd*nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	0,
+			strWdtL + strWell,					strTrd*nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	1,
+			strWdtL + strWell,					strTrd*nRsr1 + strOff1 + _vFnsThkR,				1
+	endif
+	if	iOffsetR = Point_Start	then
+		put	strWdtL + strWell + xOffsetR + _strOff2_X + _strWdtR_X1 + _strLndR_X,	strTrd*nRsr1 + strOff1 + lndWdt,								bLine_Out,
+			strWdtL + strWell + xOffsetR + _strWdtR_X1 - _fnsThkR_X,				strTrd*nRsr1 + strOff1 - (_strWdtR_Y + strOff2 + _fnsThkR_Y),	0,
+			strWdtL + strWell + xOffsetR - _fnsThkR_X,								strTrd*nRsr1 + strOff1 - (strOff2 + _fnsThkR_Y),				1,
+			strWdtL + strWell + xOffsetR + _strOff2_X + _vFnsThkR_X,				strTrd*nRsr1 + strOff1 + _vFnsThkR,								1
+	endif
+	! if	iOffsetR = Point_End	then
+	! 	put	strWdtL + strWell + _strWdtR_X1 - _subR_X,					strTrd*nRsr1 + _strOff1_Y + lndWdt,												1,
+	! 		strWdtL + strWell + _strWdtR_X1 + _smallR_X + _fnsThkR_X,	strTrd*nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y - _strWdtR_Y + _fnsThkR_Y),	0,
+	! 		strWdtL + strWell + _smallR_X + _fnsThkR_X,					strTrd*nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y + _fnsThkR_Y),				1,
+	! 		strWdtL + strWell - _strOff2_X - _vFnsThkR_X,				strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y,										1
+	! endif
+
+
+	poly2_b	nsp/3,	1*_bLine + 2*_bFill + 4,	fillPen,	backPen,	use(nsp)
+
+	!	Hotline
+	for	h = 1	to	(nsp/3) - 2
+		hotline2	get(2) + (use(1) - get(1)),	use(2)
+	next	h
+		hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+	!-----------------------------------------------------------------------------------------------
+	!	Up/Down
+	!-----------------------------------------------------------------------------------------------
+	pen	etcPen
+
+	!	Point(1,2)
+	if	iOffsetL = Point_Off	then
+		put	strWdtL/2,	strTrd*nRsr1 + _fnsThkL_Y,							1,
+			strWdtL/2,	strTrd*nRsr1 + strOff1 + _vFnsThkL/2 + lndWdt/2,	1
+	endif
+	! if	iOffsetL = Point_Start	then
+	! 	put	strWdtL - _smallL_X + _fnsThkL_X - _strWdtL_X/2,								strTrd*nRsr1 - _smallL_Y + _fnsThkL_Y + _strWdtL_Y/2,	1,
+	! 		strWdtL + (_strOff1_X + _vFnsThkL_X + _subL_X)/2 - (_smallL_X + _strWdtL_X)/2,	strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y/2 + lndWdt/2,	1 
+	! endif
+	if	iOffsetL = Point_End	then
+		put	strWdtL - (xOffsetL + _fnsThkL_X) - _strWdtL_X/2,									strTrd*nRsr1 + _fnsThkL_Y - _strWdtL_Y/2,			1,
+			strWdtL - (xOffsetL + _strOff1_X + _vFnsThkL_X/2 + _strWdtL_X/2 + _strLndL_X/2),	strTrd*nRsr1 + strOff1 + _vFnsThkL/2 + lndWdt/2,	1
+	endif
+
+	!	Point(3,4)
+	if	iOffsetR = Point_Off	then
+		put	strWdtL + strWell + strWdtR/2,	strTrd*nRsr1 + strOff1 + _vFnsThkR/2 + lndWdt/2,	1,
+			strWdtL + strWell + strWdtR/2,	strTrd*nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	1
+	endif
+	if	iOffsetR = Point_Start	then
+		put	strWdtL + strWell + xOffsetR + _strOff2_X + _strWdtR_X1/2 + _strLndR_X/2,	strTrd*nRsr1 + strOff1 + _vFnsThkR/2 + lndWdt/2,				1,
+			strWdtL + strWell + xOffsetR - _fnsThkR_X + _strWdtR_X1/2 + _vFnsThkR_X/2,	strTrd*nRsr1 + strOff1 - (strOff2 + _fnsThkR_Y) - _strWdtR_Y/2,	1
+	endif
+	! if	iOffsetR = Point_End	then
+	! 	put	strWdtL + strWell + _strWdtR_X1/2 - (_subR_X + _strOff2_X + _vFnsThkR_X)/2,	strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y/2 + lndWdt/2,	1,
+	! 		strWdtL + strWell + _smallR_X + _fnsThkR_X + _strWdtR_X1/2,					strTrd*nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y + _fnsThkR_Y) + _strWdtR_Y/2,	1
+	! endif
+
+	poly2_	nsp/3,	1,	get(nsp)
+
+	!-----------------------------------------------------------------------------------------------
+	!	핸드레일
+	!-----------------------------------------------------------------------------------------------
+	pen	strPen
+
+		!	Outer Handrail
+		!-----------------------------------------------------------------------------------------------
+		if	not(_bHndLine_Out)	then
+
+			_x1 = hndOff_Out - hndRd
+			_x2 = hndOff_Out + hndRd
+
+			!	Point(1,2)
+			if	iOffsetL = Point_Off	then
+				put	_x1,	strTrd*nRsr1 + _fnsThkL_Y,				1,
+					_x1,	strTrd*nRsr1 + strOff1 + lndWdt - _x1,	1
+			endif
+			! if	iOffsetL = Point_Start	then
+			! 	_Point1_X = _x1*cos(str_Ang_L)
+			! 	_Point1_Y = _x1*sin(str_Ang_L)
+
+			! 	_Point2_X = -_x1*tan(str_Ang_L) + _x1/cos(str_Ang_L)
+			! 	_Point2_Y = _x1
+
+			! 	put	strWdtL - (_smallL_X + _strWdtL_X) + _fnsThkL_X + _Point1_X,	strTrd*nRsr1 - _smallL_Y + _strWdtL_Y + _fnsThkL_Y - _Point1_Y,	1,
+			! 		strWdtL - (_smallL_X + _strWdtL_X) + _subL_X + _Point2_X,		strTrd*nRsr1 + _strOff1_Y + lndWdt - _Point2_Y,					1
+			! endif
+			if	iOffsetL = Point_End	then
+				_Point1_X = _x1*cos(str_Ang_L)
+				_Point1_Y = _x1*sin(str_Ang_L)
+
+				_Point2_X = _x1*tan(str_Ang_L) + _x1/cos(str_Ang_L)
+				_Point2_Y = _x1
+
+				put	strWdtL - (xOffsetL + _strWdtL_X + _fnsThkL_X) + _Point1_X,					strTrd*nRsr1 - _strWdtL_Y + _fnsThkL_Y + _Point1_Y,	1,
+					strWdtL - (xOffsetL + _strWdtL_X + _strOff1_X + _strLndL_X) + _Point2_X,	strTrd*nRsr1 + strOff1 + lndWdt - _Point2_Y,		1
+			endif
+
+			!	Point(3,4,5,6)
+			if	iOffsetR = Point_Off	then
+				put	strWdtL + strWell + strWdtR - _x1,	strTrd*nRsr1 + strOff1 + lndWdt - _x1,			1,
+					strWdtL + strWell + strWdtR - _x1,	strTrd*nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	0,
+					strWdtL + strWell + strWdtR - _x2,	strTrd*nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	1,
+					strWdtL + strWell + strWdtR - _x2,	strTrd*nRsr1 + strOff1 + lndWdt - _x2,			1
+			endif
+			if	iOffsetR = Point_Start	then
+				_Point3_X = _x1*tan(str_Ang_R) + _x1/cos(str_Ang_R)
+				_Point3_Y = _x1
+
+				_Point4_X = _x1*cos(str_Ang_R)
+				_Point4_Y = _x1*sin(str_Ang_R)
+
+				_Point5_X = _x2*cos(str_Ang_R)
+				_Point5_Y = _x2*sin(str_Ang_R)
+
+				_Point6_X = _x2*tan(str_Ang_R) + _x2/cos(str_Ang_R)
+				_Point6_Y = _x2
+
+				put	strWdtL + strWell + xOffsetR + _strOff2_X + _strWdtR_X1 + _strLndR_X - _Point3_X,	strTrd*nRsr1 + strOff1 + lndWdt - _Point3_Y,								1,
+					strWdtL + strWell + xOffsetR + _strWdtR_X1 - _fnsThkR_X - _Point4_X,				strTrd*nRsr1 + strOff1 - (_strWdtR_Y + strOff2 + _fnsThkR_Y) + _Point4_Y,	0,
+					strWdtL + strWell + xOffsetR + _strWdtR_X1 - _fnsThkR_X - _Point5_X,				strTrd*nRsr1 + strOff1 - (_strWdtR_Y + strOff2 + _fnsThkR_Y) + _Point5_Y,	1,
+					strWdtL + strWell + xOffsetR + _strOff2_X + _strWdtR_X1 + _strLndR_X - _Point6_X,	strTrd*nRsr1 + strOff1 + lndWdt - _Point6_Y,								1
+			endif
+			! if	iOffsetR = Point_End	then
+			! 	_Point3_X = -_x1*tan(str_Ang_R) + _x1/cos(str_Ang_R)
+			! 	_Point3_Y = _x1
+
+			! 	_Point4_X = _x1*cos(str_Ang_R)
+			! 	_Point4_Y = _x1*sin(str_Ang_R)
+
+			! 	_Point5_X = _x2*cos(str_Ang_R)
+			! 	_Point5_Y = _x2*sin(str_Ang_R)
+
+			! 	_Point6_X = -_x2*tan(str_Ang_R) + _x2/cos(str_Ang_R)
+			! 	_Point6_Y = _x2
+
+			! 	put	strWdtL + strWell + _strWdtR_X1 - _subR_X - _Point3_X,					strTrd*nRsr1 + _strOff1_Y + lndWdt - _Point3_Y,												1,
+			! 		strWdtL + strWell + _strWdtR_X1 + _smallR_X + _fnsThkR_X - _Point4_X,	strTrd*nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y - _strWdtR_Y + _fnsThkR_Y) - _Point4_Y,	0,
+			! 		strWdtL + strWell + _strWdtR_X1 + _smallR_X + _fnsThkR_X - _Point5_X,	strTrd*nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y - _strWdtR_Y + _fnsThkR_Y) - _Point5_Y,	1,
+			! 		strWdtL + strWell + _strWdtR_X1 - _subR_X - _Point6_X,					strTrd*nRsr1 + _strOff1_Y + lndWdt - _Point6_Y,												1
+			! endif
+
+			!	Point(7,8)
+			if	iOffsetL = Point_Off	then
+				put	_x2,	strTrd*nRsr1 + strOff1 + lndWdt - _x2,	1,
+					_x2,	strTrd*nRsr1 + _fnsThkL_Y,				1
+			endif
+			! if	iOffsetL = Point_Start	then
+			! 	_Point1_X = _x2*cos(str_Ang_L)
+			! 	_Point1_Y = _x2*sin(str_Ang_L)
+
+			! 	_Point2_X = -_x2*tan(str_Ang_L) + _x2/cos(str_Ang_L)
+			! 	_Point2_Y = _x2
+
+			! 	put	strWdtL - (_smallL_X + _strWdtL_X) + _subL_X + _Point2_X,		strTrd*nRsr1 + _strOff1_Y + lndWdt - _Point2_Y,					1,
+			! 		strWdtL - (_smallL_X + _strWdtL_X) + _fnsThkL_X + _Point1_X,	strTrd*nRsr1 - _smallL_Y + _strWdtL_Y + _fnsThkL_Y - _Point1_Y,	1
+			! endif
+			if	iOffsetL = Point_End	then
+				_Point7_X = _x2*cos(str_Ang_L)
+				_Point7_Y = _x2*sin(str_Ang_L)
+
+				_Point8_X = _x2*tan(str_Ang_L) + _x2/cos(str_Ang_L)
+				_Point8_Y = _x2
+
+				put	strWdtL - (xOffsetL + _strWdtL_X + _strOff1_X + _strLndL_X) + _Point8_X,	strTrd*nRsr1 + strOff1 + lndWdt - _Point8_Y,		1,
+					strWdtL - (xOffsetL + _strWdtL_X + _fnsThkL_X) + _Point7_X,					strTrd*nRsr1 - _strWdtL_Y + _fnsThkL_Y + _Point7_Y,	1
+			endif
+
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+		endif
+
+		!	Inner Handrail
+		!-----------------------------------------------------------------------------------------------
+		if	not(_bHndLine_In)	then
+
+			_x1 = hndOff_In - hndRd
+			_x2 = hndOff_In + hndRd
+			_x3 = hndOff_Stw - hndRd
+			_x4 = hndOff_Stw + hndRd
+
+			!	Point(1,2,3,4)
+			if	iOffsetL = Point_Off	then
+				put	strWdtL - _x1,	strTrd*nRsr1 + strOff1 + _vFnsThkL + _x3,	1,
+					strWdtL - _x1,	strTrd*nRsr1 + _fnsThkL_Y,					0,
+					strWdtL - _x2,	strTrd*nRsr1 + _fnsThkL_Y,					1,
+					strWdtL - _x2,	strTrd*nRsr1 + strOff1 + _vFnsThkL + _x4,	1
+			endif
+			! if	iOffsetL = Point_Start	then
+			! 	_Point1_X = _x1/cos(str_Ang_L) - _x1*tan(str_Ang_L)
+			! 	_Point1_Y = _x1
+
+			! 	_Point2_X = _x1*cos(str_Ang_L)
+			! 	_Point2_Y = _x1*sin(str_Ang_L)
+
+			! 	_Point3_X = _x2*cos(str_Ang_L)
+			! 	_Point3_Y = _x2*sin(str_Ang_L)
+
+			! 	_Point4_X = _x2/cos(str_Ang_L) - _x2*tan(str_Ang_L)
+			! 	_Point4_Y = _x2
+
+			! 	put	strWdtL + _strOff1_X + _vFnsThkL_X - _Point1_X,	strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y + _Point1_Y,	1,
+			! 		strWdtL - _smallL_X + _fnsThkL_X - _Point2_X,	strTrd*nRsr1 - _smallL_Y + _fnsThkL_Y + _Point2_Y,		0,
+			! 		strWdtL - _smallL_X + _fnsThkL_X - _Point3_X,	strTrd*nRsr1 - _smallL_Y + _fnsThkL_Y + _Point3_Y,		1,
+			! 		strWdtL + _strOff1_X + _vFnsThkL_X - _Point4_X,	strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y + _Point4_Y,	1
+			! endif
+			if	iOffsetL = Point_End	then
+				_Point1_X = _x1/cos(str_Ang_L) + _x1*tan(str_Ang_L)
+				_Point1_Y = _x3
+
+				_Point2_X = _x1*cos(str_Ang_L)
+				_Point2_Y = _x1*sin(str_Ang_L)
+
+				_Point3_X = _x2*cos(str_Ang_L)
+				_Point3_Y = _x2*sin(str_Ang_L)
+
+				_Point4_X = _x2/cos(str_Ang_L) + _x2*tan(str_Ang_L)
+				_Point4_Y = _x4
+
+				put	strWdtL - (xOffsetL + _strOff1_X + _vFnsThkL_X) - _Point1_X,	strTrd*nRsr1 + strOff1 + _vFnsThkL + _Point1_Y,	1,
+					strWdtL - (xOffsetL + _fnsThkL_X) - _Point2_X,					strTrd*nRsr1 + _fnsThkL_Y - _Point2_Y,			0,
+					strWdtL - (xOffsetL + _fnsThkL_X) - _Point3_X,					strTrd*nRsr1 + _fnsThkL_Y - _Point3_Y,			1,
+					strWdtL - (xOffsetL + _strOff1_X + _vFnsThkL_X) - _Point4_X,	strTrd*nRsr1 + strOff1 + _vFnsThkL + _Point4_Y,	1
+			endif
+
+			!	Point(5,6,7,8)
+			if	iOffsetR = Point_Off	then
+				put	strWdtL + strWell + _x2,	strTrd*nRsr1 + strOff1 + _vFnsThkR + _x4,		1,
+					strWdtL + strWell + _x2,	strTrd*nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	0,
+					strWdtL + strWell + _x1,	strTrd*nRsr1 + strOff1 - _fnsThkR_Y - strOff2,	1,
+					strWdtL + strWell + _x1,	strTrd*nRsr1 + strOff1 + _vFnsThkR + _x3,		1
+					
+			endif
+			if	iOffsetR = Point_Start	then
+				_Point5_X = _x2/cos(str_Ang_R) + _x2*tan(str_Ang_R)
+				_Point5_Y = _x4
+
+				_Point6_X = _x2*cos(str_Ang_R)
+				_Point6_Y = _x2*sin(str_Ang_R)
+
+				_Point7_X = _x1*cos(str_Ang_R)
+				_Point7_Y = _x1*sin(str_Ang_R)
+
+				_Point8_X = _x1/cos(str_Ang_R) + _x1*tan(str_Ang_R)
+				_Point8_Y = _x3
+
+				put	strWdtL + strWell + xOffsetR + _strOff2_X + _vFnsThkR_X + _Point5_X,	strTrd*nRsr1 + strOff1 + _vFnsThkL_Y + _Point5_Y,				1,
+					strWdtL + strWell + xOffsetR - _fnsThkR_X + _Point6_X,					strTrd*nRsr1 + strOff1 - (strOff2 + _fnsThkR_Y) - _Point6_Y,	1,
+					strWdtL + strWell + xOffsetR - _fnsThkR_X + _Point7_X,					strTrd*nRsr1 + strOff1 - (strOff2 + _fnsThkR_Y) - _Point7_Y,	1,
+					strWdtL + strWell + xOffsetR + _strOff2_X + _vFnsThkR_X + _Point8_X,	strTrd*nRsr1 + strOff1 + _vFnsThkL_Y + _Point8_Y,				1
+			endif
+			! if	iOffsetR = Point_End	then
+			! 	_Point5_X = _x2/cos(str_Ang_R) - _x2*tan(str_Ang_R)
+			! 	_Point5_Y = _x2
+
+			! 	_Point6_X = _x2*cos(str_Ang_R)
+			! 	_Point6_Y = _x2*sin(str_Ang_R)
+
+			! 	_Point7_X = _x1*cos(str_Ang_R)
+			! 	_Point7_Y = _x1*sin(str_Ang_R)
+
+			! 	_Point8_X = _x1/cos(str_Ang_R) - _x1*tan(str_Ang_R)
+			! 	_Point8_Y = _x1
+
+			! 	put	strWdtL + strWell - _strOff2_X - _vFnsThkR_X + _Point5_X,	strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y + _Point5_Y,							1,
+			! 		strWdtL + strWell + _smallR_X + _fnsThkR_X + _Point6_X,		strTrd*nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y + _fnsThkR_Y) + _Point6_Y,	1,
+			! 		strWdtL + strWell + _smallR_X + _fnsThkR_X + _Point7_X,		strTrd*nRsr1 + _strOff1_Y - (_strOff2_Y + _smallR_Y + _fnsThkR_Y) + _Point7_Y,	1,
+			! 		strWdtL + strWell - _strOff2_X - _vFnsThkR_X + _Point8_X,	strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y + _Point8_Y,							1
+			! endif
+
+			!	Point(9)
+			if	iOffsetL = Point_Off	then
+				put	strWdtL - _x1,	strTrd*nRsr1 + strOff1 + _vFnsThkL + _x3,	1
+			endif
+			! if	iOffsetL = Point_Start	then
+			! 	put	strWdtL + _strOff1_X + _vFnsThkL_X - _Point1_X,	strTrd*nRsr1 + _strOff1_Y + _vFnsThkL_Y + _Point1_Y,	1
+			! endif
+			if	iOffsetL = Point_End	then
+				put	strWdtL - (xOffsetL + _strOff1_X + _vFnsThkL_X) - _Point1_X,	strTrd*nRsr1 + strOff1 + _vFnsThkL + _Point1_Y,	1
+			endif
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+		endif
+
+endif
+
+
+
+!===============================================================================================
+!	계단 2nd
+!===============================================================================================
+fill	65
+fillPen = 1
+backPen = 0
+
+add2	strWdtL + strWell + strWdtR,	strTrd*nRsr1 + strOff1 - strOff2
+	rot2	180
+
+		!-----------------------------------------------------------------------------------------------
+		!	Hotspot
+		!-----------------------------------------------------------------------------------------------
+		if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+			if	iOffsetR = Point_Start	then	add2	strWdtR,	0
+			if	iOffsetR = Point_End	then	add2	strWdtR,	strTrd*nRsr2
+				hotspot2	0,			0,	unID,	xOffsetR,	1+128	:	unID = unID + 1
+				hotspot2	1,			0,	unID,	xOffsetR,	3		:	unID = unID + 1
+				hotspot2	-xOffsetR,	0,	unID,	xOffsetR,	2		:	unID = unID + 1
+			del 1
+		endif
+
+
+		!-----------------------------------------------------------------------------------------------
+		!	좌표이동 - 시작
+		!-----------------------------------------------------------------------------------------------
+		_nTrans = 0
+		if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+			add2	-xOffsetR,	0	:	_nTrans = _nTrans + 1
+
+			if	iOffsetR = Point_Start	then
+				add2	strWdtR,	0	:	_nTrans = _nTrans + 1
+					rot2	-str_Ang_R	:	_nTrans = _nTrans + 1
+				add2	-strWdtR,	0	:	_nTrans = _nTrans + 1
+			endif
+			if	iOffsetR = Point_End	then
+				add2	strWdtR,	strTrd*nRsr2	:	_nTrans = _nTrans + 1
+					rot2	str_Ang_R	:	_nTrans = _nTrans + 1
+				add2	-strWdtR,	-strTrd*nRsr2	:	_nTrans = _nTrans + 1
+			endif
+		endif
+
+
+		!-----------------------------------------------------------------------------------------------
+		!	Draw
+		!-----------------------------------------------------------------------------------------------
+
+			!	변수 정의
+			!-----------------------------------------------------------------------------------------------
+				_status = str_2nd
+				_strWdt = strWdtR
+				_nRsr = nRsr2
+				_brkAng = 21.8
+				_rBrkAng = 90 - _brkAng
+
+				if	GLOB_CH_STORY_DIST = 0	then
+					_storyValue = Story_Current
+					_iViewFlr = iWrkFlr
+					_brkLct = wrkBrkLct
+					_bBrk = bWrkBrk
+				endif
+				if	GLOB_CH_STORY_DIST > eps	then
+					_storyValue = Story_Upstairs
+					_iViewFlr = iUprFlr
+					_brkLct = uprBrkLct
+					_bBrk = bUprBrk
+				endif
+
+			!	작업층에서 Cut View일 때는 두 번째 계단을 그릴 필요가 없음
+			if	not(_storyValue = Story_Current & _iViewFlr = View_Cut & _status = str_2nd)	then
+
+				!	외곽선
+				!-----------------------------------------------------------------------------------------------
+					gosub	"Outline"
+				
+				!	단
+				!-----------------------------------------------------------------------------------------------
+					gosub	"Treadline"
+
+				!	논슬립
+				!-----------------------------------------------------------------------------------------------
+				if	_bNonSlip	then
+					gosub	"Nonslipline"
+				endif
+
+				!	핸드레일
+				!-----------------------------------------------------------------------------------------------
+					gosub	"Handrailline"
+
+
+				!	텍스트 및 Up/Down
+				!-----------------------------------------------------------------------------------------------
+					gosub	"2DRepresentation"
+
+				!	Hotspot
+				!-----------------------------------------------------------------------------------------------
+					gosub	"CommonHotspot"
+
+				!	Dimension
+				!-----------------------------------------------------------------------------------------------
+					!	공통
+					_nRsr = nRsr2
+					_aText = -90
+
+					!	작업층
+					if	iDimPlan_Wrk = DimPlan_On | (iDimPlan_Wrk = DimPlan_MVO & dimSettingValue = 2)	then
+						if	not(iDimLct_Wrk = DimLct_1st)	then
+							_dimOffset = dimOffset_WrkR
+							_dimWitness = dimWitness_WrkR
+
+							if	_storyValue = Story_Current	then
+								if	_bDimension	then
+									gosub	"Dimension"
+
+									add2	0,	_fnsThk
+										hotspot2	0,					0,	unID,	dimOffset_WrkR,	1	:	unID = unID + 1
+										hotspot2	1,					0,	unID,	dimOffset_WrkR,	3	:	unID = unID + 1
+										hotspot2	-dimOffset_WrkR,	0,	unID,	dimOffset_WrkR,	2	:	unID = unID + 1
+
+										hotspot2	0,					0,	unID,	dimWitness_WrkR,	1	:	unID = unID + 1
+										hotspot2	1,					0,	unID,	dimWitness_WrkR,	3	:	unID = unID + 1
+										hotspot2	-dimWitness_WrkR,	0,	unID,	dimWitness_WrkR,	2	:	unID = unID + 1
+
+										add2	0,	strTrd*_nRsr
+											hotspot2	0,					0,	unID,	dimOffset_WrkR,	1	:	unID = unID + 1
+											hotspot2	1,					0,	unID,	dimOffset_WrkR,	3	:	unID = unID + 1
+											hotspot2	-dimOffset_WrkR,	0,	unID,	dimOffset_WrkR,	2	:	unID = unID + 1
+
+											hotspot2	0,					0,	unID,	dimWitness_WrkR,	1	:	unID = unID + 1
+											hotspot2	1,					0,	unID,	dimWitness_WrkR,	3	:	unID = unID + 1
+											hotspot2	-dimWitness_WrkR,	0,	unID,	dimWitness_WrkR,	2	:	unID = unID + 1
+										del 1
+									del 1
+								endif
+							endif
+						endif
+					endif
+
+					!	상부층
+					if	iDimPlan_Upr = DimPlan_On | (iDimPlan_Upr = DimPlan_MVO & dimSettingValue = 2)	then
+						if	not(iDimLct_Upr = DimLct_1st)	then
+							_dimOffset = dimOffset_UprR
+							_dimWitness = dimWitness_UprR
+
+							if	_storyValue = Story_Upstairs	then
+								if	_bDimension	then
+									gosub	"Dimension"
+
+									add2	0,	_fnsThk
+										hotspot2	0,					0,	unID,	dimOffset_UprR,	1	:	unID = unID + 1
+										hotspot2	1,					0,	unID,	dimOffset_UprR,	3	:	unID = unID + 1
+										hotspot2	-dimOffset_UprR,	0,	unID,	dimOffset_UprR,	2	:	unID = unID + 1
+
+										hotspot2	0,					0,	unID,	dimWitness_UprR,	1	:	unID = unID + 1
+										hotspot2	1,					0,	unID,	dimWitness_UprR,	3	:	unID = unID + 1
+										hotspot2	-dimWitness_UprR,	0,	unID,	dimWitness_UprR,	2	:	unID = unID + 1
+
+										add2	0,	strTrd*_nRsr
+											hotspot2	0,					0,	unID,	dimOffset_UprR,	1	:	unID = unID + 1
+											hotspot2	1,					0,	unID,	dimOffset_UprR,	3	:	unID = unID + 1
+											hotspot2	-dimOffset_UprR,	0,	unID,	dimOffset_UprR,	2	:	unID = unID + 1
+
+											hotspot2	0,					0,	unID,	dimWitness_UprR,	1	:	unID = unID + 1
+											hotspot2	1,					0,	unID,	dimWitness_UprR,	3	:	unID = unID + 1
+											hotspot2	-dimWitness_UprR,	0,	unID,	dimWitness_UprR,	2	:	unID = unID + 1
+										del 1
+									del 1
+								endif
+							endif
+						endif
+					endif
+			endif
+
+		!-----------------------------------------------------------------------------------------------
+		!	좌표이동 - 끝
+		!-----------------------------------------------------------------------------------------------
+		del _nTrans
+
+	del 1
+del 1
+
+
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+
+
+
+!===============================================================================================
+!	Sub-Routine
+!===============================================================================================
+
+!-----------------------------------------------------------------------------------------------
+"Outline":	!	외곽선
+!-----------------------------------------------------------------------------------------------
+	pen	strPen
+
+	!	변수 정의
+	_bLine = 1
+	_bFill = 1
+	if	_iViewFlr = View_None	then
+		_bLine = 0
+	endif
+
+	!	Cut & Stair 1st
+	if	_iViewFlr = View_Cut & _status = str_1st	then
+		if	_storyValue = Story_Current	then
+			put	0,								_fnsThk,							1,
+				hndOff_Out - hndRd,				_fnsThk,							_bHndLine_Out,
+				hndOff_Out + hndRd,				_fnsThk,							1,
+				_strWdt - (hndOff_In + hndRd),	_fnsThk,							_bHndLine_In,
+				_strWdt - (hndOff_In - hndRd),	_fnsThk,							1,
+				_strWdt,						_fnsThk,							1,
+				_strWdt,						_brkLct + _strWdt/2*tan(_brkAng),	0,
+				0,								_brkLct - _strWdt/2*tan(_brkAng),	bLine_Out,
+				0,								_fnsThk,							1
+		endif
+		if	_storyValue = Story_Upstairs	then
+			put	0,								_brkLct - _strWdt/2*tan(_brkAng),	0,
+				_strWdt,						_brkLct + _strWdt/2*tan(_brkAng),	1,
+				_strWdt,						strTrd*_nRsr + _fnsThk,				1,
+				_strWdt - (hndOff_In - hndRd),	strTrd*_nRsr + _fnsThk,				_bHndLine_In,
+				_strWdt - (hndOff_In + hndRd),	strTrd*_nRsr + _fnsThk,				1,
+				hndOff_Out + hndRd,				strTrd*_nRsr + _fnsThk,				_bHndLine_Out,
+				hndOff_Out - hndRd,				strTrd*_nRsr + _fnsThk,				1,
+				0,								strTrd*_nRsr + _fnsThk,				bLine_Out,
+				0,								_brkLct - _strWdt/2*tan(_brkAng),	1
+		endif
+	endif
+
+	!	Entire / None
+	if	_iViewFlr = View_Entire | _iViewFlr = View_None | (_iViewFlr = View_Cut & _status = str_2nd)	then
+		put	0,								_fnsThk,				1,
+			hndOff_Out - hndRd,				_fnsThk,				_bHndLine_Out,
+			hndOff_Out + hndRd,				_fnsThk,				1,
+			_strWdt - (hndOff_In + hndRd),	_fnsThk,				_bHndLine_In,
+			_strWdt - (hndOff_In - hndRd),	_fnsThk,				1,
+			_strWdt,						_fnsThk,				1,
+			_strWdt,						strTrd*_nRsr + _fnsThk,	1,
+			_strWdt - (hndOff_In - hndRd),	strTrd*_nRsr + _fnsThk,	_bHndLine_In,
+			_strWdt - (hndOff_In + hndRd),	strTrd*_nRsr + _fnsThk,	1,
+			hndOff_Out + hndRd,				strTrd*_nRsr + _fnsThk,	_bHndLine_Out,
+			hndOff_Out - hndRd,				strTrd*_nRsr + _fnsThk,	1,
+			0,								strTrd*_nRsr + _fnsThk,	bLine_Out,
+			0,								_fnsThk,				1
+	endif
+
+	poly2_b	nsp/3,	1*_bLine + 2*_bFill,	fillPen,	backPen,	use(nsp)
+
+	!	Hotline
+	for	h = 1	to	(nsp/3) - 2
+		hotline2	get(2) + (use(1) - get(1)),	use(2)
+	next	h
+		hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Breakline":	!	Break line
+!-----------------------------------------------------------------------------------------------
+	pen	etcPen
+
+	if	_iViewFlr = View_Cut & _status = str_1st	then
+		add2	_strWdt/2,	_brkLct
+
+			_pointX = (0.150*cos(_rBrkAng))*cos(_brkAng)
+			_pointY = _pointX*tan(_brkAng)
+
+			put	-(_strWdt/2 + 0.300),	-(_strWdt/2 + 0.300)*tan(_brkAng),
+				-_strWdt/2,				-_strWdt/2*tan(_brkAng),
+				-_pointX,				-_pointY,
+				0,						-0.150,
+				0,						0.150,
+				_pointX,				_pointY,
+				_strWdt/2,				_strWdt/2*tan(_brkAng),
+				(_strWdt/2 + 0.300),	(_strWdt/2 + 0.300)*tan(_brkAng)
+
+
+			poly2	nsp/2,	_bBrk,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/2) - 2
+				hotline2	get(2),	use(2)
+			next	h
+				hotline2	get(2),	get(2)
+		del 1
+	endif
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Treadline":	!	Tread line
+!-----------------------------------------------------------------------------------------------
+	pen	strPen
+
+	if	_iViewFlr = View_Cut & _status = str_1st	then
+
+		!	작업층
+		if	_storyValue = Story_Current	then
+			!	변수정의
+			_distS = _brkLct - _strWdt/2*tan(_brkAng)
+			_distL = _brkLct + _strWdt/2*tan(_brkAng)
+			_nFull = int(_distS/strTrd)
+			_nCut = int(_distL/strTrd) - _nFull
+
+			!	잘리지 않은 부분
+			add2	0,	_fnsThk
+				for	i = 1	to	_nFull
+
+					add2	0,	strTrd
+
+					put	0,								0,	1,
+						hndOff_Out - hndRd,				0,	_bHndLine_Out,
+						hndOff_Out + hndRd,				0,	1,
+						_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+						_strWdt - (hndOff_In - hndRd),	0,	1,
+						_strWdt,						0,	1
+
+					poly2_	nsp/3,	1,	get(nsp)
+
+					hotline2	0,	0,	_strWdt,	0
+
+				next	i
+
+				del _nFull
+			del 1
+
+			!	잘린 부분
+			add2	0,	strTrd*_nFull + _fnsThk
+
+				for	i = 1	to	_nCut
+					_posTrd = strTrd*(_nFull + i) + _fnsThk
+					_valueY = _posTrd - _distS
+					_referY_low = (_brkLct - _distS) - 0.150
+					_referY_high = (_brkLct - _distS) + 0.150
+					_cPointX1 = _valueY/tan(_brkAng)
+					_cPointX2 = _valueY/tan(_rBrkAng) - _referY_low/tan(_rBrkAng)
+					_cPointX3 = _referY_high/tan(_rBrkAng) - _valueY/tan(_rBrkAng)
+
+					if	_posTrd > _distS & _posTrd < _distL	then
+
+						!	Section 1
+						if	_posTrd <= _brkLct - 0.150	then
+							if	_cPointX1 <= hndOff_Out - hndRd	then
+								put	_cPointX1,						0,	1,
+									hndOff_Out - hndRd,				0,	_bHndLine_Out,
+									hndOff_Out + hndRd,				0,	1,
+									_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+									_strWdt - (hndOff_In - hndRd),	0,	1,
+									_strWdt,						0,	1
+							endif
+
+							if	_cPointX1 > hndOff_Out - hndRd & _cPointX1 <= hndOff_Out + hndRd	then
+								put	_cPointX1,						0,	_bHndLine_Out,
+									hndOff_Out + hndRd,				0,	1,
+									_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+									_strWdt - (hndOff_In - hndRd),	0,	1,
+									_strWdt,						0,	1
+							endif
+
+							if	_cPointX1 > hndOff_Out + hndRd	then
+								put	_cPointX1,						0,	1,
+									_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+									_strWdt - (hndOff_In - hndRd),	0,	1,
+									_strWdt,						0,	1
+							endif
+						endif
+
+						!	Section 2
+						if	_posTrd > _brkLct - 0.150 & _posTrd <= _brkLct - _pointY	then
+							put	_cPointX1,						0,	1,
+								_strWdt/2 - _cPointX2,			0,	0,
+								_strWdt/2,						0,	1,
+								_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+								_strWdt - (hndOff_In - hndRd),	0,	1,
+								_strWdt,						0,	1
+						endif
+
+						!	Section 3
+						if	_posTrd > _brkLct - _pointY & _posTrd <= _brkLct + _pointY	then
+							put	_strWdt/2,						0,	1,
+								_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+								_strWdt - (hndOff_In - hndRd),	0,	1,
+								_strWdt,						0,	1
+						endif
+
+						!	Section 4
+						if	_posTrd > _brkLct + _pointY & _posTrd <= _brkLct + 0.150	then
+							put	_strWdt/2,						0,	1,
+								_strWdt/2 + _cPointX3,			0,	0,
+								_cPointX1,						0,	1,
+								_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+								_strWdt - (hndOff_In - hndRd),	0,	1,
+								_strWdt,						0,	1
+						endif
+
+						!	Section 5
+						if	_posTrd > _brkLct + 0.150	then
+							if	_cPointX1 <= _strWdt - (hndOff_In + hndRd)	then
+								put	_cPointX1,						0,	1,
+									_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+									_strWdt - (hndOff_In - hndRd),	0,	1,
+									_strWdt,						0,	1
+							endif
+
+							if	_cPointX1 > _strWdt - (hndOff_In + hndRd) & _cPointX1 <= _strWdt - (hndOff_In - hndRd)	then
+								put	_cPointX1,						0,	_bHndLine_In,
+									_strWdt - (hndOff_In - hndRd),	0,	1,
+									_strWdt,						0,	1
+							endif
+
+							if	_cPointX1 > _strWdt - (hndOff_In - hndRd)	then
+								put	_cPointX1,						0,	1,
+									_strWdt,						0,	1
+							endif
+						endif
+
+						!	Draw line
+						add2	0,	strTrd*i
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						del 1
+					endif
+
+				next	i
+
+			del 1
+
+		endif
+
+		!	상부층
+		if	_storyValue = Story_Upstairs	then
+			!	변수정의
+			_distS = _brkLct - _strWdt/2*tan(_brkAng)
+			_distL = _brkLct + _strWdt/2*tan(_brkAng)
+			_nFull = int(_distS/strTrd)
+			_nCut = int(_distL/strTrd) - _nFulll
+			_nRemain = _nRsr - int(_distL/strTrd)
+
+			!	잘린 부분
+			add2	0,	strTrd*_nFull + _fnsThk
+
+				for	i = 1	to	_nCut
+					_posTrd = strTrd*(_nFull + i) + _fnsThk
+					_valueY = _posTrd - _distS
+					_referY_low = (_brkLct - _distS) - 0.150
+					_referY_high = (_brkLct - _distS) + 0.150
+					_cPointX1 = _valueY/tan(_brkAng)
+					_cPointX2 = _valueY/tan(_rBrkAng) - _referY_low/tan(_rBrkAng)
+					_cPointX3 = _referY_high/tan(_rBrkAng) - _valueY/tan(_rBrkAng)
+
+					if	_posTrd > _distS & _posTrd < _distL	then
+
+						!	Section 1
+						if	_posTrd <= _brkLct - 0.150	then
+							if	_cPointX1 <= hndOff_Out - hndRd	then
+								put	0,			0,	1,
+									_cPointX1,	0,	1
+							endif
+
+							if	_cPointX1 > hndOff_Out - hndRd & _cPointX1 <= hndOff_Out + hndRd	then
+								put	0,					0,	1,
+									hndOff_Out - hndRd,	0,	_bHndLine_Out,
+									_cPointX1,			0,	1
+							endif
+
+							if	_cPointX1 > hndOff_Out + hndRd	then
+								put	0,					0,	1,
+									hndOff_Out - hndRd,	0,	_bHndLine_Out,
+									hndOff_Out + hndRd,	0,	1,
+									_cPointX1,			0,	1
+							endif
+						endif
+
+						!	Section 2
+						if	_posTrd > _brkLct - 0.150 & _posTrd <= _brkLct - _pointY	then
+							put	0,						0,	1,
+								hndOff_Out - hndRd,		0,	_bHndLine_Out,
+								hndOff_Out + hndRd,		0,	1,
+								_cPointX1,				0,	0,
+								_strWdt/2 - _cPointX2,	0,	1,
+								_strWdt/2,				0,	1
+						endif
+
+						!	Section 3
+						if	_posTrd > _brkLct - _pointY & _posTrd <= _brkLct + _pointY	then
+							put	0,						0,	1,
+								hndOff_Out - hndRd,		0,	_bHndLine_Out,
+								hndOff_Out + hndRd,		0,	1,
+								_strWdt/2,				0,	1
+						endif
+
+						!	Section 4
+						if	_posTrd > _brkLct + _pointY & _posTrd <= _brkLct + 0.150	then
+							put	0,						0,	1,
+								hndOff_Out - hndRd,		0,	_bHndLine_Out,
+								hndOff_Out + hndRd,		0,	1,
+								_strWdt/2,				0,	0,
+								_strWdt/2 + _cPointX3,	0,	1,
+								_cPointX1,				0,	1
+						endif
+
+						!	Section 5
+						if	_posTrd > _brkLct + 0.150	then
+							if	_cPointX1 <= _strWdt - (hndOff_In + hndRd)	then
+								put	0,					0,	1,
+									hndOff_Out - hndRd,	0,	_bHndLine_Out,
+									hndOff_Out + hndRd,	0,	1,
+									_cPointX1,			0,	1
+							endif
+
+							if	_cPointX1 > _strWdt - (hndOff_In + hndRd) & _cPointX1 <= _strWdt - (hndOff_In - hndRd)	then
+								put	0,								0,	1,
+									hndOff_Out - hndRd,				0,	_bHndLine_Out,
+									hndOff_Out + hndRd,				0,	1,
+									_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+									_cPointX1,						0,	1
+							endif
+
+							if	_cPointX1 > _strWdt - (hndOff_In - hndRd)	then
+								put	0,								0,	1,
+									hndOff_Out - hndRd,				0,	_bHndLine_Out,
+									hndOff_Out + hndRd,				0,	1,
+									_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+									_strWdt - (hndOff_In - hndRd),	0,	1,
+									_cPointX1,						0,	1
+							endif
+						endif
+
+						!	Draw line
+						add2	0,	strTrd*i
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						del 1
+					endif
+
+				next	i
+
+			del 1
+
+			!	잘리지 않은 부분
+			add2	0,	strTrd*int(_distL/strTrd) + _fnsThk
+
+				for	i = 1	to	_nRemain
+
+					add2	0,	strTrd
+
+					put	0,								0,	1,
+						hndOff_Out - hndRd,				0,	_bHndLine_Out,
+						hndOff_Out + hndRd,				0,	1,
+						_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+						_strWdt - (hndOff_In - hndRd),	0,	1,
+						_strWdt,						0,	1
+
+					poly2_	nsp/3,	1,	get(nsp)
+
+					hotline2	0,	0,	_strWdt,	0
+
+				next	i
+
+				del _nRemain
+
+			del 1
+		endif
+	endif
+
+	if	_iViewFlr = View_Entire | (_iViewFlr = View_Cut & _status = str_2nd)	then
+
+		add2	0,	_fnsThk
+
+			for	i = 1	to	_nRsr
+
+				add2	0,	strTrd
+
+				put	0,								0,	1,
+					hndOff_Out - hndRd,				0,	_bHndLine_Out,
+					hndOff_Out + hndRd,				0,	1,
+					_strWdt - (hndOff_In + hndRd),	0,	_bHndLine_In,
+					_strWdt - (hndOff_In - hndRd),	0,	1,
+					_strWdt,						0,	1
+
+				poly2_	nsp/3,	1,	get(nsp)
+
+				hotline2	0,	0,	_strWdt,	0
+
+			next	i
+
+			del _nRsr
+
+		del 1
+
+	endif
+
+
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Nonslipline":	!	Non Slip line
+!-----------------------------------------------------------------------------------------------
+	pen	nslpPen
+
+	if	_iViewFlr = View_Cut & _status = str_1st	then
+
+		!	작업층
+		if	_storyValue = Story_Current	then
+			!	변수정의
+			_distS = (_brkLct - _strWdt/2*tan(_brkAng)) - 0.050 + 0.050*tan(_brkAng)
+			_distL = (_brkLct + _strWdt/2*tan(_brkAng)) - 0.010
+			_nFull = int(_distS/strTrd)
+			_nCut = int(_distL/strTrd) - _nFull
+
+			!	잘리지 않은 부분
+			for	i = 1	to	_nFull + 1
+
+				if	hndOff_Out - hndRd < 0.050	then
+					put	hndOff_Out + hndRd,	0.050,	1,
+						_strWdt - 0.150,	0.050,	1,
+						_strWdt - 0.150,	0,		1
+				else
+					put	0.050,				0,		1,
+						0.050,				0.050,	1,
+						hndOff_Out - hndRd,	0.050,	_bHndLine_Out,
+						hndOff_Out + hndRd,	0.050,	1,
+						_strWdt - 0.150,	0.050,	1,
+						_strWdt - 0.150,	0,		1
+				endif
+
+				poly2_	nsp/3,	1,	use(nsp)
+
+				!	Hotline
+				for	h = 1	to	(nsp/3) - 2
+					hotline2	get(2) + (use(1) - get(1)),	use(2)
+				next	h
+					hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+				add2	0,	strTrd
+
+			next	i
+
+			del _nFull + 1
+
+			!	잘린 부분
+			add2	0,	strTrd*_nFull
+
+				for	i = 1	to	_nCut
+					_posNslp = strTrd*(_nFull + i) + 0.050
+					_valueY_Nslp = _posNslp - (_brkLct - _strWdt/2*tan(_brkAng))
+					_referY_low = _strWdt/2*tan(_brkAng) - 0.150
+					_referY_high = _strWdt/2*tan(_brkAng) + 0.150
+					_cPointX1 = _valueY_Nslp/tan(_brkAng)
+					_cPointX2 = _valueY_Nslp/tan(_rBrkAng) - _referY_low/tan(_rBrkAng)
+					_cPointX3 = _referY_high/tan(_rBrkAng) - _valueY_Nslp/tan(_rBrkAng)
+					_cPointY1 = (_cPointX1 - 0.050)*tan(_brkAng)
+					_cPointY2 = (_cPointX1 - (_strWdt - 0.150))*tan(_brkAng)
+					if	0.050 - _cPointY1 < eps	then	_cPointY1 = 0.050
+
+					if	_posNslp > _distS & _posNslp < _distL	then
+
+						!	Section 1
+						if	_posNslp <= _brkLct - 0.150	then
+
+							!	공통
+							if	hndOff_Out - hndRd > 0.050	then
+								put	0.050,				0,					1,
+									0.050,				0.050 - _cPointY1,	0
+							endif
+
+							if	_cPointX1 <= hndOff_Out - hndRd	then
+								put	_cPointX1,			0.050,				1,
+									hndOff_Out - hndRd,	0.050,				_bHndLine_Out,
+									hndOff_Out + hndRd,	0.050,				1,
+									_strWdt - 0.150,	0.050,				1,
+									_strWdt - 0.150,	0,					1
+							endif
+
+							if	_cPointX1 > hndOff_Out - hndRd & _cPointX1 <= hndOff_Out + hndRd	then
+								put	_cPointX1,			0.050,				_bHndLine_Out,
+									hndOff_Out + hndRd,	0.050,				1,
+									_strWdt - 0.150,	0.050,				1,
+									_strWdt - 0.150,	0,					1
+							endif
+
+							if	_cPointX1 > hndOff_Out + hndRd	then
+								put	_cPointX1,			0.050,				1,
+									_strWdt - 0.150,	0.050,				1,
+									_strWdt - 0.150,	0,					1
+							endif
+						endif
+
+						!	Section 2
+						if	_posNslp > _brkLct - 0.150 & _posNslp <= _brkLct - _pointY	then
+							put	_cPointX1,				0.050,	1,
+								_strWdt/2 - _cPointX2,	0.050,	0,
+								_strWdt/2,				0.050,	1,
+								_strWdt - 0.150,		0.050,	1,
+								_strWdt - 0.150,		0,		1
+						endif
+
+						!	Section 3
+						if	_posNslp > _brkLct - _pointY & _posNslp <= _brkLct + _pointY	then
+							put	_strWdt/2,				0.050,	1,
+								_strWdt - 0.150,		0.050,	1,
+								_strWdt - 0.150,		0,		1
+						endif
+
+						!	Section 4
+						if	_posNslp > _brkLct + _pointY & _posNslp <= _brkLct + 0.150	then
+							put	_strWdt/2,				0.050,	1,
+								_strWdt/2 + _cPointX3,	0.050,	0,
+								_cPointX1,				0.050,	1,
+								_strWdt - 0.150,		0.050,	1,
+								_strWdt - 0.150,		0,		1
+						endif
+
+						!	Section 5
+						if	_posNslp > _brkLct + 0.150	then
+							if	_cPointX1 <= _strWdt - 0.150	then
+								put	_cPointX1,				0.050,	1,
+									_strWdt - 0.150,		0.050,	1,
+									_strWdt - 0.150,		0,		1
+							endif
+
+							if	_cPointX1 > _strWdt - 0.150	then
+								put	_strWdt - 0.150,		0.050 - _cPointY2,	1,
+									_strWdt - 0.150,		0,		1
+							endif
+						endif
+
+						!	Draw line
+						add2	0,	strTrd*i
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						del 1
+					endif
+
+				next	i
+
+			del 1
+
+		endif
+
+		!	상부층
+		if	_storyValue = Story_Upstairs	then
+			!	변수정의
+			_distS = (_brkLct - _strWdt/2*tan(_brkAng)) - 0.050
+			_distL = (_brkLct + _strWdt/2*tan(_brkAng)) + 0.050
+			_nFull = int(_distS/strTrd)
+			_nCut = int((_distL - 0.050)/strTrd) - _nFull
+			_nRemain = _nRsr - int((_distL - 0.050)/strTrd)
+
+			!	잘린 부분
+			add2	0,	strTrd*_nFull
+
+				for	i = 1	to	_nCut
+					_posNslp = strTrd*(_nFull + i) + 0.050
+					_valueY_Nslp = _posNslp - (_brkLct - _strWdt/2*tan(_brkAng))
+					_referY_low = _strWdt/2*tan(_brkAng) - 0.150
+					_referY_high = _strWdt/2*tan(_brkAng) + 0.150
+					_cPointX1 = _valueY_Nslp/tan(_brkAng)
+					_cPointX2 = _valueY_Nslp/tan(_rBrkAng) - _referY_low/tan(_rBrkAng)
+					_cPointX3 = _referY_high/tan(_rBrkAng) - _valueY_Nslp/tan(_rBrkAng)
+					_cPointY1 = (_cPointX1 - 0.050)*tan(_brkAng)
+					_cPointY2 = (_cPointX1 - (_strWdt - 0.150))*tan(_brkAng)
+					if	0.050 - _cPointY1 < eps	then	_cPointY1 = 0.050
+					if	0.050 - _cPointY2 < eps	then	_cPointY2 = 0.050
+
+					if	_posNslp > _distS & _posNslp < _distL	then
+
+						!	Section 1
+						if	_posNslp <= _brkLct - 0.150	then
+
+							!	공통
+							if	hndOff_Out - hndRd > 0.050	then
+								put	0.050,	0.050 - _cPointY1,	1,
+									0.050,	0.050,				1
+							endif
+
+							if	_cPointX1 <= hndOff_Out - hndRd	then
+								put	_cPointX1,			0.050,	1
+							endif
+
+							if	_cPointX1 > hndOff_Out - hndRd & _cPointX1 <= hndOff_Out + hndRd	then
+								put	hndOff_Out - hndRd,	0.050,	_bHndLine_Out,
+									_cPointX1,			0.050,	1
+							endif
+
+							if	_cPointX1 > hndOff_Out + hndRd	then
+								put	hndOff_Out - hndRd,	0.050,	_bHndLine_Out,
+									hndOff_Out + hndRd,	0.050,	1,
+									_cPointX1,			0.050,	1
+							endif
+						endif
+
+						!	Section 2
+						if	_posNslp > _brkLct - 0.150 & _posNslp <= _brkLct - _pointY	then
+							if	hndOff_Out - hndRd > 0.050	then
+								put	0.050,					0,		1,
+									0.050,					0.050,	1,
+									hndOff_Out - hndRd,		0.050,	_bHndLine_Out,
+									hndOff_Out + hndRd,		0.050,	1,
+									_cPointX1,				0.050,	0,
+									_strWdt/2 - _cPointX2,	0.050,	1,
+									_strWdt/2,				0.050,	1
+							endif
+
+							if	hndOff_Out - hndRd <= 0.050	then
+								put	hndOff_Out + hndRd,		0.050,	1,
+									_cPointX1,				0.050,	0,
+									_strWdt/2 - _cPointX2,	0.050,	1,
+									_strWdt/2,				0.050,	1
+							endif
+						endif
+
+						!	Section 3
+						if	_posNslp > _brkLct - _pointY & _posNslp <= _brkLct + _pointY	then
+							if	hndOff_Out - hndRd > 0.050	then
+								put	0.050,					0,		1,
+									0.050,					0.050,	1,
+									hndOff_Out - hndRd,		0.050,	_bHndLine_Out,
+									hndOff_Out + hndRd,		0.050,	1,
+									_strWdt/2,				0.050,	1
+							endif
+
+							if	hndOff_Out - hndRd <= 0.050	then
+								put	hndOff_Out + hndRd,		0.050,	1,
+									_strWdt/2,				0.050,	1
+							endif
+						endif
+
+						!	Section 4
+						if	_posNslp > _brkLct + _pointY & _posNslp <= _brkLct + 0.150	then
+							if	hndOff_Out - hndRd > 0.050	then
+								put	0.050,					0,		1,
+									0.050,					0.050,	1,
+									hndOff_Out - hndRd,		0.050,	_bHndLine_Out,
+									hndOff_Out + hndRd,		0.050,	1,
+									_strWdt/2,				0.050,	0,
+									_strWdt/2 + _cPointX3,	0.050,	1,
+									_cPointX1,				0.050,	1
+							endif
+
+							if	hndOff_Out - hndRd <= 0.050	then
+								put	hndOff_Out + hndRd,		0.050,	1,
+									_strWdt/2,				0.050,	0,
+									_strWdt/2 + _cPointX3,	0.050,	1,
+									_cPointX1,				0.050,	1
+							endif
+						endif
+
+						!	Section 5
+						if	_posNslp > _brkLct + 0.150	then
+							if	_cPointX1 <= _strWdt - 0.150	then
+								if	hndOff_Out - hndRd > 0.050	then
+									put	0.050,					0,		1,
+										0.050,					0.050,	1,
+										hndOff_Out - hndRd,		0.050,	_bHndLine_Out,
+										hndOff_Out + hndRd,		0.050,	1,
+										_cPointX1,				0.050,	1
+								endif
+
+								if	hndOff_Out - hndRd <= 0.050	then
+									put	hndOff_Out + hndRd,		0.050,	1,
+										_cPointX1,				0.050,	1
+								endif
+							endif
+
+							if	_cPointX1 > _strWdt - 0.150	then
+								if	hndOff_Out - hndRd > 0.050	then
+									put	0.050,					0,					1,
+										0.050,					0.050,				1,
+										hndOff_Out - hndRd,		0.050,				_bHndLine_Out,
+										hndOff_Out + hndRd,		0.050,				1,
+										_strWdt - 0.150,		0.050,				1,
+										_strWdt - 0.150,		0.050 - _cPointY2,	1
+								endif
+
+								if	hndOff_Out - hndRd <= 0.050	then
+									put	hndOff_Out + hndRd,		0.050,				1,
+										_strWdt - 0.150,		0.050,				1,
+										_strWdt - 0.150,		0.050 - _cPointY2,	1
+								endif
+							endif
+						endif
+
+						!	Draw line
+						add2	0,	strTrd*i
+							poly2_	nsp/3,	1,	use(nsp)
+
+							!	Hotline
+							for	h = 1	to	(nsp/3) - 2
+								hotline2	get(2) + (use(1) - get(1)),	use(2)
+							next	h
+								hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+						del 1
+					endif
+
+				next	i
+
+			del 1
+
+			!	잘리지 않은 부분
+			add2	0,	strTrd*(int((_distL - 0.050)/strTrd) + 1)
+
+				for	i = 1	to	_nRemain
+
+					if	hndOff_Out - hndRd < 0.050	then
+						put	hndOff_Out + hndRd,	0.050,	1,
+							_strWdt - 0.150,	0.050,	1,
+							_strWdt - 0.150,	0,		1
+					else
+						put	0.050,				0,		1,
+							0.050,				0.050,	1,
+							hndOff_Out - hndRd,	0.050,	_bHndLine_Out,
+							hndOff_Out + hndRd,	0.050,	1,
+							_strWdt - 0.150,	0.050,	1,
+							_strWdt - 0.150,	0,		1
+					endif
+
+					poly2_	nsp/3,	1,	use(nsp)
+
+					!	Hotline
+					for	h = 1	to	(nsp/3) - 2
+						hotline2	get(2) + (use(1) - get(1)),	use(2)
+					next	h
+						hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+					add2	0,	strTrd
+
+				next	i
+
+				del _nRemain
+
+			del 1
+		endif
+	endif
+
+	if	_iViewFlr = View_Entire | (_iViewFlr = View_Cut & _status = str_2nd)	then
+
+		for	i = 1	to	_nRsr + 1
+
+			if	hndOff_Out - hndRd < 0.050	then
+				put	hndOff_Out + hndRd,	0.050,	1,
+					_strWdt - 0.150,	0.050,	1,
+					_strWdt - 0.150,	0,		1
+			else
+				put	0.050,				0,		1,
+					0.050,				0.050,	1,
+					hndOff_Out - hndRd,	0.050,	_bHndLine_Out,
+					hndOff_Out + hndRd,	0.050,	1,
+					_strWdt - 0.150,	0.050,	1,
+					_strWdt - 0.150,	0,		1
+			endif
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+
+			add2	0,	strTrd
+
+		next	i
+
+		del _nRsr + 1
+	endif
+
+return
+
+
+
+!-----------------------------------------------------------------------------------------------
+"Handrailline":	!	Handrail line
+!-----------------------------------------------------------------------------------------------
+pen	strPen
+
+if	not(_iViewFlr = View_None)	then
+	!	First Stair
+	if	_status = str_1st	then
+		!	Hotspot
+		if	not(_storyValue = Story_Upstairs & _iViewFlr = View_Cut)	then
+			if	not(_bHndLine_Out)	then
+				hotspot2	0,			0,	unID,	hndOff_Out,	1 + 128	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	hndOff_Out,	3		:	unID = unID + 1
+				hotspot2	hndOff_Out,	0,	unID,	hndOff_Out,	2		:	unID = unID + 1
+
+				add2	hndOff_Out,	0
+					hotspot2	0,	0,				unID,	hndWrk_Out,	1 + 128	:	unID = unID + 1
+					hotspot2	0,	1,				unID,	hndWrk_Out,	3		:	unID = unID + 1
+					hotspot2	0,	-hndWrk_Out,	unID,	hndWrk_Out,	2		:	unID = unID + 1
+				del 1
+			endif
+
+			if	not(_bHndLine_In)	then
+				add2	_strWdt,	0
+					hotspot2	0,			0,	unID,	hndOff_In,	1 + 128	:	unID = unID + 1
+					hotspot2	1,			0,	unID,	hndOff_In,	3		:	unID = unID + 1
+					hotspot2	-hndOff_In,	0,	unID,	hndOff_In,	2		:	unID = unID + 1
+
+					add2	-hndOff_In,	0
+						hotspot2	0,	0,			unID,	hndWrk_In,	1 + 128	:	unID = unID + 1
+						hotspot2	0,	1,			unID,	hndWrk_In,	3		:	unID = unID + 1
+						hotspot2	0,	-hndWrk_In,	unID,	hndWrk_In,	2		:	unID = unID + 1
+					del 1
+				del 1
+			endif
+		endif
+
+		!	Outer Handrail
+		if	not(_bHndLine_Out)	then
+			_x1 = hndOff_Out - hndRd
+			_x2 = hndOff_Out + hndRd
+
+			_y1 = tan(_brkAng)*_x1 + (_brkLct - _strWdt/2*tan(_brkAng))
+			_y2 = tan(_brkAng)*_x2 + (_brkLct - _strWdt/2*tan(_brkAng))
+
+			if	_iViewFlr = View_Cut	then
+				if	_storyValue = Story_Current	then
+					put	_x1,	_y1,					1,
+						_x1,	-(hndWrk_Out + hndRd),	1,
+						_x2,	-(hndWrk_Out + hndRd),	1,
+						_x2,	_y2,					0
+				endif
+				if	_storyValue = Story_Upstairs	then
+					put	_x1,	_y1,			1,
+						_x1,	strTrd*nRsr1,	0,
+						_x2,	strTrd*nRsr1,	1,
+						_x2,	_y2,			1
+				endif
+			endif
+
+			if	_iViewFlr = View_Entire	then
+				put	_x1,	-(hndWrk_Out + hndRd),	1,
+					_x1,	strTrd*nRsr1,			0,
+					_x2,	strTrd*nRsr1,			1,
+					_x2,	-(hndWrk_Out + hndRd),	1,
+					_x1,	-(hndWrk_Out + hndRd),	1
+			endif
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))		
+		endif
+
+		!	Inner Handrail
+		if	not(_bHndLine_In)	then
+			_x1 = _strWdt - (hndOff_In + hndRd)
+			_x2 = _strWdt - (hndOff_In - hndRd)
+
+			_y1 = tan(_brkAng)*_x1 + (_brkLct - _strWdt/2*tan(_brkAng))
+			_y2 = tan(_brkAng)*_x2 + (_brkLct - _strWdt/2*tan(_brkAng))
+
+			if	_iViewFlr = View_Cut	then
+				if	_storyValue = Story_Current	then
+					put	_x1,	_y1,					1,
+						_x1,	-(hndWrk_Out + hndRd),	1,
+						_x2,	-(hndWrk_Out + hndRd),	1,
+						_x2,	_y2,					0
+				endif
+				if	_storyValue = Story_Upstairs	then
+					put	_x1,	_y1,			1,
+						_x1,	strTrd*nRsr1,	0,
+						_x2,	strTrd*nRsr1,	1,
+						_x2,	_y2,			1
+				endif
+			endif
+
+			if	_iViewFlr = View_Entire	then
+				put	_x1,	-(hndWrk_Out + hndRd),	1,
+					_x1,	strTrd*nRsr1,			0,
+					_x2,	strTrd*nRsr1,			1,
+					_x2,	-(hndWrk_Out + hndRd),	1,
+					_x1,	-(hndWrk_Out + hndRd),	1
+			endif
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))		
+		endif
+	endif
+
+
+	!	Second Stair
+	if	_status = str_2nd	then
+		!	Hotspot
+		add2	0,	strTrd*nRsr2
+			if	not(_bHndLine_Out)	then
+				hotspot2	0,			0,	unID,	hndOff_Out,	1 + 128	:	unID = unID + 1
+				hotspot2	-1,			0,	unID,	hndOff_Out,	3		:	unID = unID + 1
+				hotspot2	hndOff_Out,	0,	unID,	hndOff_Out,	2		:	unID = unID + 1
+
+				add2	hndOff_Out,	0
+					hotspot2	0,	0,			unID,	hndUpr_Out,	1 + 128	:	unID = unID + 1
+					hotspot2	0,	-1,			unID,	hndUpr_Out,	3		:	unID = unID + 1
+					hotspot2	0,	hndUpr_Out,	unID,	hndUpr_Out,	2		:	unID = unID + 1
+				del 1
+			endif
+
+			if	not(_bHndLine_In)	then
+				add2	_strWdt,	0
+					hotspot2	0,			0,	unID,	hndOff_In,	1 + 128	:	unID = unID + 1
+					hotspot2	1,			0,	unID,	hndOff_In,	3		:	unID = unID + 1
+					hotspot2	-hndOff_In,	0,	unID,	hndOff_In,	2		:	unID = unID + 1
+
+					add2	-hndOff_In,	0
+						hotspot2	0,	0,			unID,	hndUpr_In,	1 + 128	:	unID = unID + 1
+						hotspot2	0,	-1,			unID,	hndUpr_In,	3		:	unID = unID + 1
+						hotspot2	0,	hndUpr_In,	unID,	hndUpr_In,	2		:	unID = unID + 1
+					del 1
+				del 1
+			endif
+		del 1
+
+		!	Outer Handrail
+		if	not(_bHndLine_Out)	then
+			_x1 = hndOff_Out - hndRd
+			_x2 = hndOff_Out + hndRd
+
+			put	_x1,	0,										1,
+				_x1,	strTrd*nRsr2 + (hndUpr_Out + hndRd),	1,
+				_x2,	strTrd*nRsr2 + (hndUpr_Out + hndRd),	1,
+				_x2,	0,										1
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+		endif
+
+		!	Inner Handrail
+		if	not(_bHndLine_In)	then
+			_x1 = _strWdt - (hndOff_In + hndRd)
+			_x2 = _strWdt - (hndOff_In - hndRd)
+
+			put	_x1,	0,									1,
+				_x1,	strTrd*nRsr2 + (hndUpr_In + hndRd),	1,
+				_x2,	strTrd*nRsr2 + (hndUpr_In + hndRd),	1,
+				_x2,	0,									1
+
+			poly2_	nsp/3,	1,	use(nsp)
+
+			!	Hotline
+			for	h = 1	to	(nsp/3) - 2
+				hotline2	get(2) + (use(1) - get(1)),	use(2)
+			next	h
+				hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1))
+		endif
+
+	endif
+endif
+
+return
+
+
+
+!-----------------------------------------------------------------------------------------------
+"2DRepresentation":	!	2D
+!-----------------------------------------------------------------------------------------------
+
+	add2	_strWdt/2,	_fnsThk
+		!	현재층
+		if	_storyValue = Story_Current & not(iWrkFlr = View_None)	then
+
+			pen	etcPen
+			if	_status = str_1st	then
+
+				circle2	0,	0,	0.075
+
+				!	Cut
+				if	_iViewFlr = View_Cut	then
+					line2	0,	0,	0,	_brkLct - 0.270
+
+					add2	0,	_brkLct - 0.270
+
+						put	0,		0,
+							0.100,	-0.060,
+							0.120,	-0.030,
+							0,		0.040,
+							-0.120,	-0.030,
+							-0.100,	-0.060,
+							0,		0
+
+						poly2	nsp/2,	1,	get(nsp)
+
+					del 1
+				endif
+
+				!	Entire
+				if	_iViewFlr = View_Entire	then
+					line2	0,	0,	0,	strTrd*_nRsr
+				endif
+
+				!	Text
+				pen		textPen
+				style	"style_Up"
+				if	bText	then
+
+					!	Hotspot
+					hotspot2	0,	0,			unID,	textLct1,	1 + 128	:	unID = unID + 1
+					hotspot2	0,	1,			unID,	textLct1,	3		:	unID = unID + 1
+					hotspot2	0,	-textLct1,	unID,	textLct1,	2		:	unID = unID + 1
+
+					add2	0,	-textLct1
+						text2	0,	0,	"UP"
+					del 1
+				endif
+			endif
+
+			if	_status = str_2nd	then
+
+				pen	etcPen
+				if	_iViewFlr = View_Entire	then
+					line2	0,	0,	0,	strTrd*_nRsr - 0.040
+
+					add2	0,	strTrd*_nRsr - 0.040
+
+						put	0,		0,
+							0.100,	-0.060,
+							0.120,	-0.030,
+							0,		0.040,
+							-0.120,	-0.030,
+							-0.100,	-0.060,
+							0,		0
+
+						poly2	nsp/2,	1,	get(nsp)
+
+					del 1
+				endif
+			endif
+		endif
+
+		!	위층
+		if	_storyValue = Story_Upstairs & not(iUprFlr = View_None)	then
+			pen	etcPen
+			if	_status = str_1st	then
+				if	_iViewFlr = View_Cut	then
+					line2	0,	_brkLct + 0.270,	0,	strTrd*_nRsr
+
+					add2	0,	_brkLct + 0.270
+						mul2	1,	-1
+
+							put	0,		0,
+								0.100,	-0.060,
+								0.120,	-0.030,
+								0,		0.040,
+								-0.120,	-0.030,
+								-0.100,	-0.060,
+								0,		0
+
+							poly2	nsp/2,	1,	get(nsp)
+
+						del 1
+					del 1
+				endif
+
+				if	_iViewFlr = View_Entire	then
+					line2	0,	0.040,	0,	strTrd*_nRsr
+
+					add2	0,	0.040
+						mul2	1,	-1
+
+							put	0,		0,
+								0.100,	-0.060,
+								0.120,	-0.030,
+								0,		0.040,
+								-0.120,	-0.030,
+								-0.100,	-0.060,
+								0,		0
+
+							poly2	nsp/2,	1,	get(nsp)
+
+						del 1
+					del 1
+				endif
+			endif
+
+			if	_status = str_2nd	then
+				line2	0,	0,	0,	strTrd*_nRsr
+
+				add2	0,	strTrd*_nRsr
+
+					circle2	0,	0,	0.075
+
+				del 1
+
+				pen		textPen
+				style	"style_Up"
+				if	bText	then
+					add2	0,	strTrd*_nRsr
+
+						!	Hotspot
+						hotspot2	0,	0,			unID,	textLct2,	1 + 128	:	unID = unID + 1
+						hotspot2	0,	-1,			unID,	textLct2,	3		:	unID = unID + 1
+						hotspot2	0,	textLct2,	unID,	textLct2,	2		:	unID = unID + 1
+
+						add2	0,	textLct2
+							mul2	1,	-1
+								text2	0,	0,	"DN"
+							del 1
+						del 1
+					del 1
+				endif
+			endif
+		endif
+	del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"CommonHotspot":	!	Common Hotspot
+!-----------------------------------------------------------------------------------------------
+if	_status = str_1st	then
+	hotspot2	0,			0,	unID,	strWdtL,	1 + 128	:	unID = unID + 1
+	hotspot2	-1,			0,	unID,	strWdtL,	3		:	unID = unID + 1
+	hotspot2	strWdtL,	0,	unID,	strWdtL,	2		:	unID = unID + 1
+
+	add2	strWdtL,	strTrd*nRsr1
+		rot2	-str_Ang_L
+		hotspot2	0,	0,			unID,	strOff1,	1 + 128	:	unID = unID + 1
+		hotspot2	0,	-1,			unID,	strOff1,	3		:	unID = unID + 1
+		hotspot2	0,	strOff1,	unID,	strOff1,	2		:	unID = unID + 1
+		del 1
+	del 1
+endif
+
+if	_status = str_2nd	then
+	add2	strWdtR,	0
+		add2	0,	-strOff2
+			rot2	str_Ang_R
+				hotspot2	0,	0,			unID,	strOff2,	1 + 128	:	unID = unID + 1
+				hotspot2	0,	-1,			unID,	strOff2,	3		:	unID = unID + 1
+				hotspot2	0,	strOff2,	unID,	strOff2,	2		:	unID = unID + 1
+			del 1
+		del 1
+
+		add2	0,	strTrd*nRsr2
+			hotspot2	0,			0,	unID,	strWdtR,	1 + 128	:	unID = unID + 1
+			hotspot2	1,			0,	unID,	strWdtR,	3		:	unID = unID + 1
+			hotspot2	-strWdtR,	0,	unID,	strWdtR,	2		:	unID = unID + 1
+		del 1
+	del 1
+endif
+
+return
+
+!-------------------------------------------------------------------------------------------
+"Dimension":	!	Dimension
+!-------------------------------------------------------------------------------------------
+pen		dimPen
+fill	64
+
+if	not(_iViewFlr = View_None)	then
+	add2	0,	_fnsThk
+
+		!	치수선
+		!-------------------------------------------------------------------------------------------
+		add2	-_dimOffset,	0
+			line2	0,	0,	0,	strTrd*_nRsr
+		del 1
+
+		!	Witness
+		line2	-_dimWitness,	0,				-(_dimOffset + 0.075),	0
+		line2	-_dimWitness,	strTrd*_nRsr,	-(_dimOffset + 0.075),	strTrd*_nRsr
+
+		!	Circle
+		add2	-_dimOffset,	0
+			put	0,			0,		900,
+				dimCircle,	360,	4000
+
+			poly2_	nsp/3,	1+2+4,	use(nsp)
+
+			add2	0,	strTrd*_nRsr
+				poly2_	nsp/3,	1+2+4,	get(nsp)
+			del 1
+		del 1
+
+		!	치수
+		!-------------------------------------------------------------------------------------------
+		nr = strTrd*_nRsr
+
+		paragraph	"prgLth"	2,	0,	0,	0,	1
+			pen		dimTextPen
+			style	"style_Dim"
+			str("%~mm",	nr)
+		endparagraph
+
+		textblock	"tbLth"	0,	8,	_aText,	1,	1,	1,	"prgLth"
+
+		paragraph	"prgTrdxN"	2,	0,	0,	0,	1
+					pen		dimTextPen
+					style	"style_Dim"
+					"("
+					str("%~mm",	strTrd)
+					"x"
+					str("%~",	_nRsr)
+					"T)"
+		endparagraph
+
+		textblock	"tbTrdxN"	0,	2,	_aText,	1,	1,	1,	"prgTrdxN"
+
+		add2	-_dimOffset,	(strTrd*_nRsr)/2
+			richtext2	0,	0,	"tbLth"
+			richtext2	0,	0,	"tbTrdxN"
+		del 1
+
+	del 1
+endif
+
+return

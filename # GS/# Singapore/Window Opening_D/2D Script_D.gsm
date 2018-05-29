@@ -1,0 +1,153 @@
+
+
+!======================================================================================================
+!	Window Maker(Opening_D) 20 
+!======================================================================================================
+!   DATE : 2017/4/12 WED
+!   VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+
+!----------------------------------------------------------------------------------------------
+!  Genaral
+!----------------------------------------------------------------------------------------------
+!	Cutting Level
+m2Dcut_level = GLOB_CUTPLANES_INFO[1] + GLOB_ELEVATION
+
+if	bEdit	then
+
+	!	Over Elevation
+	if	mOpening_posY - m2Dcut_level > EPS	then
+		end
+	endif
+	
+	!	Below Elevation
+	if	iOpening_type = Type_FixedGlass | iOpening_type = Type_Frameless	then
+		HeightTmp = 0
+		for	i = 1	to	iCoordinate_num
+			DistanceTmp = abs(mLayout_Coordinate[i][2])
+			HeightTmp = max(HeightTmp,	DistanceTmp)
+		next	i
+	else
+		HeightTmp = mOpeningHeight
+	endif
+
+	!	Layout Size
+	HeightTmp = HeightTmp + mLayout_Offset[2] + mLayout_Offset[4]
+	
+	if	(mOpening_posY + HeightTmp) - m2Dcut_level < EPS	then
+		end
+	endif
+
+endif
+
+
+
+!----------------------------------------------------------------------------------------------
+!  2D Symbol
+!----------------------------------------------------------------------------------------------
+add2	0, -mOpening_posy_insert - mOpening_posy_reveal
+	
+	if	iDetail_2D = DETAIL_2D_DETAIL	then
+		pen	iOpen_pen_2D
+	
+		add2	mOpening_posX, 0
+	
+			add2	mOpening_Coordinate[1][1],	0
+	
+				!	Opening Index
+				if	bOpening_index	then
+					gosub	"Opening_index"	
+				endif
+
+				!	Direction
+				if	iDirect = Direct_Reversed	then
+					mul2	1,	-1
+				endif
+
+				if	iOpening_type = Type_Door	then
+
+					arc2	mOpeningWidth,	0,	mOpeningWidth,	90,	180
+					line2	mOpeningWidth,	0,	mOpeningWidth,	mOpeningWidth
+
+				endif
+
+				if	iOpening_type = Type_Door_M	then
+
+					arc2	0,	0,	mOpeningWidth,	0,	90
+					line2	0,	0,	0,	mOpeningWidth
+
+				endif
+
+				if	iOpening_type = Type_DoubleDoor	then
+
+					arc2	0,				0,	mOpeningWidth/2,	0,	90
+					arc2	mOpeningWidth,	0,	mOpeningWidth/2,	90,	180
+					line2	0,				0,	0,				mOpeningWidth/2
+					line2	mOpeningWidth,	0,	mOpeningWidth,	mOpeningWidth/2
+
+				endif
+
+				if	iOpening_type = Type_DoubleDoor_A	then
+
+					arc2	0,				0,	mOpeningWidth - mOpening_sub,	0,	90
+					arc2	mOpeningWidth,	0,	mOpening_sub,					90,	180
+					line2	0,				0,	0,				mOpeningWidth - mOpening_sub
+					line2	mOpeningWidth,	0,	mOpeningWidth,	mOpening_sub
+
+				endif
+
+				if	iOpening_type = Type_SlidingDoor	then
+
+					line2	0,					-gs_leaf_thk*2,	mOpeningWidth/2,	-gs_leaf_thk*2
+					line2	mOpeningWidth/2,	0,				mOpeningWidth,		0
+
+					!	Arrow
+					add2	mOpeningWidth/4,	-(gs_leaf_thk*2 + 0.120)
+						line2	0,	0,	0.180,	0
+
+						add2	0.180,	0
+							line2	-0.180/3*cos(45),	-0.180/3*sin(45),	0,	0
+							line2	-0.180/3*cos(45),	0.180/3*sin(45),	0,	0
+						del 1
+					del 1
+
+				endif
+
+				!	Direction
+				if	iDirect = Direct_Reversed	then
+					del 1
+				endif
+	
+			del 1
+	
+		del 1
+	endif
+
+del	1
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+
+
+
+!----------------------------------------------------------------------------------------------
+"Opening_index"	:
+!----------------------------------------------------------------------------------------------
+
+	pen	iText_pen
+	mTextT = 0.002
+
+	if	iSymbol_mirrored = 0	then
+		mul2	-1, 1
+	else
+		mul2	1, 1
+	endif
+		text2	0, 0, iOpening_index
+	del	1
+
+return

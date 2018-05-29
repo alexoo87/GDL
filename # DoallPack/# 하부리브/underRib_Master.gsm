@@ -1,0 +1,70 @@
+!===============================================================================================
+!	하부리브
+!===============================================================================================
+eps = 0.0001
+unID = 100
+
+!	프로파일 유형
+!-----------------------------------------------------------------------------------------------
+PROFILE_TRAPEZOID = 1
+PROFILE_TRIANGLE = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stProfile[]
+		stProfile[1] = "사다리꼴"
+		stProfile[2] = "삼각형"
+endif
+
+!	리브 유형
+!-----------------------------------------------------------------------------------------------
+RIB_VERTICAL = 1
+RIB_ARC = 2
+RIB_FREE = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stRib[]
+		stRib[1] = "수직리브"
+		stRib[2] = "곡선리브"
+		stRib[3] = "이형리브"
+endif
+
+!	마감 유형
+!-----------------------------------------------------------------------------------------------
+FINISH_TYPE1 = 1
+FINISH_TYPE2 = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stFinish[]
+		stFinish[1] = "TYPE1"
+		stFinish[2] = "TYPE2"
+endif
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+DISPLAY_CUTPLANE = 1
+DISPLAY_PROJECTED = 2
+DISPLAY_WITHOVERHEAD = 3
+DISPLAY_OUTLINES = 4
+DISPLAY_OVERHEAD = 5
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDisplay[]
+		stDisplay[1] = "Cutplane"
+		stDisplay[2] = "Projected"
+		stDisplay[3] = "Projected with Overhead"
+		stDisplay[4] = "Outlines Only"
+		stDisplay[5] = "Overhead All"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+PROJECTTO_FLOORPLAN = 1
+PROJECTTO_ABSOLUTE = 2
+PROJECTTO_ENTIRE = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stProjectTo[]
+		stProjectTo[1] = "To Floor Plan Range"
+		stProjectTo[2] = "Absolute Display Limit"
+		stProjectTo[3] = "Entire Element"
+endif

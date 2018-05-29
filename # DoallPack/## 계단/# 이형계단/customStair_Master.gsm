@@ -1,0 +1,115 @@
+!===============================================================================================
+!	이형 계단
+!===============================================================================================
+eps = 0.0001
+unID = 100
+
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+
+!	계단 높이 산정 방법
+!-----------------------------------------------------------------------------------------------
+Calc_Rsr_nRsr = 1
+Calc_Hgt_nRsr = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stCalcHgt[]
+		stCalcHgt[1] = "Riser + RiserNumber"
+		stCalcHgt[2] = "Height + RiserNumber"
+endif
+
+
+!	층 보이기 설정
+!-----------------------------------------------------------------------------------------------
+View_Cut = 1
+View_Entire = 2
+View_None = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stView[]
+		stView[1] = "Cut"
+		stView[2] = "Entire"
+		stView[3] = "None"
+endif
+
+
+!	Offset Location
+!-----------------------------------------------------------------------------------------------
+Point_Off = 1
+Point_Start = 2
+Point_End = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stOffset[]
+		stOffset[1] = "끄기"
+		stOffset[2] = "켜기"
+		stOffset[3] = "켜기"
+endif
+
+
+!	평면 치수 설정
+!-----------------------------------------------------------------------------------------------
+DimPlan_Off = 1
+DimPlan_On = 2
+DimPlan_MVO = 3
+
+if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+	dim	stDimPlan[]
+		stDimPlan[1] = "Off"
+		stDimPlan[2] = "On"
+		stDimPlan[3] = "by MVO"
+endif
+
+!	평면 치수 위치
+!-----------------------------------------------------------------------------------------------
+DimLct_1st = 1
+DimLct_2nd = 2
+DimLct_Both = 3
+
+if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3 then
+	dim	stDimLct[]
+		stDimLct[1] = "1st"
+		stDimLct[2] = "2nd"
+		stDimLct[3] = "1st & 2nd"
+endif
+
+
+	!	핸드레일 단면 형상
+	!-----------------------------------------------------------------------------------------------
+	RailSect_Line = 1
+	RailSect_3D = 2
+	RailSect_MVO = 3
+
+	if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+		dim	stRailSect[]
+			stRailSect[1] = "단선"
+			stRailSect[2] = "3D형상"
+			stRailSect[3] = "by MVO"
+	endif
+
+!===============================================================================================
+!	공통 계산
+!===============================================================================================
+
+!	계단 기울기 구하기
+ _strAng = strRsr/strTrd
+ _strAng = atn(_strAng)
+
+
+!	2D 이형 : 기울어진 각도 계산
+str_Ang_L = 0
+str_Ang_R = 0
+
+if	iOffsetL = Point_Start | iOffsetL = Point_End	then
+	_calcTan_L = xOffsetL/(strTrd*nRsr1)
+	_calcAng_L = atn(_calcTan_L)
+	str_Ang_L = _calcAng_L
+endif
+
+if	iOffsetR = Point_Start | iOffsetR = Point_End	then
+	_calcTan_R = xOffsetR/(strTrd*nRsr2)
+	_calcAng_R = atn(_calcTan_R)
+	str_Ang_R = _calcAng_R
+endif

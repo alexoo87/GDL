@@ -1,0 +1,282 @@
+!===============================================================================================
+!	Custom H형 철골보
+!===============================================================================================
+
+!===============================================================================================
+!	3D Detail Level
+!===============================================================================================
+if	iDetailLevel = DetailLevel_Detailed	then	resol	32
+if	iDetailLevel = DetailLevel_Simple	then	resol	8
+if	iDetailLevel = DetailLevel_None		then	end
+
+!===============================================================================================
+!	2D Display
+!==============================================================================================
+if	not(_iDisplay = Display_Symoblic) | (_bEditView & _iEditView = Display_Projected)	then
+	if	bSymbol	then
+		if	iProjectTo = ProjectTo_FloorPlan | (iProjectTo = ProjectTo_Absolute & btmPlaneHgt < cutPlaneHgt)	then
+			addz	btmPlaneHgt
+				cutplane{2}	180,	2
+			del 1
+		endif
+
+		addz	cutPlaneHgt
+			cutplane{2}	180*(iProjectType = 2),	1
+		del 1
+
+		if	iProjectTo = ProjectTo_Entire	then
+			addz	topPlaneHgt
+				cutplane{2}	0,	2
+			del 1
+		endif
+	endif
+endif
+
+
+!===============================================================================================
+!	X/Y 회전 및 기준점 설정
+!===============================================================================================
+if	iRotY = Rotation_Top	then
+	_zPos = 0
+endif
+
+if	iRotY = Rotation_Center	then
+	_zPos = beamHL/2
+endif
+
+if	iRotY = Rotation_Bottom	then
+	_zPos = beamHL
+endif
+
+!	Rotation Y
+_rotLth = beamLth/2
+rotx	90
+	hotspot	_rotLth,			0,	0,					unID,	aRotY,	4	:	unID = unID + 1
+	hotspot	_rotLth*cos(aRotY),	_rotLth*sin(aRotY),	0,	unID,	aRotY,	5	:	unID = unID + 1
+	hotspot	0,					0,	0,					unID,	aRotY,	6	:	unID = unID + 1
+	hotspot	0,					0,	1,					unID,	aRotY,	7	:	unID = unID + 1
+del 1
+
+_nTrans = 0
+
+roty	-aRotY	:	_nTrans = _nTrans + 1
+	addz	_zPos	:	_nTrans = _nTrans + 1
+		rotx	-aRotX	:	_nTrans = _nTrans + 1
+
+!===============================================================================================
+!	Hotspot
+!===============================================================================================
+!	beamLth
+hotspot	0,			0,	0,	unID,	beamLth,	1+256	:	unID = unID + 1
+hotspot	-1,			0,	0,	unID,	beamLth,	3		:	unID = unID + 1
+hotspot	beamLth,	0,	0,	unID,	beamLth,	2		:	unID = unID + 1
+
+!	OffsetL/R
+add	0,	-(beamBL/2 + 0.050),	0.010
+	hotspot	0,			0,	0,	unID,	offsetL,	1+128	:	unID = unID + 1
+	hotspot	-1,			0,	0,	unID,	offsetL,	3		:	unID = unID + 1
+	hotspot	offsetL,	0,	0,	unID,	offsetL,	2		:	unID = unID + 1
+del 1
+
+add	beamLth,	-(beamBR/2 + 0.050),	0.010
+	hotspot	0,			0,	0,	unID,	offsetR,	1+128	:	unID = unID + 1
+	hotspot	1,			0,	0,	unID,	offsetR,	3		:	unID = unID + 1
+	hotspot	-offsetR,	0,	0,	unID,	offsetR,	2		:	unID = unID + 1
+del 1
+
+
+!===============================================================================================
+!	철골보
+!===============================================================================================
+pen			beamPen_Elev
+sect_fill	beamFill,	beamBackPen,	beamFillPen,	beamPen_Sect
+material	matBeam
+
+!	변수 정의
+!-----------------------------------------------------------------------------------------------
+_yCutPlaneL = beamBL/2
+_yCutPlaneR = beamBR/2
+
+if	iCutPlaneL = CutPlane_horz	then
+	_yCutPlaneL = beamHL/2
+endif
+if	iCutPlaneR = CutPlane_horz	then
+	_yCutPlaneR = beamHR/2
+endif
+
+_dumpValue = 1
+
+!	Cut(Left)
+!-----------------------------------------------------------------------------------------------
+addx	offsetL
+	put	0,						cutCenL,
+		cutLthL1,				-_yCutPlaneL,
+		cutLthL1,				-(_yCutPlaneL + _dumpValue),
+		-(beamLth/2 + offsetL),	-(_yCutPlaneL + _dumpValue),
+		-(beamLth/2 + offsetL),	_yCutPlaneL + _dumpValue,
+		cutLthL2,				_yCutPlaneL + _dumpValue,
+		cutLthL2,				_yCutPlaneL
+
+	if	iCutPlaneL = CutPlane_horz	then
+		rotx	-90
+		addy	_yCutPlaneL
+	endif
+		! poly	nsp/2,	use(nsp)
+		cutpoly	nsp/2,	get(nsp)
+
+		!	Hotspot
+		addy	-_yCutPlaneL
+			hotspot	0,			0,	0,	unID,	cutLthL1,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	cutLthL1,	3		:	unID = unID + 1
+			hotspot	cutLthL1,	0,	0,	unID,	cutLthL1,	2		:	unID = unID + 1	
+		del 1
+
+		addy	_yCutPlaneL
+			hotspot	0,			0,	0,	unID,	cutLthL2,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	cutLthL2,	3		:	unID = unID + 1
+			hotspot	cutLthL2,	0,	0,	unID,	cutLthL2,	2		:	unID = unID + 1	
+		del 1
+	if	iCutPlaneL = CutPlane_horz	then
+		del 1
+		del 1
+	endif
+del 1
+
+!	Cut(Right)
+!-----------------------------------------------------------------------------------------------
+addx	beamLth - offsetR
+	put	0,						cutCenR,
+		cutLthR1,				-_yCutPlaneR,
+		cutLthR1,				-(_yCutPlaneR + _dumpValue),
+		beamLth/2 + offsetR,	-(_yCutPlaneR + _dumpValue),
+		beamLth/2 + offsetR,	_yCutPlaneR + _dumpValue,
+		cutLthR2,				_yCutPlaneR + _dumpValue,
+		cutLthR2,				_yCutPlaneR
+
+	if	iCutPlaneR = CutPlane_horz	then
+		rotx	-90
+		addy	_yCutPlaneR
+	endif
+		! poly	nsp/2,	use(nsp)
+		cutpoly	nsp/2,	get(nsp)
+
+		!	Hotspot
+		addy	-_yCutPlaneR
+			hotspot	0,			0,	0,	unID,	cutLthR1,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	cutLthR1,	3		:	unID = unID + 1
+			hotspot	cutLthR1,	0,	0,	unID,	cutLthR1,	2		:	unID = unID + 1	
+		del 1
+
+		addy	_yCutPlaneR
+			hotspot	0,			0,	0,	unID,	cutLthR2,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	cutLthR2,	3		:	unID = unID + 1
+			hotspot	cutLthR2,	0,	0,	unID,	cutLthR2,	2		:	unID = unID + 1	
+		del 1
+	if	iCutPlaneR = CutPlane_horz	then
+		del 1
+		del 1
+	endif
+del 1
+
+	!	철골보
+	!-----------------------------------------------------------------------------------------------
+		!	Arrange
+		_btwDist = beamHL - beamHR
+
+		if	iArrange = ARRANGE_TOP	then
+			_offset = 0
+		endif
+		if	iArrange = ARRANGE_CENTER	then
+			_offset = _btwDist/2
+		endif
+		if	iArrange = ARRANGE_BOTTOM	then
+			_offset = _btwDist
+		endif
+
+		roty	90
+			_si = 15
+			gosub	"coorBeamL"
+			addz	offsetL
+				prism_	nsp/3,	-(beamLth/2 + offsetL),	get(nsp)
+			del 1
+
+			_si = 0
+			gosub	"coorBeamL"
+
+			_si = beamLth - (offsetL + offsetR)
+			gosub	"coorBeamR"
+
+			addz	offsetL
+				ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
+			del 1
+
+			_si = 15
+			gosub	"coorBeamR"
+			addz	beamLth - offsetR
+				prism_	nsp/3,	(beamLth/2 + offsetR),	get(nsp)
+			del 1
+		del 1
+
+!	Cut End
+!-----------------------------------------------------------------------------------------------
+cutend
+cutend
+
+!===============================================================================================
+!	2D Display
+!==============================================================================================
+if	not(_iDisplay = Display_Symoblic) | (_bEditView & _iEditView = Display_Projected)	then
+	if	bSymbol	then
+		if	iProjectTo = ProjectTo_FloorPlan | (iProjectTo = ProjectTo_Absolute & btmPlaneHgt < cutPlaneHgt)	then
+			cutend
+		endif
+
+		cutend
+
+		if	iProjectTo = ProjectTo_Entire	then
+			cutend
+		endif
+	endif
+endif
+
+del _nTrans
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"coorBeamL":
+!-----------------------------------------------------------------------------------------------
+	put	0,					beamBL/2,	_si,
+		beamT2L,			beamBL/2,	_si,
+		beamT2L,			beamT1L/2,	_si,
+		beamHL - beamT2L,	beamT1L/2,	_si,
+		beamHL - beamT2L,	beamBL/2,	_si,
+		beamHL,				beamBL/2,	_si,
+		beamHL,				-beamBL/2,	_si,
+		beamHL - beamT2L,	-beamBL/2,	_si,
+		beamHL - beamT2L,	-beamT1L/2,	_si,
+		beamT2L,			-beamT1L/2,	_si,
+		beamT2L,			-beamBL/2,	_si,
+		0,					-beamBL/2,	_si
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"coorBeamR":
+!-----------------------------------------------------------------------------------------------
+	put	_offset,					beamBR/2,	_si,
+		_offset + beamT2R,			beamBR/2,	_si,
+		_offset + beamT2R,			beamT1R/2,	_si,
+		_offset + beamHR - beamT2R,	beamT1R/2,	_si,
+		_offset + beamHR - beamT2R,	beamBR/2,	_si,
+		_offset + beamHR,			beamBR/2,	_si,
+		_offset + beamHR,			-beamBR/2,	_si,
+		_offset + beamHR - beamT2R,	-beamBR/2,	_si,
+		_offset + beamHR - beamT2R,	-beamT1R/2,	_si,
+		_offset + beamT2R,			-beamT1R/2,	_si,
+		_offset + beamT2R,			-beamBR/2,	_si,
+		_offset,					-beamBR/2,	_si
+
+return

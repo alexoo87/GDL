@@ -1,0 +1,716 @@
+!===============================================================================================
+!	시스템 창호
+!===============================================================================================
+
+
+
+!===============================================================================================
+!	변수 정의
+!===============================================================================================
+
+	!	코너프레임 타입
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iCornerFrame_L"	CornerFrame_Boundary,	stCornerFrame_LR[CornerFrame_Boundary],
+									CornerFrame_Mullion,	stCornerFrame_LR[CornerFrame_Mullion],
+									CornerFrame_Rect,		stCornerFrame_LR[CornerFrame_Rect],
+									CornerFrame_Corner,		stCornerFrame_LR[CornerFrame_Corner]
+
+	values{2}	"iCornerFrame_R"	CornerFrame_Boundary,	stCornerFrame_LR[CornerFrame_Boundary],
+									CornerFrame_Mullion,	stCornerFrame_LR[CornerFrame_Mullion],
+									CornerFrame_Rect,		stCornerFrame_LR[CornerFrame_Rect],
+									CornerFrame_Corner,		stCornerFrame_LR[CornerFrame_Corner]
+
+	values{2}	"iCornerFrame_U"	CornerFrame_Boundary,	stCornerFrame_UB[CornerFrame_Boundary],
+									CornerFrame_Transom,	stCornerFrame_UB[CornerFrame_Transom]
+
+	values{2}	"iCornerFrame_B"	CornerFrame_Boundary,	stCornerFrame_UB[CornerFrame_Boundary],
+									CornerFrame_Transom,	stCornerFrame_UB[CornerFrame_Transom]
+
+	!	Corner 유형
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iCornerType"	CORNER_TYPE1,	stCornerType[CORNER_TYPE1],
+								CORNER_TYPE2,	stCornerType[CORNER_TYPE2]
+
+	if	iCornerType < eps	then
+		parameters	iCornerType = CORNER_TYPE1
+	endif
+
+	!	코너프레임 선택
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iSelectFrame"	SelectFrame_L,	stSelectFrame[SelectFrame_L],
+								SelectFrame_R,	stSelectFrame[SelectFrame_R],
+								SelectFrame_U,	stSelectFrame[SelectFrame_U],
+								SelectFrame_B,	stSelectFrame[SelectFrame_B]
+
+	!	수직프레임 타입
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iVerticalFrame"	VerticalFrame_Type1,	stVerticalFrame[VerticalFrame_Type1],
+									VerticalFrame_Type2,	stVerticalFrame[VerticalFrame_Type2]
+
+	values{2}	"iHorizontalFrame"	VerticalFrame_Type1,	stVerticalFrame[VerticalFrame_Type1],
+									VerticalFrame_Type2,	stVerticalFrame[VerticalFrame_Type2]
+
+	!	창호 타입
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iMatrix_Windows"	Windows_Fix1,		stWindowsType[Windows_Fix1],
+									Windows_Fix2,		stWindowsType[Windows_Fix2],
+									Windows_Fix3,		stWindowsType[Windows_Fix3],
+									Windows_Project1,	stWindowsType[Windows_Project1],
+									Windows_Project2,	stWindowsType[Windows_Project2],
+									Windows_Smoke,		stWindowsType[Windows_Smoke],
+									Windows_Spandrel,	stWindowsType[Windows_Spandrel],
+									Windows_Spandrel_2,	stWindowsType[Windows_Spandrel_2],
+									Windows_Spandrel_3,	stWindowsType[Windows_Spandrel_3],
+									Windows_Spandrel_4,	stWindowsType[Windows_Spandrel_4],
+									Windows_Grill,		stWindowsType[Windows_Grill],
+									Windows_Open,		stWindowsType[Windows_Open]
+
+	!	창호 타입
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iProjectHinge"	Hinge_Top,			stProjectHinge[Hinge_Top],
+								Hinge_Bottom,		stProjectHinge[Hinge_Bottom],
+								Hinge_Left,			stProjectHinge[Hinge_Left],
+								Hinge_Right,		stProjectHinge[Hinge_Right],
+								Hinge_TopLeft,		stProjectHinge[Hinge_TopLeft],
+								Hinge_TopRight,		stProjectHinge[Hinge_TopRight],
+								Hinge_BottomLeft,	stProjectHinge[Hinge_BottomLeft],
+								Hinge_BottomRight,	stProjectHinge[Hinge_BottomRight]
+
+	!	문 유형 선택
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iDoorType"	DoorType_1panel,	stDoorType[DoorType_1panel],
+							DoorType_2panel,	stDoorType[DoorType_2panel]
+
+	!	프레임 유형 선택
+	!-----------------------------------------------------------------------------------------------
+	if	iDoorOpenType = DoorOpenType_Hinged	then
+		values{2}	"iFrameType"	FrameType_1,	stFrameType[FrameType_1],
+									FrameType_2,	stFrameType[FrameType_2]
+	else
+		values{2}	"iFrameType"	FrameType_1,	stFrameType[FrameType_1]
+	endif
+
+	!	문 개폐 유형
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iDoorOpenType"	DoorOpenType_Hinged,	stDoorOpenType[DoorOpenType_Hinged],
+								DoorOpenType_Sliding,	stDoorOpenType[DoorOpenType_Sliding],
+								DoorOpenType_Auto,		stDoorOpenType[DoorOpenType_Auto]
+
+	!	손잡이 위치
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iDoorHandle"	DoorHandle_Right,	stDoorHandle[DoorHandle_Right],
+								DoorHandle_Left,	stDoorHandle[DoorHandle_Left]
+
+	!	심볼 위치 선택
+	!-----------------------------------------------------------------------------------------------
+	if	iDoorOpenType = DoorOpenType_Hinged	then
+		values{2}	"iSymbolPlace"	SymbolPlace_Front,	stSymbolPlace[SymbolPlace_Front],
+									SymbolPlace_Back,	stSymbolPlace[SymbolPlace_Back],
+									SymbolPlace_All,	stSymbolPlace[SymbolPlace_All]
+	else
+		values{2}	"iSymbolPlace"	SymbolPlace_Front,	stSymbolPlace[SymbolPlace_Front],
+									SymbolPlace_Back,	stSymbolPlace[SymbolPlace_Back]
+	endif
+
+	!	선택함수(문)
+	!-----------------------------------------------------------------------------------------------
+	_nDoor = 0
+	_iNone = 100
+	_stNone = "None"
+
+	for	i = 1	to	frameDivideNum_X
+		if	iDoorSwitch[i]	then
+			put	i	:	_nDoor = _nDoor + 1
+		endif
+	next	i
+
+	if	_nDoor > eps	then
+		values	"selectX"	get(nsp)
+
+		parameters	frameSwitch_B = 1
+		lock	"frameSwitch_B"
+	else
+		values{2}	"selectX"	_iNone,	_stNone
+
+		parameters	iDoorUI = 1
+		lock	"iDoorType", "iDoorHandle", "iFrameType", "iDoorOpenType", "iSymbolPlace",	\
+				"DoorWidth", "DoorWidth_L", "DoorWidth_R", "SldDoorWidth_L", "SldDoorWidth_R", "EqualDoorWidth", "DoorHeight", "DoorThick",	\
+				"iDoorUI"
+	endif
+
+!===============================================================================================
+!	변수 설정
+!===============================================================================================
+
+	!	전체 폭/높이
+	!-----------------------------------------------------------------------------------------------
+	_totalWidth = 0
+	_totalHeight = 0
+
+	for	i = 1	to	frameDivideNum_X
+		_totalWidth = _totalWidth + frameDistance_X[i]
+	next i
+		parameters	A = _totalWidth
+
+	for	i = 1	to	frameDivideNum_Y
+		_totalHeight = _totalHeight + frameDistance_Y[i]
+	next i
+		parameters	B = _totalHeight
+
+	!	코너프레임 폭/두께
+	!-----------------------------------------------------------------------------------------------
+	if	EqualFrameSize	then
+		if	GLOB_MODPAR_NAME = "frameWidth"	then
+			parameters	Matrix_Frame[5][1] = frameWidth
+		else
+			parameters	frameWidth = Matrix_Frame[5][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "frameThick"	then
+			parameters	Matrix_Frame[5][2] = frameThick
+		else
+			parameters	frameThick = Matrix_Frame[5][2]
+		endif
+	endif
+
+	if	not(EqualFrameSize)	then
+		if	GLOB_MODPAR_NAME = "frameWidth"	then
+			parameters	Matrix_Frame[iSelectFrame][1] = frameWidth
+		else
+			parameters	frameWidth = Matrix_Frame[iSelectFrame][1]
+		endif
+
+		if	GLOB_MODPAR_NAME = "frameThick"	then
+			parameters	Matrix_Frame[iSelectFrame][2] = frameThick
+		else
+			parameters	frameThick = Matrix_Frame[iSelectFrame][2]
+		endif
+	endif
+
+
+	!	iMatrix_Door(유형 선택)
+	!-----------------------------------------------------------------------------------------------
+	if	GLOB_MODPAR_NAME = "iDoorType"	then
+		parameters	iMatrix_Door[selectX][1] = iDoorType
+	else
+		parameters	iDoorType = iMatrix_Door[selectX][1]
+	endif
+
+	if	GLOB_MODPAR_NAME = "iFrameType"	then
+		parameters	iMatrix_Door[selectX][2] = iFrameType
+	else
+		parameters	iFrameType = iMatrix_Door[selectX][2]
+	endif
+
+	if	GLOB_MODPAR_NAME = "iDoorOpenType"	then
+		parameters	iMatrix_Door[selectX][3] = iDoorOpenType
+	else
+		parameters	iDoorOpenType = iMatrix_Door[selectX][3]
+	endif
+
+	if	GLOB_MODPAR_NAME = "iDoorHandle"	then
+		parameters	iMatrix_Door[selectX][4] = iDoorHandle
+	else
+		parameters	iDoorHandle = iMatrix_Door[selectX][4]
+	endif
+
+	if	GLOB_MODPAR_NAME = "iSymbolPlace"	then
+		parameters	iMatrix_Door[selectX][5] = iSymbolPlace
+	else
+		parameters	iSymbolPlace = iMatrix_Door[selectX][5]
+	endif
+
+	if	GLOB_MODPAR_NAME = "selectX"	then
+		parameters	iDoorType = iMatrix_Door[selectX][1]
+		parameters	iFrameType = iMatrix_Door[selectX][2]
+		parameters	iDoorOpenType = iMatrix_Door[selectX][3]
+		parameters	iDoorHandle = iMatrix_Door[selectX][4]
+		parameters	iSymbolPlace = iMatrix_Door[selectX][5]
+	endif
+
+
+	!	Matrix_DoorLength(문 길이 변수)
+	!-----------------------------------------------------------------------------------------------
+	for	i = 1	to	frameDivideNum_X
+		parameters	Matrix_DoorLength[i][1] = frameRealDistance_X[i]
+
+		_doorWdt = Matrix_DoorLength[i][1]
+		if	Matrix_DoorLength[i][4] > eps	then	_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[i][4])
+		if	Matrix_DoorLength[i][5] > eps	then	_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[i][5])
+
+		if	EqualDoorWidth	then	parameters	Matrix_DoorLength[i][2] = _doorWdt/2
+
+		parameters	Matrix_DoorLength[i][3] = _doorWdt - Matrix_DoorLength[i][2]
+	next i
+
+	for	i = 1	to	frameDivideNum_X
+		parameters	Matrix_DoorLength[i][6] = frameRealDistance_Y[1] + frameWidthTmp_B
+	next i
+
+	if	GLOB_MODPAR_NAME = "DoorWidth_L"	then
+		parameters	Matrix_DoorLength[selectX][2] = DoorWidth_L
+	else
+		parameters	DoorWidth_L = Matrix_DoorLength[selectX][2]
+	endif
+
+	if	GLOB_MODPAR_NAME = "SldDoorWidth_L"	then
+		parameters	Matrix_DoorLength[selectX][4] = SldDoorWidth_L
+	else
+		parameters	SldDoorWidth_L = Matrix_DoorLength[selectX][4]
+	endif
+
+	if	GLOB_MODPAR_NAME = "SldDoorWidth_R"	then
+		parameters	Matrix_DoorLength[selectX][5] = SldDoorWidth_R
+	else
+		parameters	SldDoorWidth_R = Matrix_DoorLength[selectX][5]
+	endif
+
+	if	GLOB_MODPAR_NAME = "DoorThick"	then
+		parameters	Matrix_DoorLength[selectX][7] = DoorThick
+	else
+		parameters	DoorThick = Matrix_DoorLength[selectX][7]
+	endif
+
+	if	GLOB_MODPAR_NAME = "selectX"	then
+		parameters	DoorWidth = Matrix_DoorLength[selectX][1]
+		parameters	DoorWidth_L = Matrix_DoorLength[selectX][2]
+		parameters	DoorWidth_R = Matrix_DoorLength[selectX][3]
+		parameters	SldDoorWidth_L = Matrix_DoorLength[selectX][4]
+		parameters	SldDoorWidth_R = Matrix_DoorLength[selectX][5]
+		parameters	DoorHeight = Matrix_DoorLength[selectX][6]
+		parameters	DoorThick = Matrix_DoorLength[selectX][7]
+	endif
+
+		!	DoorWidth
+		if	iMatrix_Door[selectX][3] = DoorOpenType_Hinged | iMatrix_Door[selectX][3] = DoorOpenType_Sliding	then
+			_doorWdt = Matrix_DoorLength[selectX][1]
+			if	Matrix_DoorLength[selectX][4] > eps	then	_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[selectX][4])
+			if	Matrix_DoorLength[selectX][5] > eps	then	_doorWdt = _doorWdt - (VerticalFrameWidth/2 + Matrix_DoorLength[selectX][5])
+
+			if	EqualDoorWidth	then
+				_doorWdtL = _doorWdt/2
+			else
+				_doorWdtL = Matrix_DoorLength[selectX][2]
+			endif
+
+			_doorWdtR = _doorWdt - _doorWdtL
+
+			if	not(abs(DoorWidth - _doorWdt) < eps)	then
+				parameters	DoorWidth = _doorWdt
+			endif
+			if	not(abs(DoorWidth_L - _doorWdtL) < eps)	then
+				parameters	DoorWidth_L = _doorWdtL
+			endif
+			if	not(abs(DoorWidth_R - _doorWdtR) < eps)	then
+				parameters	DoorWidth_R = _doorWdtR
+			endif
+		else
+			if	not(abs(DoorWidth - Matrix_DoorLength[selectX][1]) < eps)	then
+				parameters	DoorWidth = Matrix_DoorLength[selectX][1]
+			endif
+		endif
+
+
+	!	Matrix_DoorFrame(문 프레임 변수)
+	!-----------------------------------------------------------------------------------------------
+	if	GLOB_MODPAR_NAME = "DoorFrame_L"	then
+		parameters	Matrix_DoorFrame[selectX][1] = DoorFrame_L
+	else
+		parameters	DoorFrame_L = Matrix_DoorFrame[selectX][1]
+	endif
+
+	if	GLOB_MODPAR_NAME = "DoorFrame_R"	then
+		parameters	Matrix_DoorFrame[selectX][2] = DoorFrame_R
+	else
+		parameters	DoorFrame_R = Matrix_DoorFrame[selectX][2]
+	endif
+
+	if	GLOB_MODPAR_NAME = "DoorFrame_U"	then
+		parameters	Matrix_DoorFrame[selectX][3] = DoorFrame_U
+	else
+		parameters	DoorFrame_U = Matrix_DoorFrame[selectX][3]
+	endif
+
+	if	GLOB_MODPAR_NAME = "DoorFrame_B"	then
+		parameters	Matrix_DoorFrame[selectX][4] = DoorFrame_B
+	else
+		parameters	DoorFrame_B = Matrix_DoorFrame[selectX][4]
+	endif
+
+	if	GLOB_MODPAR_NAME = "DoorFrame_A"	then
+		parameters	Matrix_DoorFrame[selectX][5] = DoorFrame_A
+	else
+		parameters	DoorFrame_A = Matrix_DoorFrame[selectX][5]
+	endif
+
+	if	GLOB_MODPAR_NAME = "selectX"	then
+		parameters	DoorFrame_L = Matrix_DoorFrame[selectX][1]
+		parameters	DoorFrame_R = Matrix_DoorFrame[selectX][2]
+		parameters	DoorFrame_U = Matrix_DoorFrame[selectX][3]
+		parameters	DoorFrame_B = Matrix_DoorFrame[selectX][4]
+		parameters	DoorFrame_A = Matrix_DoorFrame[selectX][5]
+	endif
+
+
+	!	Matrix_Handle(손잡이 변수)
+	!-----------------------------------------------------------------------------------------------
+	if	GLOB_MODPAR_NAME = "HandlePosX"	then
+		parameters	Matrix_Handle[selectX][1] = HandlePosX
+	else
+		parameters	HandlePosX = Matrix_Handle[selectX][1]
+	endif
+
+	if	GLOB_MODPAR_NAME = "HandlePosY"	then
+		parameters	Matrix_Handle[selectX][2] = HandlePosY
+	else
+		parameters	HandlePosY = Matrix_Handle[selectX][2]
+	endif
+
+	if	GLOB_MODPAR_NAME = "HandleWidth"	then
+		parameters	Matrix_Handle[selectX][3] = HandleWidth
+	else
+		parameters	HandleWidth = Matrix_Handle[selectX][3]
+	endif
+
+	if	GLOB_MODPAR_NAME = "HandleHeight"	then
+		parameters	Matrix_Handle[selectX][4] = HandleHeight
+	else
+		parameters	HandleHeight = Matrix_Handle[selectX][4]
+	endif
+
+	if	GLOB_MODPAR_NAME = "HandleThick"	then
+		parameters	Matrix_Handle[selectX][5] = HandleThick
+	else
+		parameters	HandleThick = Matrix_Handle[selectX][5]
+	endif
+
+	if	GLOB_MODPAR_NAME = "selectX"	then
+		parameters	HandlePosX = Matrix_Handle[selectX][1]
+		parameters	HandlePosY = Matrix_Handle[selectX][2]
+		parameters	HandleWidth = Matrix_Handle[selectX][3]
+		parameters	HandleHeight = Matrix_Handle[selectX][4]
+		parameters	HandleThick = Matrix_Handle[selectX][5]
+	endif
+
+
+!===============================================================================================
+!	변수 범위
+!===============================================================================================
+values	"frameWidth"	range	[gasketWidth,	1]
+values	"frameThick"	range	(0,	1]
+
+values	"VerticalFrameWidth"	range	[gasketWidth,	1]
+values	"VerticalFrameThick"	range	(0,	1]
+
+values	"HorizontalFrameWidth"	range	[gasketWidth,	1]
+values	"HorizontalFrameThick"	range	(0,	1]
+
+values	"FrameCapWidth_V"	range	(0,	1]
+values	"FrameCapThick_V"	range	(0,	1]
+
+values	"FrameCapWidth_H"	range	(0,	1]
+values	"FrameCapThick_H"	range	(0,	1]
+
+MaxFrameWidth = max(Matrix_Frame[1][1], Matrix_Frame[2][1], Matrix_Frame[3][1], Matrix_Frame[4][1], Matrix_Frame[5][1], VerticalFrameWidth)
+values	"gasketWidth"	range	[0,	MaxFrameWidth]
+values	"gasketThick"	range	[0,	1]
+values	"gasketCapThick"	range	[0,	gasketThick - glassThick]
+
+values	"glassThick"	range	(0,	]
+values	"spdThk_1"	range	(0,	)
+values	"spdThk_2"	range	(0,	)
+values	"spdThk_3"	range	(0,	)
+values	"spdThk_4"	range	(0,	)
+
+values	"spdFrmThk"	range	(0,	)
+
+values	"frameDistance_X"	range	(0,	]
+values	"frameDistance_Y"	range	(0,	]
+
+values	"frameDivideNum_X"	range	(0,	40]
+values	"frameDivideNum_Y"	range	(0,	40]
+
+values	"iMatrix_Windows"	range	(0,	]
+values	"iMatrix_Door"		range	(0,	]
+
+lock	"A",	"B"
+
+values	"matrixFix3_widthL"	range	(0,	)
+values	"matrixFix3_widthR"	range	(0,	)
+
+!	기본값
+for	i = 1	to	40
+	for	j = 1	to	40
+		if	matrixFix3_widthL[i][j] < eps	then
+			parameters	matrixFix3_widthL[i][j] = 0.100
+		endif
+		if	matrixFix3_widthR[i][j] < eps	then
+			parameters	matrixFix3_widthR[i][j] = 0.100
+		endif
+	next	j
+next	i
+
+
+!	문 관련 변수
+!-----------------------------------------------------------------------------------------------
+	lock	"DoorWidth_R", "DoorWidth",	"DoorHeight"
+
+	if	iDoorType = DoorType_1panel	then
+		if	iDoorOpenType = DoorOpenType_Hinged	then
+			lock	"EqualDoorWidth", "DoorWidth_L"
+		else
+			parameters	iFrameType = FrameType_1
+			lock	"EqualDoorWidth", "DoorWidth_L", "iFrameType"
+		endif
+	endif
+
+	if	iDoorType = DoorType_2panel	then
+		parameters	iDoorHandle = DoorHandle_Left
+		lock	"iDoorHandle"
+	endif
+
+	if	iDoorOpenType = DoorOpenType_Sliding	then
+		parameters	EqualDoorWidth = 1
+		lock	"EqualDoorWidth"
+	endif
+
+	if	iDoorType = DoorType_2panel	then
+		if	iDoorOpenType = DoorOpenType_Auto	then
+			parameters	EqualDoorWidth = 1
+			lock	"EqualDoorWidth", "HandlePosX", "HandlePosY", "HandleWidth", "HandleHeight", "HandleThick",	\
+					"iFrameType", "DoorFrame_L", "DoorFrame_R", "DoorFrame_U", "DoorFrame_B"
+		else
+			lock	"DoorFrame_A", "machHeight_A"
+		endif
+	endif
+
+	if	iFrameType = FrameType_1	then
+		lock	"DoorFrame_L",	"DoorFrame_R"
+	endif
+
+	for	i = 1	to	frameDivideNum_X
+		if	iMatrix_Door[i][1] = DoorType_2panel	then
+			parameters	iMatrix_Door[i][4] = DoorHandle_Left
+			if	iMatrix_Door[i][3] = DoorOpenType_Sliding	then
+				parameters	iMatrix_Door[i][2] = FrameType_1
+			endif
+		endif
+	next i
+
+	values	"Matrix_DoorLength"	range	[0,	]
+
+	values	"DoorWidth_L"	range	(0,	]
+	values	"DoorThick"		range	(0,	]
+
+	values	"SldDoorWidth_L"	range	[0,	]
+	values	"SldDoorWidth_R"	range	[0,	]
+
+	values	"DoorFrame_L"	range	(0,	0.300]
+	values	"DoorFrame_R"	range	(0,	0.300]
+	values	"DoorFrame_U"	range	(0,	0.300]
+	values	"DoorFrame_B"	range	(0,	0.300]
+	values	"DoorFrame_A"	range	(0,	0.300]
+	values	"machHeight_A"	range	[0.165,	frameRealDistance_Y[2] + HorizontalFrameWidth)
+
+	values	"HandlePosX"	range	(0,	0.500]
+	values	"HandlePosY"	range	(0,	1.000]
+	values	"HandleWidth"	range	(0,	0.200]
+	values	"HandleHeight"	range	(0,	1.000]
+	values	"HandleThick"	range	(0,	0.200]
+
+
+	values	"iDoorUI"	1,	2,	3,	4
+
+	if	GLOB_MODPAR_NAME = "selectX"	then
+		parameters	iDoorUI = 1
+	endif
+
+!	배연창(2D Symbol)
+!-----------------------------------------------------------------------------------------------
+if	not(bSymbol2D)	then
+	lock			"symbolPen", "symbolOffset", "symbolSize"
+	hideparameter	"symbolPen", "symbolOffset", "symbolSize"
+endif
+
+if	symbolPen < eps	then
+	parameters	symbolPen = 1
+endif
+
+values	"symbolOffset"	range	[0,	]
+values	"symbolSize"	range	(0,	)
+
+
+!===============================================================================================
+!	면적 산출
+!===============================================================================================
+
+!	유리 면적
+!-----------------------------------------------------------------------------------------------
+	!	변수 정의
+	_glsArea = 0
+	_glsArea_Spd1 = 0
+	_glsArea_Spd2 = 0
+	_glsArea_Spd3 = 0
+	_glsArea_Spd4 = 0
+
+	_nCount = 0
+
+	_nFrmX = frameDivideNum_X
+	_nFrmY = frameDivideNum_Y
+
+	!	창문
+	for	i = 1	to	_nFrmX
+		for	j = 1	to	_nFrmY
+			!	변수정의
+				!	창호가 아니고 문 일때
+				_bDoor = 0
+				if	iDoorSwitch[i] & j = 1	then	_bDoor = 1
+
+				!	창호 너비/높이
+				_winType = iMatrix_Windows[i][j]
+				_winWdt = WindowsWidth[i]
+				_winHgt = WindowsHeight[j]
+
+			!	창문일 경우
+			if	_bDoor < eps	then
+				!	고정창&프로젝트창
+				if	_winType = Windows_Fix1 | _winType = Windows_Fix2 | _winType = Windows_Fix3 | \
+					_winType = Windows_Project1 | _winType = Windows_Project2 | _winType = Windows_Smoke	then
+
+					_glsArea = _glsArea + _winWdt*_winHgt	:	_nCount = _nCount + 1
+
+					!	창호 유형 : 고정창(2)/프로젝트창(2)
+					if	_winType = Windows_Fix2 | _winType = Windows_Project2	then
+						_glsArea = _glsArea - gasketWidth*_winHgt	:	_nCount = _nCount + 1
+					endif
+
+					!	창호 유형 : 고정창(3)
+					if	_winType = Windows_Fix3	then
+						_glsArea = _glsArea - (gasketWidth*_winHgt)*2	:	_nCount = _nCount + 2
+					endif
+				endif
+
+				!	스팬드럴(TYPE1)
+				if	_winType = Windows_Spandrel	then
+					_glsArea_Spd1 = _glsArea_Spd1 + _winWdt*_winHgt	:	_nCount = _nCount + 1
+				endif
+
+				!	스팬드럴(TYPE2)
+				if	_winType = Windows_Spandrel_2	then
+					_glsArea_Spd2 = _glsArea_Spd2 + _winWdt*_winHgt	:	_nCount = _nCount + 1
+				endif
+
+				!	스팬드럴(TYPE3)
+				if	_winType = Windows_Spandrel_3	then
+					_glsArea_Spd3 = _glsArea_Spd3 + _winWdt*_winHgt	:	_nCount = _nCount + 1
+				endif
+
+				!	스팬드럴(TYPE4)
+				if	_winType = Windows_Spandrel_4	then
+					_glsArea_Spd4 = _glsArea_Spd4 + _winWdt*_winHgt	:	_nCount = _nCount + 1
+				endif
+			endif
+		next	j
+	next	i
+
+	!	문
+	for	i = 1	to	_nFrmX
+		!	변수 정의
+		_doorType = iMatrix_Door[i][1]
+		_frmType = iMatrix_Door[i][2]
+		_openType = iMatrix_Door[i][3]
+
+		_doorWdt = Matrix_DoorLength[i][1]
+		_sideWdtL = Matrix_DoorLength[i][4]
+		_sideWdtR = Matrix_DoorLength[i][5]
+		_doorHgt = Matrix_DoorLength[i][6]
+
+		_doorFrmL = Matrix_DoorFrame[i][1]
+		_doorFrmR = Matrix_DoorFrame[i][2]
+		_doorFrmU = Matrix_DoorFrame[i][3]
+		_doorFrmB = Matrix_DoorFrame[i][4]
+		_doorFrmA = Matrix_DoorFrame[i][5]
+
+		!	변수 추가 계산
+			!	좌/우 고정창 높이
+			if	_openType = DoorOpenType_Auto	then
+				_sideHgt = _doorHgt - frameWidthTmp_B
+			else
+				if	_nFrmY = 1	then	_frmWdt = frameWidthTmp_U
+				if	_nFrmY # 1	then	_frmWdt = HorizontalFrameWidth
+
+				_sideHgt = _doorHgt - (frameWidthTmp_B + gasketWidth)/2 + (_frmWdt - gasketWidth)/2
+			endif
+
+			!	실제 문 너비
+			if	_openType = DoorOpenType_Auto	then
+				_frmWdt = _doorFrmA
+			else
+				_frmWdt = VerticalFrameWidth
+			endif
+
+			if	_sideWdtL > eps	then	_doorWdt = _doorWdt - (_frmWdt/2 + _sideWdtL)
+			if	_sideWdtR > eps	then	_doorWdt = _doorWdt - (_frmWdt/2 + _sideWdtR)
+
+		!	문일 경우
+		if	iDoorSwitch[i]	then
+			_glsArea = _glsArea + _doorWdt*_doorHgt	:	_nCount = _nCount + 1
+
+				!	제외면적
+				if	_openType = DoorOpenType_Auto	then
+					_glsArea = _glsArea - (_doorHgt*_doorFrmA*2 + (_doorWdt - _doorFrmA*2)*frameWidthTmp_B)	:	_nCount = _nCount + 1
+				else
+					!	프레임 유형 : 상/하
+					if	_frmType = FrameType_1 | _frmType = FrameType_2	then
+						_glsArea = _glsArea - _doorWdt*(_doorFrmU + _doorFrmB)	:	_nCount = _nCount + 1
+					endif
+
+					!	프레임 유형 : 상/하/좌/우
+					if	_frmType = FrameType_2	then
+						_glsArea = _glsArea - (_doorHgt - (_doorFrmU + _doorFrmB))*(_doorFrmL + _doorFrmR)
+
+						!	문 유형 : 2Panel
+						if	_doorType = DoorType_2panel	then
+							_glsArea = _glsArea - (_doorHgt - (_doorFrmU + _doorFrmB))*(_doorFrmL + _doorFrmR)
+						endif
+					endif
+				endif
+
+				!	추가면적
+				if	_openType = DoorOpenType_Auto	then
+					if	_sideWdtL > eps	then
+						_glsArea = _glsArea + (_sideWdtL - _doorFrmA/2)*_sideHgt	:	_nCount = _nCount + 1
+					endif
+
+					if	_sideWdtR > eps	then
+						_glsArea = _glsArea + (_sideWdtR - _doorFrmA/2)*_sideHgt	:	_nCount = _nCount + 1
+					endif
+				else
+					if	_sideWdtL > eps	then
+						_addL = frameWidthTmp_L/2 - gasketWidth
+						if	i # 1	then	_addL = VerticalFrameWidth/2 - gasketWidth
+						_glsArea = _glsArea + (_sideWdtL + _addL)*_sideHgt	:	_nCount = _nCount + 1
+					endif
+
+					if	_sideWdtR > eps	then
+						_addR = frameWidthTmp_R/2 - gasketWidth
+						if	(i # _nFrmX & _nFrmX # 1)	then	_addR = VerticalFrameWidth/2 - gasketWidth
+						_glsArea = _glsArea + (_sideWdtR + _addR)*_sideHgt	:	_nCount = _nCount + 1
+					endif
+				endif
+		endif
+	next	i
+
+	!	변수 입력
+	parameters	glsArea = _glsArea,
+				glsArea_Spd1 = 	_glsArea_Spd1,
+				glsArea_Spd2 = 	_glsArea_Spd2,
+				glsArea_Spd3 = 	_glsArea_Spd3,
+				glsArea_Spd4 = 	_glsArea_Spd4
+	parameters	nCount = _nCount
+	! parameters	testArea = _testArea
+
+	!	변수 잠금
+	lock	"glsArea", "glsArea_Spd1", "glsArea_Spd2", "glsArea_Spd3", "glsArea_Spd4", "nCount"
+	hideparameter	"nCount"
+	hideparameter	"testArea"

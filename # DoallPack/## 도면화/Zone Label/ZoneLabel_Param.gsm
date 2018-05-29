@@ -1,0 +1,215 @@
+
+
+
+!---------------------------------------------------------------------------------------------------------------------------------------------
+!	공통
+!---------------------------------------------------------------------------------------------------------------------------------------------
+lock	"A",	"B"
+! parameters	A = totalStampWidth 
+! parameters	B = totalStampHeight
+
+
+!---------------------------------------------------------------------------------------------------------------------------------------------
+!	영역 정보
+!---------------------------------------------------------------------------------------------------------------------------------------------
+parameters	roomName = ROOM_NAME,
+			roomNumber = ROOM_NUMBER,
+			bottomLevel = ROOM_BASELEV*1000,
+			subBottomLevel = (ROOM_BASELEV - ROOM_FL_THICK)*1000
+
+lock	"roomName",	"roomNumber",	"bottomLevel",	"subBottomLevel"
+
+
+!---------------------------------------------------------------------------------------------------------------------------------------------
+!	텍스트 관련
+!---------------------------------------------------------------------------------------------------------------------------------------------
+
+!	텍스트 정렬
+values{2}		"textPos"	2,	"가운데 정렬",
+							1, 	"왼쪽 정렬",
+							3,	"오른쪽 정렬"
+
+!	텍스트 조정 범위
+values		"ROOM_LSIZE"			range	(0,	]
+values		"enterTextSpace"		range	(0,	]
+values		"stampSpaceX"			range	(0,	]
+values		"stampSpaceY"			range	(0,	]
+
+!	자간/장평
+values	"nameSCF"	range	(0,	]
+values	"nameWF"	range	(0,	]
+
+values	"numSCF"	range	(0,	]
+values	"numWF"		range	(0,	]
+
+values	"ceilSCF"	range	(0,	]
+values	"ceilWF"	range	(0,	]
+
+values	"ctSCF"		range	(0,	]
+values	"ctWF"		range	(0,	]
+
+values	"levelSCF"	range	(0,	]
+values	"levelWF"	range	(0,	]
+
+!	텍스트 설정 잠금
+lock	"ROOM_LSIZE"
+
+!---------------------------------------------------------------------------------------------------------------------------------------------
+!	스탬프 관련
+!---------------------------------------------------------------------------------------------------------------------------------------------
+!	스탬프 타입 정의
+values{2} "stampType" 	STAMPTYPE_PLAN,		"평면도",
+						STAMPTYPE_CEILING,	"천정도",
+						STAMPTYPE_ETC,		"기타",
+						STAMPTYPE_MVO,		"by MVO"
+
+
+!	스탬프 내용 정의
+values{2}	"iContents_Plan"	Contents_Name,			stContents[Contents_Name],
+								Contents_NameNumH,		stContents[Contents_NameNumH],
+								Contents_NameNumV,		stContents[Contents_NameNumV],
+								Contents_NameNumFS,		stContents[Contents_NameNumFS]
+
+values{2}	"iContents_Ceil"	Contents_Name,			stContents[Contents_Name],
+								Contents_NameNumH,		stContents[Contents_NameNumH],
+								Contents_NameNumV,		stContents[Contents_NameNumV],
+								Contents_NameNumCH,		stContents[Contents_NameNumCH],
+								Contents_NameTypeCH,	stContents[Contents_NameTypeCH],
+								Contents_NameNumTypeCH,	stContents[Contents_NameNumTypeCH]
+
+values{2}	"iContents_Etc"	Contents_Name,			stContents[Contents_Name],
+							Contents_NameNumH,		stContents[Contents_NameNumH],
+							Contents_NameNumV,		stContents[Contents_NameNumV],
+							Contents_NameNumFS,		stContents[Contents_NameNumFS],
+							Contents_NameNumCH,		stContents[Contents_NameNumCH],
+							Contents_NameTypeCH,	stContents[Contents_NameTypeCH],
+							Contents_NameNumTypeCH,	stContents[Contents_NameNumTypeCH]
+
+if	stampType = STAMPTYPE_PLAN	then
+	lock	"iContents_Ceil", "iContents_Etc"
+endif
+if	stampType = STAMPTYPE_CEILING	then
+	lock	"iContents_Plan", "iContents_Etc"
+endif
+if	stampType = STAMPTYPE_ETC	then
+	lock	"iContents_Plan", "iContents_Ceil"
+endif
+
+!	스탬프 자동크기 변수
+if	not(bAutoSize)	then
+	hideparameter	"stampSpaceX",	"stampSpaceY"
+else
+	hideparameter	"stampCustomWidth",	"stampCustomHeight"
+endif
+
+!	스탬프 채우기 활성화
+if	not(bStampFill)	then
+	lock	"stampFill",	"stampFillPen",	"stampBFillPen"
+	hideparameter	"stampFill",	"stampFillPen",	"stampBFillPen"
+endif
+
+
+!---------------------------------------------------------------------------------------------------------------------------------------------
+!	지시선 관련
+!---------------------------------------------------------------------------------------------------------------------------------------------
+
+!	지시선 위치(메인)
+values{2}	"iLeaderH_Plan"	Leader_LEFT,	stLeaderH[Leader_LEFT],
+							Leader_RIGHT,	stLeaderH[Leader_RIGHT],
+							Leader_UP,		stLeaderH[Leader_UP],
+							Leader_DOWN,	stLeaderH[Leader_DOWN]
+
+values{2}	"iLeaderH_Ceil"	Leader_LEFT,	stLeaderH[Leader_LEFT],
+							Leader_RIGHT,	stLeaderH[Leader_RIGHT],
+							Leader_UP,		stLeaderH[Leader_UP],
+							Leader_DOWN,	stLeaderH[Leader_DOWN]
+
+values{2}	"iLeaderH_Etc"	Leader_LEFT,	stLeaderH[Leader_LEFT],
+							Leader_RIGHT,	stLeaderH[Leader_RIGHT],
+							Leader_UP,		stLeaderH[Leader_UP],
+							Leader_DOWN,	stLeaderH[Leader_DOWN]
+
+!	지시선 위치(수직)
+if	iLeaderH_Plan = Leader_LEFT | iLeaderH_Plan = Leader_RIGHT	then
+	values{2}	"iLeaderV_Plan"	Leader_CENTER,	stLeaderV[Leader_CENTER],
+								Leader_TOP,		stLeaderV[Leader_TOP],
+								Leader_BOTTOM,	stLeaderV[Leader_BOTTOM]
+else
+	values{2}	"iLeaderV_Plan"	Leader_CENTER,		stLeaderV[Leader_CENTER],
+								Leader_subLEFT,		stLeaderV[Leader_subLEFT],
+								Leader_subRIGHT,	stLeaderV[Leader_subRIGHT]
+endif
+
+if	iLeaderH_Ceil = Leader_LEFT | iLeaderH_Ceil = Leader_RIGHT	then
+	values{2}	"iLeaderV_Ceil"	Leader_CENTER,	stLeaderV[Leader_CENTER],
+								Leader_TOP,		stLeaderV[Leader_TOP],
+								Leader_BOTTOM,	stLeaderV[Leader_BOTTOM]
+else
+	values{2}	"iLeaderS_Ceil"	Leader_CENTER,		stLeaderV[Leader_CENTER],
+								Leader_subLEFT,		stLeaderV[Leader_subLEFT],
+								Leader_subRIGHT,	stLeaderV[Leader_subRIGHT]
+endif
+
+if	iLeaderH_Etc = Leader_LEFT | iLeaderH_Etc = Leader_RIGHT	then
+	values{2}	"iLeaderV_Etc"	Leader_CENTER,	stLeaderV[Leader_CENTER],
+								Leader_TOP,		stLeaderV[Leader_TOP],
+								Leader_BOTTOM,	stLeaderV[Leader_BOTTOM]
+else
+	values{2}	"iLeaderV_Etc"	Leader_CENTER,		stLeaderV[Leader_CENTER],
+								Leader_subLEFT,		stLeaderV[Leader_subLEFT],
+								Leader_subRIGHT,	stLeaderV[Leader_subRIGHT]
+endif
+
+!	지시선 변수 범위
+values	"subLineLth1_Plan"	range	[0,	]
+! values	"subLineLth2_Plan"	range	[0,	]
+values	"subLineLth1_Ceil"	range	[0,	]
+! values	"subLineLth2_Ceil"	range	[0,	]
+values	"subLineLth1_Etc"	range	[0,	]
+! values	"subLineLth2_Etc"	range	[0,	]
+
+
+
+!---------------------------------------------------------------------------------------------------------------------------------------------
+!	실내마감재료 정보 관련
+!---------------------------------------------------------------------------------------------------------------------------------------------
+
+!	두께 계산
+parameters	slab_thk = slab_baseT + slab_finishT
+parameters	wall_thk = wall_baseT + wall_finishT
+parameters	ceil_thk = ceil_baseT + ceil_finishT
+
+!	두께 변수 잠금
+lock	"slab_thk",	"wall_thk",	"ceil_thk"
+
+!	걸레받이 정보 숨김 / 잠금
+if	board_switch = 1	then
+	hideparameter	"board_base", "board_baseT", "board_finish", "board_finishT", "board_thk", "board_num"
+	lock	"board_base", "board_baseT", "board_finish", "board_finishT", "board_num"
+else
+	hideparameter	"board_baseT", "board_finishT"
+	lock	"board_baseT", "board_finishT"
+endif
+
+!	두께 입력 범위
+values		"slab_baseT"	range	[0,	]
+values		"slab_finishT"	range	[0,	]
+values		"slab_thk"		range	[0,	]
+values		"board_baseT"	range	[0,	]
+values		"board_finishT"	range	[0,	]
+values		"board_thk"		range	[0,	]
+values		"wall_baseT"	range	[0,	]
+values		"wall_finishT"	range	[0,	]
+values		"wall_thk"		range	[0,	]
+values		"ceil_baseT"	range	[0,	]
+values		"ceil_finishT"	range	[0,	]
+values		"ceil_thk"		range	[0,	]
+
+
+
+!---------------------------------------------------------------------------------------------------------------------------------------------
+!	UI
+!---------------------------------------------------------------------------------------------------------------------------------------------
+
+! UI 페이지 정의
+values	"gs_ui_current_page",	1

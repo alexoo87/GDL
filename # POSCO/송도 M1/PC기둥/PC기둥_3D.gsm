@@ -1,0 +1,234 @@
+!===============================================================================================
+!	PC기둥
+!===============================================================================================
+!	W.P
+hotspot	0,	0,	0,	unID	:	unID = unID + 1
+
+!	보 받침 하단부
+!-----------------------------------------------------------------------------------------------
+material	matCol
+pen			penCol
+
+	!	Hotspot
+	_xPosHsp = 0.010
+
+	hotspot	_xPosHsp,	0,	0,		unID,	hgt_B,	1+128	:	unID = unID + 1
+	hotspot	_xPosHsp,	0,	-1,		unID,	hgt_B,	3		:	unID = unID + 1
+	hotspot	_xPosHsp,	0,	hgt_B,	unID,	hgt_B,	2		:	unID = unID + 1
+
+	addz	hgt_B
+		hotspot	_xPosHsp,	0,	0,		unID,	hgt_M,	1+128	:	unID = unID + 1
+		hotspot	_xPosHsp,	0,	-1,		unID,	hgt_M,	3		:	unID = unID + 1
+		hotspot	_xPosHsp,	0,	hgt_M,	unID,	hgt_M,	2		:	unID = unID + 1
+	del 1
+
+	addz	hgt_B + hgt_M
+		hotspot	_xPosHsp,	0,	0,		unID,	hgt_T,	1+128	:	unID = unID + 1
+		hotspot	_xPosHsp,	0,	-1,		unID,	hgt_T,	3		:	unID = unID + 1
+		hotspot	_xPosHsp,	0,	hgt_T,	unID,	hgt_T,	2		:	unID = unID + 1
+
+		addx	-hWdt_B/2
+			hotspot	0,			0,	0,	unID,	addLth_L,	1+128	:	unID = unID + 1
+			hotspot	1,			0,	0,	unID,	addLth_L,	3		:	unID = unID + 1
+			hotspot	-addLth_L,	0,	0,	unID,	addLth_L,	2		:	unID = unID + 1
+		del 1
+
+		addx	hWdt_B/2
+			hotspot	0,			0,	0,	unID,	addLth_R,	1+128	:	unID = unID + 1
+			hotspot	-1,			0,	0,	unID,	addLth_R,	3		:	unID = unID + 1
+			hotspot	addLth_R,	0,	0,	unID,	addLth_R,	2		:	unID = unID + 1
+		del 1
+
+		addy	-vWdt_B/2
+			hotspot	0,	0,			0,	unID,	addLth_B,	1+128	:	unID = unID + 1
+			hotspot	0,	1,			0,	unID,	addLth_B,	3		:	unID = unID + 1
+			hotspot	0,	-addLth_B,	0,	unID,	addLth_B,	2		:	unID = unID + 1
+		del 1
+
+		addy	vWdt_B/2
+			hotspot	0,	0,			0,	unID,	addLth_T,	1+128	:	unID = unID + 1
+			hotspot	0,	-1,			0,	unID,	addLth_T,	3		:	unID = unID + 1
+			hotspot	0,	addLth_T,	0,	unID,	addLth_T,	2		:	unID = unID + 1
+		del 1
+	del 1
+
+	addz	hgt_B + hgt_M + hgt_T
+		hotspot	-(hWdt_B/2 + addLth_L),	-(vWdt_B/2 + addLth_B),	0,	unID	:	unID = unID + 1
+		hotspot	-(hWdt_B/2 + addLth_L),	(vWdt_B/2 + addLth_T),	0,	unID	:	unID = unID + 1
+		hotspot	(hWdt_B/2 + addLth_R),	(vWdt_B/2 + addLth_T),	0,	unID	:	unID = unID + 1
+		hotspot	(hWdt_B/2 + addLth_R),	-(vWdt_B/2 + addLth_B),	0,	unID	:	unID = unID + 1
+
+		hotline	-(hWdt_B/2 + addLth_L),	-(vWdt_B/2 + addLth_B),	0,	-(hWdt_B/2 + addLth_L),	(vWdt_B/2 + addLth_T),	0,	unID	:	unID = unID + 1
+		hotline	-(hWdt_B/2 + addLth_L),	(vWdt_B/2 + addLth_T),	0,	(hWdt_B/2 + addLth_R),	(vWdt_B/2 + addLth_T),	0,	unID	:	unID = unID + 1
+		hotline	(hWdt_B/2 + addLth_R),	(vWdt_B/2 + addLth_T),	0,	(hWdt_B/2 + addLth_R),	-(vWdt_B/2 + addLth_B),	0,	unID	:	unID = unID + 1
+		hotline	(hWdt_B/2 + addLth_R),	-(vWdt_B/2 + addLth_B),	0,	-(hWdt_B/2 + addLth_L),	-(vWdt_B/2 + addLth_B),	0,	unID	:	unID = unID + 1
+
+		if	bDrawStep1	then
+			add	xPosStep1,	yPosStep1,	0
+				hotspot	0,			0,			step1_hgt,	unID	:	unID = unID + 1
+				hotspot	0,			step1_vWdt,	step1_hgt,	unID	:	unID = unID + 1
+				hotspot	step1_hWdt,	step1_vWdt,	step1_hgt,	unID	:	unID = unID + 1
+				hotspot	step1_hWdt,	0,			step1_hgt,	unID	:	unID = unID + 1
+
+				hotline	0,			0,			step1_hgt,	0,			step1_vWdt,	step1_hgt,	unID	:	unID = unID + 1
+				hotline	0,			step1_vWdt,	step1_hgt,	step1_hWdt,	step1_vWdt,	step1_hgt,	unID	:	unID = unID + 1
+				hotline	step1_hWdt,	step1_vWdt,	step1_hgt,	step1_hWdt,	0,			step1_hgt,	unID	:	unID = unID + 1
+				hotline	step1_hWdt,	0,			step1_hgt,	0,			0,			step1_hgt,	unID	:	unID = unID + 1
+
+				add	step1_hWdt/2,	step1_vWdt/2,	0
+					hotspot	0,	0,	0,			unID,	step1_hgt,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,			unID,	step1_hgt,	3		:	unID = unID + 1
+					hotspot	0,	0,	step1_hgt,	unID,	step1_hgt,	2		:	unID = unID + 1
+				del 1
+			del 1
+		endif
+	del 1
+
+	addz	hgt_B + hgt_M + hgt_T + step1_hgt
+
+		if	bDrawStep2	then
+			add	xPosStep2,	yPosStep2,	0
+				hotspot	0,			0,			step2_hgt,	unID	:	unID = unID + 1
+				hotspot	0,			step2_vWdt,	step2_hgt,	unID	:	unID = unID + 1
+				hotspot	step2_hWdt,	step2_vWdt,	step2_hgt,	unID	:	unID = unID + 1
+				hotspot	step2_hWdt,	0,			step2_hgt,	unID	:	unID = unID + 1
+
+				hotline	0,			0,			step2_hgt,	0,			step2_vWdt,	step2_hgt,	unID	:	unID = unID + 1
+				hotline	0,			step2_vWdt,	step2_hgt,	step2_hWdt,	step2_vWdt,	step2_hgt,	unID	:	unID = unID + 1
+				hotline	step2_hWdt,	step2_vWdt,	step2_hgt,	step2_hWdt,	0,			step2_hgt,	unID	:	unID = unID + 1
+				hotline	step2_hWdt,	0,			step2_hgt,	0,			0,			step2_hgt,	unID	:	unID = unID + 1
+
+				add	step2_hWdt/2,	step2_vWdt/2,	0
+					hotspot	0,	0,	0,			unID,	step2_hgt,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,			unID,	step2_hgt,	3		:	unID = unID + 1
+					hotspot	0,	0,	step2_hgt,	unID,	step2_hgt,	2		:	unID = unID + 1
+				del 1
+			del 1
+		endif
+	del 1
+
+
+
+	!	하부
+	put	-hWdt_B/2,	-vWdt_B/2,	15,
+		-hWdt_B/2,	vWdt_B/2,	15,
+		hWdt_B/2,	vWdt_B/2,	15,
+		hWdt_B/2,	-vWdt_B/2,	15
+
+	prism_	nsp/3,	hgt_B,	get(nsp)
+
+	!	중간부
+	addz	hgt_B
+		!	하부 좌표
+		put	-hWdt_B/2,	-vWdt_B/2,	0,
+			-hWdt_B/2,	vWdt_B/2,	0,
+			hWdt_B/2,	vWdt_B/2,	0,
+			hWdt_B/2,	-vWdt_B/2,	0
+
+		!	상부 좌표
+		put	-(hWdt_B/2 + addLth_L),	-(vWdt_B/2 + addLth_B),	hgt_M,
+			-(hWdt_B/2 + addLth_L),	(vWdt_B/2 + addLth_T),	hgt_M,
+			(hWdt_B/2 + addLth_R),	(vWdt_B/2 + addLth_T),	hgt_M,
+			(hWdt_B/2 + addLth_R),	-(vWdt_B/2 + addLth_B),	hgt_M
+
+		ruled	(nsp/3)/2,	1+2+4,	get(nsp)
+	del 1
+
+	!	상부
+	addz	hgt_B + hgt_M
+		put	-(hWdt_B/2 + addLth_L),	-(vWdt_B/2 + addLth_B),	15,
+			-(hWdt_B/2 + addLth_L),	(vWdt_B/2 + addLth_T),	15,
+			(hWdt_B/2 + addLth_R),	(vWdt_B/2 + addLth_T),	15,
+			(hWdt_B/2 + addLth_R),	-(vWdt_B/2 + addLth_B),	15
+
+		prism_	nsp/3,	hgt_T,	get(nsp)
+
+	del 1
+
+!	보 받침 상단부
+!-----------------------------------------------------------------------------------------------
+
+	!	1단
+	addz	hgt_B + hgt_M + hgt_T
+		if	bDrawStep1	then
+			!	Hotspot
+			hotspot	0,			yPosStep1,	0,	unID,	xPosStep1,	1+128	:	unID = unID + 1
+			hotspot	-1,			yPosStep1,	0,	unID,	xPosStep1,	3		:	unID = unID + 1
+			hotspot	xPosStep1,	yPosStep1,	0,	unID,	xPosStep1,	2		:	unID = unID + 1
+
+			hotspot	xPosStep1,	0,			0,	unID,	yPosStep1,	1+128	:	unID = unID + 1
+			hotspot	xPosStep1,	-1,			0,	unID,	yPosStep1,	3		:	unID = unID + 1
+			hotspot	xPosStep1,	yPosStep1,	0,	unID,	yPosStep1,	2		:	unID = unID + 1
+
+			add	xPosStep1,	yPosStep1,	0
+				hotspot	0,			0,	0,	unID,	step1_hWdt,	1+128	:	unID = unID + 1
+				hotspot	-1,			0,	0,	unID,	step1_hWdt,	3		:	unID = unID + 1
+				hotspot	step1_hWdt,	0,	0,	unID,	step1_hWdt,	2		:	unID = unID + 1
+
+				hotspot	0,	0,			0,	unID,	step1_vWdt,	1+128	:	unID = unID + 1
+				hotspot	0,	-1,			0,	unID,	step1_vWdt,	3		:	unID = unID + 1
+				hotspot	0,	step1_vWdt,	0,	unID,	step1_vWdt,	2		:	unID = unID + 1
+
+				hotspot	0,			step1_vWdt,	0,	unID,	step1_hWdt,	1+128	:	unID = unID + 1
+				hotspot	-1,			step1_vWdt,	0,	unID,	step1_hWdt,	3		:	unID = unID + 1
+				hotspot	step1_hWdt,	step1_vWdt,	0,	unID,	step1_hWdt,	2		:	unID = unID + 1
+
+				hotspot	step1_hWdt,	0,			0,	unID,	step1_vWdt,	1+128	:	unID = unID + 1
+				hotspot	step1_hWdt,	-1,			0,	unID,	step1_vWdt,	3		:	unID = unID + 1
+				hotspot	step1_hWdt,	step1_vWdt,	0,	unID,	step1_vWdt,	2		:	unID = unID + 1
+			del 1
+
+			!	Draw
+			add	xPosStep1,	yPosStep1,	0
+				put	0,			0,			15,
+					0,			step1_vWdt,	15,
+					step1_hWdt,	step1_vWdt,	15,
+					step1_hWdt,	0,			15
+
+				prism_	nsp/3,	step1_hgt,	get(nsp)
+			del 1
+		endif
+	del 1
+
+
+	!	2단
+	addz	hgt_B + hgt_M + hgt_T + step1_hgt
+		if	bDrawStep2	then
+			!	Hotspot
+			hotspot	0,			yPosStep2,	0,	unID,	xPosStep2,	1+128	:	unID = unID + 1
+			hotspot	-1,			yPosStep2,	0,	unID,	xPosStep2,	3		:	unID = unID + 1
+			hotspot	xPosStep2,	yPosStep2,	0,	unID,	xPosStep2,	2		:	unID = unID + 1
+
+			hotspot	xPosStep2,	0,			0,	unID,	yPosStep2,	1+128	:	unID = unID + 1
+			hotspot	xPosStep2,	-1,			0,	unID,	yPosStep2,	3		:	unID = unID + 1
+			hotspot	xPosStep2,	yPosStep2,	0,	unID,	yPosStep2,	2		:	unID = unID + 1
+
+			add	xPosStep2,	yPosStep2,	0
+				hotspot	0,			0,	0,	unID,	step2_hWdt,	1+128	:	unID = unID + 1
+				hotspot	-1,			0,	0,	unID,	step2_hWdt,	3		:	unID = unID + 1
+				hotspot	step2_hWdt,	0,	0,	unID,	step2_hWdt,	2		:	unID = unID + 1
+
+				hotspot	0,	0,			0,	unID,	step2_vWdt,	1+128	:	unID = unID + 1
+				hotspot	0,	-1,			0,	unID,	step2_vWdt,	3		:	unID = unID + 1
+				hotspot	0,	step2_vWdt,	0,	unID,	step2_vWdt,	2		:	unID = unID + 1
+
+				hotspot	0,			step2_vWdt,	0,	unID,	step2_hWdt,	1+128	:	unID = unID + 1
+				hotspot	-1,			step2_vWdt,	0,	unID,	step2_hWdt,	3		:	unID = unID + 1
+				hotspot	step2_hWdt,	step2_vWdt,	0,	unID,	step2_hWdt,	2		:	unID = unID + 1
+
+				hotspot	step2_hWdt,	0,			0,	unID,	step2_vWdt,	1+128	:	unID = unID + 1
+				hotspot	step2_hWdt,	-1,			0,	unID,	step2_vWdt,	3		:	unID = unID + 1
+				hotspot	step2_hWdt,	step2_vWdt,	0,	unID,	step2_vWdt,	2		:	unID = unID + 1
+			del 1
+
+			!	Draw
+			add	xPosStep2,	yPosStep2,	0
+				put	0,			0,			15,
+					0,			step2_vWdt,	15,
+					step2_hWdt,	step2_vWdt,	15,
+					step2_hWdt,	0,			15
+
+				prism_	nsp/3,	step2_hgt,	get(nsp)
+			del 1
+		endif
+	del 1

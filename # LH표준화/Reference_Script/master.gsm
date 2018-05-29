@@ -1,0 +1,31 @@
+
+!===============================================================================================
+!	License Locking Source
+
+call	"macroL"	parameters	all	returned_parameters	keyValue
+
+if	not(keyValue)	then
+	hideparameter	all
+	lock			all
+endif
+
+!	License Locking Source
+!===============================================================================================
+
+dBaseH 	= 0.023		!! 몸체의 두께
+dBaseR 	= 0.055		!! 몸체의 반지름
+dDetH	= 0.021		!! 감지기 커버의 두께
+dDetR	= 0.030		!! 감지기 커버의 반지름
+
+eps = 0.0001
+
+!	평면 표기
+!-----------------------------------------------------------------------------------------------
+PLANVIEW_KOR = 1
+PLANVIEW_ARCHICAD = 2
+PLANVIEW_MVO = 3
+
+dim	stPlanView[] 
+	stPlanView[PLANVIEW_KOR] = "Simple"
+	stPlanView[PLANVIEW_ARCHICAD] = "Detail"
+	stPlanView[PLANVIEW_MVO] = "by MVO"

@@ -1,0 +1,322 @@
+
+!===========================================================================================
+!	변수 lock
+!===========================================================================================
+lock	"A",	"B"
+
+lock	"brkAng",	"brkL"
+
+!	마감재
+!-------------------------------------------------------------------------------------------
+if	not(bFns)	then
+	lock	"fnsThk",	"vfnsThk",	"bFnsThk",	"uFnsThk", "fnsNosing", "basThk", "uBasThk"
+endif
+
+
+!	텍스트
+!-------------------------------------------------------------------------------------------
+if	not(bTxt)	then
+	lock	"txtTyp",	"txtSize",	"txtAng"
+endif
+
+
+!	난간 On/Off
+!-------------------------------------------------------------------------------------------
+if	iIhndOF = 0 and iOhndOF = 0	then
+	lock	"hndRd", "IhndOff", "OhndOff", "stwOffset", "wrkOutside", "wrkInside", "uprOutside", "uprInside", "topInside", "hndHgt", "hndOF"
+endif
+
+
+!	2D표현 : Cut아닐때
+!-------------------------------------------------------------------------------------------
+if	iWrkFlr <> wrkFlr_Cut	then
+	lock	"bWrkBrk"
+endif
+
+if	iUprFlr <> uprFlr_Cut	then
+	lock	"bUprBrk"
+endif
+
+!	핸드레일 3rd가 Off일 때, Top은 Lock
+!-------------------------------------------------------------------------------------------
+if	not(IhndOF_3rd)	then
+	parameters	IhndOF_Top = 0
+	lock	"IhndOF_Top"
+endif
+
+
+!	계단참 상부 연결 ON -> Top은 Lock
+!-------------------------------------------------------------------------------------------
+if	bAttachTop	then
+	parameters	IhndOF_Top = 0
+	lock	"IhndOF_Top"
+endif
+
+
+!	평면치수
+!-------------------------------------------------------------------------------------------
+if	iDimPlan_Wrk = DimPlan_Off	then
+	lock	"dimOffset_WrkL", "dimWitness_WrkL", "dimOffset_WrkR", "dimWitness_WrkR", "iDimLct_Wrk"
+else
+	if	iDimLct_Wrk = DimLct_1st	then
+		lock	"dimOffset_WrkR", "dimWitness_WrkR"
+	endif
+	if	iDimLct_Wrk = DimLct_2nd	then
+		lock	"dimOffset_WrkL", "dimWitness_WrkL"
+	endif
+endif
+
+
+if	iDimPlan_Upr = DimPlan_Off	then
+	lock	"dimOffset_UprL", "dimWitness_UprL", "dimOffset_UprR", "dimWitness_UprR", "iDimLct_Upr"
+else
+	if	iDimLct_Upr = DimLct_1st	then
+		lock	"dimOffset_UprR", "dimWitness_UprR"
+	endif
+	if	iDimLct_Upr = DimLct_2nd	then
+		lock	"dimOffset_UprL", "dimWitness_UprL"
+	endif
+endif
+
+if	iDimPlan_Wrk = DimPlan_Off and iDimPlan_Upr = DimPlan_Off	then
+	lock	"dimCircle", "dimTxtSize", "bViewScale"
+	parameters	bViewScale = 0
+endif
+
+if	not(bViewScale)	then
+	lock			"iViewScale"
+	hideparameter	"iViewScale"
+endif
+
+
+!===========================================================================================
+!	변수 정의
+!===========================================================================================
+
+!	계단기준점
+!-------------------------------------------------------------------------------------------
+values{2}	"iStrRef"	StairRef_Bottom,	stStrRef[StairRef_Bottom],
+						StairRef_Landing,	stStrRef[StairRef_Landing]
+
+!	계단수
+!-------------------------------------------------------------------------------------------
+values	"strRsrN1"	range	[3,	]
+values	"strRsrN2"	range	[3,	]
+
+values	"brkL"		range	[strTrd,	2.0]
+values	"uprbrkL"	range	[strTrd,	2.0]
+! values	"brkL"		range	[strTrd,	strTrd*(strRsrN1 - 1) - strTrd/2]
+! values	"uprbrkL"	range	[strTrd,	strTrd*(strRsrN1 - 1) - strTrd/2]
+
+
+!	계단관련
+!-------------------------------------------------------------------------------------------
+values	"strWdt1"	range	[0.600,	]
+values	"strWdt2"	range	[0.600,	]
+values	"strTrd"	range	[0.200,	]
+values	"strRsr"	range	[0.125,	]
+values	"strThk"	range	[0.125,	]
+
+values	"strOff1"	range	[0,	]
+values	"strOff2"	range	[0,	]
+values	"strWell"	range	[0,	]
+
+
+!	핸드레일 관련
+!-------------------------------------------------------------------------------------------
+values	"IhndOff"	range	[0.050,	0.100]
+values	"OhndOff"	range	[0.050,	0.200]
+values	"stwOffset"	range	[hndRd,	0.100]
+values	"wrkOutside"	range	[hndRd,	]
+values	"wrkInside"		range	[hndRd,	]
+values	"uprOutside"	range	[hndRd,	]
+
+if	IhndOF_top	then
+	values	"uprInside"		range	[strTrd/2,	]
+else
+	values	"uprInside"		range	[hndRd,	]
+endif
+
+values	"topInside"	range	[-(strWdt1 + strWell + IhndOff - hndRd),	]
+values	"hndRd"		range	(0,	]
+values	"hndHgt"	range	[0.800,	2.000]
+
+	lock	"iOhndOF", "iIhndOF"
+	parameters	iOhndOF = 1 * OhndOF_1st + 2*OhndOF_2nd + 4*OhndOF_3rd
+	parameters	iIhndOF = 1 * IhndOF_1st + 2*IhndOF_2nd + 4*IhndOF_3rd
+
+values{2}	"iRailSect"	RailSect_Line,	stRailSect[RailSect_Line],
+						RailSect_3D,	stRailSect[RailSect_3D],
+						RailSect_MVO,	stRailSect[RailSect_MVO]
+
+
+!	상, 하부 슬라브 구조체 두께
+!-------------------------------------------------------------------------------------------
+values	"bLndThk"	range	[0,	]
+values	"uLndThk"	range	[0,	]
+
+	! 최하층 바닥 옵션 On : bLndThk최대로/잠금
+	if	bLowFlr	then
+		parameters	bLndThk = Rng_bLndThk
+		lock		"bLndThk"
+	endif
+
+
+!	마감 관련
+!-------------------------------------------------------------------------------------------
+values	"fnsThk"	range	(0,	0.150]
+values	"vfnsThk"	range	(0,	0.150]
+values	"bFnsThk"	range	[0,	0.150]
+values	"uFnsThk"	range	[0,	0.150]
+values	"fnsNosing"	range	[0,	0.150]
+
+
+!	바탕 관련
+!-------------------------------------------------------------------------------------------
+values	"basThk"	range	[0,	0.100]
+
+
+!	텍스트 관련
+!-------------------------------------------------------------------------------------------
+values	"txtLct1"	range	[0.050,	]
+values	"txtLct2"	range	[0.050,	]
+values	"TextSize"	range	(0,	]
+
+
+!	보이기 (2D표현)
+!-------------------------------------------------------------------------------------------
+values{2}	"iWrkFlr"	wrkFlr_Cut,		stwrkFlr[wrkFlr_Cut],
+						wrkFlr_Entire,	stwrkFlr[wrkFlr_Entire],
+						wrkFlr_None,	stwrkFlr[wrkFlr_None]
+
+values{2}	"iUprFlr"	uprFlr_Cut,		stuprFlr[uprFlr_Cut],
+						uprFlr_Entire,	stuprFlr[uprFlr_Entire],
+						uprFlr_None,	stuprFlr[uprFlr_None]
+
+
+!	계단참 관련
+!-------------------------------------------------------------------------------------------
+values{2}	"iLndType"	lndType_Flat,		stLndType[lndType_Flat],
+						lndType_1step,		stLndType[lndType_1step],
+						lndType_2step_L,	stLndType[lndType_2step_L],
+						lndType_2step_R,	stLndType[lndType_2step_R],
+						lndType_3step,		stLndType[lndType_3step]
+
+values	"strLndWdt"		range	[0.600,	]
+values	"strLndThk"		range	(0,	]
+
+values	"addRange_L"	range	[0,	]
+values	"addRange_R"	range	[0,	]
+
+	! if	iLndType <> lndType_Flat	then
+	! 	parameters	addRange_L = 0
+	! 	parameters	addRange_R = 0
+
+	! 	lock	"addRange_L", "addRange_R"
+	! endif
+
+
+!	최하층 바닥
+!-------------------------------------------------------------------------------------------
+values	"lowFlrThk"	range	[0,	]
+values	"lowFlrWdt"	range	[0,	]
+
+	if	not(bLowFlr)	then
+		hideparameter	"lowFlrThk",	"lowFlrWdt"
+		lock			"lowFlrThk",	"lowFlrWdt"
+	endif
+
+
+!	법규체크
+!-------------------------------------------------------------------------------------------
+values	"lawCheckHgt"	range	[0,	]
+
+	if	not(bLawCheck)	then
+		hideparameter	"lawCheckHgt", "lawCheckPen"
+		lock			"lawCheckHgt", "lawCheckPen"
+	endif
+
+
+!	높이 산정 방법
+!-------------------------------------------------------------------------------------------
+values{2}	"iCalcHgt"	Calc_RsrRsrN,	stCalcHgt[Calc_RsrRsrN],
+						Calc_HgtRsrN,	stCalcHgt[Calc_HgtRsrN]
+
+
+!	평면치수
+!-------------------------------------------------------------------------------------------
+values{2}	"iDimPlan_Wrk"	DimPlan_Off,	stDimPlan[DimPlan_Off],
+							DimPlan_On,		stDimPlan[DimPlan_On],
+							DimPlan_MVO,	stDimPlan[DimPlan_MVO]
+
+values{2}	"iDimPlan_Upr"	DimPlan_Off,	stDimPlan[DimPlan_Off],
+							DimPlan_On,		stDimPlan[DimPlan_On],
+							DimPlan_MVO,	stDimPlan[DimPlan_MVO]
+
+!	평면 치수 위치
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDimLct_Wrk"	DimLct_1st,		stDimLct[DimLct_1st],
+							DimLct_2nd,		stDimLct[DimLct_2nd],
+							DimLct_Both,	stDimLct[DimLct_Both]
+
+values{2}	"iDimLct_Upr"	DimLct_1st,		stDimLct[DimLct_1st],
+							DimLct_2nd,		stDimLct[DimLct_2nd],
+							DimLct_Both,	stDimLct[DimLct_Both]
+
+values	"dimOffset_WrkL"	range	[0,	]
+values	"dimWitness_WrkL"	range	[0,	dimOffset_WrkL)
+values	"dimOffset_WrkR"	range	[0,	]
+values	"dimWitness_WrkR"	range	[0,	dimOffset_WrkR)
+
+values	"dimOffset_UprL"	range	[0,	]
+values	"dimWitness_UprL"	range	[0,	dimOffset_UprL)
+values	"dimOffset_UprR"	range	[0,	]
+values	"dimWitness_UprR"	range	[0,	dimOffset_UprR)
+
+values	"dimCircle"			range	[0,	0.100]
+
+values	"dimTxtSize"	range	[0,	]
+
+
+!	단면치수
+!-------------------------------------------------------------------------------------------
+values{2}	"iSectDim_Wrk"	SectDim_Off,	stSectDim[SectDim_Off],
+							SectDim_On,		stSectDim[SectDim_On],
+							SectDim_MVO,	stSectDim[SectDim_MVO]
+
+values{2}	"iSectDim_Upr"	SectDim_Off,	stSectDim[SectDim_Off],
+							SectDim_On,		stSectDim[SectDim_On],
+							SectDim_MVO,	stSectDim[SectDim_MVO]
+
+	if	iSectDim_Wrk = SectDim_Off	then
+		lock	"sectDimOffset_Wrk", "sectDimWitness_Wrk"
+	endif
+
+	if	iSectDim_Upr = SectDim_Off	then
+		lock	"sectDimOffset_Upr", "sectDimWitness_Upr"
+	endif
+
+	if	(iSectDim_Wrk = SectDim_Off and iSectDim_Upr = SectDim_Off)	then
+		lock	"sectDimCircle", "sectDimMul", "sectDimTxtSize"
+	endif
+
+	values	"sectDimOffset_Wrk"		range	[0,	]
+	values	"sectDimWitness_Wrk"	range	[0,	sectDimOffset_Wrk)
+
+	values	"sectDimOffset_Upr"		range	[0,	]
+	values	"sectDimWitness_Upr"	range	[0,	sectDimOffset_Upr)
+
+	values	"sectDimCircle"	range	[0,	0.100]
+
+	values	"sectDimTxtSize"	range	[0,	]
+
+
+
+!===========================================================================================
+!	글꼴정의
+!===========================================================================================
+
+DIM fontnames[]
+nFonts = REQUEST ("FONTNAMES_LIST", "", fontnames)
+values "stFontType" fontnames, CUSTOM
+

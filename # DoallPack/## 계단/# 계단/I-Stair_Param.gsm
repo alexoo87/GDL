@@ -1,0 +1,230 @@
+!===========================================================================================
+!	변수 lock
+!===========================================================================================
+lock	"A",	"B"
+
+lock "brkAng"
+
+if	not(bFns)	then
+	lock	"fnsThk", "vfnsThk", "bFnsThk", "uFnsThk", "fnsNosing", "basThk", "uBasThk"
+endif
+
+if	not(bTxt)	then
+	lock	"txtTyp",	"txtSize",	"txtAng"
+endif
+
+if	not(bHandIn) and not(bHandOut)	then
+	lock	"hndRd",	"IhndOff",	"OhndOff",	"WhndOff1",	"WhndOff2",	"hndHgt",	"hndOF"
+endif
+
+if	iWrkFlr <> wrkFlr_Cut	then
+	lock	"brkOF"
+endif
+
+if	iUprFlr <> uprFlr_Cut	then
+	lock	"uprbrkOF"
+endif
+
+if	iDimPlan = DimPlan_Off	then
+	lock	"idimLct", "dimOffset", "dimWitness", "dimCircle", "dimTxtSize", "dimPen", "dimTxtPen", "bViewScale"
+	parameters	bViewScale = 0
+endif
+
+if	not(bViewScale)	then
+	lock			"iViewScale"
+	hideparameter	"iViewScale"
+endif
+
+if	lndLength > eps	then
+	lock	"bAttachTop"
+endif
+
+if	not(bHandIn)	then
+	lock	"bBalusterIn"
+endif
+if	not(bHandOut)	then
+	lock	"bBalusterOut"
+endif
+
+
+!===========================================================================================
+!	변수 정의
+!===========================================================================================
+
+!	계단 총 높이
+!-------------------------------------------------------------------------------------------
+values	"zzyzx"	range	[0,	]
+
+
+!	계단수
+!-------------------------------------------------------------------------------------------
+values	"strRsrN"	range	[3,	]
+	if	strRsrN = 3	then
+		parameters	iWrkFlr = wrkFlr_Entire
+		parameters	iUprFlr = uprFlr_Entire
+	endif
+
+!	브레이크 라인
+!-------------------------------------------------------------------------------------------
+values	"brkL"		range	[strTrd,	2.0]
+values	"uprbrkL"	range	[strTrd,	2.0]
+! values	"brkL"		range	[strTrd*2,	strTrd*(strRsrN - 3)]
+! values	"uprbrkL"	range	[strTrd*2,	strTrd*(strRsrN - 3)]
+
+!	계단관련
+!-------------------------------------------------------------------------------------------
+values	"strWdt"	range	[0.600,	]
+values	"strTrd"	range	[0.200,	1.000]
+values	"strRsr"	range	[0.125,	0.500]
+values	"strThk"	range	[0.125,	]
+
+
+!	핸드레일 관련
+!-------------------------------------------------------------------------------------------
+values	"IhndOff"	range	[0.050,	0.100]
+values	"OhndOff"	range	[0.050,	0.200]
+values	"WhndOff1"	range	[0.025,	]
+values	"WhndOff2"	range	[-strTrd/2 - hndRd,	]
+values	"hndRd"		range	[0,	]
+values	"hndHgt"	range	[0.800,	1.600]
+
+	if	bAttachBtm	then
+		parameters	WhndOff1 = 0.025
+		lock	"WhndOff1"
+	endif
+
+	if	bAttachTop	then
+		parameters	WhndOff2 = 0.050
+		lock	"WhndOff2"
+	endif
+
+values{2}	"iRailSect"	RailSect_Line,	stRailSect[RailSect_Line],
+						RailSect_3D,	stRailSect[RailSect_3D],
+						RailSect_MVO,	stRailSect[RailSect_MVO]
+
+!	텍스트 관련
+!-------------------------------------------------------------------------------------------
+values	"txtLct1"	range	[0.050,	]
+values	"txtLct2"	range	[0.050,	]
+values	"TextSize"	range	(0,	]
+
+
+!	마감재관련
+!-------------------------------------------------------------------------------------------
+values	"fnsThk"	range	(0,	0.150]
+values	"vfnsThk"	range	(0,	0.150]
+values	"bFnsThk"	range	[0,	Rng_bLndThk)
+values	"uFnsThk"	range	[0,	0.150]
+values	"fnsNosing"	range	[0,	0.150]
+
+if	not(bFns)	then
+	parameters	bNonSlip = 0
+	lock		"bNonSlip"
+endif
+
+
+!	바탕재관련
+!-------------------------------------------------------------------------------------------
+values	"basThk"	range	[0,	0.100]
+! values	"uBasThk"	range	[0,	0.100]
+
+
+!	상, 하부 슬라브 구조체 두께
+!-------------------------------------------------------------------------------------------
+values	"bLndThk"	range	[0,	]
+values	"uLndThk"	range	[0,	]
+
+	!	최하층 바닥 옵션 On : bLndThk 최소로/잠금
+	if	bLowFlr	then
+		if	lowFlrThk < Rng_bLndThk	then
+			parameters	bLndThk = lowFlrThk
+		else
+			parameters	bLndThk = Rng_bLndThk
+		endif
+		lock		"bLndThk"
+	endif
+
+
+!	보이기 (2D표현)
+!-------------------------------------------------------------------------------------------
+values{2}	"iWrkFlr"	wrkFlr_Cut,		stwrkFlr[wrkFlr_Cut],
+						wrkFlr_Entire,	stwrkFlr[wrkFlr_Entire],
+						wrkFlr_None,	stwrkFlr[wrkFlr_None]
+
+values{2}	"iUprFlr"	uprFlr_Cut,		stuprFlr[uprFlr_Cut],
+						uprFlr_Entire,	stuprFlr[uprFlr_Entire],
+						uprFlr_None,	stuprFlr[uprFlr_None]
+
+if	not(bCutPln)	then
+	lock	"cutHeight"
+endif
+
+!	치수 On/Off
+!-------------------------------------------------------------------------------------------
+values{2}	"iDimPlan"	DimPlan_Off,	stDimPlan[DimPlan_Off],
+						DimPlan_On,		stDimPlan[DimPlan_On],
+						DimPlan_MVO,	stDimPlan[DimPlan_MVO]
+
+!	치수
+!-------------------------------------------------------------------------------------------
+values{2}	"idimLct"	DimLct_Left,	stDimLct[DimLct_Left],
+						DimLct_Right,	stDimLct[DimLct_Right]
+
+values	"dimOffset"		range	[0,	]
+values	"dimWitness"	range	[0,	dimOffset)
+values	"dimCircle"		range	[0,	0.100]
+
+
+!	계단참
+!-------------------------------------------------------------------------------------------
+values	"lndLength"	range	[0,	]
+
+
+!	최하층 바닥
+!-------------------------------------------------------------------------------------------
+values	"lowFlrThk"	range	[0,	]
+values	"lowFlrWdt"	range	[0,	]
+
+	if	not(bLowFlr)	then
+		hideparameter	"lowFlrThk",	"lowFlrWdt"
+		lock			"lowFlrThk",	"lowFlrWdt"
+	endif
+
+
+!	법규체크
+!-------------------------------------------------------------------------------------------
+values	"lawCheckHgt"	range	[0,	]
+
+	if	not(bLawCheck)	then
+		hideparameter	"lawCheckHgt", "lawCheckPen"
+		lock			"lawCheckHgt", "lawCheckPen"
+	endif
+
+
+!	높이 산정 방법
+!-------------------------------------------------------------------------------------------
+values{2}	"iCalcHgt"	Calc_RsrRsrN,	stCalcHgt[Calc_RsrRsrN],
+						Calc_HgtRsrN,	stCalcHgt[Calc_HgtRsrN]
+
+
+!	단면치수
+!-------------------------------------------------------------------------------------------
+values{2}	"iSectDim"	SectDim_Off,	stSectDim[SectDim_Off],
+						SectDim_On,		stSectDim[SectDim_On],
+						SectDim_MVO,	stSectDim[SectDim_MVO]
+
+	if	iSectDim = sectDim_Off	then
+		lock	"sectDimOffset", "sectDimWitness", "sectDimCircle", "sectDimMul", "sectDimTxtSize"
+	endif
+
+	values	"sectDimOffset"		range	[0,	]
+	values	"sectDimWitness"	range	[0,	sectDimOffset)
+	values	"sectDimCircle"		range	[0,	0.100]
+
+
+!===========================================================================================
+!	글꼴정의
+!===========================================================================================
+dim	fontnames[]
+nFonts = request("FONTNAMES_LIST", "", fontnames)
+values	"stFontType"	fontnames,	Custom

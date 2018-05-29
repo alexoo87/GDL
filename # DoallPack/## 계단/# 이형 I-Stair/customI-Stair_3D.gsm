@@ -1,0 +1,1616 @@
+!===============================================================================================
+!	이형 I-Stair
+!===============================================================================================
+
+!	원점
+hotspot	0,	0,	0
+! hotspot	0,	strTrd*nRsr,	strRsr*nRsr
+! hotspot	0,	strLth,	strRsr*nRsr
+! sphere	0.02
+
+if	GLOB_PREVIEW_MODE	then
+	resol	8
+endif
+
+!	Model Value
+Entire_Model = 1
+Core_Only = 2
+
+if	GLOB_STRUCTURE_DISPLAY = 0	then
+	_modelValue = Entire_Model
+else
+	_modelValue = Core_Only
+endif
+
+!	계단 기울기
+_stairAngle = strRsr/strTrd
+_stairAngle = atn(_stairAngle)
+stairAngle = _stairAngle
+subAngle = (90 - stairAngle)
+
+! lin_	0,	0,	0,	0,	strTrd*nRsr,	strRsr*nRsr
+! lin_	0,	0,	0,	0,	strLth,	strRsr*nRsr
+! lin_	0,	0,	0,	0,	strLth,	0
+
+!	마감재 On -> 위치 이동
+_vFnsThk = 0
+_hFnsThk = 0
+_uFnsThk = 0
+_bFnsThk = 0
+if	bFns	then
+	_vFnsThk = vFnsThk
+	_hFnsThk = hFnsThk
+	_uFnsThk = uFnsThk
+	_bFnsThk = bFnsThk
+endif
+
+!	마감재
+_bFns = 0
+if	bFns	then
+	if	_modelValue = Entire_Model	then
+		_bFns = 1
+	endif
+endif
+
+!	수직마감재 + 바탕재 두께 변수 정의
+if	bFns	then
+	_vFnsThk = vFnsThk
+endif
+
+
+!	핸드레일용 구
+group	"Handrail"
+	material	hndMat
+	sphere	hndRd
+endgroup
+
+!===============================================================================================
+!	단 방향 - 수평
+!===============================================================================================
+if	iTreadType = treadType_Parallel	then
+
+	!-----------------------------------------------------------------------------------------------
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+
+	!	단 높이/너비
+	add	0,	_vFnsThk,	-_hFnsThk
+		hotspot	0,	0,	0,		unID,	strRsr,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	-1,		unID,	strRsr,	3		:	unID = unID + 1
+		hotspot	0,	0,	strRsr,	unID,	strRsr,	2		:	unID = unID + 1	
+
+		addz	strRsr
+			hotspot	0,	0,		0,	unID,	strTrd,	1+128	:	unID = unID + 1
+			hotspot	0,	-1,		0,	unID,	strTrd,	3		:	unID = unID + 1
+			hotspot	0,	strTrd,	0,	unID,	strTrd,	2		:	unID = unID + 1
+		del 1
+	del 1
+
+
+	!	마감재
+	if	_bFns	then
+		!	수직/수평 마감재 두께
+		hotspot	0,	0,			0,	unID,	vFnsThk,	1+128	:	unID = unID + 1
+		hotspot	0,	-1,			0,	unID,	vFnsThk,	3		:	unID = unID + 1
+		hotspot	0,	vFnsThk,	0,	unID,	vFnsThk,	2		:	unID = unID + 1
+
+		add	0,	vFnsThk,	strRsr
+			hotspot	0,	0,	0,			unID,	hFnsThk,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,			unID,	hFnsThk,	3		:	unID = unID + 1
+			hotspot	0,	0,	-hFnsThk,	unID,	hFnsThk,	2		:	unID = unID + 1
+		del 1
+
+		addz	strRsr - hFnsThk/2
+			hotspot	0,	0,			0,	unID,	fnsNosing,	1+128	:	unID = unID + 1
+			hotspot	0,	1,			0,	unID,	fnsNosing,	3		:	unID = unID + 1
+			hotspot	0,	-fnsNosing,	0,	unID,	fnsNosing,	2		:	unID = unID + 1
+		del 1
+
+		!	하부 슬라브/마감재 두께
+		hotspot	0,	0,	0,			unID,	bFnsThk,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	1,			unID,	bFnsThk,	3		:	unID = unID + 1
+		hotspot	0,	0,	-bFnsThk,	unID,	bFnsThk,	2		:	unID = unID + 1
+
+		add	0,	vFnsThk,	-bFnsThk
+			hotspot	0,	0,	0,			unID,	bLndThk,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,			unID,	bLndThk,	3		:	unID = unID + 1
+			hotspot	0,	0,	-bLndThk,	unID,	bLndThk,	2		:	unID = unID + 1
+		del 1
+
+		!	상부 슬라브/마감재 두께
+		add	0,	strTrd*nRsr,	strRsr*nRsr
+			hotspot	0,	0,	0,			unID,	uFnsThk,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,			unID,	uFnsThk,	3		:	unID = unID + 1
+			hotspot	0,	0,	-uFnsThk,	unID,	uFnsThk,	2		:	unID = unID + 1
+
+			addz	-uFnsThk
+				hotspot	0,	0,	0,			unID,	uLndThk,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	1,			unID,	uLndThk,	3		:	unID = unID + 1
+				hotspot	0,	0,	-uLndThk,	unID,	uLndThk,	2		:	unID = unID + 1
+			del 1
+		del 1
+	endif
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	계단 좌/우 최소/최대 구하기
+	!-----------------------------------------------------------------------------------------------
+	dumpValue = 2
+
+	if	iStairType_L = stairType_Straight	then
+		_xPosMin = min(-xStart_L,	-xEnd_L)
+	endif
+
+	if	iStairType_L = stairType_Curve	then
+		yPos = strTrd*nRsr/2
+		gosub	"calc_xPos_L"
+		_xPosMin = min(0,	xPos_L)
+	endif
+
+	xPosMin = _xPosMin - dumpValue
+
+	if	iStairType_R = stairType_Straight	then
+		_xPosMax = max(xStart_R,	xEnd_R)
+		_xPosMax = _xPosMax + strWdt
+	endif
+
+	if	iStairType_R = stairType_Curve	then
+		yPos = strTrd*nRsr/2
+		gosub	"calc_xPos_R"
+		_xPosMax = max(strWdt,	xPos_R)
+	endif
+
+	xPosMax = _xPosMax + dumpValue
+
+	!-----------------------------------------------------------------------------------------------
+	!	구조 Structure
+	!-----------------------------------------------------------------------------------------------
+	group	"strBase_"
+		pen			strPenE
+		sect_fill	strFill,	strBackPen,	strFillPen,	strPenS
+		material	strMat
+
+		bottomLevel = strThk/sin(subAngle)
+
+		add	0,	_vFnsThk,	-_hFnsThk
+			for	i = 1	to	nRsr
+
+				if	i # nRsr	then
+					put	xPosMin,	0,		15,
+						xPosMin,	strTrd,	15,
+						xPosMax,	strTrd,	15,
+						xPosMax,	0,		15
+
+					!	기본계단
+					addz	-bottomLevel
+						cutplane{2}	180 + stairAngle
+					del 1
+
+						_bLndThk = bLndThk - (_hFnsThk - _bFnsThk)
+						_uLndThk = uLndThk - (_hFnsThk - _uFnsThk)
+
+						if	i = 1	then
+							addz	-_bLndThk
+								prism_	nsp/3,	strRsr + _bLndThk,	get(nsp)
+							del 1
+
+							!	하부 슬라브
+							if	_bLndThk - bottomLevel > eps	then
+								add	0,	-(_bLndThk - bottomLevel)/tan(stairAngle),	-_bLndThk
+									put	xPosMin,	0,											15,
+										xPosMin,	(_bLndThk - bottomLevel)/tan(stairAngle),	15,
+										xPosMax,	(_bLndThk - bottomLevel)/tan(stairAngle),	15,
+										xPosMax,	0,											15
+
+									prism_	nsp/3,	_bLndThk + (_hFnsThk - _bFnsThk),	get(nsp)
+								del 1
+							endif
+						endif
+
+						if	i # 1	then
+							if	i = 2 & (bottomLevel - (strRsr + _bLndThk)) > eps	then
+								addz	-(strRsr + _bLndThk)
+									prism_	nsp/3,	strRsr + (strRsr + _bLndThk),	get(nsp)
+								del 1
+							else
+								addz	-bottomLevel
+									prism_	nsp/3,	strRsr + bottomLevel,	get(nsp)
+								del 1
+							endif
+						endif
+
+					cutend
+				endif
+
+				if	i = nRsr	then
+					addz	-bottomLevel
+						cutplane{2}	180 + stairAngle
+					del 1
+
+						put	xPosMin,	0,		15,
+							xPosMin,	strTrd,	15,
+							xPosMax,	strTrd,	15,
+							xPosMax,	0,		15
+
+						addz	-bottomLevel
+							prism_	nsp/3,	strRsr + bottomLevel + (_hFnsThk - _uFnsThk),	get(nsp)
+						del 1
+
+					cutend
+
+					!	상부 슬라브
+					if	_uLndThk - bottomLevel > eps	then
+						addz	-bottomLevel
+							cutplane{2}	stairAngle
+						del 1
+
+							add	0,	strTrd - (_uLndThk - bottomLevel)/tan(stairAngle),	strRsr - _uLndThk
+								put	xPosMin,	0,											15,
+									xPosMin,	(_uLndThk - bottomLevel)/tan(stairAngle),	15,
+									xPosMax,	(_uLndThk - bottomLevel)/tan(stairAngle),	15,
+									xPosMax,	0,											15
+
+								prism_	nsp/3,	_uLndThk,	get(nsp)
+							del 1
+
+						cutend
+					endif
+
+					if	_uLndThk - bottomLevel <= eps	then
+						addz	-bottomLevel
+							cutplane{2}	180 + stairAngle
+						del 1
+
+							add	0,	strTrd,	strRsr - bottomLevel
+								put	xPosMin,	0,											15,
+									xPosMin,	(bottomLevel - _uLndThk)/tan(stairAngle),	15,
+									xPosMax,	(bottomLevel - _uLndThk)/tan(stairAngle),	15,
+									xPosMax,	0,											15
+
+								prism_	nsp/3,	bottomLevel + (_hFnsThk - _uFnsThk),	get(nsp)
+							del 1
+						cutend
+					endif
+				endif
+
+				add	0,	strTrd,	strRsr
+
+			next	i
+
+			del	nRsr
+		del 1
+	endgroup
+
+	!-----------------------------------------------------------------------------------------------
+	!	잘라내기 Cut Shape
+	!-----------------------------------------------------------------------------------------------
+	group	"strCutL_"
+		if	iStairType_L = stairType_Straight	then
+			yPos = -strTrd*2
+			gosub	"calc_xPos_L"
+
+			xPosCut_LB = xPos_L 
+
+			yPos = strTrd*(nRsr + 2)
+			gosub	"calc_xPos_L"
+
+			xPosCut_LU = xPos_L
+
+			if	xPosCut_LB - xPosCut_LU > eps	then
+				put	xPosCut_LB,				-strTrd*2,			15,
+					xPosCut_LU - dumpValue,	-strTrd*2,			15,
+					xPosCut_LU - dumpValue,	strTrd*(nRsr + 2),	15,
+					xPosCut_LU,				strTrd*(nRsr + 2),	15
+			else
+				put	xPosCut_LB,				-strTrd*2,			15,
+					xPosCut_LB - dumpValue,	-strTrd*2,			15,
+					xPosCut_LB - dumpValue,	strTrd*(nRsr + 2),	15,
+					xPosCut_LU,				strTrd*(nRsr + 2),	15
+			endif
+
+			addz	-strRsr*nRsr/2
+				prism_	nsp/3,	strRsr*nRsr*2,	get(nsp)
+			del 1
+		endif
+
+		if	iStairType_L = stairType_Curve	then
+			add	xCenter_L,	yCenter_L,	0
+				addz	-strRsr*nRsr/2
+					cylind	strRsr*nRsr*2,	radius_L
+				del 1
+			del 1
+		endif
+	endgroup
+
+
+	group	"strCutR_"
+		if	iStairType_R = stairType_Straight	then
+			yPos = -strTrd*2
+			gosub	"calc_xPos_R"
+
+			xPosCut_RB = xPos_R
+
+			yPos = strTrd*(nRsr + 2)
+			gosub	"calc_xPos_R"
+
+			xPosCut_RU = xPos_R
+
+			if	xPosCut_RB - xPosCut_RU > eps	then
+				put	xPosCut_RB,				-strTrd*2,			15,
+					xPosCut_RB + dumpValue,	-strTrd*2,			15,
+					xPosCut_RB + dumpValue,	strTrd*(nRsr + 2),	15,
+					xPosCut_RU,				strTrd*(nRsr + 2),	15
+			else
+				put	xPosCut_RB,				-strTrd*2,			15,
+					xPosCut_RU + dumpValue,	-strTrd*2,			15,
+					xPosCut_RU + dumpValue,	strTrd*(nRsr + 2),	15,
+					xPosCut_RU,				strTrd*(nRsr + 2),	15
+			endif
+
+			addz	-strRsr*nRsr/2
+				prism_	nsp/3,	strRsr*nRsr*2,	get(nsp)
+			del 1
+		endif
+
+		if	iStairType_R = stairType_Curve	then
+			add	strWdt + xCenter_R,	yCenter_R,	0
+				addz	-strRsr*nRsr/2
+					cylind	strRsr*nRsr*2,	radius_R
+				del 1
+			del 1
+		endif
+	endgroup
+
+	!-----------------------------------------------------------------------------------------------
+	!	구조 조합
+	!-----------------------------------------------------------------------------------------------
+	if	iStairType_L = stairType_Straight	then
+		strBase_1 = subgroup("strBase_",	"strCutL_")
+	endif
+	if	iStairType_L = stairType_Curve	then
+		if	xCenter_L > eps	then
+			strBase_1 = isectgroup("strBase_",	"strCutL_")
+		else
+			strBase_1 = subgroup("strBase_",	"strCutL_")
+		endif
+	endif
+
+	if	iStairType_R = stairType_Straight	then
+		strBase_2 = subgroup(strBase_1,	"strCutR_")
+	endif
+	if	iStairType_R = stairType_Curve	then
+		if	xCenter_R > eps	then
+			strBase_2 = subgroup(strBase_1,	"strCutR_")
+		else
+			strBase_2 = isectgroup(strBase_1,	"strCutR_")
+		endif
+	endif
+
+		!	합치기
+		group	"Box_1"
+			add	-20,	-20,	-20
+				block	40,	40,	40
+			del 1
+		endgroup
+
+		group	"Box_2"
+			pen			strPenE
+			sect_fill	strFill,	strBackPen,	strFillPen,	strPenS
+			material	strMat
+
+			add	-20,	-20,	-20
+				block	40,	40,	40
+			del 1
+		endgroup
+
+		strBase_3 = subgroup("Box_1",	strBase_2)
+		strBase_4 = subgroup("Box_2",	strBase_3)
+
+	placegroup	strBase_4
+
+	!-----------------------------------------------------------------------------------------------
+	!	마감 Finish
+	!-----------------------------------------------------------------------------------------------
+	group	"vFnsBase_"
+		!	수직마감
+		!-----------------------------------------------------------------------------------------------
+		pen			fnsPenE
+		sect_fill	fnsFill,	fnsBackPen,	fnsFillPen,	fnsPenS
+		material	vFnsMat
+
+		for	i = 1	to	nRsr
+			put	xPosMin,	0,			15,
+				xPosMin,	vFnsThk,	15,
+				xPosMax,	vFnsThk,	15,
+				xPosMax,	0,			15
+
+			prism_	nsp/3,	strRsr - hFnsThk,	get(nsp)
+
+			add	0,	strTrd,	strRsr
+		next	i
+
+		del nRsr
+	endgroup
+
+	group	"hFnsBase_"
+		!	수평마감
+		!-----------------------------------------------------------------------------------------------
+		pen			fnsPenE
+		sect_fill	fnsFill,	fnsBackPen,	fnsFillPen,	fnsPenS
+		material	hFnsMat
+
+		for	i = 1	to	nRsr
+			if	i # nRsr	then
+				put	xPosMin,	-fnsNosing,			15,
+					xPosMin,	strTrd + vFnsThk,	15,
+					xPosMax,	strTrd + vFnsThk,	15,
+					xPosMax,	-fnsNosing,			15
+			endif
+
+			if	i = nRsr	then
+				put	xPosMin,	-fnsNosing,	15,
+					xPosMin,	vFnsThk,	15,
+					xPosMax,	vFnsThk,	15,
+					xPosMax,	-fnsNosing,	15
+			endif
+
+			addz	strRsr - hFnsThk
+				prism_	nsp/3,	hFnsThk,	get(nsp)
+			del 1
+
+			add	0,	strTrd,	strRsr
+		next	i
+
+		del nRsr
+	endgroup
+
+	!-----------------------------------------------------------------------------------------------
+	!	마감	조합
+	!-----------------------------------------------------------------------------------------------
+	if	iStairType_L = stairType_Straight	then
+		vFnsBase_1 = subgroup{2}("vFnsBase_",	"strCutL_",	fnsPenE,	vFnsMat,	fnsPenS)
+		hFnsBase_1 = subgroup{2}("hFnsBase_",	"strCutL_",	fnsPenE,	hFnsMat,	fnsPenS)
+	endif
+	if	iStairType_L = stairType_Curve	then
+		if	xCenter_L > eps	then
+			vFnsBase_1 = isectgroup{2}("vFnsBase_",	"strCutL_",	fnsPenE,	vFnsMat,	fnsPenS)
+			hFnsBase_1 = isectgroup{2}("hFnsBase_",	"strCutL_",	fnsPenE,	hFnsMat,	fnsPenS)
+		else
+			vFnsBase_1 = subgroup{2}("vFnsBase_",	"strCutL_",	fnsPenE,	vFnsMat,	fnsPenS)
+			hFnsBase_1 = subgroup{2}("hFnsBase_",	"strCutL_",	fnsPenE,	hFnsMat,	fnsPenS)
+		endif
+	endif
+
+
+	if	iStairType_R = stairType_Straight	then
+		vFnsBase_2 = subgroup{2}(vFnsBase_1,	"strCutR_",	fnsPenE,	vFnsMat,	fnsPenS)
+		hFnsBase_2 = subgroup{2}(hFnsBase_1,	"strCutR_",	fnsPenE,	hFnsMat,	fnsPenS)
+	endif
+	if	iStairType_R = stairType_Curve	then
+		if	xCenter_R > eps	then
+			vFnsBase_2 = subgroup{2}(vFnsBase_1,	"strCutR_",	fnsPenE,	vFnsMat,	fnsPenS)
+			hFnsBase_2 = subgroup{2}(hFnsBase_1,	"strCutR_",	fnsPenE,	hFnsMat,	fnsPenS)
+		else
+			vFnsBase_2 = isectgroup{2}(vFnsBase_1,	"strCutR_",	fnsPenE,	vFnsMat,	fnsPenS)
+			hFnsBase_2 = isectgroup{2}(hFnsBase_1,	"strCutR_",	fnsPenE,	hFnsMat,	fnsPenS)
+		endif
+	endif
+
+		!	합치기
+		group	"Box_3"
+			add	-20,	-20,	-20
+				block	40,	40,	40
+			del 1
+		endgroup
+
+		group	"Box_4"
+			pen			fnsPenE
+			sect_fill	fnsFill,	fnsBackPen,	fnsFillPen,	fnsPenS
+
+			add	-20,	-20,	-20
+				block	40,	40,	40
+			del 1
+		endgroup
+
+		vFnsBase_3 = subgroup("Box_3",	vFnsBase_2)
+		vFnsBase_4 = subgroup("Box_4",	vFnsBase_3)
+
+		hFnsBase_3 = subgroup("Box_3",	hFnsBase_2)
+		hFnsBase_4 = subgroup("Box_4",	hFnsBase_3)
+
+		vFnsBase_5 = subgroup(vFnsBase_4,	strBase_4)
+		hFnsBase_5 = subgroup(hFnsBase_4,	strBase_4)
+
+	if	_bFns	then
+		placegroup	vFnsBase_5
+		placegroup	hFnsBase_5
+	endif
+
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	핸드레일 Handrail
+	!-----------------------------------------------------------------------------------------------
+	material	hndMat
+
+	!	MVO
+	!-----------------------------------------------------------------------------------------------
+	success = LIBRARYGLOBAL("MVO_StairSettings",	"iRailSect",	_iRailSect)
+
+	if	success & iRailSect = RailSect_MVO	then
+		_iRailSect = _iRailSect
+	else
+		_iRailSect = iRailSect
+	endif
+
+	!	단선
+	!-----------------------------------------------------------------------------------------------
+	_bHnd_Out = 0
+	_bHnd_In = 0
+	if	bHnd_Out	then
+		if	_modelValue = Entire_Model	then
+			if	(GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5) & _iRailSect = RailSect_Line	then
+				_bHnd_Out = 1
+			endif
+		endif
+	endif
+	if	bHnd_In	then
+		if	_modelValue = Entire_Model	then
+			if	(GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5) & _iRailSect = RailSect_Line	then
+				_bHnd_In = 1
+			endif
+		endif
+	endif
+
+		!	바깥쪽
+		if	_bHnd_Out	then
+			dim	xPosL_Curve[],	yPosL_Curve[]
+
+			for	i = 1	to	nRsr + 1
+				!	좌표추출
+				yPos = -strTrd/2 + strTrd*(i - 1)
+				gosub	"calc_xPos_L"
+
+				!	수직
+				if	bBaluster_Out	then
+					add	xPos_L + hndOff_Out,	yPos,	strRsr*(i - 1)
+						lin_	0,	0,	0,	0,	0,	hndHgt
+					del 1
+				endif
+
+				!	수평좌표 추출(stairType_Curve)
+				xPosL_Curve[i] = xPos_L + hndOff_Out
+				yPosL_Curve[i] = yPos
+
+				!	수평좌표 추출(stairType_Straight)
+				if	i = 1	then
+					xPos_First = xPos_L + hndOff_Out
+					yPos_First = yPos
+				endif
+
+				if	i = nRsr + 1	then
+					xPos_Last = xPos_L + hndOff_Out
+					yPos_Last = yPos
+				endif
+			next	i
+
+			!	수평
+			if	iStairType_L = stairType_Straight	then
+				lin_	xPos_First,	yPos_First,	hndHgt,
+						xPos_Last,	yPos_Last,	hndHgt + strRsr*nRsr
+			endif
+
+			if	iStairType_L = stairType_Curve	then
+				for	i = 1	to	nRsr
+					lin_	xPosL_Curve[i],		yPosL_Curve[i],		hndHgt + strRsr*(i - 1),
+							xPosL_Curve[i + 1],	yPosL_Curve[i + 1],	hndHgt + strRsr*i
+				next	i
+			endif
+		endif
+
+		!	안쪽
+		if	_bHnd_In	then
+			dim	xPosR_Curve[],	yPosR_Curve[]
+
+			for	i = 1	to	nRsr + 1
+				!	좌표추출
+				yPos = -strTrd/2 + strTrd*(i - 1)
+				gosub	"calc_xPos_R"
+
+				!	수직
+				if	bBaluster_In	then
+					add	xPos_R - hndOff_In,	yPos,	strRsr*(i - 1)
+						lin_	0,	0,	0,	0,	0,	hndHgt
+					del 1
+				endif
+
+				!	수평좌표 추출(stairType_Curve)
+				xPosR_Curve[i] = xPos_R - hndOff_In
+				yPosR_Curve[i] = yPos
+
+				!	수평좌표 추출(stairType_Straight)
+				if	i = 1	then
+					xPos_First = xPos_R - hndOff_In
+					yPos_First = yPos
+				endif
+
+				if	i = nRsr + 1	then
+					xPos_Last = xPos_R - hndOff_In
+					yPos_Last = yPos
+				endif
+			next	i
+
+			!	수평
+			if	iStairType_R = stairType_Straight	then
+				lin_	xPos_First,	yPos_First,	hndHgt,
+						xPos_Last,	yPos_Last,	hndHgt + strRsr*nRsr
+			endif
+
+			if	iStairType_R = stairType_Curve	then
+				for	i = 1	to	nRsr
+					lin_	xPosR_Curve[i],		yPosR_Curve[i],		hndHgt + strRsr*(i - 1),
+							xPosR_Curve[i + 1],	yPosR_Curve[i + 1],	hndHgt + strRsr*i
+				next	i
+			endif
+		endif
+
+	!	바깥쪽 핸드레일
+	!-----------------------------------------------------------------------------------------------
+	_bHnd_Out = 0
+	if	bHnd_Out	then
+		if	_modelValue = Entire_Model	then
+			if	GLOB_VIEW_TYPE = 3 | ((GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5) & _iRailSect = RailSect_3D)	then
+				_bHnd_Out = 1
+			endif
+		endif
+	endif
+
+	if	_bHnd_Out	then
+		dim	xPosL_Curve[],	yPosL_Curve[]
+
+		for	i = 1	to	nRsr + 1
+			!	좌표추출
+			yPos = -strTrd/2 + strTrd*(i - 1)
+			gosub	"calc_xPos_L"
+
+			!	수직
+			if	bBaluster_Out	then
+				add	xPos_L + hndOff_Out,	yPos,	strRsr*(i - 1)
+					cylind	hndHgt - hndRd,	hndRd*0.8
+				del 1
+			endif
+
+			!	수평좌표 추출(stairType_Curve)
+			xPosL_Curve[i] = xPos_L + hndOff_Out
+			yPosL_Curve[i] = yPos
+
+			!	수평좌표 추출(stairType_Straight)
+			if	i = 1	then
+				xPos_First = xPos_L + hndOff_Out
+				yPos_First = yPos
+			endif
+
+			if	i = nRsr + 1	then
+				xPos_Last = xPos_L + hndOff_Out
+				yPos_Last = yPos
+			endif
+		next	i
+
+		!	수평
+		if	iStairType_L = stairType_Straight	then
+			add	xPos_First,	yPos_First,	hndHgt - hndRd
+				placegroup	sweepgroup("Handrail",	xPos_Last - xPos_First,	yPos_Last - yPos_First,	strRsr*nRsr)
+			del 1
+		endif
+
+		if	iStairType_L = stairType_Curve	then
+			for	i = 1	to	nRsr
+				add	xPosL_Curve[i],	yPosL_Curve[i],	hndHgt - hndRd + strRsr*(i - 1)
+					placegroup	sweepgroup("Handrail",	xPosL_Curve[i + 1] - xPosL_Curve[i],	yPosL_Curve[i + 1] - yPosL_Curve[i],	strRsr)
+				del 1
+			next	i
+		endif
+	endif
+
+	!	안쪽 핸드레일
+	!-----------------------------------------------------------------------------------------------
+	_bHnd_In = 0
+	if	bHnd_In	then
+		if	_modelValue = Entire_Model	then
+			if	GLOB_VIEW_TYPE = 3 | ((GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5) & _iRailSect = RailSect_3D)	then
+				_bHnd_In = 1
+			endif
+		endif
+	endif
+
+	if	_bHnd_In	then
+		dim	xPosR_Curve[],	yPosR_Curve[]
+
+		for	i = 1	to	nRsr + 1
+			!	좌표추출
+			yPos = -strTrd/2 + strTrd*(i - 1)
+			gosub	"calc_xPos_R"
+
+			!	수직
+			if	bBaluster_In	then
+				add	xPos_R - hndOff_In,	yPos,	strRsr*(i - 1)
+					cylind	hndHgt - hndRd,	hndRd*0.8
+				del 1
+			endif
+
+			!	수평좌표 추출(stairType_Curve)
+			xPosR_Curve[i] = xPos_R - hndOff_In
+			yPosR_Curve[i] = yPos
+
+			!	수평좌표 추출(stairType_Straight)
+			if	i = 1	then
+				xPos_First = xPos_R - hndOff_In
+				yPos_First = yPos
+			endif
+
+			if	i = nRsr + 1	then
+				xPos_Last = xPos_R - hndOff_In
+				yPos_Last = yPos
+			endif
+		next	i
+
+		!	수평
+		if	iStairType_R = stairType_Straight	then
+			add	xPos_First,	yPos_First,	hndHgt - hndRd
+				placegroup	sweepgroup("Handrail",	xPos_Last - xPos_First,	yPos_Last - yPos_First,	strRsr*nRsr)
+			del 1
+		endif
+
+		if	iStairType_R = stairType_Curve	then
+			for	i = 1	to	nRsr
+				add	xPosR_Curve[i],	yPosR_Curve[i],	hndHgt - hndRd + strRsr*(i - 1)
+					placegroup	sweepgroup("Handrail",	xPosR_Curve[i + 1] - xPosR_Curve[i],	yPosR_Curve[i + 1] - yPosR_Curve[i],	strRsr)
+				del 1
+			next	i
+		endif
+	endif
+
+endif
+
+
+!===============================================================================================
+!	단 방향 - 원점
+!===============================================================================================
+if	iTreadType = treadType_Center	then
+
+	!-----------------------------------------------------------------------------------------------
+	!	변수 정의
+	!-----------------------------------------------------------------------------------------------
+		!	마감재 두께에 따른 이동 각도/길이
+		_aFinish = 0
+		_hFnsThk = 0
+		_bFnsThk = 0
+		_uFnsThk = 0
+		if	bFns	then
+			_aFinish = (vFnsThk/(PI*strRad))*180
+			_hFnsThk = hFnsThk
+			_bFnsThk = bFnsThk
+			_uFnsThk = uFnsThk
+		endif
+
+		!	내부 반지름/외부 반지름
+		_rInner = strRad
+		_rOuter = strRad + strWdt
+
+		!	하나의 단 각도
+		_aTrd = aStr/nRsr
+
+		!	내부 곡선 펴기
+		_aInner = 90 - aStr/2
+
+		!	핸드레일 위치
+
+		!	계단 기울기
+		_aStair = atn(strRsr/strTrd)
+		_aSubStair = 90 - _aStair
+
+		!	계단 수직 두께
+		_strThk = strThk/cos(_aStair)
+
+	!-----------------------------------------------------------------------------------------------
+	!	Hotspot
+	!-----------------------------------------------------------------------------------------------
+
+		!	strRad
+		hotspot	0,		0,	0,	unID,	strRad,	1+128	:	unID = unID + 1
+		hotspot	-1,		0,	0,	unID,	strRad,	3		:	unID = unID + 1
+		hotspot	strRad,	0,	0,	unID,	strRad,	2		:	unID = unID + 1
+
+		!	strWdt
+		addx	strRad
+			hotspot	0,		0,	0,	unID,	strWdt,	1+128	:	unID = unID + 1
+			hotspot	-1,		0,	0,	unID,	strWdt,	3		:	unID = unID + 1
+			hotspot	strWdt,	0,	0,	unID,	strWdt,	2		:	unID = unID + 1
+		del 1
+
+		!	strRsr
+		addx	strRad + strWdt/2
+			hotspot	0,	0,	0,		unID,	strRsr,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,		unID,	strRsr,	3		:	unID = unID + 1
+			hotspot	0,	0,	strRsr,	unID,	strRsr,	2		:	unID = unID + 1
+		del 1
+
+		!	bFnsThk/bLndThk
+		rotz	_aFinish
+			addx	strRad
+				hotspot	0,	0,	0,			unID,	bFnsThk,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	1,			unID,	bFnsThk,	3		:	unID = unID + 1
+				hotspot	0,	0,	-bFnsThk,	unID,	bFnsThk,	2		:	unID = unID + 1
+
+				addz	-bFnsThk
+					hotspot	0,	0,	0,			unID,	bLndThk,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	1,			unID,	bLndThk,	3		:	unID = unID + 1
+					hotspot	0,	0,	-bLndThk,	unID,	bLndThk,	2		:	unID = unID + 1
+				del 1
+			del 1
+		del 1
+
+		!	uFnsThk/uLndThk
+		rotz	aStr + _aFinish
+			addx	strRad
+				addz	strRsr*nRsr
+					hotspot	0,	0,	0,			unID,	uFnsThk,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	1,			unID,	uFnsThk,	3		:	unID = unID + 1
+					hotspot	0,	0,	-uFnsThk,	unID,	uFnsThk,	2		:	unID = unID + 1
+
+					addz	-uFnsThk
+						hotspot	0,	0,	0,			unID,	uLndThk,	1+128	:	unID = unID + 1
+						hotspot	0,	0,	1,			unID,	uLndThk,	3		:	unID = unID + 1
+						hotspot	0,	0,	-uLndThk,	unID,	uLndThk,	2		:	unID = unID + 1
+					del 1
+				del 1
+			del 1
+		del 1
+
+	!-----------------------------------------------------------------------------------------------
+	!	구조 Structure
+	!-----------------------------------------------------------------------------------------------
+		pen			strPenE
+		sect_fill	strFill,	strBackPen,	strFillPen,	strPenS
+		material	strMat
+
+		_nTrans = 0
+
+		!	원본
+		!-----------------------------------------------------------------------------------------------
+		group	"gStrCrvBase"
+			rotz	_aFinish
+				addz	-_hFnsThk
+
+					!	하부 슬라브 두께 : Cut
+					addz	-(bLndThk + _bFnsThk - _hFnsThk)	:	_nTrans = _nTrans + 1
+						cutplane	1,	1,	0,	1
+					addz	bLndThk + _bFnsThk - _hFnsThk	:	_nTrans = _nTrans + 1
+
+						!	하부 슬라브/마감재 두께 > 계단 두께
+						if	(bLndThk + _bFnsThk) - _strThk > eps	then
+							_exLth = ((bLndThk + _bFnsThk - _hFnsThk) - _strThk)/tan(_aStair)
+
+							addz	-(bLndThk + _bFnsThk) + _hFnsThk
+								put	_rInner,	0,			15,
+									_rOuter,	0,			15,
+									_rOuter,	-_exLth,	15,
+									_rInner,	-_exLth,	15
+
+								prism_	nsp/3,	bLndThk,	get(nsp)
+							del 1
+						endif
+
+						!	단 그리기
+						for	i = 1	to	nRsr
+							addz	strRsr*(i - 1) - _strThk
+								put	0,			0,		15,
+									_rOuter,	0,		15,
+									0,			0,		900,
+									_rOuter,	_aTrd,	4000+15
+
+								if	i # nRsr	then
+									prism_	nsp/3,	strRsr + _strThk,	get(nsp)
+								else
+									prism_	nsp/3,	strRsr + _strThk + _hFnsThk - _uFnsThk,	get(nsp)
+								endif
+							del 1
+
+							rotz	_aTrd
+						next	i
+
+						del nRsr
+
+						!	상부 슬라브/마감재 두께 < 계단 두께
+						if	(uLndThk + _uFnsThk) - _strThk < -eps	then
+							_exLth = ((uLndThk + _uFnsThk - _hFnsThk) - _strThk)/tan(_aStair)
+
+							rotz	_aTrd*nRsr
+								addz	strRsr*nRsr - _strThk
+									put	_rInner,	0,			15,
+										_rOuter,	0,			15,
+										_rOuter,	-_exLth,	15,
+										_rInner,	-_exLth,	15
+
+									prism_	nsp/3,	_strThk + _hFnsThk - _uFnsThk,	get(nsp)
+								del 1
+							del 1
+						endif
+
+					cutend
+
+				del 1
+			del 1
+		endgroup
+
+		!	상부 슬라브 두께 추가
+		!-----------------------------------------------------------------------------------------------
+		group	"gAddBase"
+			if	(uLndThk + _uFnsThk) - _strThk > eps	then
+				rotz	_aFinish
+					rotz	_aTrd*(nRsr - 1)
+						addz	strRsr*nRsr - (uLndThk + _uFnsThk)
+							put	0,			0,		15,
+								_rOuter,	0,		15,
+								0,			0,		900,
+								_rOuter,	_aTrd,	4000+15
+
+							prism_	nsp/3,	uLndThk,	get(nsp)
+						del 1
+					del 1
+
+					if	(uLndThk + _uFnsThk) - (strRsr + _strThk) > eps	then
+						rotz	_aTrd*(nRsr - 2)
+							addz	strRsr*nRsr - (uLndThk + _uFnsThk)
+								put	0,			0,		15,
+									_rOuter,	0,		15,
+									0,			0,		900,
+									_rOuter,	_aTrd,	4000+15
+
+								prism_	nsp/3,	(uLndThk + _uFnsThk) - (strRsr + _strThk),	get(nsp)
+							del 1
+						del 1
+					endif
+				del 1
+			endif
+		endgroup
+
+		!	계단 내부 자르기
+		!-----------------------------------------------------------------------------------------------
+		group	"gCutInner"
+			rotz	_aFinish
+				_dumpValue = strRsr*nRsr
+
+				addz	-_dumpValue
+					if	bStraight	then
+						put	0,					0,					15,
+							_rInner,			0,					15,
+							_rInner*cos(aStr),	_rInner*sin(aStr),	15
+
+						prism_	nsp/3,	_dumpValue*3,	get(nsp)
+					else
+						for	i = 1	to	nRsr
+							addz	strRsr*(i - 1) - _strThk
+								put	0,			0,		15,
+									_rInner,	0,		15,
+									0,			0,		900,
+									_rInner,	_aTrd,	4000+15
+
+								prism_	nsp/3,	_dumpValue*3,	get(nsp)
+							del 1
+
+							rotz	_aTrd
+						next	i
+
+						del nRsr
+					endif
+				del 1
+			del 1
+		endgroup
+
+		!	계단 하부 자르기
+		!-----------------------------------------------------------------------------------------------
+		group	"gCutBottom"
+			rotz	_aFinish
+				addz	-_hFnsThk
+
+					!	하부 슬라브 두께 > 계단 두께
+					if	(bLndThk + _bFnsThk) - _strThk > eps	then
+						_exLth = ((bLndThk + _bFnsThk - _hFnsThk) - _strThk)/tan(_aStair)
+
+						add	_rInner,	0,	-(bLndThk + _bFnsThk) + _hFnsThk
+							roty	-90
+								put	0,												0,			15,
+									((bLndThk + _bFnsThk - _hFnsThk) - _strThk),	0,			15,
+									0,												-_exLth,	15
+
+								prism_	nsp/3,	-strWdt,	get(nsp)
+							del 1
+						del 1
+					endif
+
+					!	단 자르기
+					_dumpWdt = _rInner - _rInner*cos(aStr/2) + 0.010
+
+						!	tube 단면
+						put	_dumpWdt,				0,				2,
+							-(strWdt + _dumpWdt),	0,				2,
+							-(strWdt + _dumpWdt),	-_dumpValue,	2,
+							_dumpWdt,				-_dumpValue,	2
+
+						_nPoly = 4
+
+						!	tube 경로
+						for	i = 1	to	nRsr + 3
+							_aMod = _aTrd*(i - 2)
+							_xPosInner = _rInner*cos(_aMod)
+							_yPosInner = _rInner*sin(_aMod)
+							_zPosInner = strRsr*(i - 2)
+
+							put	_xPosInner,	_yPosInner,	_zPosInner,	0
+						next	i
+
+						_nPath = nRsr + 3
+
+						!	tube
+						addz	-_strThk
+							tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+						del 1
+
+					!	상부 슬라브 두께 < 계단 두께
+					if	uLndThk - _strThk < -eps	then
+						_exLth = (uLndThk - _strThk)/tan(_aStair)
+
+						rotz	_aTrd*nRsr
+							add	_rInner,	0,	strRsr*nRsr - _strThk
+								roty	90
+									put	0,						0,			15,
+										(uLndThk - _strThk),	-_exLth,	15,
+										0,						-_exLth,	15
+
+									prism_	nsp/3,	strWdt,	get(nsp)
+								del 1
+							del 1
+						del 1
+					endif
+				del 1
+			del 1
+		endgroup
+
+		!	박스
+		!-----------------------------------------------------------------------------------------------
+		group	"Box_5"
+			add	-20,	-20,	-20
+				block	40,	40,	40
+			del 1
+		endgroup
+
+		group	"Box_6"
+			pen			strPenE
+			sect_fill	strFill,	strBackPen,	strFillPen,	strPenS
+			material	strMat
+
+			add	-20,	-20,	-20
+				block	40,	40,	40
+			del 1
+		endgroup
+
+		!	배치
+		!-----------------------------------------------------------------------------------------------
+		strCrv_1 = subgroup("gStrCrvBase",	"gCutBottom")
+		strCrv_2 = addgroup(strCrv_1,	"gAddBase")
+		strCrv_3 = subgroup(strCrv_2,	"gCutInner")
+		strCrv_4 = subgroup("Box_5",	strCrv_3)
+		strCrv_5 = subgroup("Box_6",	strCrv_4)
+
+
+
+	!-----------------------------------------------------------------------------------------------
+	!	마감 Finish
+	!-----------------------------------------------------------------------------------------------
+
+		!	3D표현 : Entire
+		if	_modelValue = Entire_Model	then
+			if	bFns	then
+				!	수직
+				!-----------------------------------------------------------------------------------------------
+				group	"gFnsCrvBaseV"
+					pen			fnsPenE
+					sect_fill	fnsFill,	fnsBackPen,	fnsFillPen,	fnsPenS
+					material	vFnsMat
+
+					for	i = 1	to	nRsr
+						addz	strRsr*(i - 1)
+							put	0,			0,			15,
+								_rOuter,	0,			15,
+								0,			0,			900,
+								_rOuter,	_aFinish,	4000+15
+
+							prism_	nsp/3,	strRsr - _hFnsThk,	get(nsp)
+						del 1
+
+						rotz	_aTrd
+					next	i
+
+					del nRsr
+				endgroup
+
+				!	수평
+				!-----------------------------------------------------------------------------------------------
+				group	"gFnsCrvBaseH"
+					pen			fnsPenE
+					sect_fill	fnsFill,	fnsBackPen,	fnsFillPen,	fnsPenS
+					material	hFnsMat
+
+					for	i = 1	to	nRsr
+						addz	strRsr*i - _hFnsThk
+							if	i # nRsr	then
+								put	0,			0,					15,
+									_rOuter,	0,					15,
+									0,			0,					900,
+									_rOuter,	(_aFinish + _aTrd),	4000+15
+							else
+								put	0,			0,			15,
+									_rOuter,	0,			15,
+									0,			0,			900,
+									_rOuter,	_aFinish,	4000+15
+							endif
+
+							prism_	nsp/3,	_hFnsThk,	get(nsp)
+						del 1
+
+						rotz	_aTrd
+					next	i
+
+					del nRsr
+				endgroup
+
+				!	마감 내부 자르기
+				!-----------------------------------------------------------------------------------------------
+				group	"gFnsCutInnerV"
+					material	vFnsMat
+					gosub	"cutInner_"
+				endgroup
+
+				group	"gFnsCutInnerH"
+					material	hFnsMat
+					gosub	"cutInner_"
+				endgroup
+
+				placegroup	subgroup("gFnsCrvBaseV",	"gFnsCutInnerV")
+				placegroup	subgroup("gFnsCrvBaseH",	"gFnsCutInnerH")
+			endif
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	핸드레일 Handrail
+	!-----------------------------------------------------------------------------------------------
+		material	hndMat
+
+		!	핸드레일
+		!-----------------------------------------------------------------------------------------------
+			!	MVO
+			success = LIBRARYGLOBAL("MVO_StairSettings",	"iRailSect",	_iRailSect)
+
+			if	success & iRailSect = RailSect_MVO	then
+				_iRailSect = _iRailSect
+			else
+				_iRailSect = iRailSect
+			endif
+
+			!	3D/Section 구분
+			View_Model = 1
+			View_Section = 2
+
+			if	GLOB_VIEW_TYPE = 3	then
+				_viewType = View_Model
+			else
+				_viewType = View_Section
+			endif
+
+			!	안쪽 핸드레일
+			_bHnd_In = 0
+			if	bHnd_In	then
+				if	_modelValue = Entire_Model	then
+					_bHnd_In = 1
+				endif
+			endif
+
+			!	바깥쪽 핸드레일
+			_bHnd_Out = 0
+			if	bHnd_Out	then
+				if	_modelValue = Entire_Model	then
+					_bHnd_Out = 1
+				endif
+			endif
+
+		!	안쪽 핸드레일
+		!-----------------------------------------------------------------------------------------------
+		if	_bHnd_In	then
+			dim	_xPosL_Center[],	_yPosL_Center[]
+
+			rotz	_aFinish
+				!	내부 곡선 펴기
+				if	bStraight	then
+					!	좌표 추출
+					dim	_xPosL_Sub[],	_yPosL_Sub[]
+
+					for	i = 1	to	nRsr
+						_aHndOut = _aTrd*i
+						_xPosL_Sub[i] = (_rInner - exTrdLth[i] + hndOff_In)*cos(_aHndOut)
+						_yPosL_Sub[i] = (_rInner - exTrdLth[i] + hndOff_In)*sin(_aHndOut)
+					next	i
+
+					_aHndOut_1 = -_aTrd/2
+					_xPosL_Center[1] = (_rInner + hndOff_In)*cos(_aHndOut_1)
+					_yPosL_Center[1] = (_rInner + hndOff_In)*sin(_aHndOut_1)
+
+					_xPosL_Center[2] = (_xPosL_Sub[1] + _rInner + hndOff_In)/2
+					_yPosL_Center[2] = _yPosL_Sub[1]/2
+					for i = 3	to	nRsr + 1
+						_xPosL_Center[i] = (_xPosL_Sub[i - 1] + _xPosL_Sub[i - 2])/2
+						_yPosL_Center[i] = (_yPosL_Sub[i - 1] + _yPosL_Sub[i - 2])/2
+					next	i
+
+					!	수직재
+					if	bBaluster_In	then
+						for i = 1	to	nRsr + 1
+							add	_xPosL_Center[i],	_yPosL_Center[i],	strRsr*(i - 1)
+								if	_viewType = View_Model | _viewType = View_Section & _iRailSect = RailSect_3D	then
+									cylind	hndHgt - hndRd,	hndRd*0.8
+								endif
+								if	_viewType = View_Section & _iRailSect = RailSect_Line	then
+									lin_	0,	0,	0,	0,	0,	hndHgt
+								endif
+							del 1
+						next	i
+					endif
+
+					!	수평
+					for	i = 1	to	nRsr
+						if	_viewType = View_Model | _viewType = View_Section & _iRailSect = RailSect_3D	then
+							add	_xPosL_Center[i],	_yPosL_Center[i],	hndHgt - hndRd + strRsr*(i - 1)
+								if	i # 1	then
+									placegroup	sweepgroup{2}("Handrail",	_xPosL_Center[i + 1] - _xPosL_Center[i],	_yPosL_Center[i + 1] - _yPosL_Center[i],	strRsr)
+								else
+									!lin_	0,	0,	0,	_xPosL_Center[i + 1] - _xPosL_Center[i],	_yPosL_Center[i + 1] - _yPosL_Center[i],	strRsr
+									placegroup	sweepgroup{2}("Handrail",	_xPosL_Center[2] - _xPosL_Center[1],	_yPosL_Center[2] - _yPosL_Center[1],	strRsr)
+								endif
+							del 1
+						endif
+						if	_viewType = View_Section & _iRailSect = RailSect_Line	then
+							lin_	_xPosL_Center[i],		_yPosL_Center[i],		hndHgt + strRsr*(i - 1),
+									_xPosL_Center[i + 1],	_yPosL_Center[i + 1],	hndHgt + strRsr*i
+						endif
+					next	i
+
+				!	일반
+				else
+					rotz	-_aTrd/2
+						for	i = 1	to	nRsr + 1
+							!	각도변수
+							_aHndOut = _aTrd*(i - 1)
+
+							!	수직
+							if	bBaluster_In	then
+								rotz	_aHndOut
+									add	_rInner + hndOff_In,	0,	strRsr*(i - 1)
+										if	_viewType = View_Model | _viewType = View_Section & _iRailSect = RailSect_3D	then
+											cylind	hndHgt - hndRd,	hndRd*0.8
+										endif
+										if	_viewType = View_Section & _iRailSect = RailSect_Line	then
+											lin_	0,	0,	0,	0,	0,	hndHgt
+										endif
+									del 1
+								del 1
+							endif
+
+							!	수평좌표
+							_xPosL_Center[i] = (_rInner + hndOff_In)*cos(_aHndOut)
+							_yPosL_Center[i] = (_rInner + hndOff_In)*sin(_aHndOut)
+						next	i
+
+						!	수평
+						for	i = 1	to	nRsr
+							if	_viewType = View_Model | _viewType = View_Section & _iRailSect = RailSect_3D	then
+								add	_xPosL_Center[i],	_yPosL_Center[i],	hndHgt - hndRd + strRsr*(i - 1)
+									placegroup	sweepgroup{2}("Handrail",	_xPosL_Center[i + 1] - _xPosL_Center[i],	_yPosL_Center[i + 1] - _yPosL_Center[i],	strRsr)
+								del 1
+							endif
+							if	_viewType = View_Section & _iRailSect = RailSect_Line	then
+								lin_	_xPosL_Center[i],		_yPosL_Center[i],		hndHgt + strRsr*(i - 1),
+										_xPosL_Center[i + 1],	_yPosL_Center[i + 1],	hndHgt + strRsr*i
+							endif
+						next	i
+					del 1
+				endif
+			del 1
+		endif
+
+		!	바깥쪽 핸드레일
+		!-----------------------------------------------------------------------------------------------
+		if	_bHnd_Out	then
+			dim	_xPosR_Center[],	_yPosR_Center[]
+
+			rotz	_aFinish - _aTrd/2
+				for	i = 1	to	nRsr + 1
+					!	각도변수
+					_aHndOut = _aTrd*(i - 1)
+
+					!	수직
+					if	bBaluster_Out	then
+						rotz	_aHndOut
+							add	_rOuter - hndOff_Out,	0,	strRsr*(i - 1)
+								if	_viewType = View_Model | _viewType = View_Section & _iRailSect = RailSect_3D	then
+									cylind	hndHgt - hndRd,	hndRd*0.8
+								endif
+								if	_viewType = View_Section & _iRailSect = RailSect_Line	then
+									lin_	0,	0,	0,	0,	0,	hndHgt
+								endif
+							del 1
+						del 1
+					endif
+
+					!	수평좌표
+					_xPosR_Center[i] = (_rOuter - hndOff_Out)*cos(_aHndOut)
+					_yPosR_Center[i] = (_rOuter - hndOff_Out)*sin(_aHndOut)
+				next	i
+
+				!	수평
+				for	i = 1	to	nRsr
+					if	_viewType = View_Model | _viewType = View_Section & _iRailSect = RailSect_3D	then
+						add	_xPosR_Center[i],	_yPosR_Center[i],	hndHgt - hndRd + strRsr*(i - 1)
+							placegroup	sweepgroup{2}("Handrail",	_xPosR_Center[i + 1] - _xPosR_Center[i],	_yPosR_Center[i + 1] - _yPosR_Center[i],	strRsr)
+						del 1
+					endif
+					if	_viewType = View_Section & _iRailSect = RailSect_Line	then
+						lin_	_xPosR_Center[i],		_yPosR_Center[i],		hndHgt + strRsr*(i - 1),
+								_xPosR_Center[i + 1],	_yPosR_Center[i + 1],	hndHgt + strRsr*i
+					endif
+				next	i
+			del 1
+		endif
+
+	!-----------------------------------------------------------------------------------------------
+	!	하부 보
+	!-----------------------------------------------------------------------------------------------
+		group	"gBeam"
+			pen			strPenE
+			sect_fill	strFill,	strBackPen,	strFillPen,	strPenS
+			material	strMat
+
+			!	Beam 1
+			if	nBeam > 0	then
+				rot2	_aFinish
+					addx	_rInner
+						!	beamLct1
+						hotspot	0,			0,	0,	unID,	beamLct1,	1+128	:	unID = unID + 1
+						hotspot	-1,			0,	0,	unID,	beamLct1,	3		:	unID = unID + 1
+						hotspot	beamLct1,	0,	0,	unID,	beamLct1,	2		:	unID = unID + 1
+					del 1
+
+					!	tube 단면
+					put	beamWdt1/2,		0,			2,
+						-beamWdt1/2,	0,			2,
+						-beamWdt1/2,	-beamHgt1,	2,
+						beamWdt1/2,		-beamHgt1,	2
+
+					_nPoly = 4
+
+					!	tube 경로
+					for	i = 1	to	nRsr + 7
+						_aMod = _aTrd*(i - 4) + _aFinish
+						_xPosInner = (_rInner + beamLct1)*cos(_aMod)
+						_yPosInner = (_rInner + beamLct1)*sin(_aMod)
+						_zPosInner = strRsr*(i - 4)
+
+						put	_xPosInner,	_yPosInner,	_zPosInner,	0
+					next	i
+
+					_nPath = nRsr + 7
+
+					!	cut tube
+					_nTrans = 0
+					rotz	_aFinish	:	_nTrans = _nTrans + 1
+						rotx	90		:	_nTrans = _nTrans + 1
+							cutplane	1,	1,	0
+						rotx	-90		:	_nTrans = _nTrans + 1
+					rotz	-_aFinish	:	_nTrans = _nTrans + 1
+
+					rotz	aStr + _aFinish	:	_nTrans = _nTrans + 1
+						rotx	90			:	_nTrans = _nTrans + 1
+							cutplane	1,	1,	0,	1
+						rotx	-90				:	_nTrans = _nTrans + 1
+					rotz	-(aStr + _aFinish)	:	_nTrans = _nTrans + 1
+
+						!	tube
+						addz	-(_strThk + _hFnsThk)
+							tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+						del 1
+
+					cutend
+					cutend
+				del 1
+
+				del _nTrans
+			endif
+
+			!	Beam 2
+			if	nBeam > 1	then
+				rot2	_aFinish
+					addx	_rInner
+						!	beamLct2
+						hotspot	0,			0,	0,	unID,	beamLct2,	1+128	:	unID = unID + 1
+						hotspot	-1,			0,	0,	unID,	beamLct2,	3		:	unID = unID + 1
+						hotspot	beamLct2,	0,	0,	unID,	beamLct2,	2		:	unID = unID + 1
+					del 1
+
+					!	tube 단면
+					put	beamWdt2/2,		0,			2,
+						-beamWdt2/2,	0,			2,
+						-beamWdt2/2,	-beamHgt2,	2,
+						beamWdt2/2,		-beamHgt2,	2
+
+					_nPoly = 4
+
+					!	tube 경로
+					for	i = 1	to	nRsr + 7
+						_aMod = _aTrd*(i - 4) + _aFinish
+						_xPosInner = (_rInner + beamLct2)*cos(_aMod)
+						_yPosInner = (_rInner + beamLct2)*sin(_aMod)
+						_zPosInner = strRsr*(i - 4)
+
+						put	_xPosInner,	_yPosInner,	_zPosInner,	0
+					next	i
+
+					_nPath = nRsr + 7
+
+					!	cut tube
+					rotz	_aFinish	:	_nTrans = _nTrans + 1
+						rotx	90		:	_nTrans = _nTrans + 1
+							cutplane	1,	1,	0
+						rotx	-90		:	_nTrans = _nTrans + 1
+					rotz	-_aFinish	:	_nTrans = _nTrans + 1
+
+					rotz	aStr + _aFinish	:	_nTrans = _nTrans + 1
+						rotx	90			:	_nTrans = _nTrans + 1
+							cutplane	1,	1,	0,	1
+						rotx	-90				:	_nTrans = _nTrans + 1
+					rotz	-(aStr + _aFinish)	:	_nTrans = _nTrans + 1
+
+						!	tube
+						addz	-(_strThk + _hFnsThk)
+							tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+						del 1
+
+					cutend
+					cutend
+				del 1
+
+				del _nTrans
+			endif
+		endgroup
+
+		placegroup	"gBeam"
+
+	!-----------------------------------------------------------------------------------------------
+	!	구조 최종 배치
+	!-----------------------------------------------------------------------------------------------
+		strCrv_6 = subgroup(strCrv_5,	"gBeam")
+
+		placegroup	strCrv_6
+endif
+
+
+
+!===============================================================================================
+!===============================================================================================
+end
+!===============================================================================================
+!===============================================================================================
+
+
+
+!===============================================================================================
+!	Sub-Routine
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+"calc_xPos_L":	!	xPos_L 계산
+!-----------------------------------------------------------------------------------------------
+	if	iStairType_L = stairType_Straight	then
+		!	각도
+		_xDist = xStart_L - xEnd_L
+		_yDist = strTrd*nRsr
+
+		!	수식
+		if	abs(_xDist) < eps	then
+			_xPos_L = -xStart_L
+		else
+			_Ang_L = atn(_yDist/_xDist)
+			_xPos_L = yPos/tan(_Ang_L) - xStart_L
+		endif
+	endif
+
+	if	iStairType_L = stairType_Curve	then
+		if	xCenter_L > eps	then
+			_xPos_L = -sqr(radius_L^2 - (yPos - yCenter_L)^2) + xCenter_L
+		endif
+		if	xCenter_L <= eps	then
+			_xPos_L = sqr(radius_L^2 - (yPos - yCenter_L)^2) + xCenter_L
+		endif
+	endif
+
+	xPos_L = _xPos_L
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"calc_xPos_R":	!	xPos_R 계산
+!-----------------------------------------------------------------------------------------------
+	if	iStairType_R = stairType_Straight	then
+		!	각도
+		_xDist = xEnd_R - xStart_R
+		_yDist = strTrd*nRsr
+
+		!	수식
+		if	abs(_xDist) < eps	then
+			_xPos_R = xStart_R
+		else
+			_Ang_R = atn(_yDist/_xDist)
+			_xPos_R = yPos/tan(_Ang_R) + xStart_R
+		endif
+	endif
+
+	if	iStairType_R = stairType_Curve	then
+		if	xCenter_R > eps	then
+			_xPos_R = -sqr(radius_R^2 - (yPos - yCenter_R)^2) + xCenter_R
+		endif
+		if	xCenter_R <= eps	then
+			_xPos_R = sqr(radius_R^2 - (yPos - yCenter_R)^2) + xCenter_R
+		endif
+	endif
+
+	_xPos_R = _xPos_R + strWdt
+	xPos_R = _xPos_R
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"convertDegree":	!	Radian → Degree
+!-----------------------------------------------------------------------------------------------
+
+	Degree = Radian*180/PI
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"cutInner_":	!	마감재 내부 자르기
+!-----------------------------------------------------------------------------------------------
+	_dumpValue = strRsr*nRsr
+
+	addz	-_dumpValue
+		if	bStraight	then
+			put	0,					0,					15,
+				_rInner,			0,					15,
+				_rInner*cos(aStr),	_rInner*sin(aStr),	15
+
+			prism_	nsp/3,	_dumpValue*3,	get(nsp)
+		else
+			for	i = 1	to	nRsr
+				addz	strRsr*(i - 1) - _strThk
+					put	0,			0,		15,
+						_rInner,	0,		15,
+						0,			0,		900,
+						_rInner,	_aTrd,	4000+15
+
+					prism_	nsp/3,	_dumpValue*3,	get(nsp)
+				del 1
+
+				rotz	_aTrd
+			next	i
+
+			del nRsr
+		endif
+	del 1
+
+return

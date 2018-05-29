@@ -1,0 +1,1181 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/11/23 THU
+!	VER : AC 20
+!	DEV : LEE HAE CHAN
+
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+
+if	GLOB_FEEDBACK_MODE	then
+	HM_3D_resol = 3
+endif
+resol	HM_3D_resol
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+if	GLOB_VIEW_TYPE = 2	then
+	HM_3D_pen = HM_2D_cranePen
+endif
+pen	HM_3D_pen
+
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+call	"HM_Material_White.gsm"
+
+
+!----------------------------------------------------------------------------------------------------
+!	Hotspot
+!----------------------------------------------------------------------------------------------------
+hotspot	0, 			0, 			0, unID : unID = unID+1
+hotspot	4.600/2, 	0, 			0, unID : unID = unID+1
+hotspot	-4.600/2, 	0, 			0, unID : unID = unID+1
+hotspot	0, 			4.600/2, 	0, unID : unID = unID+1
+hotspot	0, 			-4.600/2, 	0, unID : unID = unID+1
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+	! Mast Base
+	if	HM_matWarning = ""	then
+		material	HM_matBody2
+	else
+		material	HM_matWarning
+	endif
+
+	!	Outrigger
+	!----------------------------------------------------------------------------------------------------
+	si = 1+2+4+8
+
+		! Hexagon Panel
+		!----------------------------------------------------------------------------------------------------
+		! Bottom
+		addz	0.088
+			gosub	"HexagonPanel"
+		del	1
+
+		! Upper
+		addz	0.600
+			gosub	"HexagonPanel"
+		del	1
+
+		! H-Beam
+		!----------------------------------------------------------------------------------------------------
+		! Horizontal
+		gosub	"H-Beam"
+
+		! Vertical
+		rotz	90
+			gosub	"H-Beam"
+		del	1
+
+
+
+
+
+	!	Mast
+	!----------------------------------------------------------------------------------------------------
+	! Level 1(on Base)
+	addz	HM_OutrHeight
+		cylind	HM_MastBaseHeight,	HM_MastRadius
+	del	1
+
+	! Main
+	addz	HM_OutrHeight+HM_MastBaseHeight
+		for	i = 1 to HM_MastNumber
+			addz	HM_MastHeight*(i-1)
+				cylind	HM_MastHeight,	HM_MastRadius
+			del	1
+		next	i
+	del	1
+
+	!	Deck B
+	!----------------------------------------------------------------------------------------------------
+	si = 1+2+4+8
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*(HM_MastNumber-1)+0.807
+
+		group	"shape_Deck_panel_B"
+			put	-1.200,	-1.950,	si,
+				1.200,	-1.950,	si,
+				1.950,	-1.200,	si,
+				1.950,	1.200,	si,
+				1.200,	1.950,	si,
+				-1.200,	1.950,	si,
+				-1.950,	1.200,	si,
+				-1.950,	-1.200,	si
+		
+			prism_	nsp/3,	0.065,	get(nsp)
+
+		endgroup
+
+		group	"shape_Mast_B"
+			cylind	0.065,	HM_MastRadius+0.060
+		endgroup
+
+		sub_Deck_panel_Mast_B = subgroup("shape_Deck_panel_B", "shape_Mast_B")
+		placegroup sub_Deck_panel_Mast_B
+
+
+		! GuardRail
+		!----------------------------------------------------------------------------------------------------
+		addz	0.065
+
+			! Front
+			addy	-1.950
+				addx	-1.200
+					gosub	"Guard Rail_Mast Deck"
+				del	1
+			del	1
+
+			! Back
+			addy	1.950
+				addx	1.200
+					rotz	180
+						gosub	"Guard Rail_Mast Deck"
+					del	1
+				del	1
+			del	1
+
+			! Left
+			addy	1.200
+				addx	-1.950
+					rotz	-90
+						gosub	"Guard Rail_Mast Deck"
+					del	1
+				del	1
+			del	1
+
+			! Right
+			addy	-1.200
+				addx	1.950
+					rotz	90
+						gosub	"Guard Rail_Mast Deck"
+					del	1
+				del	1
+			del	1
+
+		del	1
+
+	del	1
+
+
+	!	Deck A
+	!----------------------------------------------------------------------------------------------------
+	si = 1+2+4+8
+
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*(HM_MastNumber-1)+3.312
+	
+		group	"shape_Deck_panel_A"
+			put	-1.950,	-1.950,	si,
+				1.200,	-1.950,	si,
+				1.950,	-1.200,	si,
+				1.950,	1.200,	si,
+				1.200,	1.950,	si,
+				-1.200,	1.950,	si,
+				-1.950,	1.200,	si
+		
+			prism_	nsp/3,	0.065,	get(nsp)
+		endgroup
+
+		group	"shape_Mast_A"
+			cylind	0.065,	HM_MastRadius+0.060
+		endgroup
+
+		sub_Deck_panel_Mast_A = subgroup("shape_Deck_panel_A", "shape_Mast_A")
+		placegroup sub_Deck_panel_Mast_A
+
+
+		! GuardRail
+		!----------------------------------------------------------------------------------------------------
+		addz	0.065
+
+			! Front
+			addy	-1.950
+				addx	-1.950
+					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																	HM_GRailRef = 2,					!	OUT-Line
+																	HM_GRailL = 3.150,
+																	HM_GRailH = 0.854,
+																	HM_GRailD = 0.024,
+																	HM_GRailT = 0.027,
+																	HM_GRailDist = 0.7875,
+																	HM_GRailDist_hori = 0.540,
+																	HM_GRail_cutLeft_ang = 45,
+																	HM_GRail_cutRight_ang=22.5,
+																	HM_matGRail = HM_matBody2
+				del	1
+			del	1
+
+			! Right
+			addy	-1.950
+				addx	-1.950+(3.150)
+					rotz	45
+						addx	0
+							call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																HM_GRailRef = 2,					!	OUT-Line
+																HM_GRailL = 0.485,
+																HM_GRailH = 0.854,
+																HM_GRailD = 0.024,
+																HM_GRailT = 0.027,
+																HM_GRailDist = 0.485,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 1,
+																HM_GRail_cutLeft_ang = 22.5,
+																HM_GRail_cutRight_ang=45,
+																HM_matGRail = HM_matBody2
+						del	1
+					del	1
+				del	1
+			del	1
+
+			! Back
+			addy	1.950
+				addx	1.200
+					rotz	180
+						gosub	"Guard Rail_Mast Deck"
+					del	1
+				del	1
+			del	1
+
+			! Left
+			addy	1.200
+				addx	-1.950
+					rotz	-90
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																		HM_GRailRef = 2,					!	OUT-Line
+																		HM_GRailL = 3.150,
+																		HM_GRailH = 0.854,
+																		HM_GRailD = 0.024,
+																		HM_GRailT = 0.027,
+																		HM_GRailDist = 0.7875,
+																		HM_GRailDist_hori = 0.540,
+																		HM_GRail_cutLeft_ang = 45,
+																		HM_GRail_cutRight_ang=45,
+																		HM_matGRail = HM_matBody2
+
+						rotz	-45
+							addx	-0.485
+								call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																	HM_GRailRef = 2,					!	OUT-Line
+																	HM_GRailL = 0.485,
+																	HM_GRailH = 0.854,
+																	HM_GRailD = 0.024,
+																	HM_GRailT = 0.027,
+																	HM_GRailDist = 0.485,
+																	HM_GRailDist_hori = 0.540,
+																	HM_GRail_colHide_Right = 1,
+																	HM_GRail_cutRight_ang = 22.5,
+																	HM_matGRail = HM_matBody2
+							del	1
+						del	1
+
+					del	1
+				del	1
+			del	1
+
+			! Right
+			addy	-1.200
+				addx	1.950
+					rotz	90
+						gosub	"Guard Rail_Mast Deck"
+					del	1
+				del	1
+			del	1
+
+		del	1
+
+		! Equipment
+		!----------------------------------------------------------------------------------------------------
+		addz	0.065
+			addy	-1.950+0.027
+				addx	-1.950+0.027
+					block	1.106,	0.897,	1.037
+				del	1
+			del	1
+		del	1
+
+	del	1
+
+
+	!	Body Base
+	!----------------------------------------------------------------------------------------------------
+	BdyBseThk = 0.266
+	
+	! Bottom
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber
+		cylind	0.050,	0.835
+	del	1
+
+	! Center
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+0.050
+		cylind	0.166,	0.600
+	del	1
+
+
+	! Sawtooth
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+0.050
+		for	i  = 1 to 24/2
+			rotz	360/24*i
+				addx	-1.670/2
+					addy	-0.012/2
+						block	1.670,	0.012,	0.166
+					del	1
+				del	1
+			del	1
+		next	i
+	del	1
+
+	! Upper
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+0.050+0.166
+		cylind	0.050,	0.835
+	del	1
+
+
+
+
+!	Rotation
+!----------------------------------------------------------------------------------------------------
+rotz	HM_WorkingAng
+
+
+	!	Body Deck
+	!----------------------------------------------------------------------------------------------------
+	! Bottom Panel
+
+	BtmPnlThk = 0.169
+
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk
+
+		! Panel
+		put	0.910,			1.7325,			si,
+			-5.850,			1.7325,			si,
+			-5.850,			-1.8325,			si,
+			-1.020,			-1.8325,			si,
+			-1.020,			-2.4925,			si,
+			0.910,			-2.4925,			si
+	
+		prism_	nsp/3,	BtmPnlThk,	get(nsp)
+
+		! Guard Rail
+		addz	BtmPnlThk
+
+			! 1
+			addx	-5.460
+				addy	-1.8069
+					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																	HM_GRailRef = 1,					!	CENTER-Line
+																	HM_GRailL = 1.619,
+																	HM_GRailH = 0.8696,
+																	HM_GRailD = 0.024,
+																	HM_GRailT = 0.026,
+																	HM_GRailDist = 0.540,
+																	HM_GRailDist_hori = 0.540,
+																	HM_matGRail = HM_matBody2
+				del	1
+			del	1
+	
+			! 2
+			addx	-3.760
+				addy	-1.8069
+					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																	HM_GRailRef = 1,					!	CENTER-Line
+																	HM_GRailL = 2.726,
+																	HM_GRailH = 0.8696,
+																	HM_GRailD = 0.024,
+																	HM_GRailT = 0.026,
+																	HM_GRailDist = 0.5452,
+																	HM_GRailDist_hori = 0.540,
+																	HM_matGRail = HM_matBody2
+				del	1
+			del	1
+	
+			! 3
+			addx	-0.9944
+				addy	-1.8469
+					rotz	-90
+
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																		HM_GRailRef = 1,					!	CENTER-Line
+																		HM_GRailL = 0.6201,
+																		HM_GRailH = 0.8696,
+																		HM_GRailD = 0.024,
+																		HM_GRailT = 0.026,
+																		HM_GRailDist = 0.6201,
+																		HM_GRailDist_hori = 0.540,
+																		HM_GRail_cutRight_ang=45,
+																		HM_matGRail = HM_matBody2
+						addx	0.6201
+							rotz	90
+								call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																				HM_GRailRef = 1,					!	CENTER-Line
+																				HM_GRailL = 0.6744,
+																				HM_GRailH = 0.8696,
+																				HM_GRailD = 0.024,
+																				HM_GRailT = 0.026,
+																				HM_GRailDist = 0.6744,
+																				HM_GRailDist_hori = 0.540,
+																				HM_GRail_colHide_Left = 1,
+																				HM_GRail_cutLeft_ang = 45,
+																				HM_matGRail = HM_matBody2
+							del	1
+						del	1
+
+					del	1
+				del	1
+			del	1
+		
+			!4
+			addx	-0.505
+				addy	-1.4069
+					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																	HM_GRailRef = 1,					!	CENTER-Line
+																	HM_GRailL = 1.3954,
+																	HM_GRailH = 0.8696,
+																	HM_GRailD = 0.024,
+																	HM_GRailT = 0.026,
+																	HM_GRailDist = 0.6977,
+																	HM_GRailDist_hori = 0.540,
+																	HM_GRail_cutRight_ang=45,
+																	HM_matGRail = HM_matBody2
+					addx	1.3954
+						rotz	90
+							call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																			HM_GRailRef = 1,					!	CENTER-Line
+																			HM_GRailL = 0.4044,
+																			HM_GRailH = 0.8696,
+																			HM_GRailD = 0.024,
+																			HM_GRailT = 0.026,
+																			HM_GRailDist = 0.4044,
+																			HM_GRailDist_hori = 0.540,
+																			HM_GRail_colHide_Left = 1,
+																			HM_GRail_cutLeft_ang = 45,
+																			HM_matGRail = HM_matBody2
+
+						del	1
+					del	1
+				del	1
+			del	1
+
+			! 5
+			addx	0.8844
+				addy	1.0025
+					rotz	90
+
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																		HM_GRailRef = 1,					!	CENTER-Line
+																		HM_GRailL = 0.7044,
+																		HM_GRailH = 0.8696,
+																		HM_GRailD = 0.024,
+																		HM_GRailT = 0.026,
+																		HM_GRailDist = 0.7044,
+																		HM_GRailDist_hori = 0.540,
+																		HM_GRail_cutRight_ang=45,
+																		HM_matGRail = HM_matBody2
+						addx	0.7044
+							rotz	90
+								call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																				HM_GRailRef = 1,					!	CENTER-Line
+																				HM_GRailL = 1.864,
+																				HM_GRailH = 0.8696,
+																				HM_GRailD = 0.024,
+																				HM_GRailT = 0.026,
+																				HM_GRailDist = 0.6213,
+																				HM_GRailDist_hori = 0.540,
+																				HM_GRail_colHide_Left = 1,
+																				HM_GRail_cutLeft_ang = 45,
+																				HM_matGRail = HM_matBody2
+							del	1
+						del	1
+
+					del	1
+				del	1
+			del	1
+
+			! 6
+			addx	-1.0604
+				addy	1.7069
+					rotz	180
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																		HM_GRailRef = 1,					!	CENTER-Line
+																		HM_GRailL = 2.6996,
+																		HM_GRailH = 0.8696,
+																		HM_GRailD = 0.024,
+																		HM_GRailT = 0.026,
+																		HM_GRailDist = 0.5399,
+																		HM_GRailDist_hori = 0.540,
+																		HM_matGRail = HM_matBody2
+					del	1
+				del	1
+			del	1
+
+			! 7
+			addx	-3.840
+				addy	1.7069
+					rotz	180
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																		HM_GRailRef = 1,					!	CENTER-Line
+																		HM_GRailL = 1.620,
+																		HM_GRailH = 0.8696,
+																		HM_GRailD = 0.024,
+																		HM_GRailT = 0.026,
+																		HM_GRailDist = 0.540,
+																		HM_GRailDist_hori = 0.540,
+																		HM_matGRail = HM_matBody2
+					del	1
+				del	1
+			del	1
+
+			! 8
+			addx	-5.540
+				addy	1.7069
+					rotz	180
+
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																		HM_GRailRef = 1,					!	CENTER-Line
+																		HM_GRailL = 0.285,
+																		HM_GRailH = 0.8696,
+																		HM_GRailD = 0.024,
+																		HM_GRailT = 0.026,
+																		HM_GRailDist = 0.285,
+																		HM_GRailDist_hori = 0.540,
+																		HM_GRail_cutRight_ang=45,
+																		HM_matGRail = HM_matBody2
+						addx	0.285
+							rotz	90
+								call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																				HM_GRailRef = 1,					!	CENTER-Line
+																				HM_GRailL = 3.5138,
+																				HM_GRailH = 0.8696,
+																				HM_GRailD = 0.024,
+																				HM_GRailT = 0.026,
+																				HM_GRailDist = 0.58563,
+																				HM_GRailDist_hori = 0.540,
+																				HM_GRail_colHide_Left = 1,
+																				HM_GRail_cutLeft_ang = 45,
+																				HM_GRail_cutRight_ang = 45,
+																				HM_matGRail = HM_matBody2
+								addx	3.5138
+									rotz	90
+										call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+																						HM_GRailRef = 1,					!	CENTER-Line
+																						HM_GRailL = 0.285,
+																						HM_GRailH = 0.8696,
+																						HM_GRailD = 0.024,
+																						HM_GRailT = 0.026,
+																						HM_GRailDist = 0.285,
+																						HM_GRailDist_hori = 0.540,
+																						HM_GRail_colHide_Left = 1,
+																						HM_GRail_cutLeft_ang = 45,
+																						HM_matGRail = HM_matBody2
+									del	1
+								del	1
+
+							del	1
+						del	1
+
+					del	1
+				del	1
+			del	1
+
+		del	1
+
+	del	1
+
+
+	! Block on Bottom Panel
+	!----------------------------------------------------------------------------------------------------
+	BlcOnBtmPnlThk = 0.281
+	BseOnBtmPnlWdt = 1.765
+	BseOnBtmPnlWdtBck = 3.565
+
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+BtmPnlThk
+		addx	-5.500
+			addy	-1.7825
+
+				! Back-Right(Origin of Base)
+				block	1.700,	0.900,	BlcOnBtmPnlThk	
+
+				! Back-Middle
+				addy	0.900
+					block	1.700,	1.765,	BlcOnBtmPnlThk
+				del	1
+
+				! Back-Left
+				addy	0.900+1.765
+					block	1.700,	0.800,	BlcOnBtmPnlThk
+				del	1
+
+!				! Middle-Right
+!				addx	1.700
+!					block	2.830,	0.900,	BlcOnBtmPnlThk
+!				del	1
+
+				! Middle-Middle
+				addx	1.700
+					addy	0.900
+						block	2.830+1.830,	1.765,	BlcOnBtmPnlThk
+					del	1
+				del	1
+
+!				! Middle-Left
+!				addx	1.700
+!					addy	0.900+1.765
+!						block	2.830,	0.800,	BlcOnBtmPnlThk
+!					del	1
+!				del	1
+
+!				! front-Left
+!				addx	1.700+2.830
+!					addy	0.900+1.765
+!						block	1.830,	0.800,	BlcOnBtmPnlThk
+!					del	1
+!				del	1
+
+!				! front-Right-Inner
+!				addx	1.700+2.830
+!					addy	0.400
+!						block	1.830,	0.900-0.400,	BlcOnBtmPnlThk
+!					del	1
+!				del	1
+
+!				! front-Right-Outer
+!				addx	1.700+2.830
+!					addy	-0.660
+!						block	0.630,	1.060,	BlcOnBtmPnlThk
+!					del	1
+!				del	1
+
+				! Pulley Base
+				addz	0.281
+					! Left(Back)
+					addx	0.150
+						addy	BseOnBtmPnlWdtBck /2-1.052
+							block	0.700,	0.850,	0.135
+
+							addx	0.025
+								addy	0.050
+									addz	0.135
+										block	0.700-0.025*2,	0.850-0.050*2,	0.188
+									del	1
+								del	1
+							del	1
+						del	1
+					del	1
+	
+					! Right(Front)
+					addx	0.835
+						addy	BseOnBtmPnlWdtBck /2+0.4075
+							block	0.790,	0.845,	0.135
+
+							addx	0.010
+								addy	0.020
+									addz	0.135
+										block	0.790-0.010*2,	0.845-0.020*2,	0.225
+									del	1
+								del	1
+							del	1
+						del	1
+					del	1
+
+				del	1
+
+			del	1
+		del	1
+	del	1
+
+
+	! Pulley
+	!----------------------------------------------------------------------------------------------------
+	HM_Pulley_Width = 0.418
+	HM_Pulley_R1 = 0.283
+	HM_Pulley_R2 = 0.160
+
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+BtmPnlThk+BlcOnBtmPnlThk
+
+		! Back-Right
+		addz	0.6055
+			addx	-5.000
+				addy	-0.627
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_Pulley_Width,
+																	HM_Pulley_R1 = HM_Pulley_R1,
+																	HM_Pulley_R2 = HM_Pulley_R2,
+																	HM_Pulley_Thick = 0.025,
+																	HM_matPulley = HM_matBody2,
+																	HM_Pulley_Fixed = 1
+				del	1
+			del	1
+		del	1
+
+		! Front-Left
+		addz	0.645
+			addx	-4.270
+				addy	0.830
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_Pulley_Width,
+																	HM_Pulley_R1 = HM_Pulley_R1,
+																	HM_Pulley_R2 = HM_Pulley_R2,
+																	HM_Pulley_Thick = 0.025,
+																	HM_matPulley = HM_matBody2,
+																	HM_Pulley_Fixed = 1
+				del	1
+			del	1
+		del	1
+
+	del	1
+
+
+	! Operator Cap
+	!----------------------------------------------------------------------------------------------------
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+BtmPnlThk
+		addx	-0.320
+			addy	-2.6825
+				call	"HM_mc_OperatorCab.gsm"	parameters	all	HM_OP_Type = 2,
+																		HM_OP_Height = 1.981,
+																		HM_OP_Width = 1.240,
+																		HM_OP_Depth_bot = 1.200,
+																		HM_OP_Depth_roo = 1.230,
+																		bTest = 0,
+																		bOrigin = 0
+			del	1
+		del	1
+	del	1
+
+
+	!	Cat Head
+	!----------------------------------------------------------------------------------------------------
+	_mOutr_CH_offset = -3.500
+	HM_CH_Width = 2.350
+	HM_CH_Depth = 1.900
+	HM_CH_Height = 9.700
+	HM_CH_Topnt_posx =0.001
+
+	! Base
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+BtmPnlThk
+
+		! Back-Left
+		addx	_mOutr_CH_offset-0.11
+			addy	HM_CH_Depth/2-0.010
+				block	0.3599,	0.020,	0.181
+			del	1
+		del	1
+
+		! Back-Right
+		addx	_mOutr_CH_offset-0.11
+			addy	-(HM_CH_Depth/2-0.010)-0.020
+				block	0.3599,	0.020,	0.181
+			del	1
+		del	1
+
+		! Back-Left
+		addx	_mOutr_CH_offset+HM_CH_Width-0.25
+			addy	HM_CH_Depth/2-0.010
+				block	0.3599,	0.020,	0.181
+			del	1
+		del	1
+
+		! Back-Right
+		addx	_mOutr_CH_offset+HM_CH_Width-0.25
+			addy	-(HM_CH_Depth/2-0.010)-0.020
+				block	0.3599,	0.020,	0.181
+			del	1
+		del	1
+
+
+	del	1
+
+	! Frame
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+BtmPnlThk+0.381
+		addx	_mOutr_CH_offset
+			call	"HM_mc_CatHead.gsm"	parameters	all	HM_CH_Width = HM_CH_Width,
+																HM_CH_Depth = HM_CH_Depth,
+																HM_CH_Height = HM_CH_Height,
+																HM_CH_Topnt_posx  = HM_CH_Topnt_posx
+		del	1
+	del	1
+
+
+	!	Jib
+	!----------------------------------------------------------------------------------------------------
+	AllMastToJibOrigin = 0.650
+
+	!	Working Angle Hotspot
+	_hLth = (HM_JibLength/2)*cos(HM_JibAng)
+	add	-_mCraneOriginX,	0,	(HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+AllMastToJibOrigin) + HM_JibHeight/2
+		hotspot	_hLth,						0,							0,	unID,	HM_WorkingAng,	4	: unID = unID + 1
+		hotspot	_hLth*cos(HM_WorkingAng),	_hLth*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng,	5	: unID = unID + 1
+		hotspot	0,							0,							0,	unID,	HM_WorkingAng,	6	: unID = unID + 1
+		hotspot	0,							0,							1,	unID,	HM_WorkingAng,	7	: unID = unID + 1
+	del 1
+
+	addx	-_mMast_jib_offset
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+BtmPnlThk+BlcOnBtmPnlThk
+
+			! Base - Back(Left)
+			addx	-0.235
+				addy	0.440
+					block	0.410,	0.2,	0.044
+				del	1
+			del	1
+
+			! Base - Front(Right)
+			addx	-0.235
+				addy	-0.440-0.2
+					block	0.410,	0.2,	0.044
+				del	1
+			del	1
+
+		del	1
+	del	1
+
+	addx	-_mMast_jib_offset
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+AllMastToJibOrigin
+			if	HM_Jib_flag = 1	then
+				call	"HM_mc_Jib.gsm"	parameters	all	HM_Jib_type = 1,
+															bTest = 0,
+															bOrigin = 0
+			endif
+
+			!	Pulley
+			roty	-HM_jibAng
+				addx	HM_JibLength
+					addy	0.770
+						call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.054,
+																		HM_Pulley_R1 = 0.148,
+																		HM_Pulley_R2 = 0.1258,
+																		HM_Pulley_Thick = 0.012,
+																		HM_matPulley = HM_matBody1,
+																		HM_Pulley_Fixed = 0
+					del	1
+
+					addy	-0.770
+						call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.054,
+																		HM_Pulley_R1 = 0.148,
+																		HM_Pulley_R2 = 0.1258,
+																		HM_Pulley_Thick = 0.012,
+																		HM_matPulley = HM_matBody1,
+																		HM_Pulley_Fixed = 0
+					del	1
+					rotx	90
+						addz	-1.486/2
+							cylind	1.486,	0.055
+						del	1
+					del	1
+				del	1
+			del	1
+
+		del	1
+	del	1
+
+
+	!	Wire
+	!----------------------------------------------------------------------------------------------------
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+AllMastToJibOrigin 
+		addx	HM_WorkingR
+			addz	HM_JibLength*sin(HM_jibAng)
+				hotspot 	0, 	0, 	0,				unID, HM_JibWireLen, 1			: unID = unID + 1			
+				hotspot 	0, 	0, 	-HM_JibWireLen,	unID, HM_JibWireLen, 2			: unID = unID + 1		
+				hotspot 	0, 	0, 	1,				unID, HM_JibWireLen, 3			: unID = unID + 1		
+			del	1
+		del	1
+	del	1
+
+
+		!	Deck -> CatHead
+		!----------------------------------------------------------------------------------------------------
+		! Back-Right
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk
+			call	"HM_mc_Wire.gsm"	parameters	all		x1 = -5.150,
+															x2 = -3.740,
+															y1 = -0.627,
+															y2 = -1.900/2,
+															z1 = 1.055,
+															z2 = 10.250
+		del	1
+	
+		! Front-Left
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk
+			call	"HM_mc_Wire.gsm"	parameters	all		x1 = -4.410,
+															x2 = -3.740,
+															y1 = 0.830,
+															y2 = 1.900/2,
+															z1 = 1.055,
+															z2 = 10.250
+		del	1
+	
+	
+		!	CatHead -> Jib
+		!----------------------------------------------------------------------------------------------------
+		! Right
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk
+			call	"HM_mc_Wire.gsm"	parameters	all		x1 = -3.740,
+																x2 = HM_JibLength*cos(HM_jibAng)-_mCraneOriginX,
+																y1 = -1.900/2,
+																y2 = -1.900/2+0.180,
+																z1 = 10.250,
+																z2 = HM_JibLength*sin(HM_jibAng)+AllMastToJibOrigin
+		del	1
+	
+		! Left
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk
+			call	"HM_mc_Wire.gsm"	parameters	all		x1 = -3.740,
+																x2 = HM_JibLength*cos(HM_jibAng)-_mCraneOriginX,
+																y1 = 1.900/2,
+																y2 = 1.900/2-0.180,
+																z1 = 10.250,
+																z2 = HM_JibLength*sin(HM_jibAng)+AllMastToJibOrigin
+		del	1
+
+
+		!	Jib -> Hook
+		!----------------------------------------------------------------------------------------------------
+		! Right
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk
+			call	"HM_mc_Wire.gsm"	parameters	all		x1 = HM_JibLength*cos(HM_jibAng)-_mCraneOriginX,
+																x2 = HM_WorkingR,
+																y1 = -1.900/2+0.180,
+																y2 = -0.14,
+																z1 = HM_JibLength*sin(HM_jibAng)+AllMastToJibOrigin,
+																z2 = HM_JibLength*sin(HM_jibAng)+AllMastToJibOrigin-HM_JibWireLen+0.8
+		del	1
+
+		! Left
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk
+			call	"HM_mc_Wire.gsm"	parameters	all		x1 = HM_JibLength*cos(HM_jibAng)-_mCraneOriginX,
+																x2 = HM_WorkingR,
+																y1 = 1.900/2-0.180,
+																y2 = 0.14,
+																z1 = HM_JibLength*sin(HM_jibAng)+AllMastToJibOrigin,
+																z2 = HM_JibLength*sin(HM_jibAng)+AllMastToJibOrigin-HM_JibWireLen+0.8
+		del	1
+
+
+		!	Hook -> Suspended Load
+		!----------------------------------------------------------------------------------------------------
+		!	in "HM_mc_Suspendedloads.gsm" Macro
+
+
+	!	Hook
+	!----------------------------------------------------------------------------------------------------
+	addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+AllMastToJibOrigin 
+		addx	HM_WorkingR
+			addz	HM_JibLength*sin(HM_jibAng)
+				addz	-HM_JibWireLen
+					call	"HM_mc_Hook.gsm"	parameters	all		
+				del	1
+			del	1
+		del	1
+	del	1
+
+
+	!	Suspended Load
+	!----------------------------------------------------------------------------------------------------
+	if	HM_SLshow	then
+		addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+AllMastToJibOrigin 
+			addx	HM_WorkingR
+				addz	HM_JibLength*sin(HM_jibAng)-HM_JibWireLen
+
+					hotspot 	0, 	0, 	0,					unID, HM_SLwireLen, 1 			: unID = unID + 1
+					hotspot 	0, 	0, 	-HM_SLwireLen,	unID, HM_SLwireLen, 2			: unID = unID + 1
+					hotspot 	0, 	0, 	1,					unID, HM_SLwireLen, 3			: unID = unID + 1
+
+					addz	-HM_SLwireLen
+						rotz	90
+							call	"HM_mc_Suspendedloads.gsm"	parameters	all
+						del	1
+					del	1
+
+				del	1
+			del	1
+		del	1
+	endif
+
+
+	!	Load Text
+	!----------------------------------------------------------------------------------------------------
+	if	HM_3D_text_show_load	then
+		if	GLOB_CONTEXT <> 23 	then
+			addx	HM_SLdepth/2
+				addz	HM_OutrHeight+HM_MastBaseHeight+HM_MastHeight*HM_MastNumber+BdyBseThk+AllMastToJibOrigin 
+					addx	HM_WorkingR
+						addz	HM_JibLength*sin(HM_jibAng)-HM_JibWireLen-HM_SLwireLen
+							rotz	90
+								call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 1,
+																				HM_3D_text_show_plane = 0
+							del	1
+						del	1
+					del 1
+				del	1
+			del	1
+		endif
+	endif
+
+	if	HM_3D_text_show_plane	then
+		!	On the Bottom (TEST)
+		call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 0,
+														HM_3D_text_show_plane = 1
+	endif
+
+
+del	1
+
+	!----------------------------------------------------------------------------------------------------
+	!	Dimension
+	!----------------------------------------------------------------------------------------------------
+
+	!	Working Radius
+	!----------------------------------------------------------------------------------------------------
+	if	HM_3D_WorkingR_show	then
+		call	"HM_mc_WorkingR.gsm"	parameters all	
+	endif
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+!	Guard Rail
+!----------------------------------------------------------------------------------------------------
+"Guard Rail_Mast Deck"	:
+	! Center
+	call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+													HM_GRailRef = 2,					!	OUT-Line
+													HM_GRailL = 2.400,
+													HM_GRailH = 0.854,
+													HM_GRailD = 0.024,
+													HM_GRailT = 0.027,
+													HM_GRailDist = 0.800,
+													HM_GRailDist_hori = 0.540,
+													HM_GRail_cutLeft_ang = 22.5,
+													HM_GRail_cutRight_ang=22.5,
+													HM_matGRail = HM_matBody2
+
+	! Right
+	addx	2.400
+		rotz	45
+			call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+												HM_GRailRef = 2,					!	OUT-Line
+												HM_GRailL = 0.485,
+												HM_GRailH = 0.854,
+												HM_GRailD = 0.024,
+												HM_GRailT = 0.027,
+												HM_GRailDist = 0.485,
+												HM_GRailDist_hori = 0.540,
+												HM_GRail_colHide_Left = 1,
+												HM_GRail_cutLeft_ang = 22.5,
+												HM_matGRail = HM_matBody2
+		del	1
+	del	1
+
+	! Left
+		rotz	-45
+			addx	-0.485
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,
+													HM_GRailRef = 2,					!	OUT-Line
+													HM_GRailL = 0.485,
+													HM_GRailH = 0.854,
+													HM_GRailD = 0.024,
+													HM_GRailT = 0.027,
+													HM_GRailDist = 0.485,
+													HM_GRailDist_hori = 0.540,
+													HM_GRail_colHide_Right = 1,
+													HM_GRail_cutRight_ang = 22.5,
+													HM_matGRail = HM_matBody2
+			del	1
+		del	1
+
+return
+
+
+!	H-Beam
+!----------------------------------------------------------------------------------------------------
+"H-Beam"	:
+
+	! Bottom
+	addx	-(5.318-0.009*2)/2
+		addy	-0.400/2
+			addz	0.100
+				block	5.318-0.009*2,	0.400,	0.036
+			del	1
+		del	1
+	del	1
+
+	! Upper
+	addx	-(5.318-0.009*2)/2
+		addy	-0.400/2
+			addz	0.564
+				block	5.318-0.009*2,	0.400,	0.036
+			del	1
+		del	1
+	del	1
+
+	! Center(Vertical)
+	addx	-(5.318-0.009*2)/2
+		addz	0.100+0.036
+			block	5.318-0.009*2,	0.036,	0.428
+		del	1
+	del	1
+
+	! Side
+	addx	-5.318/2
+		addy	-0.400/2
+			block	0.009,	0.400,	0.630
+		del	1
+	del	1
+
+	addx	5.318/2-0.009
+		addy	-0.400/2
+			block	0.009,	0.400,	0.630
+		del	1
+	del	1
+
+	! Strut
+	! 1
+	addx	2.300
+		addx	-0.177/2
+			addy	-0.060/2
+				addz	0.540
+					roty	-18
+						block	0.177,	0.060,	6
+					del	1
+				del	1
+			del	1
+		del	1
+	del	1
+
+	! 2
+	addx	-2.300
+		addx	-0.177/2
+			addy	-0.060/2
+				addz	0.540
+					roty	18
+						block	0.177,	0.060,	6
+					del	1
+				del	1
+			del	1
+		del	1
+	del	1
+
+return
+
+
+!	Hexagon Panel
+!----------------------------------------------------------------------------------------------------
+"HexagonPanel" :
+	put	0.861,	0.200,	si,
+		0.200,	0.861,	si,
+		-0.200,	0.861,	si,
+		-0.861,	0.200,	si,
+		-0.861,	-0.200,	si,
+		-0.200,	-0.861,	si,
+		0.200,	-0.861,	si,
+		0.861,	-0.200,	si
+
+	prism_	nsp/3,	0.012,	get(nsp)
+return
+
