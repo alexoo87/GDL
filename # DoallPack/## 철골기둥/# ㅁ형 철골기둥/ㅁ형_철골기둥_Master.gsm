@@ -35,3 +35,32 @@ if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
 		stCutAxis[2] = "Y축"
 endif
 
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+DISPLAY_PROJECTED = 1
+DISPLAY_WITHOVERHEAD = 2
+DISPLAY_OUTLINES = 3
+DISPLAY_OVERHEAD = 4
+DISPLAY_CUTPLANE = 5
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stDisplay[]
+		stDisplay[1] = "Projected"
+		stDisplay[2] = "Projected with Overhead"
+		stDisplay[3] = "Outlines Only"
+		stDisplay[4] = "Overhead All"
+		stDisplay[5] = "Cut Plane"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+PROJECTTO_FLOORPLAN = 1
+PROJECTTO_ABSOLUTE = 2
+PROJECTTO_ENTIRE = 3
+
+if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
+	dim	stProjectTo[]
+		stProjectTo[1] = "To Floor Plan Range"
+		stProjectTo[2] = "Absolute Display Limit"
+		stProjectTo[3] = "Entire Element"
+endif

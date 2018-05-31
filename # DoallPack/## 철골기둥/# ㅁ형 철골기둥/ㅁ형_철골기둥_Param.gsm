@@ -66,3 +66,21 @@ values	"posCenterB"	range	[-_range_Center,	_range_Center]
 
 values	"cutLthB_1"	range	(-(colHgt/2),	colHgt/2)
 values	"cutLthB_2"	range	(-(colHgt/2),	colHgt/2)
+
+!	Floor Plan Display
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDisplay"	DISPLAY_PROJECTED,		stDisplay[DISPLAY_PROJECTED],
+						DISPLAY_WITHOVERHEAD,	stDisplay[DISPLAY_WITHOVERHEAD],
+						DISPLAY_OUTLINES,		stDisplay[DISPLAY_OUTLINES],
+						DISPLAY_OVERHEAD,		stDisplay[DISPLAY_OVERHEAD],
+						DISPLAY_CUTPLANE,		stDisplay[DISPLAY_CUTPLANE]
+
+if	not(iDisplay = DISPLAY_WITHOVERHEAD | iDisplay = DISPLAY_OVERHEAD)	then
+	lock	"overPen", "overLT"
+endif
+
+!	Show Projection To
+!-----------------------------------------------------------------------------------------------
+values{2}	"iProjectTo"	PROJECTTO_FLOORPLAN,	stProjectTo[PROJECTTO_FLOORPLAN],
+							PROJECTTO_ABSOLUTE,		stProjectTo[PROJECTTO_ABSOLUTE],
+							PROJECTTO_ENTIRE,		stProjectTo[PROJECTTO_ENTIRE]

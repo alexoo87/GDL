@@ -12,14 +12,15 @@ values	"TxtOff"	range	(0,	]
 
 !	Title Type
 !-----------------------------------------------------------------------------------
-values{2}	"iTitleType"	Title_Type1,	stTitleType[Title_Type1],
-							Title_Type2,	stTitleType[Title_Type2]
+values{2}	"iTitleType"	TITLE_TYPE1,	stTitleType[TITLE_TYPE1],
+							TITLE_TYPE2,	stTitleType[TITLE_TYPE2]
 
 
 !	Scale Type
 !-----------------------------------------------------------------------------------
-values{2}	"iScaleType"	Scale_A1,	stScaleType[Scale_A1],
-							Scale_A3,	stScaleType[Scale_A3]
+values{2}	"iScaleType"	SCALE_A1,		stScaleType[SCALE_A1],
+							SCALE_A3,		stScaleType[SCALE_A3],
+							SCALE_A1_A3,	stScaleType[SCALE_A1_A3]
 
 
 !	Lock Parameter
@@ -29,21 +30,21 @@ lock	"ac_drawingName", "ac_drawingNumber", "ac_drawingScale"
 
 !	스케일 OFF시 A1스케일 온오프 락
 !-----------------------------------------------------------------------------------
-if	ScaleOF = 0	then
-	lock	"A1OF", "ScaleCustom", "ScaleCustomOF", "iScaleType"
+if	not(bScale)	then
+	lock	"bScaleA1", "nCustomScale", "bCustomScale", "iScaleType"
 endif
 
-if	ScaleCustomOF = 0	then
-	lock	"ScaleCustom"
+if	not(bCustomScale)	then
+	lock	"nCustomScale"
 endif
 
 
 !	Type2 _ 변수 숨기기
 !-----------------------------------------------------------------------------------
-if	iTitleType = Title_Type1	then
+if	iTitleType = TITLE_TYPE1	then
 	hideparameter	"iScaleType"
 endif
-if	iTitleType = Title_Type2	then
-	hideparameter	"txtPrc", "txtCst", "A1OF"
+if	iTitleType = TITLE_TYPE2	then
+	hideparameter	"txtPrc", "txtCst", "bScaleA1"
 endif
  

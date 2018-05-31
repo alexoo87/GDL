@@ -186,15 +186,15 @@ endif
 
 !	기본설정
 !-----------------------------------------------------------------------------------
-eps = 0.001
+eps = 0.0001
 
 
 !	Drawing Title
 !-----------------------------------------------------------------------------------
-Title_Type1 = 1
-Title_Type2 = 2
+TITLE_TYPE1 = 1
+TITLE_TYPE2 = 2
 
-if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3	then
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
 	dim	stTitleType[2]
 		stTitleType[1] = `Type1`
 		stTitleType[2] = `Type2`
@@ -202,13 +202,15 @@ endif
 
 !	Scale Type
 !-----------------------------------------------------------------------------------
-Scale_A1 = 1
-Scale_A3 = 2
+SCALE_A1 = 1
+SCALE_A3 = 2
+SCALE_A1_A3 = 3
 
-if	GLOB_SCRIPT_TYPE <> 2 and GLOB_SCRIPT_TYPE <> 3	then
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
 	dim	stScaleType[]
-		stScaleType[1] = `A1`
-		stScaleType[2] = `A3`
+		stScaleType[1] = "A1"
+		stScaleType[2] = "A3"
+		stScaleType[3] = "A1+A3"
 endif
 
 
@@ -218,7 +220,6 @@ endif
 	nFonts = request("FONTNAMES_LIST", "", fontnames)
 	values	"stFontType"	fontnames,	CUSTOM
 
-
 !	폰트 스타일 정의
 !-----------------------------------------------------------------------------------
 	define style{2}	drwNsty		stFontType,	txtDrwSize/1000,	txtDrwB + 2*txtDrwI
@@ -227,17 +228,16 @@ endif
 
 !	스케일 변수 숫자화
 !-----------------------------------------------------------------------------------
-
 	!	A3
 	!-----------------------------------------------------------------------------------
-	ScaleTxt = ac_drawingScale
+	_stScale = ac_drawingScale
 	ScaleNum1 = 0
 	ScaleNum2 = 0
 
-	n = split(ScaleTxt,	"%n:%n",	ScaleNum1,	stra3,	ScaleNum2)
+	n = split(_stScale,	"%n:%n",	ScaleNum1,	stra3,	ScaleNum2)
 	
-	if	ScaleCustomOF = 1	then
-		a3B = ScaleCustom
+	if	bCustomScale	then
+		a3B = nCustomScale
 	else
 		a3B = ScaleNum2
 	endif
@@ -245,14 +245,3 @@ endif
 	a1B = a3B/2
 	a1 = str("%~",	a1B)
 	a3 = str("%~",	a3B)
-	
-
-!	글자크기에 따른 심볼크기 및 간격 조정
-!-----------------------------------------------------------------------------------
-!	Rd = txtIDSize * (400/140)
-!	parameters	Rd = Rd
-!	RdOff = txtDrwSize * (400/300)
-!	parameters	RdOff = RdOff
-
-
-

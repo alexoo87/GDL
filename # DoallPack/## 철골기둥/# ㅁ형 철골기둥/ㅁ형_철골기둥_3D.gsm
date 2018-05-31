@@ -5,6 +5,29 @@
 !	W.P
 hotspot	0,	0,	0,	unID	:	unID = unID + 1
 
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+if	bSymbol	then
+	_n2Dcut = 0
+	if	iProjectTo = PROJECTTO_FLOORPLAN | (iProjectTo = PROJECTTO_ABSOLUTE & btmPlaneHgt < cutPlaneHgt)	then
+		addz	btmPlaneHgt
+			cutplane{2}	180,	2	:	_n2Dcut = _n2Dcut + 1
+		del 1
+	endif
+
+	addz	cutPlaneHgt
+		cutplane{2}	180*(iProjectType = 2),	1	:	_n2Dcut = _n2Dcut + 1
+	del 1
+
+	if	iProjectTo = PROJECTTO_FLOORPLAN | (iProjectTo = PROJECTTO_ABSOLUTE & btmPlaneHgt < cutPlaneHgt)	then
+		addz	topPlaneHgt
+			cutplane{2}	0,	2	:	_n2Dcut = _n2Dcut + 1
+		del 1
+	endif
+endif
+
+!-----------------------------------------------------------------------------------------------
 !	철골 기둥
 !-----------------------------------------------------------------------------------------------
 pen			penCol_Elev
@@ -227,6 +250,14 @@ material	matCol
 		next	c
 	endif
 
+!-----------------------------------------------------------------------------------------------
+!	2D Display
+!-----------------------------------------------------------------------------------------------
+if	bSymbol	then
+	for	i = 1	to	_n2Dcut
+		cutend
+	next	i
+endif
 
 end
 
