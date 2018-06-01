@@ -3,11 +3,12 @@
 !===============================================================================================
 
 !	W.P
-hotspot2	0,	0,	unID	:	unID = unID + 1
+! hotspot2	0,	0,	unID	:	unID = unID + 1
 
 !	드로잉 사이즈
 _drawingWidth = abs(AC_DrawingRect[1] - AC_DrawingRect[3])
 _drawingHeight = abs(AC_DrawingRect[2] - AC_DrawingRect[4])
+_drawingHeight = AC_DrawingRect[4]	!	수정
 
 !	텍스트 스타일 정의 및 크기 추출
 define style	"textStyle"	AC_TextFont,	AC_TextSize,	7,	AC_TextStyle
