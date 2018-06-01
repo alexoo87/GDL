@@ -94,6 +94,8 @@ material	matCol
 	!	Main
 	!-----------------------------------------------------------------------------------------------
 	group	"gMainShape"
+		sect_fill	colFill,	colBackPen,	colFillPen,	penCol_Sect
+
 		!	하부 좌표
 		put	_xMainNeg - xTrans,	_yMainNeg - yTrans,	0,
 			_xMainNeg - xTrans,	_yMainPos - yTrans,	0,
@@ -114,6 +116,8 @@ material	matCol
 	!	Sub
 	!-----------------------------------------------------------------------------------------------
 	group	"gSubShape"
+		sect_fill	colFill,	colBackPen,	colFillPen,	penCol_Sect
+
 		!	하부 좌표
 		put	_xSubNeg - xTrans,	_ySubNeg - yTrans,	0,
 			_xSubNeg - xTrans,	_ySubPos - yTrans,	0,

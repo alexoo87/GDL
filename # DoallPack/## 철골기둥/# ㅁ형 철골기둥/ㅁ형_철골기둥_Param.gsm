@@ -30,6 +30,27 @@ values	"colThk"	range	(0,	_minColWdt/2)
 
 values	"colHgt"	range	(0,	)
 
+!	철골 기둥 실제 길이
+!-----------------------------------------------------------------------------------------------
+lock	"calcLth"
+
+if	(abs(xTrans) < eps & abs(yTrans) < eps)	then
+	_calcLth = colHgt
+else
+	_aLth = sqr(xTrans^2 + yTrans^2)
+	_calcLth = sqr(_aLth^2 + colHgt^2)
+endif
+
+parameters	calcLth = _calcLth
+
+!	단위 중량
+!-----------------------------------------------------------------------------------------------
+lock	"specWgt"
+
+_specWgt = ((colWdt_1 + colWdt_2)*1000 - (3.287*colThk*1000))*0.0157*colThk*1000
+
+parameters	specWgt = _specWgt
+
 !	자르기 축
 !-----------------------------------------------------------------------------------------------
 values{2}	"iCutAxisT"	AXIS_X,	stCutAxis[AXIS_X],
