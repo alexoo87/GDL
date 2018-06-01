@@ -2,6 +2,14 @@
 !	창호라벨
 !===============================================================================================
 
+!	A, B 값 입력
+if	A < eps	then
+	parameters	A = 1
+endif
+if	B < eps	then
+	parameters	B = 1
+endif
+
 !	심볼 타입
 !-----------------------------------------------------------------------------------------------
 values{2}	"iSymbolType"	SYMBOL_CIRCLE_ID,	stSymbolType[SYMBOL_CIRCLE_ID],
@@ -9,23 +17,29 @@ values{2}	"iSymbolType"	SYMBOL_CIRCLE_ID,	stSymbolType[SYMBOL_CIRCLE_ID],
 							SYMBOL_STADIUM,		stSymbolType[SYMBOL_STADIUM]
 
 !	Marker Size
-if	GLOB_MODPAR_NAME = "AC_MarkerSize"	then
-	parameters	markerSize = AC_MarkerSize/1000,
-				halfSize = (AC_MarkerSize/1000)/2
-else
-	if	GLOB_MODPAR_NAME = "markerSize"	then
-		parameters	AC_MarkerSize = markerSize*1000,
-					halfSize = markerSize/2
+if	GLOB_MODPAR_NAME # ""	then 
+	if	GLOB_MODPAR_NAME = "AC_MarkerSize"	then
+		parameters	markerSize = AC_MarkerSize/1000,
+					halfSize = (AC_MarkerSize/1000)/2
 	else
-		if	GLOB_MODPAR_NAME = "halfSize"	then
-			parameters	AC_MarkerSize = (halfSize*2)*1000,
-						markerSize = halfSize*2
+		if	GLOB_MODPAR_NAME = "markerSize"	then
+			parameters	AC_MarkerSize = markerSize*1000,
+						halfSize = markerSize/2
+		else
+			if	GLOB_MODPAR_NAME = "halfSize"	then
+				parameters	AC_MarkerSize = (halfSize*2)*1000,
+							markerSize = halfSize*2
+			endif
 		endif
 	endif
 endif
 
-if	not(iSymbolType = SYMBOL_CIRCLE_ID | iSymbolType = SYMBOL_CIRCLE_DIM)	then
-	lock	"bChangeContent"
+values	"halfSize"	range	(0,	)
+
+!	라벨 위치
+!-----------------------------------------------------------------------------------------------
+if	bOriginPos	then
+	lock	"xPosLabel", "yPosLabel"
 endif
 
 !	소수점 최대자리수 표기
@@ -103,10 +117,58 @@ if	iSymbolType <> SYMBOL_STADIUM	then
 	parameters	linePosX1_T1 = 0,	OriginPosX_T2 = 0
 	lock	"linePosX1_T1", "OriginPosX_T2"
 else
-	if	iLineWay = LineWay_UP or iLineWay = LineWay_DN	then
+	if	iLineWay = LineWay_UP | iLineWay = LineWay_DN	then
 
 	else
 		parameters	linePosX1_T1 = 0,	OriginPosX_T2 = 0
 		lock	"linePosX1_T1", "OriginPosX_T2"
 	endif
 endif
+
+!	ID 분할 방법
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDivRule"	DIV_RULE_AUTO,		stDivRule[DIV_RULE_AUTO],
+						DIV_RULE_MANUAL,	stDivRule[DIV_RULE_MANUAL]
+
+if	not(iSymbolType = SYMBOL_CIRCLE_ID)	then
+	hideparameter	"iDivRule", "stDiv", "stContent_A", "stContent_1", " stContent_2"
+endif
+
+if	not(iSymbolType = SYMBOL_CIRCLE_ID | iSymbolType = SYMBOL_CIRCLE_DIM)	then
+	hideparameter	"bChangeContent"
+endif
+
+if	not(iDivRule = DIV_RULE_MANUAL)	then
+	lock	"stDiv"
+	hideparameter	"stDiv"
+endif
+
+!	원본 ID 입력/정보 추출
+lock	"stContent_A"
+parameters	stContent_A = AC_WIDO_ID
+
+_contentLth = strlen(stContent_A)
+
+!	ID 분할
+if	iDivRule = DIV_RULE_AUTO	then
+	_stDiv = "-"
+endif
+
+if	iDivRule = DIV_RULE_MANUAL	then
+	_stDiv = stDiv
+endif
+
+_stDivLth = strlen(_stDiv)
+
+_posStDiv = strstr(stContent_A,	_stDiv)
+if	_posStDiv > eps	then
+	_stContent_1 = strsub(stContent_A,	1,	(_posStDiv - 1))
+	_stContent_2 = strsub(stContent_A,	(_posStDiv + _stDivLth),	_contentLth)
+else
+	_stContent_1 = "원본 ID에서 분할 문자열을 찾을 수 없습니다."
+	_stContent_2 = strsub(stContent_A,	1,	_contentLth)
+endif
+
+lock	"stContent_1",	"stContent_2"
+parameters	stContent_1 = _stContent_1,
+			stContent_2 = _stContent_2

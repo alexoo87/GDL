@@ -2,6 +2,9 @@
 !	창호라벨
 !===============================================================================================
 
+!	W.P
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
 !	글꼴 정의
 !-----------------------------------------------------------------------------------------------
 define style	"textStyle"	AC_TEXTFONT_1, AC_TEXTSIZE_1, 8, AC_TEXTSTYLE_1
@@ -43,47 +46,47 @@ else
 	_bMakeHotspot = 1
 endif
 
+!	마커 최초위치
+!-----------------------------------------------------------------------------------------------
+_xOriginPos = 0
+if	iSymbolType = SYMBOL_CIRCLE_ID | iSymbolType = SYMBOL_CIRCLE_DIM	then
+	_yOriginPos =  r*1.2
+endif
+if	iSymbolType = SYMBOL_STADIUM	then
+	_yOriginPos =  _textHalf*1.2
+endif
+
+!	벽 두께 추출
+!-----------------------------------------------------------------------------------------------
+_wallThk = ac_wall_thickness
+
+!	라벨 회전 각도
+!-----------------------------------------------------------------------------------------------
+n = request("view_rotangle",	"",	_aViewRot)
+_aTotalRot = (_aViewRot + SYMB_ROTANGLE) MOD 360
+
 !===============================================================================================
 !	심볼 위치
 !===============================================================================================
 
 !	최초위치 반전
 !-----------------------------------------------------------------------------------------------
+_aRotText = 0
 if	bMirror	then
-	add2	0,	-WALL_THICKNESS
+	add2	0,	-_wallThk
+	mul2	1,	-1
+	_aRotText = 180
 endif
 
-
-!	심볼각도에 따른 위치 이동
+!	마커 최초위치 고정/라벨 위치 핫스팟
 !-----------------------------------------------------------------------------------------------
-if	iSymbolType = SYMBOL_CIRCLE_ID | iSymbolType = SYMBOL_CIRCLE_DIM	then
-	rot2	-SYMB_ROTANGLE
+if	bOriginPos	then
+	xPosLabel = _xOriginPos
+	yPosLabel = _yOriginPos
 else
-	if	SYMB_ROTANGLE > 90 and SYMB_ROTANGLE < 270	then
-		rot2	180
-	endif
-endif
+	xPosLabel = xPosLabel*GLOB_SCALE
+	yPosLabel = yPosLabel*GLOB_SCALE
 
-!	심볼 수평정렬
-!-----------------------------------------------------------------------------------------------
-if	iSymbolType = SYMBOL_STADIUM	then
-	if	AC_Readable	then
-		rot2	-SYMB_ROTANGLE
-
-		if	SYMB_ROTANGLE > 90 and SYMB_ROTANGLE < 270	then
-			rot2	180
-		endif
-	endif
-endif
-
-!	마커 최초위치 고정
-!-----------------------------------------------------------------------------------------------
-xPosLabel = xPosLabel*GLOB_SCALE
-yPosLabel = yPosLabel*GLOB_SCALE
-if	bOriginPos = 1	then
-	xPosLabel = 0
-	yPosLabel = 0
-else
 	hotspot2	0,			yPosLabel,	unID,	xPosLabel,	1+128+1024	: unID = unID + 1
 	hotspot2	xPosLabel,	yPosLabel,	unID,	xPosLabel,	2			: unID = unID + 1
 	hotspot2	-1,			yPosLabel,	unID,	xPosLabel,	3			: unID = unID + 1
@@ -93,17 +96,22 @@ else
 	hotspot2	xPosLabel,	-1,			unID,	yPosLabel,	3			: unID = unID + 1
 endif
 
-
 !===============================================================================================
 !	심볼 그리기 및 텍스트 배치
 !===============================================================================================
-
 fill	AC_MarkerFill
 
 add2	xPosLabel,	yPosLabel
+	!	항상 읽기 가능
+	!-----------------------------------------------------------------------------------------------
+	_nTrans = 0
+	if	AC_Readable	then
+		if	_aTotalRot > 90 + eps & _aTotalRot < 270 + eps	then
+			rot2	180	:	_nTrans = _nTrans + 1
+		endif
+	endif
 
 	if	iSymbolType = SYMBOL_CIRCLE_ID | iSymbolType = SYMBOL_CIRCLE_DIM	then
-
 		!	Type1,2.  반원형 심볼 디스플레이
 		!-----------------------------------------------------------------------------------------------
 		pen	SYMB_VIEW_PEN
@@ -121,20 +129,14 @@ add2	xPosLabel,	yPosLabel
 
 		pen	AC_TextPen_1
 
-		!	ID 텍스트 추출
-		IDlength = strlen(AC_WIDO_ID)
-		dashPos = strstr(AC_WIDO_ID, "-")
-		ID1 = strsub(AC_WIDO_ID, 1, dashPos-1)
-		ID2 = strsub(AC_WIDO_ID, dashPos+1, IDlength)
-
 		!	Type1. 창호사이즈 미표시 반원형 심볼 텍스트 정의
 		!-----------------------------------------------------------------------------------------------
 		if	iSymbolType = SYMBOL_CIRCLE_ID	then
-			_stTopContent = ID1
-			_stBottomContent = ID2
+			_stTopContent = stContent_1
+			_stBottomContent = stContent_2
 			if	bChangeContent	then
-				_stTopContent = ID2
-				_stBottomContent = ID1
+				_stTopContent = stContent_2
+				_stBottomContent = stContent_1
 			endif
 		endif
 
@@ -165,8 +167,8 @@ add2	xPosLabel,	yPosLabel
 
 			!	텍스트 디스플레이
 			!-----------------------------------------------------------------------------------------------
-			if	iDispID = dispID_Full	then	stID = AC_WIDO_ID
-			if	iDispID = dispID_Name	then	stID = ID1
+			if	iDispID = dispID_Full	then	stID = stContent_A
+			if	iDispID = dispID_Name	then	stID = stContent_1
 
 			_stTopContent = stID
 			_stBottomContent = windowWidth + "X" + windowHeight
@@ -178,9 +180,15 @@ add2	xPosLabel,	yPosLabel
 
 		!	텍스트 배치
 		!-----------------------------------------------------------------------------------------------
-		text2	0,	_textSize - _textHalf, 		_stTopContent
-		text2	0,	-_textSize - _textHalf, 	_stBottomContent
+		rot2	_aRotText
+			add2	0,	_textSize - _textHalf
+				text2	0,	0,	_stTopContent
+			del 1
 
+			add2	0,	-_textSize - _textHalf
+				text2	0,	0,	_stBottomContent
+			del 1
+		del 1
 	endif
 
 	!	Type3. 사각원형 심볼타입 정의
@@ -216,66 +224,117 @@ add2	xPosLabel,	yPosLabel
 		endif
 	endif
 
+	!	지시선 그리기
+	!-----------------------------------------------------------------------------------------------
+	pen		SYMB_VIEW_PEN
+	fill	64
+
+		!	변수정의
+		lineSpotRad = lineSpotRad/1000*GLOB_SCALE
+
+		!	지시선
+		if	bLeadLine	then
+			!	심볼타입 : Type1,2
+			!-----------------------------------------------------------------------------------------------
+			if	iSymbolType # SYMBOL_STADIUM	then
+
+				!	지시선 방향
+				!-----------------------------------------------------------------------------------------------
+				if	iLineWay = LineWay_UP	then	rot2	0
+				if	iLineWay = LineWay_DN	then	rot2	180
+				if	iLineWay = LineWay_LT	then	rot2	90
+				if	iLineWay = LineWay_RT	then	rot2	270
+
+				DistTmp = r
+
+					gosub	"LeadLine_"
+
+				del 1
+
+			!	심볼타입 : Type3
+			!-----------------------------------------------------------------------------------------------
+			else
+
+				!	지시선 방향
+				!-----------------------------------------------------------------------------------------------
+				if	iLineWay = LineWay_UP	then	rot2	0
+				if	iLineWay = LineWay_DN	then	rot2	180
+				if	iLineWay = LineWay_LT	then	rot2	90
+				if	iLineWay = LineWay_RT	then	rot2	270
+
+				if	iLineWay = LineWay_UP | iLineWay = LineWay_DN	then	DistTmp = _textHalf
+				if	iLineWay = LineWay_LT | iLineWay = LineWay_RT	then	DistTmp = w/2 + _textHalf
+
+					gosub	"LeadLine_"
+
+				del 1
+
+
+			endif
+		endif
+
+
+	!	항상 읽기 가능
+	!-----------------------------------------------------------------------------------------------
+	if	_nTrans > eps	then
+		del	_nTrans
+	endif
 del 1
 
 
 
-!===============================================================================================
-!	지시선
-!===============================================================================================
-pen		SYMB_VIEW_PEN
-fill	64
+! !===============================================================================================
+! !	지시선
+! !===============================================================================================
+! pen		SYMB_VIEW_PEN
+! fill	64
 
-!	변수정의
-!-----------------------------------------------------------------------------------------------
-lineSpotRad = lineSpotRad/1000*GLOB_SCALE
+! !	변수정의
+! !-----------------------------------------------------------------------------------------------
+! lineSpotRad = lineSpotRad/1000*GLOB_SCALE
 
 
-!	지시선 그리기
-!-----------------------------------------------------------------------------------------------
-if	bLeadLine	then
-	add2	xPosLabel,	yPosLabel
-	
-		!	심볼타입 : Type1,2
-		!-----------------------------------------------------------------------------------------------
-		if	iSymbolType # SYMBOL_STADIUM	then
-	
-			!	지시선 방향
-			!-----------------------------------------------------------------------------------------------
-			if	iLineWay = LineWay_UP	then	rot2	0
-			if	iLineWay = LineWay_DN	then	rot2	180
-			if	iLineWay = LineWay_LT	then	rot2	90
-			if	iLineWay = LineWay_RT	then	rot2	270
-	
-			DistTmp = r
-	
-				gosub	"LeadLine_"
-	
-			del 1
-	
-		!	심볼타입 : Type3
-		!-----------------------------------------------------------------------------------------------
-		else
-	
-			!	지시선 방향
-			!-----------------------------------------------------------------------------------------------
-			if	iLineWay = LineWay_UP	then	rot2	0
-			if	iLineWay = LineWay_DN	then	rot2	180
-			if	iLineWay = LineWay_LT	then	rot2	90
-			if	iLineWay = LineWay_RT	then	rot2	270
-	
-			if	iLineWay = LineWay_UP | iLineWay = LineWay_DN	then	DistTmp = _textHalf
-			if	iLineWay = LineWay_LT | iLineWay = LineWay_RT	then	DistTmp = w/2 + _textHalf
-	
-				gosub	"LeadLine_"
-	
-			del 1
-	
-	
-		endif
-	
-	del 1
-endif
+! !	지시선 그리기
+! !-----------------------------------------------------------------------------------------------
+! if	bLeadLine	then
+! 	!	심볼타입 : Type1,2
+! 	!-----------------------------------------------------------------------------------------------
+! 	if	iSymbolType # SYMBOL_STADIUM	then
+
+! 		!	지시선 방향
+! 		!-----------------------------------------------------------------------------------------------
+! 		if	iLineWay = LineWay_UP	then	rot2	0
+! 		if	iLineWay = LineWay_DN	then	rot2	180
+! 		if	iLineWay = LineWay_LT	then	rot2	90
+! 		if	iLineWay = LineWay_RT	then	rot2	270
+
+! 		DistTmp = r
+
+! 			gosub	"LeadLine_"
+
+! 		del 1
+
+! 	!	심볼타입 : Type3
+! 	!-----------------------------------------------------------------------------------------------
+! 	else
+
+! 		!	지시선 방향
+! 		!-----------------------------------------------------------------------------------------------
+! 		if	iLineWay = LineWay_UP	then	rot2	0
+! 		if	iLineWay = LineWay_DN	then	rot2	180
+! 		if	iLineWay = LineWay_LT	then	rot2	90
+! 		if	iLineWay = LineWay_RT	then	rot2	270
+
+! 		if	iLineWay = LineWay_UP | iLineWay = LineWay_DN	then	DistTmp = _textHalf
+! 		if	iLineWay = LineWay_LT | iLineWay = LineWay_RT	then	DistTmp = w/2 + _textHalf
+
+! 			gosub	"LeadLine_"
+
+! 		del 1
+
+
+! 	endif
+! endif
 
 
 
@@ -397,9 +456,7 @@ return
 				!	보조지시선 개수 : 1
 				!-----------------------------------------------------------------------------------------------
 				if	nType2 = 1	then
-
 					gosub	"Spot_"
-
 				endif
 
 				!	보조지시선 개수 : 2
@@ -420,20 +477,15 @@ return
 						hotspot2	linePosX1_T2,	linePosY1_T2,	unID,	linePosX1_T2,	2		:	unID = unID + 1
 
 					add2	linePosX1_T2,	0
-
 						line2	0,	0,	0,	linePosY1_T2
 
 							!	hotspot
 							hotspot2	0,	0,				unID,	linePosY1_T2,	1+128	:	unID = unID + 1
 							hotspot2	0,	-1,				unID,	linePosY1_T2,	3		:	unID = unID + 1
 							hotspot2	0,	linePosY1_T2,	unID,	linePosY1_T2,	2		:	unID = unID + 1
-
 						add2	0,	linePosY1_T2
-
 							gosub	"Spot_"
-
 						del 1
-
 					del 1
 
 					!	2번째 보조지시선
@@ -450,18 +502,14 @@ return
 						hotspot2	linePosX2_T2,	linePosY2_T2,	unID,	linePosX2_T2,	2		:	unID = unID + 1
 
 					add2	linePosX2_T2,	0
-
 						line2	0,	0,	0,	linePosY2_T2
 
 							!	hotspot
 							hotspot2	0,	0,				unID,	linePosY2_T2,	1+128	:	unID = unID + 1
 							hotspot2	0,	-1,				unID,	linePosY2_T2,	3		:	unID = unID + 1
 							hotspot2	0,	linePosY2_T2,	unID,	linePosY2_T2,	2		:	unID = unID + 1
-
 						add2	0,	linePosY2_T2
-
 							gosub	"Spot_"
-
 						del 1
 
 					del 1
@@ -484,20 +532,15 @@ return
 						hotspot2	linePosX3_T2,	linePosY3_T2,	unID,	linePosX3_T2,	2		:	unID = unID + 1
 
 					add2	linePosX3_T2,	0
-
 						line2	0,	0,	0,	linePosY3_T2
 
 							!	hotspot
 							hotspot2	0,	0,				unID,	linePosY3_T2,	1+128	:	unID = unID + 1
 							hotspot2	0,	-1,				unID,	linePosY3_T2,	3		:	unID = unID + 1
 							hotspot2	0,	linePosY3_T2,	unID,	linePosY3_T2,	2		:	unID = unID + 1
-
 						add2	0,	linePosY3_T2
-
 							gosub	"Spot_"
-
 						del 1
-
 					del 1
 
 				endif
@@ -518,9 +561,4 @@ return
 
 	poly2_B	nsp/3,	1+2,	SYMB_VIEW_PEN,	SYMB_VIEW_PEN,	get(nsp)
 
-
 return
-
-
-
-

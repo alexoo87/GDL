@@ -5,12 +5,6 @@
 eps = 0.0001
 unID = 100
 
-!	폰트명 정의
-!-----------------------------------------------------------------------------------------------
-dim	fontnames[]
-nFonts = request("FONTNAMES_LIST", "", fontnames)
-
-
 !	심볼 타입 이름 정의
 !-----------------------------------------------------------------------------------------------
 SYMBOL_CIRCLE_ID = 1
@@ -76,4 +70,15 @@ if	GLOB_SCRIPT_TYPE <> 2 & GLOB_SCRIPT_TYPE <> 3	then
 	dim	stLineType[]
 		stLineType[1] = "Type1"
 		stLineType[2] = "Type2"
+endif
+
+!	ID 분할 방법
+!-----------------------------------------------------------------------------------------------
+DIV_RULE_AUTO = 1
+DIV_RULE_MANUAL = 2
+
+if	GLOB_SCRIPT_TYPE <> 2 & GLOB_SCRIPT_TYPE <> 3	then
+	dim	stDivRule[]
+		stDivRule[1] = "자동('-'을 기준으로 분할)"
+		stDivRule[2] = "사용자 입력 텍스트 기준으로 분할"
 endif
