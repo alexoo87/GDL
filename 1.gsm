@@ -27,6 +27,3 @@ if	GLOB_SCRIPT_TYPE # 2 and GLOB_SCRIPT_TYPE # 3	then
 		stProjectTo[2] = "Absolute Display Limit"
 		stProjectTo[3] = "Entire Element"
 endif
-
-
-!	Commit Test
