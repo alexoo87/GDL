@@ -128,9 +128,15 @@ endif
 values{2}	"iMlnType"	Mln_Type1,	stMlnType[Mln_Type1],
 						Mln_Type2,	stMlnType[Mln_Type2]
 
+if	iMlnType = MLN_TYPE1	then
+	parameters	bFrmCapL = 1,
+				bFrmCapR = 1
+	lock	"bFrmCapL", "bFrmCapR"
+endif
+
+
 values{2}	"iTrsType"	Trs_Type1,	stTrsType[Trs_Type1],
 						Trs_Type2,	stTrsType[Trs_Type2]
-
 
 !	멀리언 각도
 !-----------------------------------------------------------------------------------------------
@@ -606,10 +612,6 @@ endif
 				glsArea_Spd3 = _glsArea_Spd3,
 				glsArea_Spd4 = _glsArea_Spd4
 
-	parameters	nCount = (nTrs + 1)
-
 	!	변수 잠금 및 숨기기
 	!-----------------------------------------------------------------------------------------------
 	lock	"glsArea", "glsArea_Spd1", "glsArea_Spd2", "glsArea_Spd3", "glsArea_Spd4"
-
-	hideparameter	"nCount"

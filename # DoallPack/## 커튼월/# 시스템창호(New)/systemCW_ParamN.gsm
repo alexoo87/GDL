@@ -98,6 +98,12 @@ endif
 values{2}	"iMlnType"	MLN_TYPE1,	stMlnType[MLN_TYPE1],
 						MLN_TYPE2,	stMlnType[MLN_TYPE2]
 
+if	iMlnType = MLN_TYPE1	then
+	parameters	bFrmCapL = 1,
+				bFrmCapR = 1
+	lock	"bFrmCapL", "bFrmCapR"
+endif
+
 !	트랜섬 유형
 !-----------------------------------------------------------------------------------------------
 values{2}	"iTrsType"	TRS_TYPE1,	stTrsType[TRS_TYPE1],

@@ -23,13 +23,20 @@ if	bGuide	then
 	del 1
 endif
 
+!	Mullion Type
+_iMlnTypeL = iMlnType
+if	not(bFrmCapL)	then	_iMlnTypeL = MLN_TYPE1
+
+_iMlnTypeR = iMlnType
+if	not(bFrmCapR)	then	_iMlnTypeR = MLN_TYPE1
+
 !	_bMlnTypeL1/_bMlnTypeL2
-_bMlnTypeL1 = (iFrmTypeL = FrmType_Boundary) | (iFrmTypeL = FrmType_Mullion & iMlnType = Mln_Type1)
-_bMlnTypeL2 = (iFrmTypeL = FrmType_Mullion & iMlnType = Mln_Type2)
+_bMlnTypeL1 = (iFrmTypeL = FrmType_Boundary) | (iFrmTypeL = FrmType_Mullion & _iMlnTypeL = Mln_Type1)
+_bMlnTypeL2 = (iFrmTypeL = FrmType_Mullion & _iMlnTypeL = Mln_Type2)
 
 !	_bMlnTypeR1/_bMlnTypeR2
-_bMlnTypeR1 = (iFrmTypeR = FrmType_Boundary) | (iFrmTypeR = FrmType_Mullion & iMlnType = Mln_Type1)
-_bMlnTypeR2 = (iFrmTypeR = FrmType_Mullion & iMlnType = Mln_Type2)
+_bMlnTypeR1 = (iFrmTypeR = FrmType_Boundary) | (iFrmTypeR = FrmType_Mullion & _iMlnTypeR = Mln_Type1)
+_bMlnTypeR2 = (iFrmTypeR = FrmType_Mullion & _iMlnTypeR = Mln_Type2)
 
 
 !===============================================================================================
@@ -219,11 +226,15 @@ if	iFrmTypeL = FrmType_Mullion	then
 	_xPosL_refer = _referLth*cos(_aSubL)
 	_yPosL_refer = _referLth*sin(_aSubL)
 
+	!	Mullion Type
+	_iMlnType = iMlnType
+	if	not(bFrmCapL)	then	_iMlnType = MLN_TYPE1
+
 	!	Point
 	dim	_frmPointL[][]
 
 		if	iCornerType = CORNER_TYPE1	then
-			if	iMlnType = Mln_Type1	then
+			if	_iMlnType = Mln_Type1	then
 				!	Point1
 				_frmPointL[1][1] = gskWdtL/2
 				_frmPointL[1][2] = 0
@@ -259,7 +270,7 @@ if	iFrmTypeL = FrmType_Mullion	then
 				_nFrmL = 8
 			endif
 
-			if	iMlnType = Mln_Type2	then
+			if	_iMlnType = Mln_Type2	then
 				!	Point1
 				_frmPointL[1][1] = gskWdtL/2
 				_frmPointL[1][2] = 0
@@ -321,7 +332,7 @@ if	iFrmTypeL = FrmType_Mullion	then
 		endif
 
 		if	iCornerType = CORNER_TYPE2	then
-			if	iMlnType = Mln_Type1	then
+			if	_iMlnType = Mln_Type1	then
 				!	Point1
 				_frmPointL[1][1] = gskWdtL/2
 				_frmPointL[1][2] = 0
@@ -361,7 +372,7 @@ if	iFrmTypeL = FrmType_Mullion	then
 				_nFrmL = 9
 			endif
 
-			if	iMlnType = Mln_Type2	then
+			if	_iMlnType = Mln_Type2	then
 				!	Point1
 				_frmPointL[1][1] = gskWdtL/2
 				_frmPointL[1][2] = 0
@@ -509,11 +520,15 @@ addx	ctwWdt
 		_xPosR_refer = _referLth*cos(_aSubR)
 		_yPosR_refer = _referLth*sin(_aSubR)
 
+		!	Mullion Type
+		_iMlnType = iMlnType
+		if	not(bFrmCapR)	then	_iMlnType = MLN_TYPE1
+
 		!	Point
 		dim	_frmPointR[][]
 
 			if	iCornerType = CORNER_TYPE1	then
-				if	iMlnType = Mln_Type1	then
+				if	_iMlnType = Mln_Type1	then
 					!	Point1
 					_frmPointR[1][1] = -gskWdtR/2
 					_frmPointR[1][2] = 0
@@ -549,7 +564,7 @@ addx	ctwWdt
 					_nFrmR = 8
 				endif
 
-				if	iMlnType = Mln_Type2	then
+				if	_iMlnType = Mln_Type2	then
 					!	Point1
 					_frmPointR[1][1] = -gskWdtR/2
 					_frmPointR[1][2] = 0
@@ -611,7 +626,7 @@ addx	ctwWdt
 			endif
 
 			if	iCornerType = CORNER_TYPE2	then
-				if	iMlnType = Mln_Type1	then
+				if	_iMlnType = Mln_Type1	then
 					!	Point1
 					_frmPointR[1][1] = -gskWdtR/2
 					_frmPointR[1][2] = 0
@@ -651,7 +666,7 @@ addx	ctwWdt
 					_nFrmR = 9
 				endif
 
-				if	iMlnType = Mln_Type2	then
+				if	_iMlnType = Mln_Type2	then
 					!	Point1
 					_frmPointR[1][1] = -gskWdtR/2
 					_frmPointR[1][2] = 0
@@ -2545,21 +2560,24 @@ if	(_iWinElev = WinElev_ON) & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
 			_elevRatio_frmT = (ctwHgt - frmWdtT)/ctwHgt
 		endif
 
-		!	index
+		!	index_L
+		_iMlnTypeL = iMlnType
+		if	not(bFrmCapL)	then	_iMlnTypeL = MLN_TYPE1
+
 		if	iCornerType = CORNER_TYPE1	then
-			if	iMlnType = Mln_Type1	then
+			if	_iMlnTypeL = Mln_Type1	then
 				_idxElevFrm = 8
 			endif
-			if	iMlnType = Mln_Type2	then
+			if	_iMlnTypeL = Mln_Type2	then
 				_idxElevFrm = 13
 			endif
 		endif
 
 		if	iCornerType = CORNER_TYPE2	then
-			if	iMlnType = Mln_Type1	then
+			if	_iMlnTypeL = Mln_Type1	then
 				_idxElevFrm = 9
 			endif
-			if	iMlnType = Mln_Type2	then
+			if	_iMlnTypeL = Mln_Type2	then
 				_idxElevFrm = 14
 			endif
 		endif
@@ -2586,7 +2604,7 @@ if	(_iWinElev = WinElev_ON) & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
 			endif
 
 			if	iFrmTypeL = FrmType_Mullion	then
-				if	iMlnType = Mln_Type1	then
+				if	_iMlnTypeL = Mln_Type1	then
 					!	Point1
 					_elevFrmL[1][1] = _dxL*_elevRatio_frmB + _xPosTransL[1]
 					_elevFrmL[1][2] = _guidePoint[2][2]*_elevRatio_frmB
@@ -2604,7 +2622,7 @@ if	(_iWinElev = WinElev_ON) & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
 					_elevFrmL[4][2] = _guidePoint[2][2]*_elevRatio_frmT
 				endif
 
-				if	iMlnType = Mln_Type2	then
+				if	_iMlnTypeL = Mln_Type2	then
 					!	Point1
 					_elevFrmL[1][1] = _dxL*_elevRatio_frmB + _xPosTransL[2]
 					_elevFrmL[1][2] = _guidePoint[2][2]*_elevRatio_frmB
@@ -2636,6 +2654,29 @@ if	(_iWinElev = WinElev_ON) & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
 			del 1
 		endif
 
+		!	index_R
+		_iMlnTypeR = iMlnType
+		if	not(bFrmCapR)	then	_iMlnTypeR = MLN_TYPE1
+
+		if	iCornerType = CORNER_TYPE1	then
+			if	_iMlnTypeR = Mln_Type1	then
+				_idxElevFrm = 8
+			endif
+			if	_iMlnTypeR = Mln_Type2	then
+				_idxElevFrm = 13
+			endif
+		endif
+
+		if	iCornerType = CORNER_TYPE2	then
+			if	_iMlnTypeR = Mln_Type1	then
+				_idxElevFrm = 9
+			endif
+			if	_iMlnTypeR = Mln_Type2	then
+				_idxElevFrm = 14
+			endif
+		endif
+
+
 		!	우측 프레임
 		if	bFrmR	then
 			dim	_elevFrmR[][]
@@ -2658,7 +2699,7 @@ if	(_iWinElev = WinElev_ON) & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
 			endif
 
 			if	iFrmTypeR = FrmType_Mullion	then
-				if	iMlnType = Mln_Type1	then
+				if	_iMlnTypeR = Mln_Type1	then
 					!	Point1
 					_elevFrmR[1][1] = _guidePoint[4][1] + _dxR*_elevRatio_frmB + _xPosTransR[1]
 					_elevFrmR[1][2] = _guidePoint[3][2]*_elevRatio_frmB
@@ -2676,7 +2717,7 @@ if	(_iWinElev = WinElev_ON) & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
 					_elevFrmR[4][2] = _guidePoint[3][2]*_elevRatio_frmT
 				endif
 
-				if	iMlnType = Mln_Type2	then
+				if	_iMlnTypeR = Mln_Type2	then
 					!	Point1
 					_elevFrmR[1][1] = _guidePoint[4][1] + _dxR*_elevRatio_frmB + _xPosTransR[2]
 					_elevFrmR[1][2] = _guidePoint[3][2]*_elevRatio_frmB

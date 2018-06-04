@@ -223,13 +223,15 @@ if	iDisplay = DISPLAY_SYMBOLIC	then
 
 	!	수직프레임
 	!-----------------------------------------------------------------------------------------------
-	drawindex	20
+	drawindex	50
 	_frmType = iFrmTypeL
 	_frmClass = VFRAME_CORNER
 	_frmWdt = frmWdtL
 	_frmThk = frmThkL
 	_gskWdt = gskWdtL
 	_aFrm = aFrmL
+	_iMlnType = iMlnType
+	if	not(bFrmCapL)	then	_iMlnType = MLN_TYPE1
 
 	gosub	"vFrame"
 
@@ -239,6 +241,8 @@ if	iDisplay = DISPLAY_SYMBOLIC	then
 	_frmThk = frmThkR
 	_gskWdt = gskWdtR
 	_aFrm = aFrmR
+	_iMlnType = iMlnType
+	if	not(bFrmCapR)	then	_iMlnType = MLN_TYPE1
 
 	add2	ctwWdt,	0
 		mul2	-1,	1
@@ -253,6 +257,7 @@ if	iDisplay = DISPLAY_SYMBOLIC	then
 		_frmThk = mlnThk
 		_gskWdt = mlnGskWdt
 		_aFrm = 0
+		_iMlnType = iMlnType
 
 		for	i = 1	to	nMln
 			add2	mlnGap[i],	0
@@ -985,7 +990,7 @@ end
 
 	if	(_frmType = FRAME_MULLION & _frmClass = VFRAME_CORNER) | _frmClass = VFRAME_MULLION	then
 		if	iCornerType = CORNER_TYPE1	then
-			if	iMlnType = MLN_TYPE1	then
+			if	_iMlnType = MLN_TYPE1	then
 				put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									1,
 					-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				1,
 					-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				1,
@@ -997,7 +1002,7 @@ end
 					-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									1
 			endif
 
-			if	iMlnType = MLN_TYPE2	then
+			if	_iMlnType = MLN_TYPE2	then
 				put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									1,
 					-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),									1,
 					-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),				1,
@@ -1017,7 +1022,7 @@ end
 		endif
 
 		if	iCornerType = CORNER_TYPE2	then
-			if	iMlnType = MLN_TYPE1	then
+			if	_iMlnType = MLN_TYPE1	then
 				put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															1,
 					-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm) + ((_frmWdt - _gskWdt)/2)*tan(_aFrm),	1,
 					-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),										1,
@@ -1030,7 +1035,7 @@ end
 					-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															1
 			endif
 
-			if	iMlnType = MLN_TYPE2	then
+			if	_iMlnType = MLN_TYPE2	then
 				put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															1,
 					-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),															1,
 					-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										1,

@@ -158,6 +158,8 @@ group	"_vFrame"
 		_frmThk = frmThkL
 		_gskWdt = gskWdtL
 		_aFrm = aFrmL
+		_iMlnType = iMlnType
+		if	not(bFrmCapL)	then	_iMlnType = MLN_TYPE1
 
 		gosub	"vFrame"
 	endif
@@ -170,6 +172,8 @@ group	"_vFrame"
 		_frmThk = frmThkR
 		_gskWdt = gskWdtR
 		_aFrm = aFrmR
+		_iMlnType = iMlnType
+		if	not(bFrmCapR)	then	_iMlnType = MLN_TYPE1
 
 		addx	ctwWdt
 			mulx	-1
@@ -186,6 +190,7 @@ group	"_vFrame"
 		_frmThk = mlnThk
 		_gskWdt = mlnGskWdt
 		_aFrm = 0
+		_iMlnType = iMlnType
 
 		for	i = 1	to	nMln
 			addx	mlnGap[i]
@@ -205,6 +210,8 @@ group	"_vFrameCut"
 	_frmThk = frmThkL
 	_gskWdt = gskWdtL
 	_aFrm = aFrmL
+	_iMlnType = iMlnType
+	if	not(bFrmCapL)	then	_iMlnType = MLN_TYPE1
 
 	gosub	"vFrame"
 
@@ -215,6 +222,8 @@ group	"_vFrameCut"
 	_frmThk = frmThkR
 	_gskWdt = gskWdtR
 	_aFrm = aFrmR
+	_iMlnType = iMlnType
+	if	not(bFrmCapR)	then	_iMlnType = MLN_TYPE1
 
 	addx	ctwWdt
 		mulx	-1
@@ -230,6 +239,7 @@ group	"_vFrameCut"
 		_frmThk = mlnThk
 		_gskWdt = mlnGskWdt
 		_aFrm = 0
+		_iMlnType = iMlnType
 
 		for	i = 1	to	nMln
 			addx	mlnGap[i]
@@ -1473,6 +1483,8 @@ _door2 = subgroup(_door1,	"_hFrame")
 			_frmWdt = frmWdtL
 			_gskWdt = gskWdtL
 			_aFrm = aFrmL
+			_iMlnType = iMlnType
+			if	not(bFrmCapL)	then	_iMlnType = MLN_TYPE1
 			gosub	"getCoor_cutPnl"
 
 			! poly	nsp/2,	use(nsp)
@@ -1521,6 +1533,8 @@ _door2 = subgroup(_door1,	"_hFrame")
 			_frmWdt = frmWdtR
 			_gskWdt = gskWdtR
 			_aFrm = aFrmR
+			_iMlnType = iMlnType
+			if	not(bFrmCapR)	then	_iMlnType = MLN_TYPE1
 			gosub	"getCoor_cutPnl"
 
 			mulx	-1
@@ -1735,6 +1749,11 @@ end
 			cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
 		del 1
 	endif
+		!	멀리언 혹은 코너프레임 각도가 없을 때 수직선 제거
+		_si = 15
+		if	_frmClass = VFRAME_MULLION | (_frmType = FRAME_MULLION & _frmClass = VFRAME_CORNER & abs(_aFrm) < eps)	then
+			_si = 13
+		endif
 
 		!	형태
 		if	(_frmType = FRAME_BOUNDARY & _frmClass = VFRAME_CORNER)	then
@@ -1748,7 +1767,7 @@ end
 
 		if	(_frmType = FRAME_MULLION & _frmClass = VFRAME_CORNER) | _frmClass = VFRAME_MULLION	then
 			if	iCornerType = CORNER_TYPE1	then
-				if	iMlnType = MLN_TYPE1	then
+				if	_iMlnType = MLN_TYPE1	then
 					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15,
 						-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
 						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),				15,
@@ -1760,7 +1779,7 @@ end
 						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15
 				endif
 
-				if	iMlnType = MLN_TYPE2	then
+				if	_iMlnType = MLN_TYPE2	then
 					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15,
 						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),									15,
 						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),				15,
@@ -1774,13 +1793,13 @@ end
 						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),				15,
 						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),				15,
 						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),									15,
-						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15,
-						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									15
+						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									_si,
+						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),									_si
 				endif
 			endif
 
 			if	iCornerType = CORNER_TYPE2	then
-				if	iMlnType = MLN_TYPE1	then
+				if	_iMlnType = MLN_TYPE1	then
 					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15,
 						-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm) + ((_frmWdt - _gskWdt)/2)*tan(_aFrm),	15,
 						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),										15,
@@ -1793,8 +1812,8 @@ end
 						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15
 				endif
 
-				if	iMlnType = MLN_TYPE2	then
-					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15,
+				if	_iMlnType = MLN_TYPE2	then
+					put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															_si,
 						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),															15,
 						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										15,
 						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										15,
@@ -1808,8 +1827,8 @@ end
 						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										15,
 						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),										15,
 						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),															15,
-						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15,
-						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															15
+						_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															_si,
+						-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),															_si
 				endif
 			endif
 		endif
@@ -2447,7 +2466,7 @@ return
 !-----------------------------------------------------------------------------------------------
 "getCoor_cutPnl":
 !-----------------------------------------------------------------------------------------------
-	if	iMlnType = MLN_TYPE1	then
+	if	_iMlnType = MLN_TYPE1	then
 		put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),
 			-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
 			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),
@@ -2458,7 +2477,7 @@ return
 			_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm)
 	endif
 
-	if	iMlnType = MLN_TYPE2	then
+	if	_iMlnType = MLN_TYPE2	then
 		put	-_gskWdt/2,	-(_gskWdt/2)*tan(_aFrm),
 			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm),
 			-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskCapThk/cos(_aFrm),

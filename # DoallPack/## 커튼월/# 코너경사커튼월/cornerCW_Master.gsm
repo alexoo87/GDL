@@ -92,7 +92,8 @@ if	iWinElev = WinElev_MVO	then
 			_iWinElev = WinElev_OFF
 		endif
 	else
-		print	"Error. There isn't the MVO Library"
+		print	"창호입면도 MVO 파일이 라이브러리 관리자에 로딩되지 않았습니다."
+		_iWinElev = iWinElev
 	endif
 else
 	if	iWinElev = WinElev_ON	then

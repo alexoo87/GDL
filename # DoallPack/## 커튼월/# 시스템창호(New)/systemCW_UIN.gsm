@@ -411,13 +411,15 @@ ui_page	4,	-1,	"코너프레임 설정",	"uiTab_StorefrontFrame_flat(1)"
 		ui_outfield	"개스킷 너비",	posX + 5, posY	:	posY = posY + gapY
 
 		if	iPageFrm = CORNER_TOP | iPageFrm = CORNER_BOTTOM	then
-			ui_outfield	"프레임 각도",		posX + 5, posY, 60, _outHgt, 4	:	posY = posY + gapY
-			ui_outfield	"코너프레임 유형",	posX + 5, posY, 90, _outHgt, 4	:	posY = posY + gapY
+			ui_outfield	"프레임 각도",	posX + 5, posY, 60, _outHgt, 4	:	posY = posY + gapY
+			ui_outfield	"코너프레임 유형",	posX + 5, posY, 90, _outHgt, 4
+			ui_outfield	"프레임 캡",		posX + 200, posY, 90, _outHgt, 4	:	posY = posY + gapY
 		endif
 
 		if	iPageFrm = CORNER_LEFT | iPageFrm = CORNER_RIGHT	then
-			ui_outfield	"프레임 각도",		posX + 5, posY, 60, _outHgt	:	posY = posY + gapY
-			ui_outfield	"코너프레임 유형",	posX + 5, posY, 90, _outHgt	:	posY = posY + gapY
+			ui_outfield	"프레임 각도",	posX + 5, posY, 60, _outHgt	:	posY = posY + gapY
+			ui_outfield	"코너프레임 유형",	posX + 5, posY, 90, _outHgt
+			ui_outfield	"프레임 캡",		posX + 200, posY	:	posY = posY + gapY
 		endif
 
 
@@ -450,7 +452,8 @@ ui_page	4,	-1,	"코너프레임 설정",	"uiTab_StorefrontFrame_flat(1)"
 			ui_infield	"frmThkL",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
 			ui_infield	"gskWdtL",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
 			ui_infield	"aFrmL",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
-			ui_infield	"iCornerType",	posX + 60, posY, 95, _infHgt	:	posY = posY + gapY
+			ui_infield	"iCornerType",	posX + 60, posY, 95, _infHgt
+			ui_infield	"bFrmCapL",		posX + 220, posY, 15, _infHgt	ui_tooltip	"멀리언 유형이 'Cap(TYPE2)'일 경우 활성화"	:	posY = posY + gapY
 
 			_frmType = iFrmTypeL
 		endif
@@ -461,7 +464,8 @@ ui_page	4,	-1,	"코너프레임 설정",	"uiTab_StorefrontFrame_flat(1)"
 			ui_infield	"frmThkR",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
 			ui_infield	"gskWdtR",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
 			ui_infield	"aFrmR",		posX + 40, posY, 60, _infHgt	:	posY = posY + gapY
-			ui_infield	"iCornerType",	posX + 60, posY, 95, _infHgt	:	posY = posY + gapY
+			ui_infield	"iCornerType",	posX + 60, posY, 95, _infHgt
+			ui_infield	"bFrmCapR",		posX + 220, posY, 15, _infHgt	ui_tooltip	"멀리언 유형이 'Cap(TYPE2)'일 경우 활성화"	:	posY = posY + gapY
 
 			_frmType = iFrmTypeR
 		endif

@@ -62,7 +62,6 @@ if	bGuide	then
 	endif
 endif
 
-strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1),	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2,	stepHgt_S + stepHgt*(nStep_1 - 1) + stepHgt*(nStep_2 - 1)
 !===============================================================================================
 !	Hotspot
 !===============================================================================================
@@ -124,11 +123,15 @@ if	iFrmTypeL = FrmType_Mullion	then
 	_xPosL_refer = _referLth*cos(_aSubL)
 	_yPosL_refer = _referLth*sin(_aSubL)
 
+	!	Mullion Type
+	_iMlnType = iMlnType
+	if	not(bFrmCapL)	then	_iMlnType = MLN_TYPE1
+
 	!	Point
 	dim	_frmPointL[][]
 
 		if	iCornerType = CORNER_TYPE1	then
-			if	iMlnType = Mln_Type1	then
+			if	_iMlnType = Mln_Type1	then
 				!	Point1
 				_frmPointL[1][1] = gskWdtL/2
 				_frmPointL[1][2] = 0
@@ -164,7 +167,7 @@ if	iFrmTypeL = FrmType_Mullion	then
 				_nFrmL = 8
 			endif
 
-			if	iMlnType = Mln_Type2	then
+			if	_iMlnType = Mln_Type2	then
 				!	Point1
 				_frmPointL[1][1] = gskWdtL/2
 				_frmPointL[1][2] = 0
@@ -226,7 +229,7 @@ if	iFrmTypeL = FrmType_Mullion	then
 		endif
 
 		if	iCornerType = CORNER_TYPE2	then
-			if	iMlnType = Mln_Type1	then
+			if	_iMlnType = Mln_Type1	then
 				!	Point1
 				_frmPointL[1][1] = gskWdtL/2
 				_frmPointL[1][2] = 0
@@ -266,7 +269,7 @@ if	iFrmTypeL = FrmType_Mullion	then
 				_nFrmL = 9
 			endif
 
-			if	iMlnType = Mln_Type2	then
+			if	_iMlnType = Mln_Type2	then
 				!	Point1
 				_frmPointL[1][1] = gskWdtL/2
 				_frmPointL[1][2] = 0
@@ -392,11 +395,15 @@ add2	ctwWdt,	0
 		_xPosR_refer = _referLth*cos(_aSubR)
 		_yPosR_refer = _referLth*sin(_aSubR)
 
+		!	Mullion Type
+		_iMlnType = iMlnType
+		if	not(bFrmCapR)	then	_iMlnType = MLN_TYPE1
+
 		!	Point
 		dim	_frmPointR[][]
 
 			if	iCornerType = CORNER_TYPE1	then
-				if	iMlnType = Mln_Type1	then
+				if	_iMlnType = Mln_Type1	then
 					!	Point1
 					_frmPointR[1][1] = -gskWdtR/2
 					_frmPointR[1][2] = 0
@@ -432,7 +439,7 @@ add2	ctwWdt,	0
 					_nFrmR = 8
 				endif
 
-				if	iMlnType = Mln_Type2	then
+				if	_iMlnType = Mln_Type2	then
 					!	Point1
 					_frmPointR[1][1] = -gskWdtR/2
 					_frmPointR[1][2] = 0
@@ -494,7 +501,7 @@ add2	ctwWdt,	0
 			endif
 
 			if	iCornerType = CORNER_TYPE2	then
-				if	iMlnType = Mln_Type1	then
+				if	_iMlnType = Mln_Type1	then
 					!	Point1
 					_frmPointR[1][1] = -gskWdtR/2
 					_frmPointR[1][2] = 0
@@ -534,7 +541,7 @@ add2	ctwWdt,	0
 					_nFrmR = 9
 				endif
 
-				if	iMlnType = Mln_Type2	then
+				if	_iMlnType = Mln_Type2	then
 					!	Point1
 					_frmPointR[1][1] = -gskWdtR/2
 					_frmPointR[1][2] = 0
@@ -722,34 +729,44 @@ if	AC_symb_display_option = 6	then
 
 	_ratioCut = (gs_cutplane_height/ctwHgt)
 
+	!	Mullion Type
+	_iMlnTypeL = iMlnType
+	if	not(bFrmCapL)	then	_iMlnTypeL = MLN_TYPE1
+
 	if	iFrmTypeL = FrmType_Boundary	then
-		_xPosIdx = 3
+		_xPosIdxL = 3
 	endif
 	if	iFrmTypeL = FrmType_Mullion	then
-		if	iCornerType = CORNER_TYPE1	then
-			if	iMlnType = Mln_Type1	then
-				_xPosIdx = 3
-			endif
-			if	iMlnType = Mln_Type2	then
-				_xPosIdx = 6
-			endif
+		if	_iMlnTypeL = Mln_Type1	then
+			_xPosIdxL = 3
 		endif
-		if	iCornerType = CORNER_TYPE2	then
-			if	iMlnType = Mln_Type1	then
-				_xPosIdx = 3
-			endif
-			if	iMlnType = Mln_Type2	then
-				_xPosIdx = 6
-			endif
+		if	_iMlnTypeL = Mln_Type2	then
+			_xPosIdxL = 6
 		endif
 	endif
 
+	_iMlnTypeR = iMlnType
+	if	not(bFrmCapR)	then	_iMlnTypeR = MLN_TYPE1
+
+	if	iFrmTypeR = FrmType_Boundary	then
+		_xPosIdxR = 3
+	endif
+	if	iFrmTypeR = FrmType_Mullion	then
+		if	_iMlnTypeR = Mln_Type1	then
+			_xPosIdxR = 3
+		endif
+		if	_iMlnTypeR = Mln_Type2	then
+			_xPosIdxR = 6
+		endif
+	endif
+
+	!	Draw Lines
 	add2	0,	gskThk
 		!	라인 1
-		line2	_xPosTransL[_xPosIdx] + _dxL*_ratioCut,	_dyL*_ratioCut,	ctwWdt + _xPosTransR[_xPosIdx] + _dxR*_ratioCut,	_dyR*_ratioCut
+		line2	_xPosTransL[_xPosIdxL] + _dxL*_ratioCut,	_dyL*_ratioCut,	ctwWdt + _xPosTransR[_xPosIdxR] + _dxR*_ratioCut,	_dyR*_ratioCut
 
 		!	라인 2
-		line2	_xPosTransL[(_xPosIdx + 1)] + _dxL*_ratioCut,	_dyL*_ratioCut + frmThkL,	ctwWdt + _xPosTransR[(_xPosIdx + 1)] + _dxR*_ratioCut,	_dyR*_ratioCut + frmThkR
+		line2	_xPosTransL[(_xPosIdxL + 1)] + _dxL*_ratioCut,	_dyL*_ratioCut + frmThkL,	ctwWdt + _xPosTransR[(_xPosIdxR + 1)] + _dxR*_ratioCut,	_dyR*_ratioCut + frmThkR
 	del 1
 endif
 
