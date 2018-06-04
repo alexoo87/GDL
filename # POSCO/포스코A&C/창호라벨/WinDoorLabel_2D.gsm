@@ -10,16 +10,6 @@ hotspot2	0,	0,	unID	:	unID = unID + 1
 define style	"textStyle"	AC_TEXTFONT_1, AC_TEXTSIZE_1, 8, AC_TEXTSTYLE_1
 style	"textStyle"
 
-
-!	위치 관련 변수 정의
-!-----------------------------------------------------------------------------------------------
-if	iSymbolType = SYMBOL_CIRCLE_ID	then
-	_ratioSize = 2						!	반원형 심볼(Type1) 창호사이즈 미표시시 심볼 크기 비율
-endif
-if	iSymbolType = SYMBOL_CIRCLE_DIM	then
-	_ratioSize = 3.5						!	반원형 심볼(Type2) 창호사이즈 표시시 심볼 크기 비율
-endif
-
 !	문자 높이, 길이 정의
 !-----------------------------------------------------------------------------------------------
 n = request("Height_of_style", "textStyle", _textSize, _descent, _leading)			!	문자 높이 호출
@@ -34,11 +24,33 @@ _textHalf = _textHalf/1000*GLOB_SCALE
 halfSize = halfSize*GLOB_SCALE
 markerSize = markerSize*GLOB_SCALE
 
+!	심볼 자동 사이즈 비율
+!-----------------------------------------------------------------------------------------------
+if	iSymbolType = SYMBOL_CIRCLE_ID	then
+	_ratioSize = 2.5
+endif
+if	iSymbolType = SYMBOL_CIRCLE_DIM	then
+	if	iDemiPoint = demiPoint_Zero	then
+		_ratioSize = 3.5
+	endif
+	if	iDemiPoint = demiPoint_First	then
+		_ratioSize = 3.5
+	endif
+	if	iDemiPoint = demiPoint_Second	then
+		_ratioSize = 4
+	endif
+endif
+
 !	각 심볼 사이즈 관련 변수 정의
 !-----------------------------------------------------------------------------------------------
 if	autoSizing		then
 	r = _textSize*_ratioSize										!	반원형 심볼(Type1, 2) 반지름
 	w = _textLth													!	사각원형 심볼(Type3) 폭
+
+	if	w/2 > r	then
+		r = w/2 + _textSize/2
+	endif
+
 	_bMakeHotspot = 0
 else
 	r = (AC_MarkerSize/2)/1000*GLOB_SCALE										!	반원형 심볼(Type1, 2) 반지름
