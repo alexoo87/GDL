@@ -1991,6 +1991,7 @@ prism_	nsp/3,	WindowsHeight[j],	get(nsp)
 !	단열재
 pen			spandPenElv
 sect_fill	spandFill,	spandFillPenBg,	spandFillPen,	spandPen
+
 if	iMatrix_Windows[i][j] = Windows_Spandrel	then
 	material	spdMat_1
 	_spdThk = spdThk_1
@@ -2008,175 +2009,178 @@ if	iMatrix_Windows[i][j] = Windows_Spandrel_4	then
 	_spdThk = spdThk_4
 endif
 
-	!	단열 철판 두께 변수 정의
-	_offsetIns = 0
-	_spdFrmThk = 0
-	if	bSpdFrm	then
-		_offsetIns = 0.006
-		_spdFrmThk = spdFrmThk
-	endif
-
-if	i = 1	then
-	if	frameDivideNum_X = 1	then
-		_xPosInsL = frameWidthTmp_L
-		_xPosInsR = frameDistance_X[i] - frameWidthTmp_R
-	endif
-
-	if	frameDivideNum_X # 1	then
-		_xPosInsL = frameWidthTmp_L
-		_xPosInsR = frameDistance_X[i] - VerticalFrameWidth/2
-	endif
-endif
-if	i # 1 & i # frameDivideNum_X	then
-	_xPosInsL = VerticalFrameWidth/2
-	_xPosInsR = frameDistance_X[i] - VerticalFrameWidth/2
-endif
-
-if	i = frameDivideNum_X & frameDivideNum_X # 1	then
-	_xPosInsL = VerticalFrameWidth/2
-	_xPosInsR = frameDistance_X[i] - frameWidthTmp_R
-endif
-
-_yPosInsF = -(gasketThick + VerticalFrameThick) + _spdThk
-_yPosInsB = -(gasketThick + VerticalFrameThick)
-
-	put	_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15,
-		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk,	15,
-		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk,	15,
-		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15,
-		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15
-
-	addz	_offsetB + (_offsetIns + _spdFrmThk)
-		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - (_offsetIns + _spdFrmThk)*2,	get(nsp)
+	!	텍스트
+	addx	_offsetL
+		add	WindowsWidth[i]/2,	0,	WindowsHeight[j]/2
+			gosub	"Windows_Text"
+		del 1
 	del 1
 
-!	단열 철판
-sect_fill	65,	spandFillPenBg,	spandFillPen,	spandPen
-material	spdFrmMat
+	!	단열재 두께가 있을 경우
+	if	_spdThk > eps	then
+		!	단열 철판 두께 변수 정의
+		_offsetIns = 0
+		_spdFrmThk = 0
+		if	bSpdFrm	then
+			_offsetIns = 0.006
+			_spdFrmThk = spdFrmThk
+		endif
 
-if	bSpdFrm	then
-	!	Cut
-	roty	-90
-		put	_offsetB + (_offsetIns + _spdFrmThk),							_yPosInsB + _spdFrmThk,
-			_offsetB + (_offsetIns + _spdFrmThk),							_yPosInsF - _spdFrmThk,
-			_offsetB + frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,
-			_offsetB + frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk
+		if	i = 1	then
+			if	frameDivideNum_X = 1	then
+				_xPosInsL = frameWidthTmp_L
+				_xPosInsR = frameDistance_X[i] - frameWidthTmp_R
+			endif
 
-		poly	nsp/2,	use(nsp)
-		cutpoly	nsp/2,	get(nsp)
-	del 1
+			if	frameDivideNum_X # 1	then
+				_xPosInsL = frameWidthTmp_L
+				_xPosInsR = frameDistance_X[i] - VerticalFrameWidth/2
+			endif
+		endif
+		if	i # 1 & i # frameDivideNum_X	then
+			_xPosInsL = VerticalFrameWidth/2
+			_xPosInsR = frameDistance_X[i] - VerticalFrameWidth/2
+		endif
 
-	!	본체
-	put	_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB,	15,
-		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
-		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
-		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB,	15
+		if	i = frameDivideNum_X & frameDivideNum_X # 1	then
+			_xPosInsL = VerticalFrameWidth/2
+			_xPosInsR = frameDistance_X[i] - frameWidthTmp_R
+		endif
 
-	addz	_offsetB + _offsetIns
-		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
-	del 1
+		_yPosInsF = -(gasketThick + VerticalFrameThick) + _spdThk
+		_yPosInsB = -(gasketThick + VerticalFrameThick)
 
-	!	Cutend
-	cutend
+		!	단열재
+		put	_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15,
+			_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk,	15,
+			_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk,	15,
+			_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15,
+			_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,	15
 
-	!	옆 덮개
-	put	_xPosInsL + _offsetIns,					_yPosInsB,	15,
-		_xPosInsL + _offsetIns,					_yPosInsF,	15,
-		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
-		_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB,	15
+		addz	_offsetB + (_offsetIns + _spdFrmThk)
+			prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - (_offsetIns + _spdFrmThk)*2,	get(nsp)
+		del 1
 
-	addz	_offsetB + _offsetIns
-		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
-	del 1
+		!	단열 철판
+		sect_fill	65,	spandFillPenBg,	spandFillPen,	spandPen
+		material	spdFrmMat
 
-	put	_xPosInsR - _offsetIns,					_yPosInsB,	15,
-		_xPosInsR - _offsetIns,					_yPosInsF,	15,
-		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
-		_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB,	15
+		if	bSpdFrm	then
+			!	Cut
+			roty	-90
+				put	_offsetB + (_offsetIns + _spdFrmThk),							_yPosInsB + _spdFrmThk,
+					_offsetB + (_offsetIns + _spdFrmThk),							_yPosInsF - _spdFrmThk,
+					_offsetB + frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk),	_yPosInsF - _spdFrmThk,
+					_offsetB + frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk),	_yPosInsB + _spdFrmThk
 
-	addz	_offsetB + _offsetIns
-		prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
-	del 1
-endif
+				poly	nsp/2,	use(nsp)
+				cutpoly	nsp/2,	get(nsp)
+			del 1
 
-!	텍스트
-addx	_offsetL
-	add	WindowsWidth[i]/2,	0,	WindowsHeight[j]/2
-		gosub	"Windows_Text"
-	del 1
-del 1
+			!	본체
+			put	_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB,	15,
+				_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
+				_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
+				_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB,	15
 
-!	단열재 해치
-sect_fill	spandFill,	spandFillPenBg,	spandFillPen,	spandPenHatch
+			addz	_offsetB + _offsetIns
+				prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
+			del 1
 
-	!	변수 정의
-	dim	ModuleInt[][],	ModuleRemain[][]
+			!	Cutend
+			cutend
 
-	ModuleWidth = ((_spdThk - _spdFrmThk*2) - eps*2)/2
-	ModuleUnit = ModuleWidth/2
-	ModuleInt[i][j] = int(frameRealDistance_Y[j]/ModuleWidth)
-	ModuleRemain[i][j] = (frameRealDistance_Y[j] MOD ModuleWidth)
-	ModuleNum = ModuleInt[i][j]
+			!	옆 덮개
+			put	_xPosInsL + _offsetIns,					_yPosInsB,	15,
+				_xPosInsL + _offsetIns,					_yPosInsF,	15,
+				_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
+				_xPosInsL + (_offsetIns + _spdFrmThk),	_yPosInsB,	15
 
-	if	ModuleRemain[i][j] > 0	then	ModuleNum = ModuleNum + 1
+			addz	_offsetB + _offsetIns
+				prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
+			del 1
 
-	!	해치
-	if	GLOB_VIEW_TYPE = 4	then
-		if	i = 1	then	addx	frameWidthTmp_L
-		if	i # 1	then	addx	VerticalFrameWidth/2
+			put	_xPosInsR - _offsetIns,					_yPosInsB,	15,
+				_xPosInsR - _offsetIns,					_yPosInsF,	15,
+				_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsF,	15,
+				_xPosInsR - (_offsetIns + _spdFrmThk),	_yPosInsB,	15
 
-			addz	_offsetB
-				addx	frameRealDistance_X[i]
-					addy	-(VerticalFrameThick + gasketThick)
+			addz	_offsetB + _offsetIns
+				prism_	nsp/3,	WindowsHeight[j] + gasketWidth - HorizontalFrameWidth - _offsetIns*2,	get(nsp)
+			del 1
+		endif
 
-							!	해치 For
-							roty	-90
-								addx	(_offsetIns + _spdFrmThk)
-									roty	90
-										cutplane	1,	1,	0,	1
-									del 1
-								del 1
+		!	단열재 해치
+		sect_fill	spandFill,	spandFillPenBg,	spandFillPen,	spandPenHatch
 
-								addx	frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk)
-									roty	90
-										cutplane	1,	1,	0,	0
-									del 1
-								del 1
+			!	변수 정의
+			dim	ModuleInt[][],	ModuleRemain[][]
 
-									for	m = 1	to	ModuleNum
-										put	0,				0,				15,
-											0,				ModuleUnit,		900,
-											0,				90,				4000+15,
-											ModuleUnit,		ModuleUnit,		15,
-											0,				ModuleUnit*3,	15,
-											ModuleUnit,		ModuleUnit*3,	900,
-											0,				-180,			4000+15,
-											ModuleUnit*2,	ModuleUnit*3,	15,
-											ModuleUnit,		ModuleUnit,		15,
-											ModuleUnit*2,	ModuleUnit,		900,
-											0,				90,				4000+15
+			ModuleWidth = ((_spdThk - _spdFrmThk*2) - eps*2)/2
+			ModuleUnit = ModuleWidth/2
+			ModuleInt[i][j] = int(frameRealDistance_Y[j]/ModuleWidth)
+			ModuleRemain[i][j] = (frameRealDistance_Y[j] MOD ModuleWidth)
+			ModuleNum = ModuleInt[i][j]
 
-											addy	_spdFrmThk + eps
-												extrude	nsp/3,	0,	0,	frameRealDistance_X[i],	0,	get(nsp)
+			if	ModuleRemain[i][j] > 0	then	ModuleNum = ModuleNum + 1
+
+			!	해치
+			if	GLOB_VIEW_TYPE = 4	then
+				if	i = 1	then	addx	frameWidthTmp_L
+				if	i # 1	then	addx	VerticalFrameWidth/2
+
+					addz	_offsetB
+						addx	frameRealDistance_X[i]
+							addy	-(VerticalFrameThick + gasketThick)
+
+									!	해치 For
+									roty	-90
+										addx	(_offsetIns + _spdFrmThk)
+											roty	90
+												cutplane	1,	1,	0,	1
 											del 1
+										del 1
 
-											addx	ModuleWidth
-									next	m
+										addx	frameRealDistance_Y[j] - (_offsetIns + _spdFrmThk)
+											roty	90
+												cutplane	1,	1,	0,	0
+											del 1
+										del 1
 
-									del ModuleNum
+											for	m = 1	to	ModuleNum
+												put	0,				0,				15,
+													0,				ModuleUnit,		900,
+													0,				90,				4000+15,
+													ModuleUnit,		ModuleUnit,		15,
+													0,				ModuleUnit*3,	15,
+													ModuleUnit,		ModuleUnit*3,	900,
+													0,				-180,			4000+15,
+													ModuleUnit*2,	ModuleUnit*3,	15,
+													ModuleUnit,		ModuleUnit,		15,
+													ModuleUnit*2,	ModuleUnit,		900,
+													0,				90,				4000+15
 
-								cutend
-								cutend
+													addy	_spdFrmThk + eps
+														extrude	nsp/3,	0,	0,	frameRealDistance_X[i],	0,	get(nsp)
+													del 1
+
+													addx	ModuleWidth
+											next	m
+
+											del ModuleNum
+
+										cutend
+										cutend
+									del 1
+
 							del 1
+						del 1
+
 
 					del 1
 				del 1
-
-
-			del 1
-		del 1
+			endif
 	endif
-
 return
 
 

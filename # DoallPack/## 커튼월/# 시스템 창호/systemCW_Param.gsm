@@ -417,10 +417,10 @@ values	"gasketThick"	range	[0,	1]
 values	"gasketCapThick"	range	[0,	gasketThick - glassThick]
 
 values	"glassThick"	range	(0,	]
-values	"spdThk_1"	range	(0,	)
-values	"spdThk_2"	range	(0,	)
-values	"spdThk_3"	range	(0,	)
-values	"spdThk_4"	range	(0,	)
+values	"spdThk_1"	range	[0,	)
+values	"spdThk_2"	range	[0,	)
+values	"spdThk_3"	range	[0,	)
+values	"spdThk_4"	range	[0,	)
 
 values	"spdFrmThk"	range	(0,	)
 

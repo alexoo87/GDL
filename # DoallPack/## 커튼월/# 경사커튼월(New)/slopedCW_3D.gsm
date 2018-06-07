@@ -2204,6 +2204,7 @@ return
 		_insThk = insThk_4
 	endif
 
+	if	_insThk > eps	then
 		!	단열 철판 두께 변수 정의
 		_offsetIns = 0
 		_spdFrmThk = 0
@@ -2228,124 +2229,125 @@ return
 		_insFrmY = (_etcHgt - _offsetIns*2)*tan(aTilt)
 		_insFrmZ = (_etcHgt - _offsetIns*2)
 
-	put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _spdFrmThk,			15,
-		(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _insThk - _spdFrmThk,	15,
-		_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk - _spdFrmThk,	15,
-		_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _spdFrmThk,			15
+		put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _spdFrmThk,			15,
+			(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _insThk - _spdFrmThk,	15,
+			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk - _spdFrmThk,	15,
+			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _spdFrmThk,			15
 
-	add	_transX_Ins,	_transY_Ins,	_transZ_Ins
-		extrude	nsp/3,	_insX,	_insY,	_insZ,	1+2+4+16+32,	get(nsp)
-	del 1
-
-	!	단열 철판
-	sect_fill	65,	insBackPen,	insFillPen,	insSectPen
-	material	spdFrmMat
-
-	if	bSpdFrm	then
-		!	Cut
-		roty	-90
-			put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + (_offsetIns + _spdFrmThk)*tan(aTilt) + _spdFrmThk,
-				(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + (_offsetIns + _spdFrmThk)*tan(aTilt) + _insThk - _spdFrmThk,
-				_etcHgt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + (_etcHgt - (_offsetIns + _spdFrmThk))*tan(aTilt) + _insThk - _spdFrmThk,
-				_etcHgt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + (_etcHgt - (_offsetIns + _spdFrmThk))*tan(aTilt) + _spdFrmThk
-
-			! poly	nsp/2,	use(nsp)
-			cutpoly	nsp/2,	get(nsp)
+		add	_transX_Ins,	_transY_Ins,	_transZ_Ins
+			extrude	nsp/3,	_insX,	_insY,	_insZ,	1+2+4+16+32,	get(nsp)
 		del 1
 
-		!	본체
-		put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk),				15,
-			(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _insThk,	15,
-			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
-			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
+		!	단열 철판
+		sect_fill	65,	insBackPen,	insFillPen,	insSectPen
+		material	spdFrmMat
 
-		add	_transX_InsFrm,	_transY_InsFrm,	_transZ_InsFrm
-			extrude	nsp/3,	_insFrmX,	_insFrmY,	_insFrmZ,	1+2+4+16+32,	get(nsp)
-		del 1
+		if	bSpdFrm	then
+			!	Cut
+			roty	-90
+				put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + (_offsetIns + _spdFrmThk)*tan(aTilt) + _spdFrmThk,
+					(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + (_offsetIns + _spdFrmThk)*tan(aTilt) + _insThk - _spdFrmThk,
+					_etcHgt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + (_etcHgt - (_offsetIns + _spdFrmThk))*tan(aTilt) + _insThk - _spdFrmThk,
+					_etcHgt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + (_etcHgt - (_offsetIns + _spdFrmThk))*tan(aTilt) + _spdFrmThk
 
-		!	Cutend
-		cutend
-
-		!	옆 덮개
-		put	_offsetIns,					-(_minFrmThk + gskThk),				15,
-			_offsetIns,					-(_minFrmThk + gskThk) + _insThk,	15,
-			(_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
-			(_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
-
-		add	_transX_InsFrm,	_transY_InsFrm,	_transZ_InsFrm
-			extrude	nsp/3,	_insFrmX,	_insFrmY,	_insFrmZ,	1+2+4+16+32,	get(nsp)
-		del 1
-
-		put	_etcWdt - _offsetIns,					-(_minFrmThk + gskThk),				15,
-			_etcWdt - _offsetIns,					-(_minFrmThk + gskThk) + _insThk,	15,
-			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
-			_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
-
-		add	_transX_InsFrm,	_transY_InsFrm,	_transZ_InsFrm
-			extrude	nsp/3,	_insFrmX,	_insFrmY,	_insFrmZ,	1+2+4+16+32,	get(nsp)
-		del 1
-	endif
-
-	!	단열재 해치
-	if	GLOB_VIEW_TYPE = 4	then
-		sect_fill	insFill,	insBackPen,	insFillPen,	insHtcPen
-
-		!	해치 전체 길이
-		_insHtcLth = _etcHgt/cos(aTilt) + _insThk*sin(aTilt)
-		_insHtcWdt = _etcWdt
-
-		!	해치 변수 정의
-		_modWdt = ((_insThk - _spdFrmThk*2)*cos(aTilt) - eps*2)/2
-		_modUnit = _modWdt/2
-
-		_nMod = int(_insHtcLth/_modWdt)
-		_nMod = _nMod + 2
-
-		_insOff = 0
-		if	aTilt < -eps	then	_insOff = _insThk*sin(aTilt)
-
-		addy	-(_minFrmThk + gskThk) + _spdFrmThk + eps
-
-			!	해치 자르기
-			_nCut = 0
-			addz	(_offsetIns + _spdFrmThk)
-				cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
-			del 1
-			addz	_etcHgt - (_offsetIns + _spdFrmThk)
-				cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+				! poly	nsp/2,	use(nsp)
+				cutpoly	nsp/2,	get(nsp)
 			del 1
 
-			!	해치 그리기
-			rotx	-aTilt
-				addz	_insOff
-					roty	-90
-						for	m = 1	to	_nMod
-							put	0,			0,			0,
-								0,			_modUnit,	900,
-								0,			90,			4000,
-								_modUnit,	_modUnit,	0,
-								0,			_modUnit*3,	0,
-								_modUnit,	_modUnit*3,	900,
-								0,			-180,		4000,
-								_modWdt,	_modUnit*3,	0,
-								_modUnit,	_modUnit,	0,
-								_modWdt,	_modUnit,	900,
-								0,			90,			4000
+			!	본체
+			put	(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk),				15,
+				(_offsetIns + _spdFrmThk),				-(_minFrmThk + gskThk) + _insThk,	15,
+				_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
+				_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
 
-							extrude	nsp/3,	0,	0,	-_insHtcWdt,	0,	get(nsp)
+			add	_transX_InsFrm,	_transY_InsFrm,	_transZ_InsFrm
+				extrude	nsp/3,	_insFrmX,	_insFrmY,	_insFrmZ,	1+2+4+16+32,	get(nsp)
+			del 1
 
-							addx	_modWdt
-						next	m
+			!	Cutend
+			cutend
 
-						del	_nMod
+			!	옆 덮개
+			put	_offsetIns,					-(_minFrmThk + gskThk),				15,
+				_offsetIns,					-(_minFrmThk + gskThk) + _insThk,	15,
+				(_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
+				(_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
+
+			add	_transX_InsFrm,	_transY_InsFrm,	_transZ_InsFrm
+				extrude	nsp/3,	_insFrmX,	_insFrmY,	_insFrmZ,	1+2+4+16+32,	get(nsp)
+			del 1
+
+			put	_etcWdt - _offsetIns,					-(_minFrmThk + gskThk),				15,
+				_etcWdt - _offsetIns,					-(_minFrmThk + gskThk) + _insThk,	15,
+				_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk) + _insThk,	15,
+				_etcWdt - (_offsetIns + _spdFrmThk),	-(_minFrmThk + gskThk),				15
+
+			add	_transX_InsFrm,	_transY_InsFrm,	_transZ_InsFrm
+				extrude	nsp/3,	_insFrmX,	_insFrmY,	_insFrmZ,	1+2+4+16+32,	get(nsp)
+			del 1
+		endif
+
+		!	단열재 해치
+		if	GLOB_VIEW_TYPE = 4	then
+			sect_fill	insFill,	insBackPen,	insFillPen,	insHtcPen
+
+			!	해치 전체 길이
+			_insHtcLth = _etcHgt/cos(aTilt) + _insThk*sin(aTilt)
+			_insHtcWdt = _etcWdt
+
+			!	해치 변수 정의
+			_modWdt = ((_insThk - _spdFrmThk*2)*cos(aTilt) - eps*2)/2
+			_modUnit = _modWdt/2
+
+			_nMod = int(_insHtcLth/_modWdt)
+			_nMod = _nMod + 2
+
+			_insOff = 0
+			if	aTilt < -eps	then	_insOff = _insThk*sin(aTilt)
+
+			addy	-(_minFrmThk + gskThk) + _spdFrmThk + eps
+
+				!	해치 자르기
+				_nCut = 0
+				addz	(_offsetIns + _spdFrmThk)
+					cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+				del 1
+				addz	_etcHgt - (_offsetIns + _spdFrmThk)
+					cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+				del 1
+
+				!	해치 그리기
+				rotx	-aTilt
+					addz	_insOff
+						roty	-90
+							for	m = 1	to	_nMod
+								put	0,			0,			0,
+									0,			_modUnit,	900,
+									0,			90,			4000,
+									_modUnit,	_modUnit,	0,
+									0,			_modUnit*3,	0,
+									_modUnit,	_modUnit*3,	900,
+									0,			-180,		4000,
+									_modWdt,	_modUnit*3,	0,
+									_modUnit,	_modUnit,	0,
+									_modWdt,	_modUnit,	900,
+									0,			90,			4000
+
+								extrude	nsp/3,	0,	0,	-_insHtcWdt,	0,	get(nsp)
+
+								addx	_modWdt
+							next	m
+
+							del	_nMod
+						del 1
 					del 1
 				del 1
 			del 1
-		del 1
 
-		for	c = 1	to	_nCut
-			cutend
-		next	c
+			for	c = 1	to	_nCut
+				cutend
+			next	c
+		endif
 	endif
 
 return

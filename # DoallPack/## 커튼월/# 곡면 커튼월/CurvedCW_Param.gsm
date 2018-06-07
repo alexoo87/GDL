@@ -610,7 +610,7 @@ values	"gapTrs"	range	(0,	]
 !-----------------------------------------------------------------------------------------------
 values	"textSize"	range	(0,	)
 
-values	"insThk"	range	(0,	frmThk)
+values	"insThk"	range	[0,	frmThk)
 values	"grlThk"	range	(0,	0.050]
 values	"gapGrl"	range	(0,	0.200]
 values	"grlAng"	range	[-90,	90]

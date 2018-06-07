@@ -1820,7 +1820,7 @@ end
 						-_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm) + ((_frmWdt - _gskWdt)/2)*tan(_aFrm),	15,
 						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),										15,
 						-_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),							15,
-						0,			-(gskThk + _frmThk)/cos(_aFrm),														15,
+						0,			-(gskThk + _frmThk)/cos(_aFrm),														_si,
 						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - (gskThk + _frmThk)/cos(_aFrm),							15,
 						_frmWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm),										15,
 						_gskWdt/2,	-(_frmWdt/2)*tan(_aFrm) - gskThk/cos(_aFrm) + ((_frmWdt - _gskWdt)/2)*tan(_aFrm),	15,
@@ -2017,11 +2017,13 @@ return
 			_insThk = insThk_4
 		endif
 
-		addz	_etcLct
-			addx	_xPosEtc
-				gosub	"pnlIns"
+		if	_insThk > eps	then
+			addz	_etcLct
+				addx	_xPosEtc
+					gosub	"pnlIns"
+				del 1
 			del 1
-		del 1
+		endif
 	endif
 
 	!	그릴
@@ -2505,17 +2507,19 @@ return
 	material	frmMat
 
 	!	본체
-	put	-_frmWdt/2,	-gskThk,			15,
+	put	-_gskWdt/2,	-gskThk,			15,
+		-_frmWdt/2,	-gskThk,			15,
 		-_frmWdt/2,	-(gskThk + mlnThk),	15,
 		_frmWdt/2,	-(gskThk + mlnThk),	15,
-		_frmWdt/2,	-gskThk,			15
+		_frmWdt/2,	-gskThk,			15,
+		_gskWdt/2,	-gskThk,			0
 
 	prism_	nsp/3,	_doorHgt,	get(nsp)
 
-	!	본체
+	!	개스킷
 	if	iMlnType = MLN_TYPE1	then
 		put	-_gskWdt/2,	0,					15,
-			-_gskWdt/2,	-gskThk,			15,
+			-_gskWdt/2,	-gskThk,			0,
 			_gskWdt/2,	-gskThk,			15,
 			_gskWdt/2,	0,					15
 	endif
@@ -2524,7 +2528,7 @@ return
 		put	-_frmWdt/2,	0,					15,
 			-_frmWdt/2,	-gskCapThk,			15,
 			-_gskWdt/2,	-gskCapThk,			15,
-			-_gskWdt/2,	-gskThk,			15,
+			-_gskWdt/2,	-gskThk,			0,
 			_gskWdt/2,	-gskThk,			15,
 			_gskWdt/2,	-gskCapThk,			15,
 			_frmWdt/2,	-gskCapThk,			15,

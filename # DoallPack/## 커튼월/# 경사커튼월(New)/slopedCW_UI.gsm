@@ -149,11 +149,11 @@ posY = 6
 
 		ui_infield	"iHingeType",	posX,	posY,	90,	20	:	posY = posY + gapY
 
-		ui_infield	"insThk_1",	posX,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE1) 단열재 두께"
-		ui_infield	"insThk_2",	posX + 55,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE2) 단열재 두께"	:	posY = posY + gapY
+		ui_infield	"insThk_1",	posX,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE1) 단열재 두께, 0으로 설정 시 OFF"
+		ui_infield	"insThk_2",	posX + 55,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE2) 단열재 두께, 0으로 설정 시 OFF"	:	posY = posY + gapY
 
-		ui_infield	"insThk_3",	posX,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE3) 단열재 두께"
-		ui_infield	"insThk_4",	posX + 55,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE4) 단열재 두께"	:	posY = posY + gapY
+		ui_infield	"insThk_3",	posX,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE3) 단열재 두께, 0으로 설정 시 OFF"
+		ui_infield	"insThk_4",	posX + 55,	posY,	50,	20	ui_tooltip	"스팬드럴(TYPE4) 단열재 두께, 0으로 설정 시 OFF"	:	posY = posY + gapY
 
 		ui_infield	"grlThk",	posX,	posY,	50,	20	ui_tooltip	"그릴창 두께"
 		ui_infield	"grlGap",	posX + 55,	posY,	50,	20	ui_tooltip	"그릴창 간격"	:	posY = posY + gapY

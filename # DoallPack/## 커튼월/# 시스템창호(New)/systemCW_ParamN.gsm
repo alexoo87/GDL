@@ -5,7 +5,7 @@ values	"nMln"	range	[0,	40]
 values	"nTrs"	range	[0,	40]
 
 values	"gskThk"	range	(0,	)
-values	"gskCapThk"	range	(0,	)
+values	"gskCapThk"	range	(0,	(gskThk - glsThk - glsLct)]
 
 values	"frmWdtB"	range	(0,	)
 values	"frmThkB"	range	(0,	)
@@ -112,13 +112,19 @@ values{2}	"iTrsType"	TRS_TYPE1,	stTrsType[TRS_TYPE1],
 !-----------------------------------------------------------------------------------------------
 !	패널
 !-----------------------------------------------------------------------------------------------
+!	유리 위치 최대값
+_maxGlsLct = (gskThk - glsThk)
+if	iMlnType = MLN_TYPE2 | iTrsType = TRS_TYPE2	then
+	_maxGlsLct = _maxGlsLct - gskCapThk
+endif
+
 values	"glsThk"	range	(0,	gskThk)
-values	"glsLct"	range	[0,	(gskThk - glsThk)]
+values	"glsLct"	range	[0,	_maxGlsLct]
 values	"txtSize"	range	(0,	)
-values	"insThk_1"	range	(0,	)
-values	"insThk_2"	range	(0,	)
-values	"insThk_3"	range	(0,	)
-values	"insThk_4"	range	(0,	)
+values	"insThk_1"	range	[0,	)
+values	"insThk_2"	range	[0,	)
+values	"insThk_3"	range	[0,	)
+values	"insThk_4"	range	[0,	)
 values	"grlThk"	range	(0,	)
 values	"grlGap"	range	(0,	)
 values	"aGrl"		range	[-90,	90]
@@ -919,21 +925,21 @@ endif
 	if	GLOB_MODPAR_NAME = "iM_Length"	then
 		for	i = 1	to	(nMln + 1)
 			if	nMln > eps	then
-				if	iM_Length[i][6] - 0.100 < eps	then
+				if	iM_Length[i][6] - mlnWdt < eps	then
 					parameters	iM_Length[i][6] = 0
 				endif
 			endif
-			if	(mlnGap[i] - iM_Length[i][7] - 0.200) - iM_Length[i][6] < eps	then
-				parameters	iM_Length[i][6] = mlnGap[i] - iM_Length[i][7] - 0.200
+			if	(mlnGap[i] - iM_Length[i][7] - mlnWdt*2) - iM_Length[i][6] < eps	then
+				parameters	iM_Length[i][6] = mlnGap[i] - iM_Length[i][7] - mlnWdt*2
 			endif
 
 			if	nMln > eps	then
-				if	iM_Length[i][7] - 0.100 < eps	then
+				if	iM_Length[i][7] - mlnWdt < eps	then
 					parameters	iM_Length[i][7] = 0
 				endif
 			endif
-			if	(mlnGap[i] - iM_Length[i][6] - 0.200) - iM_Length[i][7] < eps	then
-				parameters	iM_Length[i][7] = mlnGap[i] - iM_Length[i][6] - 0.200
+			if	(mlnGap[i] - iM_Length[i][6] - mlnWdt*2) - iM_Length[i][7] < eps	then
+				parameters	iM_Length[i][7] = mlnGap[i] - iM_Length[i][6] - mlnWdt*2
 			endif
 		next	i
 	endif

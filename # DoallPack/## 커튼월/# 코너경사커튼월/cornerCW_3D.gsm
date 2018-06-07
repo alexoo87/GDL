@@ -55,11 +55,15 @@ del 1
 
 !	trsGap
 if	not(nTrs < eps) & not(bEqualGap)	then
+	dim	_stTrsGap[]
+
 	addx	matrixPoint[4][1]/2
 		for	i = 1	to	nTrs
-			hotspot	0,	0,	0,			unID,	trsGap[i],	1+128	:	unID = unID + 1
-			hotspot	0,	0,	-1,			unID,	trsGap[i],	3		:	unID = unID + 1
-			hotspot	0,	0,	trsGap[i],	unID,	trsGap[i],	2		:	unID = unID + 1
+			_stTrsGap[i] = str(i,	1,	0) + "번째 트랜섬"
+
+			hotspot	0,	0,	0,			unID,	trsGap[i],	1+128,	trsGap[i],	_stTrsGap[i]	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	trsGap[i],	3,		trsGap[i],	_stTrsGap[i]	:	unID = unID + 1
+			hotspot	0,	0,	trsGap[i],	unID,	trsGap[i],	2,		trsGap[i],	_stTrsGap[i]	:	unID = unID + 1
 		next	i
 	del 1
 endif
@@ -2096,158 +2100,160 @@ group	"gIns"
 				_insThk = insThk_4
 			endif
 
-			!	단열 철판 두께 변수 정의
-			!-----------------------------------------------------------------------------------------------
-			_offsetIns = 0
-			_spdFrmThk = 0
-			if	bSpdFrm	then
-				_offsetIns = 0.006
-				_spdFrmThk = spdFrmThk
-			endif
+			if	_insThk > eps	then
+				!	단열 철판 두께 변수 정의
+				!-----------------------------------------------------------------------------------------------
+				_offsetIns = 0
+				_spdFrmThk = 0
+				if	bSpdFrm	then
+					_offsetIns = 0.006
+					_spdFrmThk = spdFrmThk
+				endif
 
-			!	Height of Insulation / zPosIns
-			!-----------------------------------------------------------------------------------------------
-			if	nTrs < eps	then
-				_insHgt = ctwHgt - (frmWdtB + frmWdtT) - (_offsetIns + _spdFrmThk)*2
-				_zPosIns = frmWdtB + (_offsetIns + _spdFrmThk)
-			else
-				if	i = 1	then
-					_insHgt = trsGap[i] - (frmWdtB + trsWdt/2) - (_offsetIns + _spdFrmThk)*2
+				!	Height of Insulation / zPosIns
+				!-----------------------------------------------------------------------------------------------
+				if	nTrs < eps	then
+					_insHgt = ctwHgt - (frmWdtB + frmWdtT) - (_offsetIns + _spdFrmThk)*2
 					_zPosIns = frmWdtB + (_offsetIns + _spdFrmThk)
+				else
+					if	i = 1	then
+						_insHgt = trsGap[i] - (frmWdtB + trsWdt/2) - (_offsetIns + _spdFrmThk)*2
+						_zPosIns = frmWdtB + (_offsetIns + _spdFrmThk)
+					endif
+
+					if	i # 1 & i # (nTrs + 1)	then
+						_insHgt = (trsGap[i] - trsGap[i - 1]) - trsWdt - (_offsetIns + _spdFrmThk)*2
+						_zPosIns = trsGap[i - 1] + trsWdt/2 + (_offsetIns + _spdFrmThk)
+					endif
+
+					if	i = (nTrs + 1)	then
+						_insHgt = (ctwHgt - trsGap[i - 1]) - (frmWdtT + trsWdt/2) - (_offsetIns + _spdFrmThk)*2
+						_zPosIns = trsGap[i - 1] + trsWdt/2 + (_offsetIns + _spdFrmThk)
+					endif
 				endif
 
-				if	i # 1 & i # (nTrs + 1)	then
-					_insHgt = (trsGap[i] - trsGap[i - 1]) - trsWdt - (_offsetIns + _spdFrmThk)*2
-					_zPosIns = trsGap[i - 1] + trsWdt/2 + (_offsetIns + _spdFrmThk)
-				endif
-
-				if	i = (nTrs + 1)	then
-					_insHgt = (ctwHgt - trsGap[i - 1]) - (frmWdtT + trsWdt/2) - (_offsetIns + _spdFrmThk)*2
-					_zPosIns = trsGap[i - 1] + trsWdt/2 + (_offsetIns + _spdFrmThk)
-				endif
-			endif
-
-			!	비율
-			!-----------------------------------------------------------------------------------------------
-			if	nTrs < eps	then
-				_ratio_insB = (frmWdtB + (_offsetIns + _spdFrmThk))/ctwHgt
-				_ratio_insT = (ctwHgt - frmWdtT - (_offsetIns + _spdFrmThk))/ctwHgt
-			else
-				if	i = 1	then
+				!	비율
+				!-----------------------------------------------------------------------------------------------
+				if	nTrs < eps	then
 					_ratio_insB = (frmWdtB + (_offsetIns + _spdFrmThk))/ctwHgt
-					_ratio_insT = (trsGap[i] - trsWdt/2 - (_offsetIns + _spdFrmThk))/ctwHgt
-				endif
-
-				if	i # 1 & i # (nTrs + 1)	then
-					_ratio_insB = (trsGap[i - 1] + trsWdt/2 + (_offsetIns + _spdFrmThk))/ctwHgt
-					_ratio_insT = (trsGap[i] - trsWdt/2 - (_offsetIns + _spdFrmThk))/ctwHgt
-				endif
-
-				if	i = (nTrs + 1)	then
-					_ratio_insB = (trsGap[i - 1] + trsWdt/2 + (_offsetIns + _spdFrmThk))/ctwHgt
 					_ratio_insT = (ctwHgt - frmWdtT - (_offsetIns + _spdFrmThk))/ctwHgt
-				endif
-			endif
+				else
+					if	i = 1	then
+						_ratio_insB = (frmWdtB + (_offsetIns + _spdFrmThk))/ctwHgt
+						_ratio_insT = (trsGap[i] - trsWdt/2 - (_offsetIns + _spdFrmThk))/ctwHgt
+					endif
 
-			!	하부 좌표
-			!-----------------------------------------------------------------------------------------------
-				!	좌측 좌표
-				_xTransL_insB = _dxL*_ratio_insB
-				_yTransL_insB = _dyL*_ratio_insB
+					if	i # 1 & i # (nTrs + 1)	then
+						_ratio_insB = (trsGap[i - 1] + trsWdt/2 + (_offsetIns + _spdFrmThk))/ctwHgt
+						_ratio_insT = (trsGap[i] - trsWdt/2 - (_offsetIns + _spdFrmThk))/ctwHgt
+					endif
 
-				if	iFrmTypeL = FrmType_Boundary	then
-					_xPosL_insB1 = frmWdtL
-					_yPosL_insB1 = frmThkL + gskThk - _insThk + _spdFrmThk
-
-					_xPosL_insB2 = frmWdtL
-					_yPosL_insB2 = frmThkL + gskThk - _spdFrmThk
-				endif
-
-				if	iFrmTypeL = FrmType_Mullion	then
-					_xPosL_insB1 = _xPosTransL[_idxIns_1] + _insThk*tan(aFrmL)
-					_yPosL_insB1 = _yPosTransL[_idxIns_1] - _insThk + _spdFrmThk
-
-					_xPosL_insB2 = _xPosTransL[_idxIns_1]
-					_yPosL_insB2 = _yPosTransL[_idxIns_1] - _spdFrmThk
+					if	i = (nTrs + 1)	then
+						_ratio_insB = (trsGap[i - 1] + trsWdt/2 + (_offsetIns + _spdFrmThk))/ctwHgt
+						_ratio_insT = (ctwHgt - frmWdtT - (_offsetIns + _spdFrmThk))/ctwHgt
+					endif
 				endif
 
-				put	_xPosL_insB1 + _xTransL_insB + (_offsetIns + _spdFrmThk),	_yPosL_insB1 + _yTransL_insB,	0,
-					_xPosL_insB2 + _xTransL_insB + (_offsetIns + _spdFrmThk),	_yPosL_insB2 + _yTransL_insB,	0
+				!	하부 좌표
+				!-----------------------------------------------------------------------------------------------
+					!	좌측 좌표
+					_xTransL_insB = _dxL*_ratio_insB
+					_yTransL_insB = _dyL*_ratio_insB
 
-				!	우측 좌표
-				_xTransR_insB = _dxR*_ratio_insB
-				_yTransR_insB = _dyR*_ratio_insB
+					if	iFrmTypeL = FrmType_Boundary	then
+						_xPosL_insB1 = frmWdtL
+						_yPosL_insB1 = frmThkL + gskThk - _insThk + _spdFrmThk
 
-				if	iFrmTypeR = FrmType_Boundary	then
-					_xPosR_insB1 = -frmWdtR
-					_yPosR_insB1 = frmThkR + gskThk - _spdFrmThk
+						_xPosL_insB2 = frmWdtL
+						_yPosL_insB2 = frmThkL + gskThk - _spdFrmThk
+					endif
 
-					_xPosR_insB2 = -frmWdtR
-					_yPosR_insB2 = frmThkR + gskThk - _insThk + _spdFrmThk
-				endif
+					if	iFrmTypeL = FrmType_Mullion	then
+						_xPosL_insB1 = _xPosTransL[_idxIns_1] + _insThk*tan(aFrmL)
+						_yPosL_insB1 = _yPosTransL[_idxIns_1] - _insThk + _spdFrmThk
 
-				if	iFrmTypeR = FrmType_Mullion	then
-					_xPosR_insB1 = _xPosTransR[_idxIns_2]
-					_yPosR_insB1 = _yPosTransR[_idxIns_2] - _spdFrmThk
+						_xPosL_insB2 = _xPosTransL[_idxIns_1]
+						_yPosL_insB2 = _yPosTransL[_idxIns_1] - _spdFrmThk
+					endif
 
-					_xPosR_insB2 = _xPosTransR[_idxIns_2] + _insThk*tan(aFrmR)
-					_yPosR_insB2 = _yPosTransR[_idxIns_2] - _insThk + _spdFrmThk
-				endif
+					put	_xPosL_insB1 + _xTransL_insB + (_offsetIns + _spdFrmThk),	_yPosL_insB1 + _yTransL_insB,	0,
+						_xPosL_insB2 + _xTransL_insB + (_offsetIns + _spdFrmThk),	_yPosL_insB2 + _yTransL_insB,	0
 
-				put	ctwWdt + _xPosR_insB1 + _xTransR_insB - (_offsetIns + _spdFrmThk),	_yPosR_insB1 + _yTransR_insB,	0,
-					ctwWdt + _xPosR_insB2 + _xTransR_insB - (_offsetIns + _spdFrmThk),	_yPosR_insB2 + _yTransR_insB,	0
+					!	우측 좌표
+					_xTransR_insB = _dxR*_ratio_insB
+					_yTransR_insB = _dyR*_ratio_insB
 
-			!	상부 좌표
-			!-----------------------------------------------------------------------------------------------
-				!	좌측 좌표
-				_xTransL_insT = _dxL*_ratio_insT
-				_yTransL_insT = _dyL*_ratio_insT
+					if	iFrmTypeR = FrmType_Boundary	then
+						_xPosR_insB1 = -frmWdtR
+						_yPosR_insB1 = frmThkR + gskThk - _spdFrmThk
 
-				if	iFrmTypeL = FrmType_Boundary	then
-					_xPosL_insT1 = frmWdtL
-					_yPosL_insT1 = frmThkL + gskThk - _insThk + _spdFrmThk
+						_xPosR_insB2 = -frmWdtR
+						_yPosR_insB2 = frmThkR + gskThk - _insThk + _spdFrmThk
+					endif
 
-					_xPosL_insT2 = frmWdtL
-					_yPosL_insT2 = frmThkL + gskThk - _spdFrmThk
-				endif
+					if	iFrmTypeR = FrmType_Mullion	then
+						_xPosR_insB1 = _xPosTransR[_idxIns_2]
+						_yPosR_insB1 = _yPosTransR[_idxIns_2] - _spdFrmThk
 
-				if	iFrmTypeL = FrmType_Mullion	then
-					_xPosL_insT1 = _xPosTransL[_idxIns_1] + _insThk*tan(aFrmL)
-					_yPosL_insT1 = _yPosTransL[_idxIns_1] - _insThk + _spdFrmThk
+						_xPosR_insB2 = _xPosTransR[_idxIns_2] + _insThk*tan(aFrmR)
+						_yPosR_insB2 = _yPosTransR[_idxIns_2] - _insThk + _spdFrmThk
+					endif
 
-					_xPosL_insT2 = _xPosTransL[_idxIns_1]
-					_yPosL_insT2 = _yPosTransL[_idxIns_1] - _spdFrmThk
-				endif
+					put	ctwWdt + _xPosR_insB1 + _xTransR_insB - (_offsetIns + _spdFrmThk),	_yPosR_insB1 + _yTransR_insB,	0,
+						ctwWdt + _xPosR_insB2 + _xTransR_insB - (_offsetIns + _spdFrmThk),	_yPosR_insB2 + _yTransR_insB,	0
 
-				put	_xPosL_insT1 + _xTransL_insT + (_offsetIns + _spdFrmThk),	_yPosL_insT1 + _yTransL_insT,	_insHgt,
-					_xPosL_insT2 + _xTransL_insT + (_offsetIns + _spdFrmThk),	_yPosL_insT2 + _yTransL_insT,	_insHgt
+				!	상부 좌표
+				!-----------------------------------------------------------------------------------------------
+					!	좌측 좌표
+					_xTransL_insT = _dxL*_ratio_insT
+					_yTransL_insT = _dyL*_ratio_insT
 
-				!	우측 좌표
-				_xTransR_insT = _dxR*_ratio_insT
-				_yTransR_insT = _dyR*_ratio_insT
+					if	iFrmTypeL = FrmType_Boundary	then
+						_xPosL_insT1 = frmWdtL
+						_yPosL_insT1 = frmThkL + gskThk - _insThk + _spdFrmThk
 
-				if	iFrmTypeR = FrmType_Boundary	then
-					_xPosR_insT1 = -frmWdtR
-					_yPosR_insT1 = frmThkR + gskThk - _spdFrmThk
+						_xPosL_insT2 = frmWdtL
+						_yPosL_insT2 = frmThkL + gskThk - _spdFrmThk
+					endif
 
-					_xPosR_insT2 = -frmWdtR
-					_yPosR_insT2 = frmThkR + gskThk - _insThk + _spdFrmThk
-				endif
+					if	iFrmTypeL = FrmType_Mullion	then
+						_xPosL_insT1 = _xPosTransL[_idxIns_1] + _insThk*tan(aFrmL)
+						_yPosL_insT1 = _yPosTransL[_idxIns_1] - _insThk + _spdFrmThk
 
-				if	iFrmTypeR = FrmType_Mullion	then
-					_xPosR_insT1 = _xPosTransR[_idxIns_2]
-					_yPosR_insT1 = _yPosTransR[_idxIns_2] - _spdFrmThk
+						_xPosL_insT2 = _xPosTransL[_idxIns_1]
+						_yPosL_insT2 = _yPosTransL[_idxIns_1] - _spdFrmThk
+					endif
 
-					_xPosR_insT2 = _xPosTransR[_idxIns_2] + _insThk*tan(aFrmR)
-					_yPosR_insT2 = _yPosTransR[_idxIns_2] - _insThk + _spdFrmThk
-				endif
+					put	_xPosL_insT1 + _xTransL_insT + (_offsetIns + _spdFrmThk),	_yPosL_insT1 + _yTransL_insT,	_insHgt,
+						_xPosL_insT2 + _xTransL_insT + (_offsetIns + _spdFrmThk),	_yPosL_insT2 + _yTransL_insT,	_insHgt
 
-				put	ctwWdt + _xPosR_insT1 + _xTransR_insT - (_offsetIns + _spdFrmThk),	_yPosR_insT1 + _yTransR_insT,	_insHgt,
-					ctwWdt + _xPosR_insT2 + _xTransR_insT - (_offsetIns + _spdFrmThk),	_yPosR_insT2 + _yTransR_insT,	_insHgt
+					!	우측 좌표
+					_xTransR_insT = _dxR*_ratio_insT
+					_yTransR_insT = _dyR*_ratio_insT
+
+					if	iFrmTypeR = FrmType_Boundary	then
+						_xPosR_insT1 = -frmWdtR
+						_yPosR_insT1 = frmThkR + gskThk - _spdFrmThk
+
+						_xPosR_insT2 = -frmWdtR
+						_yPosR_insT2 = frmThkR + gskThk - _insThk + _spdFrmThk
+					endif
+
+					if	iFrmTypeR = FrmType_Mullion	then
+						_xPosR_insT1 = _xPosTransR[_idxIns_2]
+						_yPosR_insT1 = _yPosTransR[_idxIns_2] - _spdFrmThk
+
+						_xPosR_insT2 = _xPosTransR[_idxIns_2] + _insThk*tan(aFrmR)
+						_yPosR_insT2 = _yPosTransR[_idxIns_2] - _insThk + _spdFrmThk
+					endif
+
+					put	ctwWdt + _xPosR_insT1 + _xTransR_insT - (_offsetIns + _spdFrmThk),	_yPosR_insT1 + _yTransR_insT,	_insHgt,
+						ctwWdt + _xPosR_insT2 + _xTransR_insT - (_offsetIns + _spdFrmThk),	_yPosR_insT2 + _yTransR_insT,	_insHgt
 
 				addz	_zPosIns
 					ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
 				del 1
+			endif
 		endif
 	next	i
 endgroup
@@ -2291,158 +2297,160 @@ group	"gSpdFrm"
 				_insThk = insThk_4
 			endif
 
-			!	단열 철판 두께 변수 정의
-			!-----------------------------------------------------------------------------------------------
-			_offsetIns = 0
-			_spdFrmThk = 0
-			if	bSpdFrm	then
-				_offsetIns = 0.006
-				_spdFrmThk = spdFrmThk
-			endif
+			if	_insThk > eps	then
+				!	단열 철판 두께 변수 정의
+				!-----------------------------------------------------------------------------------------------
+				_offsetIns = 0
+				_spdFrmThk = 0
+				if	bSpdFrm	then
+					_offsetIns = 0.006
+					_spdFrmThk = spdFrmThk
+				endif
 
-			!	Height of Insulation / zPosIns
-			!-----------------------------------------------------------------------------------------------
-			if	nTrs < eps	then
-				_spdFrmHgt = ctwHgt - (frmWdtB + frmWdtT) - _offsetIns*2
-				_zPosSpdFrm = frmWdtB + _offsetIns
-			else
-				if	i = 1	then
-					_spdFrmHgt = trsGap[i] - (frmWdtB + trsWdt/2) - _offsetIns*2
+				!	Height of Insulation / zPosIns
+				!-----------------------------------------------------------------------------------------------
+				if	nTrs < eps	then
+					_spdFrmHgt = ctwHgt - (frmWdtB + frmWdtT) - _offsetIns*2
 					_zPosSpdFrm = frmWdtB + _offsetIns
+				else
+					if	i = 1	then
+						_spdFrmHgt = trsGap[i] - (frmWdtB + trsWdt/2) - _offsetIns*2
+						_zPosSpdFrm = frmWdtB + _offsetIns
+					endif
+
+					if	i # 1 & i # (nTrs + 1)	then
+						_spdFrmHgt = (trsGap[i] - trsGap[i - 1]) - trsWdt - _offsetIns*2
+						_zPosSpdFrm = trsGap[i - 1] + trsWdt/2 + _offsetIns
+					endif
+
+					if	i = (nTrs + 1)	then
+						_spdFrmHgt = (ctwHgt - trsGap[i - 1]) - (frmWdtT + trsWdt/2) - _offsetIns*2
+						_zPosSpdFrm = trsGap[i - 1] + trsWdt/2 + _offsetIns
+					endif
 				endif
 
-				if	i # 1 & i # (nTrs + 1)	then
-					_spdFrmHgt = (trsGap[i] - trsGap[i - 1]) - trsWdt - _offsetIns*2
-					_zPosSpdFrm = trsGap[i - 1] + trsWdt/2 + _offsetIns
-				endif
-
-				if	i = (nTrs + 1)	then
-					_spdFrmHgt = (ctwHgt - trsGap[i - 1]) - (frmWdtT + trsWdt/2) - _offsetIns*2
-					_zPosSpdFrm = trsGap[i - 1] + trsWdt/2 + _offsetIns
-				endif
-			endif
-
-			!	비율
-			!-----------------------------------------------------------------------------------------------
-			if	nTrs < eps	then
-				_ratio_spdFrmB = (frmWdtB + _offsetIns)/ctwHgt
-				_ratio_spdFrmT = (ctwHgt - frmWdtT - _offsetIns)/ctwHgt
-			else
-				if	i = 1	then
+				!	비율
+				!-----------------------------------------------------------------------------------------------
+				if	nTrs < eps	then
 					_ratio_spdFrmB = (frmWdtB + _offsetIns)/ctwHgt
-					_ratio_spdFrmT = (trsGap[i] - trsWdt/2 - _offsetIns)/ctwHgt
-				endif
-
-				if	i # 1 & i # (nTrs + 1)	then
-					_ratio_spdFrmB = (trsGap[i - 1] + trsWdt/2 + _offsetIns)/ctwHgt
-					_ratio_spdFrmT = (trsGap[i] - trsWdt/2 - _offsetIns)/ctwHgt
-				endif
-
-				if	i = (nTrs + 1)	then
-					_ratio_spdFrmB = (trsGap[i - 1] + trsWdt/2 + _offsetIns)/ctwHgt
 					_ratio_spdFrmT = (ctwHgt - frmWdtT - _offsetIns)/ctwHgt
-				endif
-			endif
+				else
+					if	i = 1	then
+						_ratio_spdFrmB = (frmWdtB + _offsetIns)/ctwHgt
+						_ratio_spdFrmT = (trsGap[i] - trsWdt/2 - _offsetIns)/ctwHgt
+					endif
 
-			!	하부 좌표
-			!-----------------------------------------------------------------------------------------------
-				!	좌측 좌표
-				_xTransL_spdFrmB = _dxL*_ratio_spdFrmB
-				_yTransL_spdFrmB = _dyL*_ratio_spdFrmB
+					if	i # 1 & i # (nTrs + 1)	then
+						_ratio_spdFrmB = (trsGap[i - 1] + trsWdt/2 + _offsetIns)/ctwHgt
+						_ratio_spdFrmT = (trsGap[i] - trsWdt/2 - _offsetIns)/ctwHgt
+					endif
 
-				if	iFrmTypeL = FrmType_Boundary	then
-					_xPosL_spdFrmB1 = frmWdtL
-					_yPosL_spdFrmB1 = frmThkL + gskThk - _insThk
-
-					_xPosL_spdFrmB2 = frmWdtL
-					_yPosL_spdFrmB2 = frmThkL + gskThk
-				endif
-
-				if	iFrmTypeL = FrmType_Mullion	then
-					_xPosL_spdFrmB1 = _xPosTransL[_idxIns_1] + _insThk*tan(aFrmL)
-					_yPosL_spdFrmB1 = _yPosTransL[_idxIns_1] - _insThk
-
-					_xPosL_spdFrmB2 = _xPosTransL[_idxIns_1]
-					_yPosL_spdFrmB2 = _yPosTransL[_idxIns_1]
+					if	i = (nTrs + 1)	then
+						_ratio_spdFrmB = (trsGap[i - 1] + trsWdt/2 + _offsetIns)/ctwHgt
+						_ratio_spdFrmT = (ctwHgt - frmWdtT - _offsetIns)/ctwHgt
+					endif
 				endif
 
-				put	_xPosL_spdFrmB1 + _xTransL_spdFrmB + _offsetIns,	_yPosL_spdFrmB1 + _yTransL_spdFrmB,	0,
-					_xPosL_spdFrmB2 + _xTransL_spdFrmB + _offsetIns,	_yPosL_spdFrmB2 + _yTransL_spdFrmB,	0
+				!	하부 좌표
+				!-----------------------------------------------------------------------------------------------
+					!	좌측 좌표
+					_xTransL_spdFrmB = _dxL*_ratio_spdFrmB
+					_yTransL_spdFrmB = _dyL*_ratio_spdFrmB
 
-				!	우측 좌표
-				_xTransR_spdFrmB = _dxR*_ratio_spdFrmB
-				_yTransR_spdFrmB = _dyR*_ratio_spdFrmB
+					if	iFrmTypeL = FrmType_Boundary	then
+						_xPosL_spdFrmB1 = frmWdtL
+						_yPosL_spdFrmB1 = frmThkL + gskThk - _insThk
 
-				if	iFrmTypeR = FrmType_Boundary	then
-					_xPosR_spdFrmB1 = -frmWdtR
-					_yPosR_spdFrmB1 = frmThkR + gskThk
+						_xPosL_spdFrmB2 = frmWdtL
+						_yPosL_spdFrmB2 = frmThkL + gskThk
+					endif
 
-					_xPosR_spdFrmB2 = -frmWdtR
-					_yPosR_spdFrmB2 = frmThkR + gskThk - _insThk
-				endif
+					if	iFrmTypeL = FrmType_Mullion	then
+						_xPosL_spdFrmB1 = _xPosTransL[_idxIns_1] + _insThk*tan(aFrmL)
+						_yPosL_spdFrmB1 = _yPosTransL[_idxIns_1] - _insThk
 
-				if	iFrmTypeR = FrmType_Mullion	then
-					_xPosR_spdFrmB1 = _xPosTransR[_idxIns_2]
-					_yPosR_spdFrmB1 = _yPosTransR[_idxIns_2]
+						_xPosL_spdFrmB2 = _xPosTransL[_idxIns_1]
+						_yPosL_spdFrmB2 = _yPosTransL[_idxIns_1]
+					endif
 
-					_xPosR_spdFrmB2 = _xPosTransR[_idxIns_2] + _insThk*tan(aFrmR)
-					_yPosR_spdFrmB2 = _yPosTransR[_idxIns_2] - _insThk
-				endif
+					put	_xPosL_spdFrmB1 + _xTransL_spdFrmB + _offsetIns,	_yPosL_spdFrmB1 + _yTransL_spdFrmB,	0,
+						_xPosL_spdFrmB2 + _xTransL_spdFrmB + _offsetIns,	_yPosL_spdFrmB2 + _yTransL_spdFrmB,	0
 
-				put	ctwWdt + _xPosR_spdFrmB1 + _xTransR_spdFrmB - _offsetIns,	_yPosR_spdFrmB1 + _yTransR_spdFrmB,	0,
-					ctwWdt + _xPosR_spdFrmB2 + _xTransR_spdFrmB - _offsetIns,	_yPosR_spdFrmB2 + _yTransR_spdFrmB,	0
+					!	우측 좌표
+					_xTransR_spdFrmB = _dxR*_ratio_spdFrmB
+					_yTransR_spdFrmB = _dyR*_ratio_spdFrmB
 
-			!	상부 좌표
-			!-----------------------------------------------------------------------------------------------
-				!	좌측 좌표
-				_xTransL_spdFrmT = _dxL*_ratio_spdFrmT
-				_yTransL_spdFrmT = _dyL*_ratio_spdFrmT
+					if	iFrmTypeR = FrmType_Boundary	then
+						_xPosR_spdFrmB1 = -frmWdtR
+						_yPosR_spdFrmB1 = frmThkR + gskThk
 
-				if	iFrmTypeL = FrmType_Boundary	then
-					_xPosL_spdFrmT1 = frmWdtL
-					_yPosL_spdFrmT1 = frmThkL + gskThk - _insThk
+						_xPosR_spdFrmB2 = -frmWdtR
+						_yPosR_spdFrmB2 = frmThkR + gskThk - _insThk
+					endif
 
-					_xPosL_spdFrmT2 = frmWdtL
-					_yPosL_spdFrmT2 = frmThkL + gskThk
-				endif
+					if	iFrmTypeR = FrmType_Mullion	then
+						_xPosR_spdFrmB1 = _xPosTransR[_idxIns_2]
+						_yPosR_spdFrmB1 = _yPosTransR[_idxIns_2]
 
-				if	iFrmTypeL = FrmType_Mullion	then
-					_xPosL_spdFrmT1 = _xPosTransL[_idxIns_1] + _insThk*tan(aFrmL)
-					_yPosL_spdFrmT1 = _yPosTransL[_idxIns_1] - _insThk
+						_xPosR_spdFrmB2 = _xPosTransR[_idxIns_2] + _insThk*tan(aFrmR)
+						_yPosR_spdFrmB2 = _yPosTransR[_idxIns_2] - _insThk
+					endif
 
-					_xPosL_spdFrmT2 = _xPosTransL[_idxIns_1]
-					_yPosL_spdFrmT2 = _yPosTransL[_idxIns_1]
-				endif
+					put	ctwWdt + _xPosR_spdFrmB1 + _xTransR_spdFrmB - _offsetIns,	_yPosR_spdFrmB1 + _yTransR_spdFrmB,	0,
+						ctwWdt + _xPosR_spdFrmB2 + _xTransR_spdFrmB - _offsetIns,	_yPosR_spdFrmB2 + _yTransR_spdFrmB,	0
 
-				put	_xPosL_spdFrmT1 + _xTransL_spdFrmT + _offsetIns,	_yPosL_spdFrmT1 + _yTransL_spdFrmT,	_spdFrmHgt,
-					_xPosL_spdFrmT2 + _xTransL_spdFrmT + _offsetIns,	_yPosL_spdFrmT2 + _yTransL_spdFrmT,	_spdFrmHgt
+				!	상부 좌표
+				!-----------------------------------------------------------------------------------------------
+					!	좌측 좌표
+					_xTransL_spdFrmT = _dxL*_ratio_spdFrmT
+					_yTransL_spdFrmT = _dyL*_ratio_spdFrmT
 
-				!	우측 좌표
-				_xTransR_spdFrmT = _dxR*_ratio_spdFrmT
-				_yTransR_spdFrmT = _dyR*_ratio_spdFrmT
+					if	iFrmTypeL = FrmType_Boundary	then
+						_xPosL_spdFrmT1 = frmWdtL
+						_yPosL_spdFrmT1 = frmThkL + gskThk - _insThk
 
-				if	iFrmTypeR = FrmType_Boundary	then
-					_xPosR_spdFrmT1 = -frmWdtR
-					_yPosR_spdFrmT1 = frmThkR + gskThk
+						_xPosL_spdFrmT2 = frmWdtL
+						_yPosL_spdFrmT2 = frmThkL + gskThk
+					endif
 
-					_xPosR_spdFrmT2 = -frmWdtR
-					_yPosR_spdFrmT2 = frmThkR + gskThk - _insThk
-				endif
+					if	iFrmTypeL = FrmType_Mullion	then
+						_xPosL_spdFrmT1 = _xPosTransL[_idxIns_1] + _insThk*tan(aFrmL)
+						_yPosL_spdFrmT1 = _yPosTransL[_idxIns_1] - _insThk
 
-				if	iFrmTypeR = FrmType_Mullion	then
-					_xPosR_spdFrmT1 = _xPosTransR[_idxIns_2]
-					_yPosR_spdFrmT1 = _yPosTransR[_idxIns_2]
+						_xPosL_spdFrmT2 = _xPosTransL[_idxIns_1]
+						_yPosL_spdFrmT2 = _yPosTransL[_idxIns_1]
+					endif
 
-					_xPosR_spdFrmT2 = _xPosTransR[_idxIns_2] + _insThk*tan(aFrmR)
-					_yPosR_spdFrmT2 = _yPosTransR[_idxIns_2] - _insThk
-				endif
+					put	_xPosL_spdFrmT1 + _xTransL_spdFrmT + _offsetIns,	_yPosL_spdFrmT1 + _yTransL_spdFrmT,	_spdFrmHgt,
+						_xPosL_spdFrmT2 + _xTransL_spdFrmT + _offsetIns,	_yPosL_spdFrmT2 + _yTransL_spdFrmT,	_spdFrmHgt
 
-				put	ctwWdt + _xPosR_spdFrmT1 + _xTransR_spdFrmT - _offsetIns,	_yPosR_spdFrmT1 + _yTransR_spdFrmT,	_spdFrmHgt,
-					ctwWdt + _xPosR_spdFrmT2 + _xTransR_spdFrmT - _offsetIns,	_yPosR_spdFrmT2 + _yTransR_spdFrmT,	_spdFrmHgt
+					!	우측 좌표
+					_xTransR_spdFrmT = _dxR*_ratio_spdFrmT
+					_yTransR_spdFrmT = _dyR*_ratio_spdFrmT
+
+					if	iFrmTypeR = FrmType_Boundary	then
+						_xPosR_spdFrmT1 = -frmWdtR
+						_yPosR_spdFrmT1 = frmThkR + gskThk
+
+						_xPosR_spdFrmT2 = -frmWdtR
+						_yPosR_spdFrmT2 = frmThkR + gskThk - _insThk
+					endif
+
+					if	iFrmTypeR = FrmType_Mullion	then
+						_xPosR_spdFrmT1 = _xPosTransR[_idxIns_2]
+						_yPosR_spdFrmT1 = _yPosTransR[_idxIns_2]
+
+						_xPosR_spdFrmT2 = _xPosTransR[_idxIns_2] + _insThk*tan(aFrmR)
+						_yPosR_spdFrmT2 = _yPosTransR[_idxIns_2] - _insThk
+					endif
+
+					put	ctwWdt + _xPosR_spdFrmT1 + _xTransR_spdFrmT - _offsetIns,	_yPosR_spdFrmT1 + _yTransR_spdFrmT,	_spdFrmHgt,
+						ctwWdt + _xPosR_spdFrmT2 + _xTransR_spdFrmT - _offsetIns,	_yPosR_spdFrmT2 + _yTransR_spdFrmT,	_spdFrmHgt
 
 				addz	_zPosSpdFrm
 					ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)
 				del 1
+			endif
 		endif
 	next	i
 endgroup

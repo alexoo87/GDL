@@ -3025,7 +3025,9 @@ _textLct = 0.5
 if	iPanelType[i][j] = Panel_Fix | iPanelType[i][j] = Panel_Panel	then	gosub	"textFix"
 if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then	gosub	"openLine"
 if	iPanelType[i][j] = Panel_Smoke	then	gosub	"textSmoke"
-if	iPanelType[i][j] = Panel_Spandrel	then	gosub	"insulation"
+if	insThk > eps	then
+	if	iPanelType[i][j] = Panel_Spandrel	then	gosub	"insulation"
+endif
 
 return
 
@@ -3237,7 +3239,9 @@ if	i = 1	then
 	endif
 endif
 
-if	iPanelType[i][j] = Panel_Spandrel	then	gosub	"sub_insulation"
+if	insThk > eps	then
+	if	iPanelType[i][j] = Panel_Spandrel	then	gosub	"sub_insulation"
+endif
 
 return
 

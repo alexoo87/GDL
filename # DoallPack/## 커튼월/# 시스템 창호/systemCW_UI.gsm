@@ -240,14 +240,14 @@ ui_page	5,	1,	"창호 설정",	"uiTab_WindowSettings_flat(1)"
 
 	!	outfield
 	ui_style	0,	0
-	ui_outfield	"창호 설정 표",			35, 35, 120, 20
-	ui_outfield	"텍스트 On/Off",		40, 60, 115, 15
-	ui_outfield	'"F"',					135, 60
-	ui_outfield	'"배"',					180, 60
-	ui_outfield	"텍스트 반전",			40,	85, 115, 20
-	ui_outfield	"텍스트 사이즈",		40, 110, 115, 20
-	ui_outfield	"텍스트 숨김 스케일",	40, 135, 115, 20	ui_tooltip	"해당 스케일 이상에서 텍스트 숨기기"
-	ui_outfield	"유리 두께",			40, 160, 115, 20
+	ui_outfield	"창호 설정 표",		35, 35
+	ui_outfield	"텍스트 On/Off",		40, 60
+	ui_outfield	'"F"',				135, 60
+	ui_outfield	'"배"',				180, 60
+	ui_outfield	"텍스트 반전",		40,	85
+	ui_outfield	"텍스트 사이즈",		40, 110
+	ui_outfield	"텍스트 숨김 스케일",	40, 135	ui_tooltip	"해당 스케일 이상에서 텍스트 숨기기"
+	ui_outfield	"유리 두께",			40, 160
 
 	!	창호 세부설정(창 별로)
 	ui_outfield	"열림각도",	100, 195
@@ -271,26 +271,26 @@ ui_page	5,	1,	"창호 설정",	"uiTab_WindowSettings_flat(1)"
 
 	!	infield
 	ui_style 	0,	0
-	ui_infield	"iMatrix_Windows",	160, 30, 40, 20
-	ui_infield	"TextSwitch",		160, 55, 20, 20	ui_tooltip	"고정창 `F` 텍스트 On/Off"
-	ui_infield	"bSmokeText",		205, 55, 20, 20	ui_tooltip	"배연창 `배` 텍스트 On/Off"
-	ui_infield	"TextMirror",		160, 80, 20, 20
-	ui_infield	"TextSize",			160, 105, 60, 20
-	ui_infield	"TextScale",		160, 130, 60, 20	ui_tooltip	"해당 스케일 이하에서는 텍스트 숨김"
-	ui_infield	"glassThick",		160, 155, 60, 20
+	ui_infield	"iMatrix_Windows",	160, 31, 40, 19
+	ui_infield	"TextSwitch",		160, 56, 15, 19	ui_tooltip	"고정창 `F` 텍스트 On/Off"
+	ui_infield	"bSmokeText",		205, 56, 15, 19	ui_tooltip	"배연창 `배` 텍스트 On/Off"
+	ui_infield	"TextMirror",		160, 81, 15, 19
+	ui_infield	"TextSize",			160, 106, 60, 19
+	ui_infield	"TextScale",		160, 131, 60, 19	ui_tooltip	"해당 스케일 이하에서는 텍스트 숨김"
+	ui_infield	"glassThick",		160, 156, 60, 19
 
-	ui_infield	"ProjectAngle",		150, 190, 40, 20
-	ui_infield	"iProjectHinge",	250, 190, 40, 20
-	ui_infield	"bScreen",			340, 190, 40, 20
+	ui_infield	"ProjectAngle",		150, 191, 40, 19
+	ui_infield	"iProjectHinge",	250, 191, 40, 19
+	ui_infield	"bScreen",			340, 191, 40, 19
 
-	ui_infield	"grillThick",		150, 215, 40, 20
-	ui_infield	"grillDistance",	250, 215, 40, 20
-	ui_infield	"grillAngle",		340, 215, 40, 20
+	ui_infield	"grillThick",		150, 216, 40, 19
+	ui_infield	"grillDistance",	250, 216, 40, 19
+	ui_infield	"grillAngle",		340, 216, 40, 19
 
-	ui_infield	"spdThk_1",	135, 240, 45, 20
-	ui_infield	"spdThk_2",	220, 240, 45, 20
-	ui_infield	"spdThk_3",	305, 240, 45, 20
-	ui_infield	"spdThk_4",	390, 240, 45, 20
+	ui_infield	"spdThk_1",	135, 241, 45, 19	ui_tooltip	"스팬드럴(TYPE1) 단열재 두께, 0으로 설정 시 OFF"
+	ui_infield	"spdThk_2",	220, 241, 45, 19	ui_tooltip	"스팬드럴(TYPE2) 단열재 두께, 0으로 설정 시 OFF"
+	ui_infield	"spdThk_3",	305, 241, 45, 19	ui_tooltip	"스팬드럴(TYPE3) 단열재 두께, 0으로 설정 시 OFF"
+	ui_infield	"spdThk_4",	390, 241, 45, 19	ui_tooltip	"스팬드럴(TYPE4) 단열재 두께, 0으로 설정 시 OFF"
 
 	!	그림
 	ui_pict	"ui_4_wdw",	260, 20, 160, 160, 2

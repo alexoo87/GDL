@@ -51,9 +51,13 @@ endif
 
 !	커튼월
 !-----------------------------------------------------------------------------------------------
-values	"ctwHgt"	range	((frmWdtB + frmWdtT),	]
+_minCtwHgt = (frmWdtB + frmWdtT)
+for	i = 1	to	nTrs
+	_minCtwHgt = _minCtwHgt + trsWdt
+next	i
+
+values	"ctwHgt"	range	(_minCtwHgt,	]
 values	"ctwWdt"	range	[0,	]
-! values	"ctwWdt"	range	((frmWdtL + frmWdtR),	]
 
 !	프레임 유형
 !-----------------------------------------------------------------------------------------------
@@ -85,7 +89,6 @@ values{2}	"iFrmTypeT"	FrmType_Boundary,	stFrmType[FrmType_Boundary],
 values{2}	"iFrmTypeB"	FrmType_Boundary,	stFrmType[FrmType_Boundary],
 						FrmType_Transom,	stFrmType[FrmType_Transom]
 
-
 !	프레임 너비
 values	"frmWdtL"	range	(0,	)
 values	"frmThkL"	range	(0,	)
@@ -104,6 +107,7 @@ values	"frmThkT"	range	(0,	)
 values	"gskWdtT"	range	(0,	frmWdtT]
 
 values	"gskThk"	range	[0,	]
+values	"gskCapThk"	range	(0,	(gskThk - pnlThk - pnlLct)]
 
 values	"trsWdt"	range	(0,	)
 values	"trsThk"	range	(0,	)
@@ -163,59 +167,43 @@ if	nTrs < 1	then
 	parameters	trsGap[1] = ctwHgt - (frmWdtB + frmWdtT)
 endif
 
-values	"trsGap"	range	[frmWdtB,	ctwHgt - frmWdtT]
-if	bEqualGap	then
-	lock			"trsGap"
-	hideparameter	"trsGap"
+values	"trsGap"	range	[frmWdtB + trsWdt/2,	ctwHgt - (frmWdtT + trsWdt/2)]
 
-	for	i = 1	to	nTrs + 1
-		_tempHgt = ctwHgt/(nTrs + 1)
-		parameters	trsGap[i] = _tempHgt*i
-	next	i
-else
-	if	nTrs > 2	then
-		if	trsGap[1] - trsGap[2] > eps	then
-			parameters	trsGap[1] = trsGap[2] - eps*100
-		endif
-		if	trsGap[2] - trsGap[3] > eps	then
-			parameters	trsGap[2] = trsGap[3] - eps*100
-		endif
+if	nTrs > eps	then
+	if	bEqualGap	then
+		lock			"trsGap"
+		hideparameter	"trsGap"
 
-		if	nTrs > 3	then
-			if	trsGap[3] - trsGap[4] > eps	then
-				parameters	trsGap[3] = trsGap[4] - eps*100
-			endif
+		for	i = 1	to	nTrs + 1
+			_tempHgt = ctwHgt/(nTrs + 1)
+			parameters	trsGap[i] = _tempHgt*i
+		next	i
+	else
+		!	Offset Value
+		_offsetValue = trsWdt
 
-			if	nTrs > 4	then
-				if	trsGap[4] - trsGap[5] > eps	then
-					parameters	trsGap[4] = trsGap[5] - eps*100
-				endif
+		!	사이 간격을 옮기기 전 최초 값 입력
+		dim	_originValue[]
 
-				if	nTrs > 5	then
-					if	trsGap[5] - trsGap[6] > eps	then
-						parameters	trsGap[5] = trsGap[6] - eps*100
-					endif
+		for	i = 1	to	nTrs
+			_originValue[i] = trsGap[i]
+		next	i
 
-					if	nTrs > 6	then
-						if	trsGap[6] - trsGap[7] > eps	then
-							parameters	trsGap[6] = trsGap[7] - eps*100
-						endif
+		parameters	originGap = _originValue
 
-						if	nTrs > 7	then
-							if	trsGap[7] - trsGap[8] > eps	then
-								parameters	trsGap[7] = trsGap[8] - eps*100
-							endif
-
-							if	nTrs > 8	then
-								if	trsGap[8] - trsGap[9] > eps	then
-									parameters	trsGap[8] = trsGap[9] - eps*100
-								endif
-							endif
-						endif
-					endif
+		!	제한값 설정
+		for	i = 1	to	(nTrs - 1)
+			if	not(abs(trsGap[i] - originGap[i]) < eps)	then
+				if	trsGap[i] - originGap[(i + 1)] > -_offsetValue	then
+					parameters	trsGap[i] = originGap[(i + 1)] - _offsetValue
 				endif
 			endif
-		endif
+			if	not(abs(trsGap[(i + 1)] - originGap[(i + 1)]) < eps)	then
+				if	trsGap[(i + 1)] - originGap[i] < _offsetValue	then
+					parameters	trsGap[(i + 1)] = originGap[i] + _offsetValue
+				endif
+			endif
+		next	i
 	endif
 endif
 
@@ -229,13 +217,19 @@ values{2}	"iInsType"	INS_TYPE_NONE,	stInsType[INS_TYPE_NONE],
 
 !	패널
 !-----------------------------------------------------------------------------------------------
-values	"pnlLct"	range	[0,	(gskThk - pnlThk)]
+!	패널 위치 최대값
+_maxPnlLct = gskThk - pnlThk
+if	iMlnType = Mln_Type2 | iTrsType = Trs_Type2	then
+	_maxPnlLct = _maxPnlLct - gskCapThk
+endif
+
+values	"pnlLct"	range	[0,	_maxPnlLct]
 values	"pnlThk"	range	(0,	gskThk)
 
-values	"insThk_1"	range	(0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
-values	"insThk_2"	range	(0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
-values	"insThk_3"	range	(0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
-values	"insThk_4"	range	(0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
+values	"insThk_1"	range	[0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
+values	"insThk_2"	range	[0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
+values	"insThk_3"	range	[0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
+values	"insThk_4"	range	[0,	min(frmThkL, frmThkR, frmThkT, frmThkB, trsThk)]
 
 !	수평프레임 캡
 !-----------------------------------------------------------------------------------------------
