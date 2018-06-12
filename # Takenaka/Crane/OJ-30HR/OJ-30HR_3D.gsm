@@ -41,11 +41,11 @@ call	"HM_Material_White.gsm"
 !	Hotspot
 !----------------------------------------------------------------------------------------------------
 add	-_mCraneOriginX, -_mCraneOriginY, 0
+	hotspot	_mCraneOriginX, _mCraneOriginY, 	0, unID : unID = unID+1		!	Origin
 	hotspot	0, 0, 								0, unID : unID = unID+1
 	hotspot	HM_CraneWidth, 0, 					0, unID : unID = unID+1
 	hotspot	HM_CraneWidth, HM_CraneDepth, 		0, unID : unID = unID+1
 	hotspot	0, HM_CraneDepth, 					0, unID : unID = unID+1
-	hotspot	_mCraneOriginX, _mCraneOriginY, 	0, unID : unID = unID+1		!	Origin
 del	1
 
 
@@ -63,6 +63,8 @@ rotz	HM_WorkingAng
 
 	!	Outrigger
 	!----------------------------------------------------------------------------------------------------
+	OJ_30HR = 4
+	
 	if	bTest	then
 		hotspot 	0, 	0, 	0,				unID, HM_OutrHeight, 1 			: unID = unID + 1			
 		hotspot 	0, 	0, 	HM_OutrHeight,	unID, HM_OutrHeight, 2			: unID = unID + 1		
@@ -92,11 +94,17 @@ rotz	HM_WorkingAng
 	_mPanel_posx = -1.200
 	_mPanel_posy = -1.915
 	_mPanel_posz = _mDeck_panel_posz - _mDeck_posz
+
+	_mPanelW2 = 1.900
+	_mPanelD2 = 0.800
+	_mPanelT2 = 0.052
+	_mPanel_posx2 = -1.060-0.200
+	_mPanel_posy2 = 0.669-0.200
+	_mPanel_posz2 = _mDeck_panel_posz - _mDeck_posz	
+
 	addz	_mDeck_posz
 		gosub	"shape_Deck"
 	del	1
-
-
 
 
 	!	Operator Cap
@@ -132,9 +140,13 @@ rotz	HM_WorkingAng
 															HM_CH_Depth = HM_CH_Depth,
 															HM_CH_Height = HM_CH_Height,
 															HM_CH_Topnt_posx = HM_CH_Topnt_posx,
-															HM_CH_DeckW = 0.584+0.300,
+															HM_CH_Deck = 1,
+															HM_CH_DeckW = 0.600,
 															HM_CH_DeckD = HM_CH_Depth+1.000,
-															HM_CH_DeckT = 0.100,
+															HM_CH_DeckT = 0.200,
+															HM_CH_Deck_HoleW = 0.250,
+															HM_CH_Deck_HoleD = HM_CH_Depth+0.400,
+															HM_CH_Deck_posx = 0.650,
 															HM_CH_Deck_posz = 3.374,
 															HM_CH_Radius1 = 0.063,
 															HM_CH_Radius2 = 0.070,
@@ -142,7 +154,8 @@ rotz	HM_WorkingAng
 															HM_CH_Pulley_R2 = 0.150,
 															HM_CH_Pulley_Thick = 0.020,
 															HM_CH_Deck_mirror = 1,
-															HM_CH_OffsetZ = 0.120
+															HM_CH_OffsetZ = 0.120,
+															HM_matBody1 = HM_matBody2
 		del	1
 	del	1
 
@@ -170,13 +183,24 @@ rotz	HM_WorkingAng
 	endif
 
 	!	Working Angle Hotspot
-	_hLth = (HM_JibLength/2)*cos(HM_JibAng)
-	add	_mOutr_Jib_offset_x,	0,	HM_OutrHeight + _mOutr_Jib_offset + HM_JibHeight/2
-		hotspot	_hLth,						0,							0,	unID,	HM_WorkingAng,	4	: unID = unID + 1
+	! _hLth = (HM_JibLength/2)*cos(HM_JibAng)
+	! add	_mOutr_Jib_offset_x,	0,	HM_OutrHeight + _mOutr_Jib_offset + HM_JibHeight/2
+	! 	hotspot	_hLth,						0,							0,	unID,	HM_WorkingAng,	4	: unID = unID + 1
+	! 	hotspot	_hLth*cos(HM_WorkingAng),	_hLth*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng,	5	: unID = unID + 1
+	! 	hotspot	0,							0,							0,	unID,	HM_WorkingAng,	6	: unID = unID + 1
+	! 	hotspot	0,							0,							1,	unID,	HM_WorkingAng,	7	: unID = unID + 1
+	! del 1
+
+
+	_hLth = (HM_JibLength/2)*cos(HM_JibAng) + _mOutr_Jib_offset_x
+	rotz	-HM_WorkingAng
+	addz	HM_OutrHeight + _mOutr_Jib_offset + HM_JibHeight/2 
+		hotspot	_hLth,						0,							0,	unID,	HM_WorkingAng,	4+128	: unID = unID + 1
 		hotspot	_hLth*cos(HM_WorkingAng),	_hLth*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng,	5	: unID = unID + 1
 		hotspot	0,							0,							0,	unID,	HM_WorkingAng,	6	: unID = unID + 1
 		hotspot	0,							0,							1,	unID,	HM_WorkingAng,	7	: unID = unID + 1
 	del 1
+	del	1
 
 	if	HM_Jib_flag	then
 		addz	_mDeck_posz
@@ -186,7 +210,7 @@ rotz	HM_WorkingAng
 
 				!	Pulley
 				roty	-HM_jibAng
-					addx	HM_JibLength
+					addx	HM_JibLength - 0.139
 						roty	90
 							gosub	"Jib_Pulley"
 						del	1
@@ -224,22 +248,22 @@ rotz	HM_WorkingAng
 		!	Deck -> CatHead
 		!----------------------------------------------------------------------------------------------------
 		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mPulley_posx - _mPulley_R2,
-														x2 = _mOutr_CH_offset + HM_CH_Topnt_posx - 0.200,													
+														x2 = _mOutr_CH_offset + HM_CH_Topnt_posx - 0.150,													
 														y1 = 0.100,
 														y2 = HM_CH_Depth/2,
 														z1 = _mDeck_posz + _mPulley_posz,
-														z2 = _mJib_posz + HM_CH_Height
+														z2 = _mJib_posz + HM_CH_Height + 0.120
 		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mPulley_posx - _mPulley_R2,
-														x2 = _mOutr_CH_offset + HM_CH_Topnt_posx - 0.200,													
+														x2 = _mOutr_CH_offset + HM_CH_Topnt_posx - 0.150,													
 														y1 = -0.100,
 														y2 = -HM_CH_Depth/2,
 														z1 = _mDeck_posz + _mPulley_posz,
-														z2 = _mJib_posz + HM_CH_Height
+														z2 = _mJib_posz + HM_CH_Height + 0.120
 
 		!	CatHead -> Jib
 		!----------------------------------------------------------------------------------------------------
-		_mPulley_posx = HM_JibLength*cos(HM_jibAng) -_mJib_pulleyR2*cos(90-HM_jibAng)
-		_mPulley_posz = HM_JibLength*sin(HM_jibAng) +_mJib_pulleyR2*sin(90-HM_jibAng)
+		_mPulley_posx = (HM_JibLength-_mJib_pulleyR)*cos(HM_jibAng) -_mJib_pulleyR2*cos(90-HM_jibAng)
+		_mPulley_posz = (HM_JibLength-_mJib_pulleyR)*sin(HM_jibAng) +_mJib_pulleyR2*sin(90-HM_jibAng)
 
 		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mOutr_CH_offset + HM_CH_Topnt_posx,	
 														x2 = _mOutr_Jib_offset_x + _mPulley_posx ,														
@@ -255,21 +279,45 @@ rotz	HM_WorkingAng
 														z2 = _mJib_posz + _mPulley_posz
 
 
+		_mWirePulley_posx = (HM_JibLength-_mJib_pulleyR)*cos(HM_jibAng) + ((-0.250)*cos(HM_jibAng) - 0*sin(HM_jibAng))
+		_mWirePulley_posz = (HM_JibLength-_mJib_pulleyR)*sin(HM_jibAng) + ((-0.250)*sin(HM_jibAng) + 0*cos(HM_jibAng))
+
+		call	"HM_mc_WirePulley.gsm"	parameters	all		HM_WP_startptX1 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+															HM_WP_startptZ1 = _mJib_posz + HM_CH_Height,
+															HM_WP_startptX2 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+															HM_WP_startptZ2 = _mJib_posz + HM_CH_Height + 0.200,
+															HM_WP_startptY = HM_CH_Depth/2,
+															HM_WP_endptX = _mOutr_Jib_offset_x + _mWirePulley_posx,
+															HM_WP_endptZ = _mJib_posz + _mWirePulley_posz,
+															HM_WP_endptY = _mJib_pulleyDist/2 + 0.120,
+															HM_WP_posPulley_ratio = 0.547
+
+		call	"HM_mc_WirePulley.gsm"	parameters	all		HM_WP_startptX1 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+															HM_WP_startptZ1 = _mJib_posz + HM_CH_Height,
+															HM_WP_startptX2 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+															HM_WP_startptZ2 = _mJib_posz + HM_CH_Height + 0.200,
+															HM_WP_startptY = -HM_CH_Depth/2,
+															HM_WP_endptX = _mOutr_Jib_offset_x + _mWirePulley_posx,
+															HM_WP_endptZ = _mJib_posz + _mWirePulley_posz,
+															HM_WP_endptY = -_mJib_pulleyDist/2 - 0.120,
+															HM_WP_posPulley_ratio = 0.547
+													
 		!	Jib -> Hook
 		!----------------------------------------------------------------------------------------------------
-		_mPulley_offset_posx = _mJib_pulleyR2
-		call	"HM_mc_Wire.gsm"	parameters	all		x1 = HM_WorkingR+_mPulley_offset_posx,	
-														x2 = HM_WorkingR,														
+		call	"HM_mc_Wire.gsm"	parameters	all		x1 = HM_WorkingR,
+														x2 = HM_WorkingR,
 														y1 = _mJib_pulleyDist/2,
 														y2 = HM_HookRadius-0.020,
 														z1 = _mJib_posz + HM_JibLength*sin(HM_jibAng),
 														z2 = _mJib_posz + HM_JibLength*sin(HM_jibAng) -HM_JibWireLen + HM_HookHeight
-		call	"HM_mc_Wire.gsm"	parameters	all		x1 = HM_WorkingR+_mPulley_offset_posx,	
-														x2 = HM_WorkingR,														
+		call	"HM_mc_Wire.gsm"	parameters	all		x1 = HM_WorkingR,
+														x2 = HM_WorkingR,
 														y1 = -_mJib_pulleyDist/2,
 														y2 = -(HM_HookRadius-0.020),
 														z1 = _mJib_posz + HM_JibLength*sin(HM_jibAng),
-														z2 = _mJib_posz + HM_JibLength*sin(HM_jibAng) -HM_JibWireLen + HM_HookHeight														
+														z2 = _mJib_posz + HM_JibLength*sin(HM_jibAng) -HM_JibWireLen + HM_HookHeight
+
+
 
 
 
@@ -351,6 +399,18 @@ rotz	HM_WorkingAng
 														HM_3D_text_show_plane = 1
 	endif
 
+
+
+	!	Machine
+	!----------------------------------------------------------------------------------------------------
+	add -1.060, 0.669, 1.338
+		gosub	"shape_machine_controlpanel"
+	del 1
+
+	add	-0.705, 0.100, 0.694
+		gosub	"shape_machine_turningdevice"
+	del 1
+
 del	1
 
 
@@ -360,9 +420,8 @@ del	1
 
 	!	Working Radius
 	!----------------------------------------------------------------------------------------------------
-	if	HM_3D_WorkingR_show	then
-		call	"HM_mc_WorkingR.gsm"	parameters all
-	endif
+	call	"HM_mc_WorkingR.gsm"	parameters all
+
 
 
 
@@ -386,7 +445,8 @@ end
 	addz	-0.340
 		addx	-2.600
 			addy	0.400
-				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = 0.250,
+				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.250,
+																HM_Beam_Width_EP = 0.250,
 																HM_Beam_Height_SP = 0.340,
 																HM_Beam_Height_EP = 0.340,
 																HM_Beam_Offset_SP = 0,
@@ -397,7 +457,8 @@ end
 																HM_matBeam = HM_matBody2
 			del	1
 			addy	-0.400
-				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = 0.250,
+				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.250,
+																HM_Beam_Width_EP = 0.250,
 																HM_Beam_Height_SP = 0.340,
 																HM_Beam_Height_EP = 0.340,
 																HM_Beam_Offset_SP = 0,
@@ -410,7 +471,8 @@ end
 			addy	-0.400-0.250/2
 			addx	2.925 + 0.250/2 + 0.001
 				rotz	90
-					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = 0.250,
+					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.250,
+																	HM_Beam_Width_EP = 0.250,
 																	HM_Beam_Height_SP = 0.340,
 																	HM_Beam_Height_EP = 0.340,
 																	HM_Beam_Offset_SP = 0,
@@ -436,6 +498,11 @@ end
 		addz	-0.430
 			gosub	"shape_ladder"
 		del	2
+	del	1
+
+	!	Panel2
+	add	_mPanel_posx2, _mPanel_posy2, _mPanel_posz2
+		gosub	"shape_deck_panel2"
 	del	1
 
 
@@ -554,6 +621,56 @@ return
 return
 
 
+"shape_deck_panel2"	:
+
+	addz	-_mPanelT2
+		block	_mPanelW2, _mPanelD2, _mPanelT2
+	del	1
+
+	addx	0
+		addy	0.100
+			rotz	90
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,					!	Cylind
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = _mPanelD2-0.100,
+																HM_GRailH = 0.900,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.450,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 0,
+																HM_GRail_cutRight_ang = -45,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1
+
+	addx	0
+		addy	_mPanelD2
+			rotz	0
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 2,					!	Cylind
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = _mPanelW2,
+																HM_GRailH = 0.900,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.450,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 0,
+																HM_GRail_cutLeft_ang = -45,
+																HM_GRail_cutRight_ang = 0,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1
+
+return
+
+
+
 "shape_ladder"	:
 
 	_btmHLdrWdt = 0.400
@@ -618,7 +735,7 @@ return
 														HM_Pulley_Thick = 0.010,
 														HM_matPulley = HM_matBody1,
 														HM_Pulley_Fixed = 1,
-														HM_matWarning_show = 0
+														HM_matWarning_show = 1
 	del	1
 	addy	_mJib_pulleyDist/2
 		call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _mJib_pulleyW,
@@ -627,10 +744,15 @@ return
 														HM_Pulley_Thick = 0.010,
 														HM_matPulley = HM_matBody1,
 														HM_Pulley_Fixed = 1,
-														HM_matWarning_show = 0
+														HM_matWarning_show = 1
 	del	1	
 
-	material	HM_matBody1
+	if	HM_matWarning = ""	then
+		material HM_matBody1
+	else
+		material HM_matWarning
+	endif
+
 	_mW = _mJib_pulleyDist+_mJib_pulleyW+0.010*2
 	_mD = _mJib_pulleyR*2 
 	_mT = 0.173
@@ -654,3 +776,49 @@ return
 return
 
 
+!	제어반
+"shape_machine_controlpanel"	:
+	
+	if	HM_matWarning = ""	then
+		material HM_matBody2
+	else
+		material HM_matWarning
+	endif
+
+	_mW = 0.800
+	_mD = 0.350
+	_mH = 1.400
+
+	block	_mW, _mD, _mH
+	addx _mW+0.100
+		block	_mW, _mD, _mH
+	del 1
+
+return
+
+
+!	회전대
+"shape_machine_turningdevice"	:
+	
+	if	HM_matWarning = ""	then
+		material HM_matBody2
+	else
+		material HM_matWarning
+	endif
+
+	_mR1 = 0.150
+	_mR2 = 0.200
+	_mH = 1.240
+	_mH2 = 0.047		!	R2
+	_mH3 = 0.363
+	_mH1 = _mH-_mH2-_mH3
+
+	cylind _mH1, _mR1
+	addz _mH1
+		cylind _mH2, _mR2
+		addz _mH2
+			cylind _mH3, _mR1		
+		del 1
+	del 1
+
+return

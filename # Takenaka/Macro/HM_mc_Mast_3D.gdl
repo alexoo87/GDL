@@ -1,0 +1,440 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/12/22 THU
+!	VER : AC 20
+!	DEV : LEE HAE CHAN
+
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot	0, 0, 0
+	model	wire
+	circle	0.1
+	circle	0.2
+	model	solid
+endif
+
+if	bTest	then
+
+endif
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+resol HM_3D_resol
+pen		HM_3D_pen
+
+if	GLOB_FEEDBACK_MODE	then
+	resol	8
+endif
+
+!	Set Material
+if	HM_matWarning = ""	then
+	material HM_matBody2
+else
+	material HM_matWarning
+endif
+
+!----------------------------------------------------------------------------------------------------
+!	Shape - Cylinder
+!----------------------------------------------------------------------------------------------------
+if	HM_MastType = MAST_CYLIND	then
+
+	for	i = 1	to	HM_MastNumber
+		cylind	HM_MastHeight,	HM_MastRadius
+
+		addz	HM_MastHeight
+	next	i
+
+	del HM_MastNumber
+
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	Shape - Rectangle Type 1
+!-----------------------------------------------------------------------------------------------
+if	HM_MastType = MAST_RECT_TYPE1	then
+	!	Mast Basement(Column)
+	_mastBaseHgt = 1.750
+	_plateThk = 0.048
+	_columnHgt = 1.200 - _plateThk*2
+
+	group	"MastBasement_Base_OTA_150H"
+		addz	_mastBaseHgt
+			!	Base Plate(Bottom)
+			for	i = 1	to	4
+				gosub	"coordinate_BasePlate_OTA_150H"
+
+				prism_	nsp/3,	_plateThk,	use(nsp)
+				prism_	nsp/3,	-0.050,		get(nsp)
+
+				rotz	90
+			next	i
+
+			del 4
+
+			!	Base Column
+			addz	_plateThk
+				for	i = 1	to	4
+					put	0.750,			0.750,			15,
+						0.750,			0.550,			15,
+						0.750 - 0.025,	0.550,			15,
+						0.750 - 0.025,	0.750 - 0.025,	15,
+						0.550,			0.750 - 0.025,	15,
+						0.550,			0.750,			15
+
+					prism_	nsp/3,	_columnHgt,	get(nsp)
+
+					put	0.575,			0.575,			15,
+						0.575,			0.750 - 0.025,	15,
+						0.575 + 0.019,	0.750 - 0.025,	15,
+						0.575 + 0.019,	0.575 + 0.019,	15,
+						0.750 - 0.025,	0.575 + 0.019,	15,
+						0.750 - 0.025,	0.575,			15
+
+					prism_	nsp/3,	_columnHgt,	get(nsp)
+
+					rotz	90
+				next	i
+
+				del 4
+			del 1
+
+			!	Base Side Plate(Bottom)
+			addz	_plateThk
+				for	i = 1	to	4
+					addx	0.750
+						roty	-90
+
+							put	0,		-0.550,			15,
+								0.500,	-0.550,			15,
+								0.500,	-0.550 + 0.020,	15,
+								0.090,	-0.250,			15,
+								0,		-0.250,			15
+
+							prism_	nsp/3,	0.025,	use(nsp)
+
+							muly	-1
+								prism_	nsp/3,	0.025,	get(nsp)
+							del 1
+
+						del 1
+					del 1
+
+					rotz	90
+				next	i
+
+				del 4
+			del 1
+
+			!	Base Side Plate(Top)
+			addz	_plateThk + _columnHgt
+				for	i = 1	to	4
+					addx	0.750
+						roty	90
+
+							put	0,		-0.550,			15,
+								0,		-0.250,			15,
+								0.500,	-0.550 + 0.020,	15,
+								0.500,	-0.550,			15
+
+							prism_	nsp/3,	-0.025,	use(nsp)
+
+							muly	-1
+								prism_	nsp/3,	-0.025,	get(nsp)
+							del 1
+
+						del 1
+					del 1
+
+					rotz	90
+				next	i
+
+				del 4
+			del 1
+
+			!	Base Plate(Top)
+			addz	_plateThk + _columnHgt
+				for	i = 1	to	4
+					gosub	"coordinate_BasePlate_OTA_150H"
+
+					prism_	nsp/3,	_plateThk,	get(nsp)
+
+					rotz	90
+				next	i
+
+				del 4
+			del 1
+		del 1
+	endgroup
+
+	group	"MastBasement_Side_OTA_150H"
+		addz	_mastBaseHgt + _plateThk
+			for	i = 1	to	4
+				addx	0.750
+					roty	-90
+						!	Side Plate(Bottom)
+						put	-0.010,	-0.250,	15,
+							-0.010,	0.250,	15,
+							0.090,	0.250,	15,
+							0.090,	-0.250,	15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+
+						!	대각선 Plate
+						_aObl = 37.3
+						_oblWdt = 0.130
+
+						put	0,					-0.550,		15,
+							0.722,				0,			15,
+							0,					0.550,		15,
+							_oblWdt/sin(_aObl),	0.550,		15,
+							0.772,				0.1254,		15,
+							0.772,				-0.1254,	15,
+							_oblWdt/sin(_aObl),	-0.550,		15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+
+						!	Side Plate(Top)
+						put	0.772,	-0.550,	15,
+							0.772,	0.550,	15,
+							0.902,	0.550,	15,
+							0.902,	-0.550,	15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+					del 1
+				del 1
+
+				rotz	90
+			next	i
+
+
+			del 4
+		del 1
+	endgroup
+
+	!	배치
+	placegroup	"MastBasement_Base_OTA_150H"
+	placegroup	subgroup("MastBasement_Side_OTA_150H", "MastBasement_Base_OTA_150H")
+
+	!	Mast Module Group
+	!-----------------------------------------------------------------------------------------------
+	_zPosMastModule = 2.950
+	_plateThk = 0.048
+	_columnHgt = HM_MastHeight - _plateThk*2
+
+	group	"MastModule_Base_OTA_150H"
+		addz	_zPosMastModule
+			!	Base Plate(Bottom)
+			for	i = 1	to	4
+				gosub	"coordinate_BasePlate_OTA_150H"
+
+				prism_	nsp/3,	_plateThk,	get(nsp)
+
+				rotz	90
+			next	i
+
+			del 4
+
+			!	Base Column
+			addz	_plateThk
+				for	i = 1	to	4
+					put	0.750,			0.750,			15,
+						0.750,			0.550,			15,
+						0.750 - 0.025,	0.550,			15,
+						0.750 - 0.025,	0.750 - 0.025,	15,
+						0.550,			0.750 - 0.025,	15,
+						0.550,			0.750,			15
+
+					prism_	nsp/3,	_columnHgt,	get(nsp)
+
+					put	0.575,			0.575,			15,
+						0.575,			0.750 - 0.025,	15,
+						0.575 + 0.019,	0.750 - 0.025,	15,
+						0.575 + 0.019,	0.575 + 0.019,	15,
+						0.750 - 0.025,	0.575 + 0.019,	15,
+						0.750 - 0.025,	0.575,			15
+
+					prism_	nsp/3,	_columnHgt,	get(nsp)
+
+					rotz	90
+				next	i
+
+				del 4
+			del 1
+
+			!	Base Side Plate(Bottom)
+			addz	_plateThk
+				for	i = 1	to	4
+					addx	0.750
+						roty	-90
+
+							put	0,		-0.550,			15,
+								0.500,	-0.550,			15,
+								0.500,	-0.550 + 0.020,	15,
+								0.090,	-0.250,			15,
+								0,		-0.250,			15
+
+							prism_	nsp/3,	0.025,	use(nsp)
+
+							muly	-1
+								prism_	nsp/3,	0.025,	get(nsp)
+							del 1
+
+						del 1
+					del 1
+
+					rotz	90
+				next	i
+
+				del 4
+			del 1
+
+			!	Base Side Plate(Top)
+			addz	_plateThk + _columnHgt
+				for	i = 1	to	4
+					addx	0.750
+						roty	90
+
+							put	0,		-0.550,			15,
+								0,		-0.250,			15,
+								0.500,	-0.550 + 0.020,	15,
+								0.500,	-0.550,			15
+
+							prism_	nsp/3,	-0.025,	use(nsp)
+
+							muly	-1
+								prism_	nsp/3,	-0.025,	get(nsp)
+							del 1
+
+						del 1
+					del 1
+
+					rotz	90
+				next	i
+
+				del 4
+			del 1
+
+			!	Base Plate(Top)
+			addz	_plateThk + _columnHgt
+				for	i = 1	to	4
+					gosub	"coordinate_BasePlate_OTA_150H"
+
+					prism_	nsp/3,	_plateThk,	get(nsp)
+
+					rotz	90
+				next	i
+
+				del 4
+			del 1
+		del 1
+	endgroup
+
+	group	"MastModule_Side_OTA_150H"
+		addz	_zPosMastModule + _plateThk
+			for	i = 1	to	4
+				addx	0.750
+					roty	-90
+						!	Side Plate(Bottom)
+						put	-0.010,	-0.550,	15,
+							-0.010,	0.550,	15,
+							0.090,	0.550,	15,
+							0.090,	-0.550,	15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+
+						!	대각선 Plate(Bottom)
+						_aObl = 28.77
+						_oblWdt = 0.130
+
+						put	0,					-0.550,		15,
+							1.002,				0,			15,
+							0,					0.550,		15,
+							_oblWdt/sin(_aObl),	0.550,		15,
+							1.072,				0.1099,		15,
+							1.072,				-0.1099,	15,
+							_oblWdt/sin(_aObl),	-0.550,		15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+
+						!	Side Plate(Middle)
+						put	1.072,	-0.550,	15,
+							1.072,	0.550,	15,
+							1.202,	0.550,	15,
+							1.202,	-0.550,	15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+
+						!	대각선 Plate(Middle)
+						_aObl = 22.93
+						_oblWdt = 0.130
+
+						put	1.202,						-0.550,		15,
+							2.502,						0,			15,
+							1.202,						0.550,		15,
+							1.202 + _oblWdt/sin(_aObl),	0.550,		15,
+							2.572,						0.1115,		15,
+							2.572,						-0.1115,	15,
+							1.202 + _oblWdt/sin(_aObl),	-0.550,		15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+
+						!	Side Plate(Top)
+						put	2.572,	-0.550,	15,
+							2.572,	0.550,	15,
+							2.702,	0.550,	15,
+							2.702,	-0.550,	15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+					del 1
+				del 1
+
+				rotz	90
+			next	i
+
+			del 4
+		del 1
+	endgroup
+
+	!	배치
+	for	i = 1	to	HM_MastNumber
+		placegroup	"MastModule_Base_OTA_150H"
+		placegroup	subgroup("MastModule_Side_OTA_150H", "MastModule_Base_OTA_150H")
+
+		addz	HM_MastHeight
+	next	i
+
+	del HM_MastNumber
+
+
+endif
+
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+!	Coordinates of Base Plate(OTA-150H)
+!-----------------------------------------------------------------------------------------------
+"coordinate_BasePlate_OTA_150H":
+
+	put	0.750,	0.750,	15,
+		0.750,	0.250,	15,
+		0.630,	0.250,	15,
+		0.250,	0.630,	15,
+		0.250,	0.750,	15
+
+return

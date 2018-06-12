@@ -34,39 +34,39 @@ pen	HM_3D_pen
 
 	!	Beam
 	!----------------------------------------------------------------------------------------------------
-	if	HM_matWarning = ""	then	
+	if	HM_matWarning = ""	then
 		material HM_matBeam
 	else
 		material HM_matWarning
 	endif
 
 	!	Start Point
-	put	-HM_Beam_Offset_SP,											HM_Beam_Width/2,	0,
-		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						HM_Beam_Width/2,	0,
-		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						HM_Beam_WebT/2,		0,
-		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	HM_Beam_WebT/2,		0,
-		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	HM_Beam_Width/2,	0,
-		-(HM_Beam_Offset_SP + HM_Beam_Height_SP),					HM_Beam_Width/2,	0,
-		-(HM_Beam_Offset_SP + HM_Beam_Height_SP),					-HM_Beam_Width/2,	0,
-		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	-HM_Beam_Width/2,	0,
-		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	-HM_Beam_WebT/2,	0,
-		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						-HM_Beam_WebT/2,	0,
-		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						-HM_Beam_Width/2,	0,
-		-HM_Beam_Offset_SP,											-HM_Beam_Width/2,	0
+	put	-HM_Beam_Offset_SP,											HM_Beam_Center_SP + HM_Beam_Width_SP/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						HM_Beam_Center_SP + HM_Beam_Width_SP/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						HM_Beam_Center_SP + HM_Beam_WebT/2,		0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	HM_Beam_Center_SP + HM_Beam_WebT/2,		0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	HM_Beam_Center_SP + HM_Beam_Width_SP/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP),					HM_Beam_Center_SP + HM_Beam_Width_SP/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP),					HM_Beam_Center_SP - HM_Beam_Width_SP/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	HM_Beam_Center_SP - HM_Beam_Width_SP/2,	0,
+		-(HM_Beam_Offset_SP + HM_Beam_Height_SP - HM_Beam_FlangeT),	HM_Beam_Center_SP - HM_Beam_WebT/2,		0,
+		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						HM_Beam_Center_SP - HM_Beam_WebT/2,		0,
+		-(HM_Beam_Offset_SP + HM_Beam_FlangeT),						HM_Beam_Center_SP - HM_Beam_Width_SP/2,	0,
+		-HM_Beam_Offset_SP,											HM_Beam_Center_SP - HM_Beam_Width_SP/2,	0
 
 	!	End Point
-	put	-HM_Beam_Offset_EP,											HM_Beam_Width/2,	HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						HM_Beam_Width/2,	HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						HM_Beam_WebT/2,		HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	HM_Beam_WebT/2,		HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	HM_Beam_Width/2,	HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_Height_EP),					HM_Beam_Width/2,	HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_Height_EP),					-HM_Beam_Width/2,	HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	-HM_Beam_Width/2,	HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	-HM_Beam_WebT/2,	HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						-HM_Beam_WebT/2,	HM_Beam_Length,
-		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						-HM_Beam_Width/2,	HM_Beam_Length,
-		-HM_Beam_Offset_EP,											-HM_Beam_Width/2,	HM_Beam_Length
+	put	-HM_Beam_Offset_EP,											HM_Beam_Center_EP + HM_Beam_Width_EP/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						HM_Beam_Center_EP + HM_Beam_Width_EP/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						HM_Beam_Center_EP + HM_Beam_WebT/2,		HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	HM_Beam_Center_EP + HM_Beam_WebT/2,		HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	HM_Beam_Center_EP + HM_Beam_Width_EP/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP),					HM_Beam_Center_EP + HM_Beam_Width_EP/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP),					HM_Beam_Center_EP - HM_Beam_Width_EP/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	HM_Beam_Center_EP - HM_Beam_Width_EP/2,	HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_Height_EP - HM_Beam_FlangeT),	HM_Beam_Center_EP - HM_Beam_WebT/2,		HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						HM_Beam_Center_EP - HM_Beam_WebT/2,		HM_Beam_Length,
+		-(HM_Beam_Offset_EP + HM_Beam_FlangeT),						HM_Beam_Center_EP - HM_Beam_Width_EP/2,	HM_Beam_Length,
+		-HM_Beam_Offset_EP,											HM_Beam_Center_EP - HM_Beam_Width_EP/2,	HM_Beam_Length
 
 	roty	90
 		ruled	(nsp/3)/2,	1+2+4+16+32,	get(nsp)

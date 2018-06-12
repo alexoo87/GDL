@@ -1,0 +1,88 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/12/22 THU
+!	VER : AC 20
+!	DEV : LEE HAE CHAN
+
+
+!----------------------------------------------------------------------------------------------------
+!	Test
+!----------------------------------------------------------------------------------------------------
+if	bTest then
+
+
+
+endif
+
+
+!----------------------------------------------------------------------------------------------------
+!	Define Values
+!----------------------------------------------------------------------------------------------------
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Calculation
+!----------------------------------------------------------------------------------------------------
+if	HM_CraneName = "KCP-1040"	then
+	HM_MastHeight = 5.000					!	한개 모듈 높이
+	HM_MastBaseHeight = 6.000				!	베이스 마스트 높이
+	HM_MastRadius = 0.610					!	마스트 
+
+	_mastH_max = 66.000						!	마스트 최대 높이
+	_mastH_min = 31.000						!	마스트 최소 높이
+
+	_mastN_max = int((_mastH_max - HM_MastBaseHeight)/HM_MastHeight)
+	_mastN_min = int((_mastH_min - HM_MastBaseHeight)/HM_MastHeight)
+endif
+
+!	OTA-150H
+if	HM_MastType = OTA_150H	then
+	HM_MastHeight = 3.000
+	HM_MastBaseHeight = 2.950
+	HM_MastNumber = 9
+endif
+
+HM_MastHeight_total = HM_MastNumber*HM_MastHeight + HM_MastBaseHeight
+
+!----------------------------------------------------------------------------------------------------
+!	Define Range
+!----------------------------------------------------------------------------------------------------
+if	HM_CraneName = "KCP-1040"	then
+	values	"HM_MastNumber"	range [_mastN_min, _mastN_max]
+endif
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Insert Value
+!----------------------------------------------------------------------------------------------------
+if	HM_CraneName = "KCP-1040"	then
+	parameters	HM_MastHeight = HM_MastHeight
+	parameters	HM_MastBaseHeight = HM_MastBaseHeight
+	parameters	HM_MastHeight_total = HM_MastHeight_total
+endif
+
+!	OTA-150H
+if	HM_MastType = OTA_150H	then
+	parameters	HM_MastHeight = HM_MastHeight,
+				HM_MastBaseHeight = HM_MastBaseHeight,
+				HM_MastHeight_total = HM_MastHeight_total,
+				HM_MastNumber = HM_MastNumber
+endif
+
+
+!----------------------------------------------------------------------------------------------------
+!	Hide / Lock
+!----------------------------------------------------------------------------------------------------
+if	HM_CraneName = "KCP-1040"	then
+	lock	"HM_MastHeight", "HM_MastBaseHeight", "HM_MastRadius", "HM_MastHeight_total"
+endif
+
+!	OTA-150H
+if	HM_MastType = OTA_150H	then
+	lock	"HM_MastHeight", "HM_MastBaseHeight", "HM_MastHeight_total", "HM_MastNumber"
+endif

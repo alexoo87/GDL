@@ -191,7 +191,8 @@ endif
 			addz	_offsetBeamV
 				addx	-_beamVLth/2
 					addy	_beamVLct
-						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = 0.300,
+						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.300,
+																		HM_Beam_Width_EP = 0.300,
 																		HM_Beam_Height_SP = 0.400,
 																		HM_Beam_Height_EP = 0.400,
 																		HM_Beam_Offset_SP = 0,
@@ -203,7 +204,8 @@ endif
 					del 1
 
 					addy	-_beamVLct
-						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = 0.300,
+						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.300,
+																		HM_Beam_Width_EP = 0.300,
 																		HM_Beam_Height_SP = 0.400,
 																		HM_Beam_Height_EP = 0.400,
 																		HM_Beam_Offset_SP = 0,
@@ -773,7 +775,8 @@ endif
 						_1stLth = 0.115
 						_1stHgt = 0.378
 
-						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _1stWdt,
+						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _1stWdt,
+																		HM_Beam_Width_EP = _1stWdt,
 																		HM_Beam_Height_SP = _1stHgt,
 																		HM_Beam_Height_EP = _1stHgt,
 																		HM_Beam_Offset_SP = 0,
@@ -789,7 +792,8 @@ endif
 						_2ndHgt = 0.328
 
 						addx	_1stLth
-							call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _2ndWdt,
+							call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _2ndWdt,
+																			HM_Beam_Width_EP = _2ndWdt,
 																			HM_Beam_Height_SP = _1stHgt,
 																			HM_Beam_Height_EP = _2ndHgt,
 																			HM_Beam_Offset_SP = 0,
@@ -895,7 +899,8 @@ endif
 							_4thHgt = 0.208
 
 							addx	_1stLth + _2ndLth + _cntLth
-								call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _4thWdt,
+								call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _4thWdt,
+																				HM_Beam_Width_EP = _4thWdt,
 																				HM_Beam_Height_SP = _3rdHgt,
 																				HM_Beam_Height_EP = _4thHgt,
 																				HM_Beam_Offset_SP = 0,
@@ -912,7 +917,8 @@ endif
 							_5thHgt = 0.208
 
 							addx	_1stLth + _2ndLth + _cntLth + _4thLth
-								call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _5thWdt,
+								call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _5thWdt,
+																				HM_Beam_Width_EP = _5thWdt,
 																				HM_Beam_Height_SP = _5thHgt,
 																				HM_Beam_Height_EP = _5thHgt,
 																				HM_Beam_Offset_SP = 0,
@@ -929,7 +935,8 @@ endif
 							_6thHgt = 0.130
 
 							addx	_1stLth + _2ndLth + _cntLth + _4thLth + _5thLth
-								call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _6thWdt,
+								call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _6thWdt,
+																				HM_Beam_Width_EP = _6thWdt,
 																				HM_Beam_Height_SP = _5thHgt,
 																				HM_Beam_Height_EP = _6thHgt,
 																				HM_Beam_Offset_SP = 0,
@@ -1085,7 +1092,8 @@ endif
 						_1stLth = 0.100
 						_1stHgt = 0.378
 
-						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _1stWdt,
+						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _1stWdt,
+																		HM_Beam_Width_EP = _1stWdt,
 																		HM_Beam_Height_SP = _1stHgt,
 																		HM_Beam_Height_EP = _1stHgt,
 																		HM_Beam_Offset_SP = 0,
@@ -1101,7 +1109,8 @@ endif
 						_2ndHgt = 0.328
 
 						addx	_1stLth
-							call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _2ndWdt,
+							call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _2ndWdt,
+																			HM_Beam_Width_EP = _2ndWdt,
 																			HM_Beam_Height_SP = _1stHgt,
 																			HM_Beam_Height_EP = _2ndHgt,
 																			HM_Beam_Offset_SP = 0,
@@ -1208,7 +1217,8 @@ endif
 
 		add	_xPosVBeam,	_vBeamLth/2,	_zPosVBeam
 			rotz	-90
-				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _vBeamWdt,
+				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _vBeamWdt,
+																HM_Beam_Width_EP = _vBeamWdt,
 																HM_Beam_Height_SP = _vBeamHgt,
 																HM_Beam_Height_EP = _vBeamHgt,
 																HM_Beam_Offset_SP = 0,
@@ -1222,7 +1232,8 @@ endif
 
 		add	-_xPosVBeam,	_vBeamLth/2,	_zPosVBeam
 			rotz	-90
-				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _vBeamWdt,
+				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _vBeamWdt,
+																HM_Beam_Width_EP = _vBeamWdt,
 																HM_Beam_Height_SP = _vBeamHgt,
 																HM_Beam_Height_EP = _vBeamHgt,
 																HM_Beam_Offset_SP = 0,
@@ -1306,7 +1317,8 @@ endif
 		addz	_zPosTBeam
 			addx	-_tBeamLth/2
 				addy	_yPosTBeam
-					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _tBeamWdt,
+					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _tBeamWdt,
+																	HM_Beam_Width_EP = _tBeamWdt,
 																	HM_Beam_Height_SP = _tBeamHgt,
 																	HM_Beam_Height_EP = _tBeamHgt,
 																	HM_Beam_Offset_SP = 0,
@@ -1318,7 +1330,8 @@ endif
 				del 1
 
 				addy	-_yPosTBeam
-					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _tBeamWdt,
+					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _tBeamWdt,
+																	HM_Beam_Width_EP = _tBeamWdt,
 																	HM_Beam_Height_SP = _tBeamHgt,
 																	HM_Beam_Height_EP = _tBeamHgt,
 																	HM_Beam_Offset_SP = 0,
@@ -1565,7 +1578,8 @@ return
 	del 1
 
 		rotz	_aBeam
-			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _olqBeamWdt,
+			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _olqBeamWdt,
+															HM_Beam_Width_EP = _olqBeamWdt,
 															HM_Beam_Height_SP = _olqBeamHgt,
 															HM_Beam_Height_EP = _olqBeamHgt,
 															HM_Beam_Offset_SP = 0,
@@ -1805,7 +1819,8 @@ return
 
 	addz	_zPos1st
 		addx	-_xPos1st
-			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _1stWdt,
+			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _1stWdt,
+															HM_Beam_Width_EP = _1stWdt,
 															HM_Beam_Height_SP = _1stHgt,
 															HM_Beam_Height_EP = _1stHgt,
 															HM_Beam_Offset_SP = 0,
@@ -1826,7 +1841,8 @@ return
 
 	addz	_zPos2nd
 		addx	-_xPos1st + _1stLth
-			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _2ndWdt,
+			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _2ndWdt,
+															HM_Beam_Width_EP = _2ndWdt,
 															HM_Beam_Height_SP = _1stHgt,
 															HM_Beam_Height_EP = _2ndHgt,
 															HM_Beam_Offset_SP = _2ndDist,
@@ -1846,7 +1862,8 @@ return
 
 	addz	_zPos3rd
 		addx	-_xPos1st + _1stLth + _2ndLth
-			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _3rdWdt,
+			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _3rdWdt,
+															HM_Beam_Width_EP = _3rdWdt,
 															HM_Beam_Height_SP = _3rdHgt,
 															HM_Beam_Height_EP = _3rdHgt,
 															HM_Beam_Offset_SP = 0,
@@ -1867,7 +1884,8 @@ return
 
 	addz	_zPos4th
 		addx	-_xPos1st + _1stLth + _2ndLth + _3rdLth
-			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _4thWdt,
+			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _4thWdt,
+															HM_Beam_Width_EP = _4thWdt,
 															HM_Beam_Height_SP = _3rdHgt,
 															HM_Beam_Height_EP = _4thHgt,
 															HM_Beam_Offset_SP = 0,
@@ -1887,7 +1905,8 @@ return
 
 	addz	_zPos5th
 		addx	-_xPos1st + _1stLth + _2ndLth + _3rdLth + _4thLth
-			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width = _5thWdt,
+			call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _5thWdt,
+															HM_Beam_Width_EP = _5thWdt,
 															HM_Beam_Height_SP = _5thHgt,
 															HM_Beam_Height_EP = _5thHgt,
 															HM_Beam_Offset_SP = 0,
