@@ -5,9 +5,13 @@
 
 !	Mast Index
 !-----------------------------------------------------------------------------------------------
-OTA_150H = 1
+MAST_CYLIND = 1
+MAST_RECT_TYPE1 = 2
+MAST_RECT_TYPE2 = 3
 
 if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
 	dim	stMastType[]
-		stMastType[1] = "OTA-150H"
+		stMastType[1] = "CYLINDER"
+		stMastType[2] = "RECTANGLE_TYPE1"
+		stMastType[3] = "RECTANGLE_TYPE2"
 endif

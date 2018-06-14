@@ -20,11 +20,14 @@ HM_CraneDepth = 3.600
 HM_CraneHeight = 29.950 + 10.800
 
 !	Crane Origin (Center Point)
-_mCraneOriginX = 2.700
-_mCraneOriginY = HM_CraneDepth/2
+_mCraneOriginX = 0
+_mCraneOriginY = 0
 
 !	Jib Length
-if	HM_JibLen = "10.0m"	then	HM_JibLength = 10.210
+_mJib_pulleyR = 0.163
+if	HM_JibLen = "25.0m"	then	HM_JibLength = 27.000 + _mJib_pulleyR
+if	HM_JibLen = "30.0m"	then	HM_JibLength = 32.000 + _mJib_pulleyR
+if	HM_JibLen = "35.0m"	then	HM_JibLength = 37.000 + _mJib_pulleyR
 
 !	'HM_Judgement' Index
 SAFETY = 1
@@ -37,7 +40,7 @@ OTA_150H = 1
 !----------------------------------------------------------------------------------------------------
 !	Size 
 !----------------------------------------------------------------------------------------------------
-
+_mMast_jib_offset = -0.600
 
 !----------------------------------------------------------------------------------------------------
 !	Rated Load

@@ -73,6 +73,9 @@ parameters	stepLct_1 = _stepLct_1,
 
 !	계단 관련
 !-----------------------------------------------------------------------------------------------
+values	"strWdt_1"	range	[0.200,	]
+values	"strWdt_2"	range	[0.200,	]
+
 !	stepHgt_E의 최대값 & stepDpt_E 최소값
 if	iStrShape = STRSHAPE_I	then
 	_maxStepHgt_E = stepHgt_1

@@ -33,11 +33,13 @@ else
 endif
 
 !	Mast
+HM_MastType = 2
+HM_MastWidth = 1.500
 HM_MastHeight = 3.000
-HM_MastBaseHeight = 2.950
+HM_MastBaseHeight = 1.200
 HM_MastNumber = 9
 
-HM_MastHeight_total = HM_MastNumber*HM_MastHeight + HM_MastBaseHeight
+HM_MastHeight_total = (HM_MastNumber*HM_MastHeight) + HM_MastBaseHeight
 
 !----------------------------------------------------------------------------------------------------
 !	Define Values
@@ -61,13 +63,12 @@ HM_MastHeight_total = HM_MastNumber*HM_MastHeight + HM_MastBaseHeight
 	values	"HM_JibHeight"	range [_mJibHeight_min, _mJibHeight_max]
 
 
-
-
 !----------------------------------------------------------------------------------------------------
 !	Insert Value
 !----------------------------------------------------------------------------------------------------
 !	Crane Information
-parameters 	HM_CraneName = HM_CraneName,
+parameters 	HM_CraneType = HM_CraneType,
+			HM_CraneName = HM_CraneName,
 			HM_CraneMaker = HM_CraneMaker
 
 !	Crane Size
@@ -94,7 +95,9 @@ else
 endif
 
 !	Mast
-parameters	HM_MastHeight = HM_MastHeight,
+parameters	HM_MastType = HM_MastType,
+			HM_MastWidth = HM_MastWidth,
+			HM_MastHeight = HM_MastHeight,
 			HM_MastBaseHeight = HM_MastBaseHeight,
 			HM_MastHeight_total = HM_MastHeight_total,
 			HM_MastNumber = HM_MastNumber
@@ -106,7 +109,7 @@ parameters	HM_MastHeight = HM_MastHeight,
 lock	"HM_CraneWidth", "HM_CraneDepth", "HM_CraneHeight", "HM_CraneWeight"
 
 !	Hide Title
-hideparameter	"HM_Boom", "HM_Mast"
+hideparameter	"HM_Boom"
 
 !	Judgement Color
 lock	"HM_Judgement"
@@ -115,4 +118,5 @@ lock	"HM_Judgement"
 lock	"HM_HookRadius", "HM_HookHeight"
 
 !	Mast
-lock	"HM_MastHeight", "HM_MastBaseHeight", "HM_MastHeight_total", "HM_MastNumber"
+hideparameter	"HM_MastRadius"
+lock	"HM_MastType", "HM_MastWidth", "HM_MastRadius", "HM_MastHeight", "HM_MastBaseHeight", "HM_MastHeight_total", "HM_MastNumber"
