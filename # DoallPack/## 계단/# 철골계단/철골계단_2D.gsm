@@ -1788,7 +1788,9 @@ return
 				hotline2	strWdt_1/2,		0,	strWdt_1,		0,	unID	:	unID = unID + 1
 			endif
 			if	_yPosLine > (wrkBrkLct + _referLth*sin(aBrk)) & _yPosLine <= (wrkBrkLct + _brkHgt)	then
-				line2	strWdt_1/2,		0,	_xPosLine_S2,	0
+				if	bWrkBrk	then
+					line2	strWdt_1/2,		0,	_xPosLine_S2,	0
+				endif
 				line2	_xPosLine_M,	0,	strWdt_1,		0
 
 				hotline2	strWdt_1/2,		0,	_xPosLine_S2,	0,	unID	:	unID = unID + 1
@@ -1825,7 +1827,9 @@ return
 			endif
 			if	_yPosLine > (uprBrkLct - _brkHgt) & _yPosLine <= (uprBrkLct - _referLth*sin(aBrk))	then
 				line2	0,				0,	_xPosLine_M,	0
-				line2	_xPosLine_S1,	0,	strWdt_1/2,		0
+				if	bUprBrk	then
+					line2	_xPosLine_S1,	0,	strWdt_1/2,		0
+				endif
 
 				hotline2	0,				0,	_xPosLine_M,	0,	unID	:	unID = unID + 1
 				hotline2	_xPosLine_S1,	0,	strWdt_1/2,		0,	unID	:	unID = unID + 1

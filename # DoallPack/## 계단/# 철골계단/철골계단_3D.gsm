@@ -87,11 +87,13 @@ sect_fill	strFill,	strBackPen,	strFillPen,	strSectPen
 		del 1
 
 		!	Hotspot : stepHgt_2
-		add	strWdt_1 + strOff_2,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
-			hotspot	0,	0,	0,			unID,	stepHgt_2,	1+128	:	unID = unID + 1
-			hotspot	0,	0,	-1,			unID,	stepHgt_2,	3		:	unID = unID + 1
-			hotspot	0,	0,	stepHgt_2,	unID,	stepHgt_2,	2		:	unID = unID + 1
-		del 1
+		if	iCalcaulation = RISER_NUMBER	then
+			add	strWdt_1 + strOff_2,	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+				hotspot	0,	0,	0,			unID,	stepHgt_2,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	stepHgt_2,	3		:	unID = unID + 1
+				hotspot	0,	0,	stepHgt_2,	unID,	stepHgt_2,	2		:	unID = unID + 1
+			del 1
+		endif
 
 		!	Hotspot : stepHgt_E
 		add	strWdt_1 + strOff_2 + stepDpt*(nStep_2 - 1),	stepDpt*(nStep_1 - 1) + strOff_1 + strWdt_2/2,	stepHgt_S + stepHgt_1*(nStep_1 - 1) + stepHgt_2*(nStep_2 - 1)
@@ -165,11 +167,13 @@ sect_fill	strFill,	strBackPen,	strFillPen,	strSectPen
 		del 1
 
 		!	Hotspot : stepHgt_2
-		add	strWdt_1 + strDist + strWdt_2/2,	stepDpt*(nStep_1 - 1) + strOff_1 - strOff_2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
-			hotspot	0,	0,	0,			unID,	stepHgt_2,	1+128	:	unID = unID + 1
-			hotspot	0,	0,	-1,			unID,	stepHgt_2,	3		:	unID = unID + 1
-			hotspot	0,	0,	stepHgt_2,	unID,	stepHgt_2,	2		:	unID = unID + 1
-		del 1
+		if	iCalcaulation = RISER_NUMBER	then
+			add	strWdt_1 + strDist + strWdt_2/2,	stepDpt*(nStep_1 - 1) + strOff_1 - strOff_2,	stepHgt_S + stepHgt_1*(nStep_1 - 1)
+				hotspot	0,	0,	0,			unID,	stepHgt_2,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	-1,			unID,	stepHgt_2,	3		:	unID = unID + 1
+				hotspot	0,	0,	stepHgt_2,	unID,	stepHgt_2,	2		:	unID = unID + 1
+			del 1
+		endif
 
 		!	Hotspot : stepHgt_E
 		add	strWdt_1 + strDist + strWdt_2/2,	stepDpt*(nStep_1 - 1) + strOff_1 - (strOff_2 + stepDpt*(nStep_2 - 1)),	stepHgt_S + stepHgt_1*(nStep_1 - 1) + stepHgt_2*(nStep_2 - 1)
@@ -238,11 +242,13 @@ sect_fill	strFill,	strBackPen,	strFillPen,	strSectPen
 			hotspot	0,	-1,			0,	unID,	stepDpt,	3		:	unID = unID + 1
 			hotspot	0,	stepDpt,	0,	unID,	stepDpt,	2		:	unID = unID + 1
 
-			addy	stepDpt
-				hotspot	0,	0,	0,			unID,	stepHgt_1,	1+128	:	unID = unID + 1
-				hotspot	0,	0,	-1,			unID,	stepHgt_1,	3		:	unID = unID + 1
-				hotspot	0,	0,	stepHgt_1,	unID,	stepHgt_1,	2		:	unID = unID + 1
-			del 1
+			if	iCalcaulation = RISER_NUMBER	then
+				addy	stepDpt
+					hotspot	0,	0,	0,			unID,	stepHgt_1,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	-1,			unID,	stepHgt_1,	3		:	unID = unID + 1
+					hotspot	0,	0,	stepHgt_1,	unID,	stepHgt_1,	2		:	unID = unID + 1
+				del 1
+			endif
 		del 1
 	del 1
 

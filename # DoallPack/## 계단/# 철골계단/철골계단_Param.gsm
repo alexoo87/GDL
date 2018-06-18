@@ -73,6 +73,8 @@ parameters	stepLct_1 = _stepLct_1,
 
 !	계단 관련
 !-----------------------------------------------------------------------------------------------
+values	"strHgt"	range	(0,	10)
+
 values	"strWdt_1"	range	[0.200,	]
 values	"strWdt_2"	range	[0.200,	]
 
@@ -98,6 +100,8 @@ values	"stepHgt_2"	range	[stepThk,	]
 values	"stepHgt_S"	range	[stepThk,	]
 values	"stepDpt"	range	(0,	)
 
+values	"stepThk"	range	[eps,	]
+
 values	"strDist"	range	[stgWdt*2,	]
 
 values	"nStep_1"	range	(0,	)
@@ -112,7 +116,7 @@ values	"distBase"	range	[_minDistBase,	]
 
 values	"stgWdt"	range	(0,	)
 values	"stgDpt"	range	(0,	)
-values	"stgThk"	range	(0,	)
+values	"stgThk"	range	[eps,	)
 
 values	"addStgLth"	range	[0,	]
 
@@ -162,6 +166,24 @@ endif
 
 values	"textSize"	range	(0,	)
 
+dim	_stFontList[], _idxFont[]
+r = request("FONTNAMES_LIST", "", _stFontList)
+
+for	i = 1	to	vardim1(_stFontList)
+	_idxFont[i] = i
+next	i
+
+values{2}	"iFontType"	_idxFont,	_stFontList
+
+if	GLOB_MODPAR_NAME = "iFontType"	then
+	_idx = iFontType
+	_stFontType = _stFontList[_idx]
+
+	parameters	stFontType = _stFontType
+endif
+
+parameters	__idx = vardim1(_stFontList)
+
 !	구조 접합 유형
 !-----------------------------------------------------------------------------------------------
 values{2}	"iAttach"	ATTACH_MOMENT,	stAttach[ATTACH_MOMENT],
@@ -171,4 +193,4 @@ values{2}	"iAttach"	ATTACH_MOMENT,	stAttach[ATTACH_MOMENT],
 !	심볼 관련
 !-----------------------------------------------------------------------------------------------
 values	"symOff"	range	[0,	0.500]
-values	"symSize"	range	(0,	)
+values	"symSize"	range	[eps,	)
