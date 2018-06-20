@@ -1,0 +1,128 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+if	GLOB_FEEDBACK_MODE	then
+	HM_3D_resol = 3
+endif
+
+resol	HM_3D_resol
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+if	GLOB_VIEW_TYPE = 2	then
+	HM_3D_pen = HM_2D_cranePen
+endif
+pen	HM_3D_pen
+
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+call	"HM_Material_White.gsm"
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+if	HM_matWarning = ""	then
+	_material = HM_matBody2
+else
+	_material = HM_matWarning
+endif
+
+material	_material
+
+rotz	HM_WorkingAng
+	!	Mast Basement
+	!-----------------------------------------------------------------------------------------------
+	rotz	45
+		call	"HM_mc_OutriggerTower.gsm"	parameters	all	HM_OutrType = 1,	!	Cross
+															HM_OutrWidth = 4.000,
+															HM_OutrDepth = 4.000,
+															HM_OutrHeight = 0.588,
+															mBeamW = 0.300,
+															mBeamFlangeT = 0.022,
+															mBeamWebT = 0.010,
+															bPlate = 0
+	del 1
+
+	!	Mast
+	!-----------------------------------------------------------------------------------------------
+		_zPosMast = 0.617
+
+		!	Basement
+		addz	_zPosMast
+			!	Base Plate(Bottom)
+			for	i = 1	to	4
+				put	0.500,	0.500,	15,
+					0.500,	0.235,	15,
+					0.410,	0.235,	15,
+					0.235,	0.410,	15,
+					0.235,	0.500,	15
+
+				prism_	nsp/3,	-0.029,		get(nsp)
+
+				rotz	90
+			next	i
+
+			del 4
+
+			!	Mast
+			_mastPlateWdt = 0.230
+			_mastPlateThk = 0.043
+			_mastColWdt = 0.150
+			_mastColThk = 0.019
+			_bInnerCol = 0
+
+			_mastHgt_1 = 2.671
+			call	"HM_mc_Mast.gsm"	parameters	all	HM_MastType = 2,
+														HM_MastHeight = _mastHgt_1,
+														HM_MastNumber = 1,
+														HM_PlateWdt = _mastPlateWdt,
+														HM_PlateThk = _mastPlateThk,
+														HM_ColWdt = _mastColWdt,
+														HM_ColThk = _mastColThk,
+														bInnerColumn = _bInnerCol
+
+
+			addz	_mastHgt_1
+				_mastHgt_2 = 2.829
+				call	"HM_mc_Mast.gsm"	parameters	all	HM_MastType = 2,
+															HM_MastHeight = _mastHgt_2,
+															HM_MastNumber = 1,
+															HM_PlateWdt = _mastPlateWdt,
+															HM_PlateThk = _mastPlateThk,
+															HM_ColWdt = _mastColWdt,
+															HM_ColThk = _mastColThk,
+															bInnerColumn = _bInnerCol
+			del 1
+
+			_mastPlateWdt = 0.225
+			_mastPlateThk = 0.033
+
+			addz	_mastHgt_1 + _mastHgt_2
+				call	"HM_mc_Mast.gsm"	parameters	all	HM_MastType = 2,
+															HM_PlateWdt = _mastPlateWdt,
+															HM_PlateThk = _mastPlateThk,
+															HM_ColWdt = _mastColWdt,
+															HM_ColThk = _mastColThk,
+															bInnerColumn = _bInnerCol
+			del 1
+		del 1
+
+
+
+del 1
+
+
+
+
+end
+
+
+

@@ -18,6 +18,10 @@ call	"HM_mc_Suspendedloads.gsm"	parameters	all
 !----------------------------------------------------------------------------------------------------
 !	Calculation
 !----------------------------------------------------------------------------------------------------
+!	Jib Length
+if	HM_JibLen = "20.0m"	then	HM_JibLength = 22.500 + _mJib_pulleyR
+if	HM_JibLen = "25.0m"	then	HM_JibLength = 27.500 + _mJib_pulleyR
+
 !	Jib Angle, Jib Height, Working Radius
 if	GLOB_MODPAR_NAME = "HM_JibHeight"	then
 	HM_jibAng = asn(HM_JibHeight/HM_JibLength)
@@ -27,17 +31,17 @@ else
 		HM_JibHeight = HM_JibLength*sin(HM_jibAng)
 		HM_WorkingR = HM_JibLength*cos(HM_jibAng) - _mMast_jib_offset
 	else
-		HM_jibAng = acs((HM_WorkingR+_mMast_jib_offset)/HM_JibLength)
+		HM_jibAng = acs((HM_WorkingR + _mMast_jib_offset)/HM_JibLength)
 		HM_JibHeight = HM_JibLength*sin(HM_jibAng)
 	endif
 endif
 
 !	Mast
 HM_MastType = 2
-HM_MastWidth = 1.500
-HM_MastHeight = 3.000
-HM_MastBaseHeight = 1.200
-HM_MastNumber = 9
+HM_MastWidth = 1.000
+HM_MastHeight = 5.500
+HM_MastBaseHeight = 0	!	Meaningless
+HM_MastNumber = 2
 
 HM_MastHeight_total = (HM_MastNumber*HM_MastHeight) + HM_MastBaseHeight
 
@@ -48,6 +52,15 @@ HM_MastHeight_total = (HM_MastNumber*HM_MastHeight) + HM_MastBaseHeight
 HM_HookType = 1
 HM_HookRadius = 0.325
 HM_HookHeight = 0.790
+
+values{2}	"HM_CraneRoping"	ROP_2PIECE,	"ローピング図(2本掛け)",
+								ROP_4PIECE,	"ローピング図(4本掛け)"
+
+if	HM_CraneRoping = ROP_2PIECE	then
+	HM_ListName = "OTA-60HN(2本)"
+else
+	HM_ListName = "OTA-60HN(4本)"
+endif
 
 !----------------------------------------------------------------------------------------------------
 !	Define Range
@@ -72,7 +85,8 @@ HM_HookHeight = 0.790
 !	Crane Information
 parameters 	HM_CraneType = HM_CraneType,
 			HM_CraneName = HM_CraneName,
-			HM_CraneMaker = HM_CraneMaker
+			HM_CraneMaker = HM_CraneMaker,
+			HM_ListName = HM_ListName
 
 !	Crane Size
 parameters 	HM_CraneWidth = HM_CraneWidth,
@@ -84,7 +98,7 @@ parameters	HM_JibLength = HM_JibLength
 
 
 !	Jib Angle, Jib Height, Working Radius
-if	GLOB_MODPAR_NAME = "HM_JibHeight" 	then
+if	GLOB_MODPAR_NAME = "HM_JibHeight"	then
 	parameters	HM_WorkingR = HM_WorkingR
 	parameters	HM_jibAng = HM_jibAng
 else

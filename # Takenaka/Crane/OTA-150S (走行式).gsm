@@ -45,11 +45,11 @@ _mJib_posz = _mDeck_posz + 0.200
 	!	Hotspot
 	!----------------------------------------------------------------------------------------------------
 	add	-_mCraneOriginX, -_mCraneOriginY, 0
+		hotspot	_mCraneOriginX, _mCraneOriginY, 	0, unID : unID = unID+1		!	Origin
 		hotspot	0, 0, 								0, unID : unID = unID+1
 		hotspot	HM_CraneWidth, 0, 					0, unID : unID = unID+1
 		hotspot	HM_CraneWidth, HM_CraneDepth, 		0, unID : unID = unID+1
 		hotspot	0, HM_CraneDepth, 					0, unID : unID = unID+1
-		hotspot	_mCraneOriginX, _mCraneOriginY, 	0, unID : unID = unID+1		!	Origin
 	del	1
 
 
@@ -86,7 +86,7 @@ rotz	HM_WorkingAng
 	addx	-3.140
 		addy	-3.500
 			addz	_mDeck_posz
-				call	"HM_mc_OperatorCab.gsm"	parameters	all
+				call	"HM_mc_OperatorCab.gsm"	parameters	all		HM_OP_Type = 1
 			del	1
 		del	1
 	del	1
@@ -97,7 +97,7 @@ rotz	HM_WorkingAng
 	_mOutr_CH_offset = -3.300
 	HM_CH_Width = 4.200
 	HM_CH_Depth = 2.600
-	HM_CH_Height = 9.000
+	HM_CH_Height = 8.800
 	HM_CH_Topnt_posx = 2.000
 
 	addz	_mJib_posz
@@ -107,13 +107,15 @@ rotz	HM_WorkingAng
 															HM_CH_Height = HM_CH_Height,
 															HM_CH_Topnt_posx = HM_CH_Topnt_posx,
 															HM_CH_Deck = 1,
-															HM_CH_DeckW = 2.500,
-															HM_CH_DeckD = HM_CH_Depth+2.100,
-															HM_CH_DeckT = 0.100,
-															HM_CH_Deck_posz = 7.412
+															HM_CH_DeckW = 2.300,
+															HM_CH_DeckD = HM_CH_Depth+2.000,
+															HM_CH_DeckT = 0.200,
+															HM_CH_Deck_HoleW = 1.800,
+															HM_CH_Deck_HoleD = HM_CH_Depth+0.800,
+															HM_CH_Deck_posx = 1.167,
+															HM_CH_Deck_posz = 7.400
 		del	1
 	del	1
-
 
 
 	!	Jib
@@ -149,12 +151,13 @@ rotz	HM_WorkingAng
 					del	1
 					lin_	0, 0, 0, _mMast_jib_offset, 0, 0
 				endif
+
 				!	Jib	
 				call	"HM_mc_Jib.gsm"	parameters	all	HM_Jib_type = 1
 
 				!	Pulley
 				roty	-HM_jibAng
-					addx	HM_JibLength
+					addx	HM_JibLength - _mJib_pulleyR
 						roty	90
 							gosub	"Jib_Pulley"
 						del	1
@@ -167,6 +170,22 @@ rotz	HM_WorkingAng
 						del	1
 					del	1
 				del	1
+
+				!	Jib Basket		
+				roty	-HM_jibAng
+					addx	HM_JibLength - _mJib_pulleyR
+						call	"HM_mc_Basket.gsm"	parameters	all		HM_BasketWidth = 1.000,
+																		HM_BasketDepth = 2.400,
+																		HM_BasketHeight = 1.000,
+																		HM_BasketThick = 0.100,
+																		HM_BasketAngle = 10.43 + HM_jibAng,
+																		HM_BasketPosx = -0.115,
+																		HM_BasketHoleW = _mJib_pulleyR+0.200,
+																		HM_BasketHoleD = _mJib_pulleyDist+0.400,
+																		HM_matBasket = HM_matBody1,
+																		HM_BasketMirror = 0
+					del	1
+				del	1
 			del	1
 		del	1
 	endif
@@ -177,8 +196,8 @@ rotz	HM_WorkingAng
 	!----------------------------------------------------------------------------------------------------
 	addz	HM_OutrHeight + _mOutr_Jib_offset
 		addx	HM_WorkingR
-			addz	HM_JibLength*sin(HM_jibAng)
-				hotspot 	0, 	0, 	0,				unID, HM_JibWireLen, 1			: unID = unID + 1			
+			addz	(HM_JibLength) *sin(HM_jibAng)
+				hotspot 	0, 	0, 	0,				unID, HM_JibWireLen, 1+128		: unID = unID + 1			
 				hotspot 	0, 	0, 	-HM_JibWireLen,	unID, HM_JibWireLen, 2			: unID = unID + 1		
 				hotspot 	0, 	0, 	1,				unID, HM_JibWireLen, 3			: unID = unID + 1		
 				if	bTest	then
@@ -220,6 +239,29 @@ rotz	HM_WorkingAng
 														y2 = -_mJib_pulleyDist/2,
 														z1 = _mJib_posz + HM_CH_Height + 0.200,
 														z2 = _mJib_posz + _mPulley_posz
+
+		_mWirePulley_posx = HM_JibLength*cos(HM_jibAng) + ((-0.400)*cos(HM_jibAng) - 0.075*sin(HM_jibAng))
+		_mWirePulley_posz = HM_JibLength*sin(HM_jibAng) + ((-0.400)*sin(HM_jibAng) + 0.075*cos(HM_jibAng))
+
+		call	"HM_mc_WirePulley.gsm"	parameters	all		HM_WP_startptX1 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+															HM_WP_startptZ1 = _mJib_posz + HM_CH_Height,
+															HM_WP_startptX2 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+															HM_WP_startptZ2 = _mJib_posz + HM_CH_Height + 0.200,
+															HM_WP_startptY = HM_CH_Depth/2,
+															HM_WP_endptX = _mOutr_Jib_offset_x + _mWirePulley_posx,
+															HM_WP_endptZ = _mJib_posz + _mWirePulley_posz,
+															HM_WP_endptY = _mJib_pulleyDist/2,
+															HM_WP_posPulley_ratio = 0.29
+
+		call	"HM_mc_WirePulley.gsm"	parameters	all		HM_WP_startptX1 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+															HM_WP_startptZ1 = _mJib_posz + HM_CH_Height,
+															HM_WP_startptX2 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+															HM_WP_startptZ2 = _mJib_posz + HM_CH_Height + 0.200,
+															HM_WP_startptY = -HM_CH_Depth/2,
+															HM_WP_endptX = _mOutr_Jib_offset_x + _mWirePulley_posx,
+															HM_WP_endptZ = _mJib_posz + _mWirePulley_posz,
+															HM_WP_endptY = -_mJib_pulleyDist/2,
+															HM_WP_posPulley_ratio = 0.29
 
 
 		!	Jib -> Hook
@@ -307,10 +349,22 @@ rotz	HM_WorkingAng
 	endif
 
 	if	HM_3D_text_show_plane	then
-		!	On the Bottom (TEST)
+		!	On the Bottom
 		call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 0,
 														HM_3D_text_show_plane = 1
 	endif
+
+
+	!	Machine
+	!----------------------------------------------------------------------------------------------------
+	add -3.025, -1.120, _mDeck_posz
+		gosub	"shape_machine_controlpanel"
+	del 1
+
+	add	-3.310, 0, 1.175
+		gosub	"shape_machine_turningdevice"
+	del 1
+
 
 
 del	1
@@ -322,9 +376,8 @@ del	1
 
 	!	Working Radius
 	!----------------------------------------------------------------------------------------------------
-	if	HM_3D_WorkingR_show	then
-		call	"HM_mc_WorkingR.gsm"	parameters all
-	endif
+	call	"HM_mc_WorkingR.gsm"	parameters all
+
 
 
 
@@ -337,332 +390,384 @@ end
 
 "shape_Deck"	:
 
-	if	HM_matWarning = ""	then
-		material	HM_matBody2
-	else
-		material	HM_matWarning
-	endif
+if	HM_matWarning = ""	then
+	material	HM_matBody2
+else
+	material	HM_matWarning
+endif
 
-	!	Deck
-	!----------------------------------------------------------------------------------------------------
-	si = 1+2+4+8
-	_mDeckT = 0.150
-	_mDeckT_2 = 0.100
+!	Deck
+!----------------------------------------------------------------------------------------------------
+si = 1+2+4+8
+_mDeckT = 0.150
+_mDeckT_2 = 0.100
 
-	group	"shape_Deck_panel"
-		put  -5.259999849295, 1.479999880688,      si, 
-	        -5.259999849295, -0.9400001309096,      si, 
-	        -5.249999858581, -0.9500001216231,      si, 
-	        -3.449900028558, -0.9500001216231,      si, 
-	        -3.449900028558, -3.500000119312,      si, 
-	        2.30009992647, -3.500000119312,      si, 
-	        2.300000150705, -1.625000119312,      si, 
-	        2.165000150705, -1.625000119312,      si, 
-	        2.165000150705, 1.749999880688,      si, 
-	        -1.094999849295, 1.749999880688,      si, 
-	        -1.544999849295, 2.029999880688,      si, 
-	        -4.909999849295, 2.029999880688,      si, 
-	        -5.259999849295, 1.479999880688,      si
+group	"shape_Deck_panel"
+	put  -5.259999849295, 1.479999880688,      si, 
+        -5.259999849295, -0.9400001309096,      si, 
+        -5.249999858581, -0.9500001216231,      si, 
+        -3.449900028558, -0.9500001216231,      si, 
+        -3.449900028558, -3.500000119312,      si, 
+        2.30009992647, -3.500000119312,      si, 
+        2.300000150705, -1.625000119312,      si, 
+        2.165000150705, -1.625000119312,      si, 
+        2.165000150705, 1.749999880688,      si, 
+        -1.094999849295, 1.749999880688,      si, 
+        -1.544999849295, 2.029999880688,      si, 
+        -4.909999849295, 2.029999880688,      si, 
+        -5.259999849295, 1.479999880688,      si
 
-	    addx	-_mMast_jib_offset
-		    addz	-_mDeckT
-				prism_    nsp/3, _mDeckT, get(nsp)
-			del	1
-		del	1
-
-		put -5.260000032367, -0.9800001193119,      si, 
-	        -5.259999849295, -1.480000119312,      si, 
-	        -4.759999849295, -1.971500119312,      si, 
-	        -3.46490007353, -1.980000119312,      si, 
-	        -3.46490007353, -0.9800001193119,      si, 
-	        -5.260000032367, -0.9800001193119,      si
-
-	    addx	-_mMast_jib_offset
-			addz	-_mDeckT - 0.050
-				prism_    nsp/3, _mDeckT_2, get(nsp)
-			del	1
-		del	1
-	endgroup
-
-	placegroup "shape_Deck_panel"
-
-
-	!	Connection (with Outrigger)
-	!----------------------------------------------------------------------------------------------------
-	_mDeckBotW = 2.500
-	_mDeckBotD = 6.820
-	_mDeckBotT = 0.438
-	_mDeckBot_offsetX = -5.860
-	_mDeckBot_offsetY = -_mDeckBotW/2
-
-	group	"shape_Deck_bottom"
-		addz	-_mDeckT-_mDeckBotT
-			addx	_mDeckBot_offsetX
-				addy	_mDeckBot_offsetY
-					block	_mDeckBotD, _mDeckBotW, _mDeckBotT
-				del	1
-			del	1
-		del	1
-	endgroup
-
-	placegroup subgroup ("shape_Deck_bottom", "shape_Deck_panel")
-
-
-	!	Pulley (on Deck)
-	!----------------------------------------------------------------------------------------------------
-	HM_Pulley_Width = 0.812
-	HM_Pulley_R1 = 0.550
-	addx	_mPulley_posx
-		addz	_mPulley_posz
-			call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_Pulley_Width,
-															HM_Pulley_R1 = HM_Pulley_R1,
-															HM_Pulley_R2 = _mPulley_R2,
-															HM_Pulley_Thick = 0.030,
-															HM_matPulley = HM_matBody2,
-															HM_Pulley_Fixed = 1
-			
-			!	Bottom Panel
-			addx	-HM_Pulley_R1
-			addy	-HM_Pulley_Width/2
-			addz	-HM_Pulley_R1
-				mulz	-1													
-					block	HM_Pulley_R1*2, HM_Pulley_Width, 0.234
-				del	1
-			del	1
-			del	1
-			del	1
+    addx	-_mMast_jib_offset
+	    addz	-_mDeckT
+			prism_    nsp/3, _mDeckT, get(nsp)
 		del	1
 	del	1
 
+	put -5.260000032367, -0.9800001193119,      si, 
+        -5.259999849295, -1.480000119312,      si, 
+        -4.759999849295, -1.971500119312,      si, 
+        -3.46490007353, -1.980000119312,      si, 
+        -3.46490007353, -0.9800001193119,      si, 
+        -5.260000032367, -0.9800001193119,      si
 
-	!	Guard Rail
-	!----------------------------------------------------------------------------------------------------
-	addz	-_mDeckT
-		addx	-4.050
-			addy	-3.500
+    addx	-_mMast_jib_offset
+		addz	-_mDeckT - 0.050
+			prism_    nsp/3, _mDeckT_2, get(nsp)
+		del	1
+	del	1
+endgroup
+
+placegroup "shape_Deck_panel"
+
+
+!	Connection (with Outrigger)
+!----------------------------------------------------------------------------------------------------
+_mDeckBotW = 2.500
+_mDeckBotD = 6.820
+_mDeckBotT = 0.438
+_mDeckBot_offsetX = -5.860
+_mDeckBot_offsetY = -_mDeckBotW/2
+
+group	"shape_Deck_bottom"
+	addz	-_mDeckT-_mDeckBotT
+		addx	_mDeckBot_offsetX
+			addy	_mDeckBot_offsetY
+				block	_mDeckBotD, _mDeckBotW, _mDeckBotT
+			del	1
+		del	1
+	del	1
+endgroup
+
+placegroup subgroup ("shape_Deck_bottom", "shape_Deck_panel")
+
+
+!	Pulley (on Deck)
+!----------------------------------------------------------------------------------------------------
+HM_Pulley_Width = 0.812
+HM_Pulley_R1 = 0.550
+addx	_mPulley_posx
+	addz	_mPulley_posz
+		call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_Pulley_Width,
+														HM_Pulley_R1 = HM_Pulley_R1,
+														HM_Pulley_R2 = _mPulley_R2,
+														HM_Pulley_Thick = 0.030,
+														HM_matPulley = HM_matBody2,
+														HM_Pulley_Fixed = 1
+		
+		!	Bottom Panel
+		addx	-HM_Pulley_R1
+		addy	-HM_Pulley_Width/2
+		addz	-HM_Pulley_R1
+			mulz	-1													
+				block	HM_Pulley_R1*2, HM_Pulley_Width, 0.234
+			del	1
+		del	1
+		del	1
+		del	1
+	del	1
+del	1
+
+
+!	Guard Rail
+!----------------------------------------------------------------------------------------------------
+addz	-_mDeckT
+	addx	-4.050
+		addy	-3.500
+			call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+															HM_GRailRef = 3,					!	IN-Line
+															HM_GRailL = 0.910,
+															HM_GRailH = 1.167,
+															HM_GRailD = 0.034,
+															HM_GRailT = 0.034,
+															HM_GRailDist = 1.000,
+															HM_GRailDist_hori = 0.540,
+															HM_GRail_colHide_Left = 1,
+															HM_GRail_colHide_Right = 0,
+															HM_GRail_cutLeft_ang = 45,
+															HM_matGRail = HM_matBody2
+		del	1
+	del	1
+	addx	-4.050
+		addy	-1.980
+			rotz	-90
 				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
 																HM_GRailRef = 3,					!	IN-Line
-																HM_GRailL = 0.910,
+																HM_GRailL = 1.520,
 																HM_GRailH = 1.167,
 																HM_GRailD = 0.034,
 																HM_GRailT = 0.034,
 																HM_GRailDist = 1.000,
 																HM_GRailDist_hori = 0.540,
-																HM_GRail_colHide_Left = 1,
+																HM_GRail_colHide_Left = 0,
 																HM_GRail_colHide_Right = 0,
-																HM_GRail_cutLeft_ang = 45,
+																HM_GRail_cutLeft_ang = -45,
+																HM_GRail_cutRight_ang = 45,
 																HM_matGRail = HM_matBody2
 			del	1
 		del	1
-		addx	-4.050
-			addy	-1.980
-				rotz	-90
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 1.520,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 0,
-																	HM_GRail_cutLeft_ang = -45,
-																	HM_GRail_cutRight_ang = 45,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1
-		addx	-5.360
-			addy	-1.980
-				rotz	0
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 1.310,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 1,
-																	HM_GRail_cutLeft_ang = 22.5,
-																	HM_GRail_cutRight_ang = -45,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1	
-		addx	-5.860
-			addy	-1.480
-				rotz	-45
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 0.707,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 1,
-																	HM_GRail_cutLeft_ang = 22.5,
-																	HM_GRail_cutRight_ang = 22.5,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1	
-		addx	-5.860
-			addy	1.480
-				rotz	-90
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 2.960,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 1,
-																	HM_GRail_cutLeft_ang = 32.47/2,
-																	HM_GRail_cutRight_ang = 22.5,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1								
-		addx	-5.510
-			addy	2.030
-				rotz	-122.47
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 0.652,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 1,
-																	HM_GRail_cutLeft_ang = 57.53/2,
-																	HM_GRail_cutRight_ang = 32.47/2,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1		
-		addx	-2.145
-			addy	2.030
-				rotz	-180
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 3.365,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 1,
-																	HM_GRail_cutLeft_ang = 31.89/2,
-																	HM_GRail_cutRight_ang = 57.53/2,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1	
-		addx	-1.695
-			addy	1.750
-				rotz	148.11
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 0.530,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 1,
-																	HM_GRail_cutLeft_ang = -31.89/2,
-																	HM_GRail_cutRight_ang = 31.89/2,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1	
-		addx	1.565
-			addy	1.750
-				rotz	-180
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 3.260,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 1,
-																	HM_GRail_cutLeft_ang = 45,
-																	HM_GRail_cutRight_ang = -31.89/2,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1
-		addx	1.565
-			addy	-1.625
-				rotz	90
-					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
-																	HM_GRailRef = 3,					!	IN-Line
-																	HM_GRailL = 3.375,
-																	HM_GRailH = 1.167,
-																	HM_GRailD = 0.034,
-																	HM_GRailT = 0.034,
-																	HM_GRailDist = 1.000,
-																	HM_GRailDist_hori = 0.540,
-																	HM_GRail_colHide_Left = 0,
-																	HM_GRail_colHide_Right = 1,
-																	HM_GRail_cutLeft_ang = 0,
-																	HM_GRail_cutRight_ang = 45,
-																	HM_matGRail = HM_matBody2
-				del	1
-			del	1
-		del	1		
-
 	del	1
+	addx	-5.360
+		addy	-1.980
+			rotz	0
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = 1.310,
+																HM_GRailH = 1.167,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 22.5,
+																HM_GRail_cutRight_ang = -45,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1	
+	addx	-5.860
+		addy	-1.480
+			rotz	-45
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = 0.707,
+																HM_GRailH = 1.167,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 22.5,
+																HM_GRail_cutRight_ang = 22.5,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1	
+	addx	-5.860
+		addy	1.480
+			rotz	-90
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = 2.960,
+																HM_GRailH = 1.167,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 32.47/2,
+																HM_GRail_cutRight_ang = 22.5,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1								
+	addx	-5.510
+		addy	2.030
+			rotz	-122.47
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = 0.652,
+																HM_GRailH = 1.167,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 57.53/2,
+																HM_GRail_cutRight_ang = 32.47/2,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1		
+	addx	-2.145
+		addy	2.030
+			rotz	-180
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = 3.365,
+																HM_GRailH = 1.167,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 31.89/2,
+																HM_GRail_cutRight_ang = 57.53/2,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1	
+	addx	-1.695
+		addy	1.750
+			rotz	148.11
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = 0.530,
+																HM_GRailH = 1.167,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = -31.89/2,
+																HM_GRail_cutRight_ang = 31.89/2,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1	
+	addx	1.565
+		addy	1.750
+			rotz	-180
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = 3.260,
+																HM_GRailH = 1.167,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 45,
+																HM_GRail_cutRight_ang = -31.89/2,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1
+	addx	1.565
+		addy	-1.625
+			rotz	90
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = 3.375,
+																HM_GRailH = 1.167,
+																HM_GRailD = 0.034,
+																HM_GRailT = 0.034,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 0,
+																HM_GRail_cutRight_ang = 45,
+																HM_matGRail = HM_matBody2
+			del	1
+		del	1
+	del	1		
+
+del	1
 
 return
 
 
 "Jib_Pulley"	:
 
-	addy	-_mJib_pulleyDist/2
-		call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _mJib_pulleyW,
-														HM_Pulley_R1 = _mJib_pulleyR+0.020,
-														HM_Pulley_R2 = _mJib_pulleyR,
-														HM_Pulley_Thick = 0.010,
-														HM_matPulley = HM_matBody1,
-														HM_Pulley_Fixed = 1,
-														HM_matWarning_show = 0
-	del	1
-	addy	_mJib_pulleyDist/2
-		call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _mJib_pulleyW,
-														HM_Pulley_R1 = _mJib_pulleyR+0.020,
-														HM_Pulley_R2 = _mJib_pulleyR,
-														HM_Pulley_Thick = 0.010,
-														HM_matPulley = HM_matBody1,
-														HM_Pulley_Fixed = 1,
-														HM_matWarning_show = 0
-	del	1	
+addy	-_mJib_pulleyDist/2
+	call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _mJib_pulleyW,
+													HM_Pulley_R1 = _mJib_pulleyR+0.020,
+													HM_Pulley_R2 = _mJib_pulleyR,
+													HM_Pulley_Thick = 0.010,
+													HM_matPulley = HM_matBody1,
+													HM_Pulley_Fixed = 1,
+													HM_matWarning_show = 1
+del	1
+addy	_mJib_pulleyDist/2
+	call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _mJib_pulleyW,
+													HM_Pulley_R1 = _mJib_pulleyR+0.020,
+													HM_Pulley_R2 = _mJib_pulleyR,
+													HM_Pulley_Thick = 0.010,
+													HM_matPulley = HM_matBody1,
+													HM_Pulley_Fixed = 1,
+													HM_matWarning_show = 1
+del	1	
 
 return
 
 
 "test_origin"	:
 
-	if	bOrigin	then
-		hotspot	0, 0, 0
-		model	wire
-		circle	0.1
-		circle	0.2
-		model	solid
+if	bOrigin	then
+	hotspot	0, 0, 0
+	model	wire
+	circle	0.1
+	circle	0.2
+	model	solid
+endif
+
+return
+
+
+
+!	제어반
+"shape_machine_controlpanel"	:
+	
+	if	HM_matWarning = ""	then
+		material HM_matBody2
+	else
+		material HM_matWarning
 	endif
+
+	_mW = 2.055
+	_mD = 2.287
+	_mH = 2.050
+
+	block	_mW, _mD, _mH
+
+return
+
+
+!	회전대
+"shape_machine_turningdevice"	:
+	
+	if	HM_matWarning = ""	then
+		material HM_matBody2
+	else
+		material HM_matWarning
+	endif
+
+	_mR = 1.500/2
+	_mD = 2.000
+
+	addz _mR + 0.050
+		rotx 90
+			addz -_mD/2
+				cylind _mD, _mR
+			del 1
+		del 1
+	del 1
+
+	_mW = 0.700
+	_mD = _mD + 0.300
+	_mH = 0.250
+
+	addx -_mW/2
+		addy -_mD/2
+			block	_mW, _mD, _mH
+		del 1
+	del	1
 
 return

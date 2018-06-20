@@ -1,0 +1,787 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/11/30 WED
+!	VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot	0, 0, 0
+	model	wire
+	circle	0.1
+	circle	0.2
+	model	solid
+endif
+
+if	bTest	then
+	lin_ 0, 0, 0, HM_CH_Topnt_posx, 0, HM_CH_Height
+	lin_ HM_CH_Width, 0, 0, HM_CH_Topnt_posx, 0, HM_CH_Height
+
+	hotspot	0, 0 ,0
+	hotspot	HM_CH_Width, 0 ,0
+	hotspot	HM_CH_Topnt_posx, 0, HM_CH_Height
+endif
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+resol HM_3D_resol
+
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+pen		HM_3D_pen
+
+if	HM_matWarning = ""	then	
+	material HM_matBody1
+else
+	material HM_matWarning
+endif
+
+
+addy	-HM_CH_Depth/2
+
+	!	Cat Head 
+	!----------------------------------------------------------------------------------------------------
+	gosub	"Column_triangle"
+	addy	HM_CH_Depth
+		gosub	"Column_triangle"
+	del	1
+
+		!	Crane Top Cylind
+		!----------------------------------------------------------------------------------------------------
+		if	HM_CH_Type = TYPE_PULLEY_SIDE	then
+			addy	-_mTop_depth/2
+				addz	HM_CH_Height
+					addx	HM_CH_Topnt_posx
+						rotx	-90
+							cylind	HM_CH_Depth+_mTop_depth, 0.050/2
+							addy 0.100
+								cylind	HM_CH_Depth+_mTop_depth, 0.050/2
+							del	1
+						del	1
+					del	1
+				del	1
+			del	1
+		endif
+
+		if	HM_CH_Type = TYPE_PULLEY_CENTER	then
+
+			_mCylindW = HM_CH_Pulley_R1
+			_mCylindD = HM_CH_Pulley_R1
+			_mCylindL = HM_CH_Depth + _mTop_depth
+			!	Cylind			
+			addy	-_mTop_depth/2
+				addz	HM_CH_Height
+					addx	HM_CH_Topnt_posx
+						addz	- HM_CH_Pulley_R1
+							addz	-_mCylindD
+							addx	-_mCylindW/2
+								block	_mCylindW, _mCylindL, _mCylindD
+							del	1
+							del	1
+						del	1
+					del	1
+				del	1
+			del	1
+
+			!	Pulley
+			addy	HM_CH_Depth/2
+				addz	HM_CH_Height
+					addx	HM_CH_Topnt_posx
+						addy	-HM_CH_Pulley_Dis/2
+							call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _mTop_depth-_mTop_thick*2,
+																			HM_Pulley_R1 = HM_CH_Pulley_R1,
+																			HM_Pulley_R2 = HM_CH_Pulley_R2,
+																			HM_Pulley_Thick = HM_CH_Pulley_Thick,
+																			HM_matPulley = HM_matBody1,
+																			HM_Pulley_Fixed = 1,
+																			HM_Pulley_Fixed_Half = 1
+						del	1
+						addy	HM_CH_Pulley_Dis/2
+							call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _mTop_depth-_mTop_thick*2,
+																			HM_Pulley_R1 = HM_CH_Pulley_R1,
+																			HM_Pulley_R2 = HM_CH_Pulley_R2,
+																			HM_Pulley_Thick = HM_CH_Pulley_Thick,
+																			HM_matPulley = HM_matBody1,
+																			HM_Pulley_Fixed = 1,
+																			HM_Pulley_Fixed_Half = 1
+						del	1						
+					del	1
+				del	1
+			del	1
+
+
+		endif
+
+	!	Cat Head Deck
+	!----------------------------------------------------------------------------------------------------
+	if	HM_CH_Deck	then
+		if	not(HM_CH_Deck_mirror)	then
+			addy	HM_CH_Depth/2
+				addx	-HM_CH_Deck_posx
+					addz	HM_CH_Deck_posz
+						addx	HM_CH_Topnt_posx
+							gosub	"shape_CH_deck"
+						del	1
+					del	1
+				del	1
+			del	1
+		else
+			addy	HM_CH_Depth/2
+				addx	HM_CH_Deck_posx
+					addz	HM_CH_Deck_posz
+						addx	HM_CH_Topnt_posx
+							mulx	-1
+								gosub	"shape_CH_deck"
+							del	1
+						del	1
+					del	1
+				del	1
+			del	1
+		endif
+	endif
+
+	if	HM_CH_Deck2	then
+		if	not(HM_CH_Deck2_mirror)	then
+			addy	HM_CH_Depth/2
+				addx	-HM_CH_Deck2_posx
+					addz	HM_CH_Deck2_posz
+						addx	HM_CH_Topnt_posx
+							gosub	"shape_CH_deck2"
+						del	1
+					del	1
+				del	1
+			del	1
+		else
+			addy	HM_CH_Depth/2
+				addx	HM_CH_Deck2_posx
+					addz	HM_CH_Deck2_posz
+						addx	HM_CH_Topnt_posx
+							mulx	-1
+								gosub	"shape_CH_deck2"
+							del	1
+						del	1
+					del	1
+				del	1
+			del	1
+		endif
+	endif
+
+del	1
+
+
+
+!======================================================================================================
+end
+!======================================================================================================
+
+
+!----------------------------------------------------------------------------------------------------
+!	Structure
+!----------------------------------------------------------------------------------------------------
+
+"Column_triangle"	:
+
+	!	Column 1
+	_mCol_offset1 = 0.150											!	기둥 시작위치에서 오프셋 값
+	_mCol_offset1_end = 1.350										!	기둥 끝 위치에서 오프셋 값
+	
+	!	Column 2
+	_mCol_offset2 = 0.150											!	기둥 시작위치에서 오프셋 값
+	_mCol_offset2_end = 1.150										!	기둥 끝 위치에서 오프셋 값
+
+	!	Column 3 (중앙 추가 기둥)
+	_mCol_offset3 = 0.150											!	기둥 시작위치에서 오프셋 값
+	_mCol_offset3_end = 1.350										!	기둥 끝 위치에서 오프셋 값
+
+
+	if HM_CH_Topnt_posx > EPS then
+		_ColAng1 = atn(HM_CH_Height/HM_CH_Topnt_posx)
+		_mColH1 = HM_CH_Topnt_posx/cos(_ColAng1) - _mCol_offset1_end
+	else
+		if HM_CH_Topnt_posx > -EPS & abs(HM_CH_Topnt_posx) < eps then
+			_ColAng1 = 90
+			_mColH1 = HM_CH_Height - _mCol_offset1_end
+		endif
+		if HM_CH_Topnt_posx <= -EPS & abs(HM_CH_Topnt_posx) > eps then
+			_ColAng1 = 180-atn(HM_CH_Height/abs(HM_CH_Topnt_posx))
+			_mColH1 = HM_CH_Topnt_posx/cos(_ColAng1) - _mCol_offset1_end
+		endif
+	endif	
+
+	_ColAng2 = atn(HM_CH_Height/(HM_CH_Width-HM_CH_Topnt_posx))
+	_mColH2 = (HM_CH_Width-HM_CH_Topnt_posx)/cos(_ColAng2) - _mCol_offset2_end
+
+	if	HM_CH_Column3	then
+		if HM_CH_Column3_posx-HM_CH_Topnt_posx > EPS then
+			_ColAng3 = atn(HM_CH_Height/(HM_CH_Column3_posx-HM_CH_Topnt_posx))
+			_mColH3 = (HM_CH_Column3_posx-HM_CH_Topnt_posx)/cos(_ColAng3) - _mCol_offset3_end
+		else
+			HM_CH_Column3 = 0
+		endif	
+	endif
+
+
+	!	Column 1
+	!----------------------------------------------------------------------------------------------------
+	!	Anchor
+	gosub	"shape_anchor1"
+
+	!	Column
+	roty	90-_ColAng1
+		addz	_mCol_offset1
+			roty	180
+				cutplane	
+			del	1
+		del	1
+		
+			cylind	_mColH1, HM_CH_Radius1
+
+			!	Pin
+			addz	_mColH1
+				gosub	"shape_pin1"
+			del	1
+		cutend
+	del	1
+
+
+	!	Column 2
+	!----------------------------------------------------------------------------------------------------
+	addx	HM_CH_Width
+		!	Anchor
+		gosub	"shape_anchor2"
+
+		!	Column
+		roty	-(90-_ColAng2)
+			addz	_mCol_offset2
+				roty	180
+					cutplane	
+				del	1
+			del	1	
+					
+				cylind	_mColH2, HM_CH_Radius2
+
+				!	Pin
+				addz	_mColH2
+					gosub	"shape_pin2"
+				del	1
+			cutend
+		del	1
+	del	1
+
+
+	!	Column 3
+	!----------------------------------------------------------------------------------------------------
+	if	HM_CH_Column3	then
+		addx	HM_CH_Column3_posx
+
+			!	Anchor
+			gosub	"shape_anchor3"
+
+			!	Column
+			roty	-(90-_ColAng3)
+				addz	_mCol_offset3
+					roty	180
+						cutplane	
+					del	1
+				del	1
+				
+					cylind	_mColH3, HM_CH_Radius3
+
+					!	Pin
+					addz	_mColH3
+						gosub	"shape_pin1"
+					del	1
+				cutend
+			del	1
+
+		del	1
+	endif
+
+
+	!	Top
+	!----------------------------------------------------------------------------------------------------
+	_mTop_depth = 0.200	
+	_mTop_thick = 0.020
+
+	addz	HM_CH_Height
+		addx	HM_CH_Topnt_posx	
+			gosub	"shape_top"
+			if	HM_CH_Type = TYPE_PULLEY_SIDE	then
+				call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _mTop_depth-_mTop_thick*2,
+																HM_Pulley_R1 = HM_CH_Pulley_R1,
+																HM_Pulley_R2 = HM_CH_Pulley_R2,
+																HM_Pulley_Thick = HM_CH_Pulley_Thick,
+																HM_matPulley = HM_matBody1,
+																HM_Pulley_Fixed = 0
+			endif
+			if	HM_CH_Type = TYPE_PULLEY_CENTER	then
+				!	None
+			endif
+		del	1
+	del	1
+
+
+return
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+
+"shape_anchor1"	:
+
+	si = 1+2+4+8
+	mT = 0.020
+	mT_2 = 0.050
+
+	put	0.2499, -0.179346401794,      si, 
+		0.2499,         -0.2,      si, 
+		-0.11,         -0.2,      si, 
+		-0.11,         -0.1,      si, 
+		-0.11, -6.883382752676E-015,      si, 
+		-7.684824998577E-016, -4.392319841173E-015,    900, 
+		0, -136.6672999999,   4000+si, 
+		0.08001193497795, 0.07548569573822,      si, 
+		0.2499, -0.179346401794,      si
+
+	addy	mT/2
+		rotx	90
+			muly	HM_CH_OffsetZ/0.200
+			mulx	HM_CH_Radius2/0.125
+				prism_    nsp/3, mT, get(nsp)
+			del	1
+			del	1
+		del	1
+	del	1
+
+
+	put	-0.109431692705, 0.1551035333259,      si, 
+		-0.08901024897125, -0.02570452319315,      si, 
+		3.913969842673E-016, 2.046973701653E-016,    900, 
+		0, 150.3656805016,   4000+si, 
+		0.0900775364678, -0.02166989520979,      si, 
+		0.1094317172628, 0.1551378162301,      si, 
+		-0.109431692705, 0.1551035333259,      si
+
+	roty	90-_ColAng1
+		addy	mT_2/2
+			rotx	90
+				mulx	HM_CH_Radius2/0.125			
+					prism_    nsp/3, mT_2, get(nsp)
+				del	1
+			del	1
+		del	1
+		addz	_mCol_offset1
+			cylind 0.171, HM_CH_Radius1+0.020
+		del	1
+	del	1
+
+return
+
+
+"shape_anchor2"	:
+
+	si = 1+2+4+8
+	mT = 0.020
+	mT_2 = 0.050
+
+	put	0.11,            0,      si, 
+		-6.591949208712E-017, 2.775557561563E-017,    900, 
+		0,          135,   4000+si, 
+		-0.07778174593052, 0.07778174593052,      si, 
+		-0.25,        -0.15,      si, 
+		-0.25,         -0.2,      si, 
+		0.11,         -0.2,      si, 
+		0.11,            0,      si
+
+
+	addy	mT/2
+		rotx	90
+			muly	HM_CH_OffsetZ/0.200
+			mulx	HM_CH_Radius2/0.125
+				prism_    nsp/3, mT, get(nsp)
+			del	1
+			del	1
+		del	1
+	del	1
+
+
+	put	-0.1375846965205, 0.1507211374803,      si, 
+		-0.09191940006935, -0.02399633077972,      si, 
+		8.476129954166E-015, 4.51028103754E-017,    900, 
+		0, 151.3490000001,   4000+si, 
+		0.09217006721232, -0.02301474983743,      si, 
+		0.1374264376522, 0.1507991188112,      si, 
+		-0.1375847032547, 0.1507963211699,      si
+
+	roty	-(90-_ColAng2)
+		addy	mT_2/2
+			rotx	90
+				mulx	HM_CH_Radius2/0.125
+					prism_    nsp/3, mT_2, get(nsp)
+				del	1
+			del	1
+		del	1
+		addz	_mCol_offset2
+			cylind 0.171, HM_CH_Radius2+0.020
+		del	1
+	del	1
+
+return
+
+
+"shape_anchor3"	:
+
+	si = 1+2+4+8
+	mT = 0.020
+	mT_2 = 0.050
+
+	put	0.2499, -0.179346401794,      si, 
+		0.2499,         -0.2,      si, 
+		-0.11,         -0.2,      si, 
+		-0.11,         -0.1,      si, 
+		-0.11, -6.883382752676E-015,      si, 
+		-7.684824998577E-016, -4.392319841173E-015,    900, 
+		0, -136.6672999999,   4000+si, 
+		0.08001193497795, 0.07548569573822,      si, 
+		0.2499, -0.179346401794,      si
+
+	addy	mT/2
+		rotx	90
+			muly	HM_CH_OffsetZ/0.200
+			mulx	HM_CH_Radius2/0.125
+				prism_    nsp/3, mT, get(nsp)
+			del	1
+			del	1
+		del	1
+	del	1
+
+
+	put	-0.109431692705, 0.1551035333259,      si, 
+		-0.08901024897125, -0.02570452319315,      si, 
+		3.913969842673E-016, 2.046973701653E-016,    900, 
+		0, 150.3656805016,   4000+si, 
+		0.0900775364678, -0.02166989520979,      si, 
+		0.1094317172628, 0.1551378162301,      si, 
+		-0.109431692705, 0.1551035333259,      si
+
+	roty	-(90-_ColAng3)
+		addy	mT_2/2
+			rotx	90
+				mulx	HM_CH_Radius2/0.125			
+					prism_    nsp/3, mT_2, get(nsp)
+				del	1
+			del	1
+		del	1
+		addz	_mCol_offset1
+			cylind 0.171, HM_CH_Radius3+0.020
+		del	1
+	del	1
+
+return
+
+
+"shape_pin1"	:
+
+	_mT = 0.030
+	_mR = HM_CH_Radius1+0.020
+
+	cylind _mT, _mR
+
+	_mPt1 = 0.550
+
+	si = 1+2+4+8
+	put	-_mR, 0, si,
+		_mR, 0, si,
+		_mR, _mPt1, si,
+		0, _mPt1, 900,
+		0, 180, 4000+si,
+		-_mR, _mPt1, si,
+		-_mR, 0, si 
+
+	addz	_mT
+		addy	_mT/2
+			rotx	90
+				prism_    nsp/3, _mT, get(nsp)
+			del	1
+		del	1
+	del	1
+
+	_mTop_depth = 0.200	
+	addz	_mT + _mPt1
+		addy	-_mTop_depth/2
+			rotx	-90
+				cylind	_mTop_depth, 0.040
+			del	1
+		del	1
+	del	1
+
+	if	bTest	then
+		hotspot	0, 0, _mT+_mPt1
+	endif
+
+return
+
+
+"shape_pin2"	:
+
+	_mT = 0.030
+	_mR = HM_CH_Radius2+0.020
+
+	cylind _mT, _mR
+
+	_mPt2 = 0.450
+
+	si = 1+2+4+8
+	put	-_mR, 0, si,
+		_mR, 0, si,
+		_mR, _mPt2, si,
+		0, _mPt2, 900,
+		0, 180, 4000+si,
+		-_mR, _mPt2, si,
+		-_mR, 0, si 
+
+	addz	_mT
+		addy	_mT/2
+			rotx	90
+				prism_    nsp/3, _mT, get(nsp)
+			del	1
+		del	1
+	del	1
+
+	_mTop_depth = 0.200	
+	addz	_mT + _mPt2
+		addy	-_mTop_depth/2
+			rotx	-90
+				cylind	_mTop_depth, 0.050
+			del	1
+		del	1
+	del	1
+
+	if	bTest	then
+		hotspot	0, 0, _mT+_mPt2
+	endif
+
+return
+
+
+"shape_top"	:
+
+	_mT = _mTop_thick
+	_mR = HM_CH_Radius2+0.030
+	si = 1+2+4+8
+
+	_pt1_X = 0
+	_pt1_Y = 0
+	_pt2_X = (HM_CH_Topnt_posx/cos(_ColAng1)-0.770)*cos(_ColAng1) - HM_CH_Topnt_posx
+	_pt2_Y = (HM_CH_Topnt_posx/cos(_ColAng1)-0.770)*sin(_ColAng1) - HM_CH_Height
+	_pt3_X = HM_CH_Width-HM_CH_Topnt_posx-((HM_CH_Width-HM_CH_Topnt_posx)/cos(_ColAng2)-0.670)*cos(_ColAng2)
+	_pt3_Y = ((HM_CH_Width-HM_CH_Topnt_posx)/cos(_ColAng2)-0.670)*sin(_ColAng2) - HM_CH_Height
+
+	if HM_CH_Topnt_posx > -EPS & abs(HM_CH_Topnt_posx) < eps then
+		_pt2_Y = - 0.770
+	endif
+
+
+	put	-_mR, 0, si,
+		_pt2_X-_mR, _pt2_Y, si,
+		_pt2_X, _pt2_Y, 900,
+		_pt2_X, _pt2_Y-_mR, 3000+si,
+		_pt2_X, _pt2_Y-_mR, si,
+		_pt3_X, _pt3_Y-_mR, si,
+		_pt3_X, _pt3_Y, 900,
+		_pt3_X+_mR, _pt3_Y, 3000+si,
+		_pt3_X+_mR, _pt3_Y, si,
+		_mR, 0, si,
+		0, 0, 900,
+		0, 180, 4000+si,	
+		-_mR, 0, si	
+
+	addy	-_mTop_depth/2
+		addy	_mT/2
+			rotx	90
+				prism_    nsp/3, _mT, use(nsp)
+			del	1
+		del	1
+	del	1
+	addy	_mTop_depth/2
+		addy	_mT/2
+			rotx	90
+				prism_    nsp/3, _mT, get(nsp)
+			del	1
+		del	1
+	del	1
+
+return
+
+
+"shape_CH_deck"	:
+
+	if bOrigin then
+		sphere 0.1
+		hotspot	0, 0, 0
+	endif
+
+	addy -HM_CH_DeckD/2
+
+		!	Deck
+		!----------------------------------------------------------------------------------------------------
+		_mT = HM_CH_DeckT
+		_mW = HM_CH_DeckW
+		_mD = HM_CH_DeckD
+		_mHoleW = HM_CH_Deck_HoleW
+		_mHoleD = HM_CH_Deck_HoleD
+		si = 1+2+4+8
+
+		put 	0,	0,	si,	
+				_mW, 0, si,
+				_mW, (_mD-_mHoleD)/2, si,
+				(_mW-_mHoleW), (_mD-_mHoleD)/2, si,
+				(_mW-_mHoleW), (_mD-_mHoleD)/2+_mHoleD, si,
+				_mW, (_mD-_mHoleD)/2+_mHoleD, si,
+				_mW, _mD, si,
+				0, _mD, si,
+				0,	0,	si
+
+		addz	-_mT
+			prism_    nsp/3, _mT, get(nsp)
+		del	1
+
+
+		!	Guard Rail
+		!----------------------------------------------------------------------------------------------------
+		_mH = 1.100
+		_mD = 0.034
+		_mT = 0.034
+
+		addz	-HM_CH_DeckT
+
+			addx	HM_CH_DeckW
+				rotz	90
+					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																	HM_GRailRef = 3,					!	IN-Line
+																	HM_GRailL = (HM_CH_DeckD-HM_CH_Deck_HoleD)/2,
+																	HM_GRailH = _mH,
+																	HM_GRailD = _mD,
+																	HM_GRailT = _mT,
+																	HM_GRailDist = 0.500,
+																	HM_GRailDist_hori = 0.540,
+																	HM_GRail_colHide_Left = 0,
+																	HM_GRail_colHide_Right = 0,
+																	HM_GRail_cutLeft_ang = 45,
+																	HM_GRail_cutRight_ang = 0,
+																	HM_matGRail = HM_matBody1
+				del	1
+			del	1	
+			rotz	0
+				call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																HM_GRailRef = 3,					!	IN-Line
+																HM_GRailL = HM_CH_DeckW,
+																HM_GRailH = _mH,
+																HM_GRailD = _mD,
+																HM_GRailT = _mT,
+																HM_GRailDist = 1.000,
+																HM_GRailDist_hori = 0.540,
+																HM_GRail_colHide_Left = 0,
+																HM_GRail_colHide_Right = 1,
+																HM_GRail_cutLeft_ang = 45,
+																HM_GRail_cutRight_ang = 45,
+																HM_matGRail = HM_matBody1
+			del	1
+			addy HM_CH_DeckD
+				rotz	-90
+					call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																	HM_GRailRef = 3,					!	IN-Line
+																	HM_GRailL = HM_CH_DeckD,
+																	HM_GRailH = _mH,
+																	HM_GRailD = _mD,
+																	HM_GRailT = _mT,
+																	HM_GRailDist = 1.000,
+																	HM_GRailDist_hori = 0.540,
+																	HM_GRail_colHide_Left = 0,
+																	HM_GRail_colHide_Right = 1,
+																	HM_GRail_cutLeft_ang = 45,
+																	HM_GRail_cutRight_ang = 45,
+																	HM_matGRail = HM_matBody1
+				del	1
+			del 1
+			addx	HM_CH_DeckW
+				addy	HM_CH_DeckD
+					rotz	180
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																		HM_GRailRef = 3,					!	IN-Line
+																		HM_GRailL = HM_CH_DeckW,
+																		HM_GRailH = _mH,
+																		HM_GRailD = _mD,
+																		HM_GRailT = _mT,
+																		HM_GRailDist = 1.000,
+																		HM_GRailDist_hori = 0.540,
+																		HM_GRail_colHide_Left = 0,
+																		HM_GRail_colHide_Right = 1,
+																		HM_GRail_cutLeft_ang = 45,
+																		HM_GRail_cutRight_ang = 45,
+																		HM_matGRail = HM_matBody1
+					del	1
+				del	1
+			del	1
+			addx	HM_CH_DeckW
+				addy	(HM_CH_DeckD-HM_CH_Deck_HoleD)/2+HM_CH_Deck_HoleD
+					rotz	90
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																		HM_GRailRef = 3,					!	IN-Line
+																		HM_GRailL = (HM_CH_DeckD-HM_CH_Deck_HoleD)/2,
+																		HM_GRailH = _mH,
+																		HM_GRailD = _mD,
+																		HM_GRailT = _mT,
+																		HM_GRailDist = 0.500,
+																		HM_GRailDist_hori = 0.540,
+																		HM_GRail_colHide_Left = 0,
+																		HM_GRail_colHide_Right = 1,
+																		HM_GRail_cutLeft_ang = 0,
+																		HM_GRail_cutRight_ang = 45,
+																		HM_matGRail = HM_matBody1
+					del	1
+				del	1
+			del	1	
+
+		del	1	
+
+	del 1
+
+return
+
+"shape_CH_deck2"	:
+	
+	!	상단 데크 추가 - 기존 데크와 형상 동일하게 구현
+
+	HM_CH_DeckW = HM_CH_Deck2W
+	HM_CH_DeckD = HM_CH_Deck2D
+	HM_CH_DeckT = HM_CH_Deck2T
+	HM_CH_Deck_HoleW = HM_CH_Deck2_HoleW
+	HM_CH_Deck_HoleD = HM_CH_Deck2_HoleD
+	HM_CH_Deck_posx = HM_CH_Deck2_posx
+	HM_CH_Deck_posz = HM_CH_Deck2_posz
+	
+	gosub	"shape_CH_deck"
+
+return

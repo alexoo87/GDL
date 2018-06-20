@@ -1,0 +1,86 @@
+
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/11/23 THU
+!	VER : AC 20
+!	DEV : JO HYUNG JUN
+
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+EPS = 0.0001
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Define 
+!----------------------------------------------------------------------------------------------------
+!	'HM_Jib_type' index
+JIB_TRUSS = 1
+JIB_CYLIND = 2
+
+dim	HM_Jib_type_arr[]
+	HM_Jib_type_arr[1] = "Truss"
+	HM_Jib_type_arr[2] = "Cylind"
+
+!	'HM_Jib_pos' index
+POS_1ST = 1
+POS_2ND = 2
+POS_3RD = 3
+POS_END = 4
+
+dim	HM_Jib_pos_arr[]
+	HM_Jib_pos_arr[1] = "1st Jib"
+	HM_Jib_pos_arr[2] = "2nd Jib"
+	HM_Jib_pos_arr[3] = "3rd Jib"
+	HM_Jib_pos_arr[4] = "End Jib"
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Size
+!----------------------------------------------------------------------------------------------------
+dim	_CraneName_arr[]
+	_CraneName_arr[1] = "OTA-150S"
+	_CraneName_arr[2] = "U-06H"
+	_CraneName_arr[3] = "U-09H"
+	_CraneName_arr[4] = "OJ-30HR"
+	_CraneName_arr[5] = "KCP-1040"
+	_CraneName_arr[6] = "OTA-150H"
+
+
+!	'_CraneName_arr' Index
+OTA_150S = 1
+U_06H = 2
+U_09H = 3
+OJ_30HR = 4
+KCP_1040 = 5
+
+OTA_150H = 6
+
+if	HM_CraneName = _CraneName_arr[OTA_150S]	then
+	HM_JibWidth = 1.200
+	HM_JibDepth = 1.200
+endif
+
+if	HM_CraneName = _CraneName_arr[U_06H] | HM_CraneName = _CraneName_arr[U_09H]	then
+	HM_JibWidth = 0.600
+	HM_JibDepth = 0.600
+endif	
+
+if	HM_CraneName = _CraneName_arr[OJ_30HR]	then
+	HM_JibWidth = 0.600
+	HM_JibDepth = 0.600
+endif
+
+if	HM_CraneName = _CraneName_arr[KCP_1040]	then
+	HM_JibWidth = 1.080
+	HM_JibDepth = 1.080
+endif
+
+if	HM_CraneName = _CraneName_arr[OTA_150H]	then
+	HM_JibWidth = 1.500
+	HM_JibDepth = 1.200
+endif

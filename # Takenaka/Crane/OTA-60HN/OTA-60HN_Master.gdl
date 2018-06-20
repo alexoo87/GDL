@@ -11,12 +11,16 @@ unID = 1000
 
 !	Crane Information
 HM_CraneType = 4
-HM_CraneName = "OTA-150H"
+HM_CraneName = "OTA-60HN"
 HM_CraneMaker = "小川製作所"
 
+!	Crane Roping Index
+ROP_2PIECE = 1
+ROP_4PIECE = 2
+
 !	Crane Size
-HM_CraneWidth = 3.600
-HM_CraneDepth = 3.600
+HM_CraneWidth = 4.000
+HM_CraneDepth = 4.000
 HM_CraneHeight = 29.950 + 10.800
 
 !	Crane Origin (Center Point)
@@ -24,10 +28,8 @@ _mCraneOriginX = 0
 _mCraneOriginY = 0
 
 !	Jib Length
-_mJib_pulleyR = 0.160
-if	HM_JibLen = "25.0m"	then	HM_JibLength = 27.000 + _mJib_pulleyR
-if	HM_JibLen = "30.0m"	then	HM_JibLength = 32.000 + _mJib_pulleyR
-if	HM_JibLen = "35.0m"	then	HM_JibLength = 37.000 + _mJib_pulleyR
+_mJib_pulleyR = 0.140
+
 
 !	'HM_Judgement' Index
 SAFETY = 1
@@ -37,7 +39,7 @@ WARNING_RED = 3
 !----------------------------------------------------------------------------------------------------
 !	Size 
 !----------------------------------------------------------------------------------------------------
-_mMast_jib_offset = 0.600
+_mMast_jib_offset = 1.700
 
 !----------------------------------------------------------------------------------------------------
 !	Rated Load

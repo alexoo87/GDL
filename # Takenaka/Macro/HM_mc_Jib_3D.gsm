@@ -33,7 +33,7 @@ endif
 unID = 2000
 
 !	Crane Module Length
-if	HM_CraneName = _CraneName_arr[OTA_150S]	then
+if	HM_CraneName = _CraneName_arr[OTA_150S] | HM_CraneName = _CraneName_arr[OTA_150H]	then
 	_Truss_1st_len = 9.000
 	_Truss_2nd_len = 9.000
 	_Truss_3rd_len = 5.000
@@ -76,13 +76,24 @@ endif
 !----------------------------------------------------------------------------------------------------
 resol 10
 
-define style "HM_style_Angle1" HM_2D_textFont,	HM_2D_textSize*100,	1,	0
-define style "HM_style_Angle2" HM_2D_textFont,	HM_2D_textSize*100,	8,	0
+define style "HM_style_Angle1" HM_2D_textFont,	HM_3D_textSize*100,	1,	0
+define style "HM_style_Angle2" HM_2D_textFont,	HM_3D_textSize*100,	8,	0
 
 call	"HM_Material_Red.gsm"
 call	"HM_Material_Yellow.gsm"
 call	"HM_Material_Blue.gsm"
 call	"HM_Material_White.gsm"
+call	"HM_Material_Black.gsm"
+
+if	HM_matWarning = ""	then
+	_stMat_Red = HM_matBody1
+	_stMat_White = HM_matBody2
+	_stMat_Black = "HM_matBlack"
+else
+	_stMat_Red = HM_matWarning
+	_stMat_White = HM_matWarning
+	_stMat_Black = HM_matWarning	
+endif
 
 
 !----------------------------------------------------------------------------------------------------
@@ -110,30 +121,30 @@ pen		HM_3D_pen
 			!	18.0m
 			!----------------------------------------------------------------------------------------------------
 			if	HM_JibLen = "18.0m"	then
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				gosub	"Jib_Truss_1st_3175"
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len
 					gosub	"Jib_Truss_2nd_2965"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
 					gosub	"Jib_Truss_str_3080"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
 					gosub	"Jib_Truss_str_3080"
 				del	1					
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len*2
 					gosub	"Jib_Truss_end_1_2820"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len*2 + _Truss_5th_len
 					gosub	"Jib_Truss_end_3380"
 				del	1	
@@ -142,35 +153,35 @@ pen		HM_3D_pen
 			!	20.0m
 			!----------------------------------------------------------------------------------------------------
 			if	HM_JibLen = "20.0m"	then
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				gosub	"Jib_Truss_1st_3175"
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len
 					gosub	"Jib_Truss_2nd_2965"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
 					gosub	"Jib_Truss_str_3080"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
 					gosub	"Jib_Truss_str_2000"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len + _Truss_4th_len
 					gosub	"Jib_Truss_str_3080"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len*2 + _Truss_4th_len
 					gosub	"Jib_Truss_end_1_2820"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len*2 + _Truss_4th_len + _Truss_5th_len
 					gosub	"Jib_Truss_end_3380"
 				del	1
@@ -193,9 +204,9 @@ pen		HM_3D_pen
 
 		endif
 
-		!	OTA-150S
+		!	OTA-150S/OTA-150H
 		!----------------------------------------------------------------------------------------------------
-		if	HM_CraneName = _CraneName_arr[OTA_150S]	then
+		if	HM_CraneName = _CraneName_arr[OTA_150S] | HM_CraneName = _CraneName_arr[OTA_150H]	then
 
 			roty	-HM_JibAng
 			add		0, _mTruss_posy, _mTruss_posz
@@ -203,15 +214,15 @@ pen		HM_3D_pen
 			!	25.0m
 			!----------------------------------------------------------------------------------------------------
 			if	HM_JibLen = "25.0m"	then
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				gosub	"Jib_Truss_1st_9000"
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len
 					gosub	"Jib_Truss_str_9000"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
 					gosub	"Jib_Truss_end_9000"
 				del	1
@@ -220,20 +231,20 @@ pen		HM_3D_pen
 			!	30.0m
 			!----------------------------------------------------------------------------------------------------
 			if	HM_JibLen = "30.0m"	then
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				gosub	"Jib_Truss_1st_9000"
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len
 					gosub	"Jib_Truss_str_9000"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
 					gosub	"Jib_Truss_str_5000"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
 					gosub	"Jib_Truss_end_9000"
 				del	1
@@ -242,25 +253,25 @@ pen		HM_3D_pen
 			!	35.0m
 			!----------------------------------------------------------------------------------------------------
 			if	HM_JibLen = "35.0m"	then
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				gosub	"Jib_Truss_1st_9000"
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len
 					gosub	"Jib_Truss_str_9000"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
 					gosub	"Jib_Truss_str_5000"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
 					gosub	"Jib_Truss_str_5000"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len*2
 					gosub	"Jib_Truss_end_9000"
 				del	1			
@@ -293,30 +304,30 @@ pen		HM_3D_pen
 			!	30.0m
 			!----------------------------------------------------------------------------------------------------
 			if	HM_JibLen = "30.0m"	then
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				gosub	"Jib_Truss_1st_7410"
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len*2
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len*3
 					gosub	"Jib_Truss_str_5152"
 				del	1																		
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len*4
 					gosub	"Jib_Truss_end_6096"
 				del	1
@@ -325,35 +336,35 @@ pen		HM_3D_pen
 			!	35.0m
 			!----------------------------------------------------------------------------------------------------
 			if	HM_JibLen = "35.0m"	then
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				gosub	"Jib_Truss_1st_7410"
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len*2
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len*3
 					gosub	"Jib_Truss_str_5152"
 				del	1	
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len*4
 					gosub	"Jib_Truss_str_5152"
 				del	1							
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len*5
 					gosub	"Jib_Truss_end_6096"
 				del	1
@@ -362,40 +373,40 @@ pen		HM_3D_pen
 			!	40.0m
 			!----------------------------------------------------------------------------------------------------
 			if	HM_JibLen = "40.0m"	then
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				gosub	"Jib_Truss_1st_7410"
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len*2
 					gosub	"Jib_Truss_str_5152"
 				del	1
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len*3
 					gosub	"Jib_Truss_str_5152"
 				del	1	
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len*4
 					gosub	"Jib_Truss_str_5152"
 				del	1							
 
-				mat_color = "HM_matRed"
+				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len*5
 					gosub	"Jib_Truss_str_5152"
 				del	1							
 
-				mat_color = "HM_matWhite"
+				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len*6
 					gosub	"Jib_Truss_end_6096"
 				del	1		
@@ -428,7 +439,7 @@ pen		HM_3D_pen
 
 			!	Connect
 			!----------------------------------------------------------------------------------------------------
-			material	"HM_matWhite"
+			material	_stMat_White
 				
 			_zPosCnt = 0.145
 			_cntLth = 0.400
@@ -493,6 +504,8 @@ pen		HM_3D_pen
 
 			!	Cylind - 1st
 			!----------------------------------------------------------------------------------------------------
+			material	_stMat_Red
+
 			_xPosCyd = _cntLth
 			_cydLth = 1.000
 			_cydRad = 0.216/2
@@ -565,7 +578,7 @@ pen		HM_3D_pen
 					add	-0.105,	-_msrWdt/2,	0.260
 						rotx	90
 							!	Back
-							material	"HM_matBlack"
+							material	_stMat_White
 							put	0.150,	0,		15,
 								0,		0,		900,
 								0.150,	-90,	4000+15,
@@ -582,7 +595,7 @@ pen		HM_3D_pen
 							prism_	nsp/3,	eps*2,	get(nsp)
 
 							!	Arrow
-							material	"HM_matRed"
+							material	_stMat_Red
 							put	-0.008,	-0.008,	15,
 								-0.008,	0.008,	15,
 								0.165,	0.008,	15,
@@ -594,8 +607,6 @@ pen		HM_3D_pen
 							rotz	-HM_JibAng
 								prism_	nsp/3,	eps*4,	get(nsp)
 							del 1
-
-							material	"HM_matWhite"
 						del 1
 					del 1
 				del 1
@@ -615,6 +626,12 @@ pen		HM_3D_pen
 			!	1,2,3
 			addx	_xPosCyd
 				for	iCyd = 1	to	3
+					if iCyd = 1 | iCyd = 3 then
+						material	_stMat_White
+					else
+						material	_stMat_Red
+					endif
+					
 					_aWingBtm = 22.5
 					_nWingBtm = 8
 					_aWingBtmM = (360/_nWingBtm)
@@ -631,6 +648,7 @@ pen		HM_3D_pen
 			del 1
 
 			!	4
+			material	_stMat_Red
 			addx	_xPosCyd + _cydLth*3
 				_cydLth = 1.850
 
@@ -646,6 +664,8 @@ pen		HM_3D_pen
 
 			!	Cylind - 3rd
 			!----------------------------------------------------------------------------------------------------
+			material	_stMat_White
+
 			_xPosCyd = _Cylind_1st_len + _Cylind_2nd_len
 			_cydLth = 1.000
 			_cydRad = 0.165/2
@@ -663,6 +683,8 @@ pen		HM_3D_pen
 
 				gosub	"cylind_"
 			del 1
+
+			material	_stMat_Red
 
 			addx	_xPosCyd + _cydLth
 				_cydLth = 0.720
@@ -1274,16 +1296,19 @@ end
 
 				!	Right Side
 				!----------------------------------------------------------------------------------------------------
+				_mTriValue = HM_JibDepth
 				gosub	"Jib_Truss_inner_str"
 
 				!	Left Side
 				!----------------------------------------------------------------------------------------------------
+				_mTriValue = HM_JibDepth
 				addy	HM_JibWidth
 					gosub	"Jib_Truss_inner_str"
 				del	1
 
 				!	Bottom Side
 				!----------------------------------------------------------------------------------------------------
+				_mTriValue = HM_JibWidth
 				addy	HM_JibWidth
 					rotx	90
 						gosub	"Jib_Truss_inner_str"
@@ -1292,6 +1317,7 @@ end
 
 				!	Top Side
 				!----------------------------------------------------------------------------------------------------
+				_mTriValue = HM_JibWidth
 				addz	HM_JibDepth
 					addy	HM_JibWidth
 						rotx	90
@@ -1382,6 +1408,7 @@ end
 
 				!	Right Side
 				!----------------------------------------------------------------------------------------------------
+				_mTriValue = HM_JibDepth
 				addx	- _mInner_offsetX
 				addz	_mInner_offsetX * tan(_mOutFrmAng_bot)
 					gosub	"Jib_Truss_inner_1st_side"
@@ -1390,6 +1417,7 @@ end
 
 				!	Left Side
 				!----------------------------------------------------------------------------------------------------
+				_mTriValue = HM_JibDepth
 				addx	- _mInner_offsetX
 				addz	_mInner_offsetX * tan(_mOutFrmAng_bot)
 					addy	HM_JibWidth
@@ -1400,6 +1428,7 @@ end
 
 				!	Bottom Side
 				!----------------------------------------------------------------------------------------------------
+				_mTriValue = HM_JibWidth
 				_mOutFrmAng = _mOutFrmAng_bot
 				addx	- _mInner_offsetX
 				addz	_mInner_offsetX * tan(_mOutFrmAng_bot)				
@@ -1416,6 +1445,7 @@ end
 				!	Top Side
 				!----------------------------------------------------------------------------------------------------
 				!	Origin : End Point 
+				_mTriValue = HM_JibWidth
 				_mOutFrmAng = _mOutFrmAng_top
 				addx	- _mInner_offsetX
 				addz	-_mInner_offsetX * tan(_mOutFrmAng_top)		
@@ -1492,7 +1522,7 @@ end
 
 	"Jib_Truss_triangle"	:
 		
-		_mTriAng = atn(_mTriH/(_mTriW_sub/2))
+		_mTriAng = atn(_mTriValue/(_mTriW_sub/2))
 		_mFrmL_left = _mTriW_sub/2 / cos(_mTriAng)
 		_mFrmL_right = _mFrmL_left
 
@@ -1698,7 +1728,7 @@ end
 !----------------------------------------------------------------------------------------------------	
 	"shape_anchor"	:
 
-		material "HM_matRed"
+		material _stMat_Red
 		
 		si = 1+2+4+8
 		mShapeW = 0.200
@@ -1756,7 +1786,7 @@ end
 
 	"shape_anchor_2"	:
 
-		material "HM_matRed"
+		material _stMat_Red
 		
 		si = 1+2+4+8
 		mShapeW = 0.200
@@ -1814,7 +1844,7 @@ end
 
 	"shape_anchor_3"	:
 
-		material "HM_matRed"
+		material _stMat_Red
 		
 		si = 1+2+4+8
 		mShapeW = 0.200
@@ -2027,7 +2057,7 @@ return
 "anchorWheel_":
 
 	rotx	90
-		material	"HM_matWhite"
+		material	_stMat_Red
 		addz	-(_innerSWdt/2 + _innerLWdt + _outerWdt)
 			cylind	_outerWdt,	_outerRad
 		del 1
@@ -2036,12 +2066,12 @@ return
 			cylind	_innerLWdt,	_innerLRad
 		del 1
 
-		material	"HM_matBlack"
+		material	_stMat_Black
 		addz	-_innerSWdt/2
 			cylind	_innerSWdt,	_innerSRad
 		del 1
 
-		material	"HM_matWhite"
+		material	_stMat_Red
 		addz	_innerSWdt/2
 			cylind	_innerLWdt,	_innerLRad
 		del 1
@@ -2055,7 +2085,7 @@ return
 
 "JibAngle":
 
-	if	HM_3D_text_show	then
+	if	HM_3D_text_show_jibangle	then
 		_stJibAng = str(HM_JibAng,	4,	2) + "°"
 
 		material	HM_3D_textMat
@@ -2070,7 +2100,7 @@ return
 		! del 1
 
 		if	HM_Jib_type = JIB_CYLIND	then	_zPosText = HM_JibDepth*0.50
-		if	HM_Jib_type = JIB_TRUSS		then	_zPosText = HM_JibDepth*0.80
+		if	HM_Jib_type = JIB_TRUSS		then	_zPosText = HM_JibDepth*0.90
 
 		roty	-HM_JibAng
 			addx	HM_JibLength/2

@@ -66,7 +66,7 @@ endif
 !-----------------------------------------------------------------------------------------------
 if	HM_MastType = MAST_RECT_TYPE1	then
 	!	Value
-	_plateThk = 0.048
+	_plateThk = HM_PlateThk
 	_columnHgt = HM_MastHeight - _plateThk*2
 
 	group	"MastRectType1_Base"
@@ -84,23 +84,25 @@ if	HM_MastType = MAST_RECT_TYPE1	then
 		!	Base Column
 		addz	_plateThk
 			for	i = 1	to	4
-				put	HM_MastWidth/2,			HM_MastWidth/2,			15,
-					HM_MastWidth/2,			HM_MastWidth/2 - 0.200,	15,
-					HM_MastWidth/2 - 0.025,	HM_MastWidth/2 - 0.200,	15,
-					HM_MastWidth/2 - 0.025,	HM_MastWidth/2 - 0.025,	15,
-					HM_MastWidth/2 - 0.200,	HM_MastWidth/2 - 0.025,	15,
-					HM_MastWidth/2 - 0.200,	HM_MastWidth/2,			15
+				put	HM_MastWidth/2,				HM_MastWidth/2,				15,
+					HM_MastWidth/2,				HM_MastWidth/2 - HM_ColWdt,	15,
+					HM_MastWidth/2 - HM_ColThk,	HM_MastWidth/2 - HM_ColWdt,	15,
+					HM_MastWidth/2 - HM_ColThk,	HM_MastWidth/2 - HM_ColThk,	15,
+					HM_MastWidth/2 - HM_ColWdt,	HM_MastWidth/2 - HM_ColThk,	15,
+					HM_MastWidth/2 - HM_ColWdt,	HM_MastWidth/2,				15
 
 				prism_	nsp/3,	_columnHgt,	get(nsp)
 
-				put	HM_MastWidth/2 - 0.175,			HM_MastWidth/2 - 0.175,			15,
-					HM_MastWidth/2 - 0.175,			HM_MastWidth/2 - 0.025,			15,
-					HM_MastWidth/2 - 0.175 + 0.019,	HM_MastWidth/2 - 0.025,			15,
-					HM_MastWidth/2 - 0.175 + 0.019,	HM_MastWidth/2 - 0.175 + 0.019,	15,
-					HM_MastWidth/2 - 0.025,			HM_MastWidth/2 - 0.175 + 0.019,	15,
-					HM_MastWidth/2 - 0.025,			HM_MastWidth/2 - 0.175,			15
+				if	bInnerColumn	then
+					put	HM_MastWidth/2 - HM_ColWdt*0.875,					HM_MastWidth/2 - HM_ColWdt*0.875,					15,
+						HM_MastWidth/2 - HM_ColWdt*0.875,					HM_MastWidth/2 - HM_ColThk,							15,
+						HM_MastWidth/2 - HM_ColWdt*0.875 + HM_ColThk*0.75,	HM_MastWidth/2 - HM_ColThk,							15,
+						HM_MastWidth/2 - HM_ColWdt*0.875 + HM_ColThk*0.75,	HM_MastWidth/2 - HM_ColWdt*0.875 + HM_ColThk*0.75,	15,
+						HM_MastWidth/2 - HM_ColThk,							HM_MastWidth/2 - HM_ColWdt*0.875 + HM_ColThk*0.75,	15,
+						HM_MastWidth/2 - HM_ColThk,							HM_MastWidth/2 - HM_ColWdt*0.875,					15
 
-				prism_	nsp/3,	_columnHgt,	get(nsp)
+					prism_	nsp/3,	_columnHgt,	get(nsp)
+				endif
 
 				rotz	90
 			next	i
@@ -114,11 +116,11 @@ if	HM_MastType = MAST_RECT_TYPE1	then
 				addx	HM_MastWidth/2
 					roty	-90
 
-						put	0,		-(HM_MastWidth/2 - 0.200),			15,
-							0.500,	-(HM_MastWidth/2 - 0.200),			15,
-							0.500,	-(HM_MastWidth/2 - 0.200) + 0.020,	15,
-							0.090,	-(HM_MastWidth/2 - 0.500),			15,
-							0,		-(HM_MastWidth/2 - 0.500),			15
+						put	0,				-(HM_MastWidth/2 - HM_ColWdt),			15,
+							HM_PlateWdt,	-(HM_MastWidth/2 - HM_ColWdt),			15,
+							HM_PlateWdt,	-(HM_MastWidth/2 - HM_ColWdt) + 0.020,	15,
+							0.090,			-(HM_MastWidth/2 - HM_PlateWdt),		15,
+							0,				-(HM_MastWidth/2 - HM_PlateWdt),		15
 
 						prism_	nsp/3,	0.025,	use(nsp)
 
@@ -141,10 +143,10 @@ if	HM_MastType = MAST_RECT_TYPE1	then
 				addx	HM_MastWidth/2
 					roty	90
 
-						put	0,		-(HM_MastWidth/2 - 0.200),			15,
-							0,		-(HM_MastWidth/2 - 0.500),			15,
-							0.500,	-(HM_MastWidth/2 - 0.200) + 0.020,	15,
-							0.500,	-(HM_MastWidth/2 - 0.200),			15
+						put	0,				-(HM_MastWidth/2 - HM_ColWdt),			15,
+							0,				-(HM_MastWidth/2 - HM_PlateWdt),		15,
+							HM_PlateWdt,	-(HM_MastWidth/2 - HM_ColWdt) + 0.020,	15,
+							HM_PlateWdt,	-(HM_MastWidth/2 - HM_ColWdt),			15
 
 						prism_	nsp/3,	-0.025,	use(nsp)
 
@@ -176,104 +178,154 @@ if	HM_MastType = MAST_RECT_TYPE1	then
 	endgroup
 
 	group	"MastRectType1_Side"
-		addz	_plateThk
-			!	1st
-			for	i = 1	to	4
-				addx	HM_MastWidth/2
-					roty	-90
-						!	Side Plate(Bottom)
-						put	-0.010,	-(HM_MastWidth/2 - 0.500),	15,
-							-0.010,	(HM_MastWidth/2 - 0.500),	15,
-							0.090,	(HM_MastWidth/2 - 0.500),	15,
-							0.090,	-(HM_MastWidth/2 - 0.500),	15
-
-						prism_	nsp/3,	0.025,	get(nsp)
-
-						!	대각선 Plate
-						_zPosSidePlate = 1.070
-						_tempValue = (_zPosSidePlate - 0.070)/(HM_MastWidth/2 - 0.200)
-						_aObl = atn(_tempValue)
-						_oblWdt = 0.130
-						_yReferLth = (_zPosSidePlate - _oblWdt/cos(_aObl))
-						_xReferLth = (HM_MastWidth/2 - 0.200)
-
-						put	0,						-(HM_MastWidth/2 - 0.200),							15,
-							_xReferLth*tan(_aObl),	0,													15,
-							0,						(HM_MastWidth/2 - 0.200),							15,
-							_oblWdt/cos(_aObl),		(HM_MastWidth/2 - 0.200),							15,
-							_zPosSidePlate,			(HM_MastWidth/2 - 0.200) - _yReferLth/tan(_aObl),	15,
-							_zPosSidePlate,			-(HM_MastWidth/2 - 0.200) + _yReferLth/tan(_aObl),	15,
-							_oblWdt/cos(_aObl),		-(HM_MastWidth/2 - 0.200),							15
-
-						prism_	nsp/3,	0.025,	get(nsp)
-
-						!	Side Plate(Top)
-						addx	_zPosSidePlate
-							put	0,		-(HM_MastWidth/2 - 0.200),	15,
-								0,		(HM_MastWidth/2 - 0.200),	15,
-								0.130,	(HM_MastWidth/2 - 0.200),	15,
-								0.130,	-(HM_MastWidth/2 - 0.200),	15
+		if	not(GLOB_FEEDBACK_MODE)	then
+			addz	_plateThk
+				!	1st
+				for	i = 1	to	4
+					addx	HM_MastWidth/2
+						roty	-90
+							!	Side Plate(Bottom)
+							put	-0.010,	-(HM_MastWidth/2 - HM_PlateWdt),	15,
+								-0.010,	(HM_MastWidth/2 - HM_PlateWdt),		15,
+								0.090,	(HM_MastWidth/2 - HM_PlateWdt),		15,
+								0.090,	-(HM_MastWidth/2 - HM_PlateWdt),	15
 
 							prism_	nsp/3,	0.025,	get(nsp)
-						del 1
-					del 1
-				del 1
 
-				rotz	90
-			next	i
+							!	대각선 Plate
+							_zPosSidePlate = 1.070
+							_tempValue = (_zPosSidePlate - 0.070)/(HM_MastWidth/2 - HM_ColWdt)
+							_aObl = atn(_tempValue)
+							_oblWdt = 0.130
+							_yReferLth = (_zPosSidePlate - _oblWdt/cos(_aObl))
+							_xReferLth = (HM_MastWidth/2 - HM_ColWdt)
 
-			del 4
+							put	0,						-(HM_MastWidth/2 - HM_ColWdt),							15,
+								_xReferLth*tan(_aObl),	0,														15,
+								0,						(HM_MastWidth/2 - HM_ColWdt),							15,
+								_oblWdt/cos(_aObl),		(HM_MastWidth/2 - HM_ColWdt),							15,
+								_zPosSidePlate,			(HM_MastWidth/2 - HM_ColWdt) - _yReferLth/tan(_aObl),	15,
+								_zPosSidePlate,			-(HM_MastWidth/2 - HM_ColWdt) + _yReferLth/tan(_aObl),	15,
+								_oblWdt/cos(_aObl),		-(HM_MastWidth/2 - HM_ColWdt),							15
 
-			!	2nd~
-			_modHgt = 1.500
-			_nSidePlate = int((_columnHgt - _zPosSidePlate - _oblWdt)/_modHgt)
+							prism_	nsp/3,	0.025,	get(nsp)
 
-			addz	_zPosSidePlate + _oblWdt
-				for	n = 1	to	_nSidePlate
-
-					for	i = 1	to	4
-						addx	HM_MastWidth/2
-							roty	-90
-								!	대각선 Plate
-								_zPosSidePlate = 1.370
-								_tempValue = (_zPosSidePlate - 0.070)/(HM_MastWidth/2 - 0.200)
-								_aObl = atn(_tempValue)
-								_oblWdt = 0.130
-								_yReferLth = (_zPosSidePlate - _oblWdt/cos(_aObl))
-								_xReferLth = (HM_MastWidth/2 - 0.200)
-
-								put	0,						-(HM_MastWidth/2 - 0.200),							15,
-									_xReferLth*tan(_aObl),	0,													15,
-									0,						(HM_MastWidth/2 - 0.200),							15,
-									_oblWdt/cos(_aObl),		(HM_MastWidth/2 - 0.200),							15,
-									_zPosSidePlate,			(HM_MastWidth/2 - 0.200) - _yReferLth/tan(_aObl),	15,
-									_zPosSidePlate,			-(HM_MastWidth/2 - 0.200) + _yReferLth/tan(_aObl),	15,
-									_oblWdt/cos(_aObl),		-(HM_MastWidth/2 - 0.200),							15
+							!	Side Plate(Top)
+							addx	_zPosSidePlate
+								put	0,		-(HM_MastWidth/2 - HM_ColWdt),	15,
+									0,		(HM_MastWidth/2 - HM_ColWdt),	15,
+									0.130,	(HM_MastWidth/2 - HM_ColWdt),	15,
+									0.130,	-(HM_MastWidth/2 - HM_ColWdt),	15
 
 								prism_	nsp/3,	0.025,	get(nsp)
-
-								!	Side Plate(Top)
-								addx	_zPosSidePlate
-									put	0,		-(HM_MastWidth/2 - 0.200),	15,
-										0,		(HM_MastWidth/2 - 0.200),	15,
-										0.130,	(HM_MastWidth/2 - 0.200),	15,
-										0.130,	-(HM_MastWidth/2 - 0.200),	15
-
-									prism_	nsp/3,	0.025,	get(nsp)
-								del 1
 							del 1
 						del 1
+					del 1
 
-						rotz	90
-					next	i
+					rotz	90
+				next	i
 
-					del 4
+				del 4
+
+				!	2nd~
+				_modHgt = 1.500
+				_nSidePlate = int((_columnHgt - _zPosSidePlate - _oblWdt)/_modHgt)
+				_rSidePlate = fra((_columnHgt - _zPosSidePlate - _oblWdt)/_modHgt)
+
+				if	_nSidePlate > eps	then
+					addz	_zPosSidePlate + _oblWdt
+						for	n = 1	to	_nSidePlate
+							for	i = 1	to	4
+								addx	HM_MastWidth/2
+									roty	-90
+										!	대각선 Plate
+										_zPosSidePlate = 1.370
+										_tempValue = (_zPosSidePlate - 0.070)/(HM_MastWidth/2 - HM_ColWdt)
+										_aObl = atn(_tempValue)
+										_oblWdt = 0.130
+										_yReferLth = (_zPosSidePlate - _oblWdt/cos(_aObl))
+										_xReferLth = (HM_MastWidth/2 - HM_ColWdt)
+
+										put	0,						-(HM_MastWidth/2 - HM_ColWdt),							15,
+											_xReferLth*tan(_aObl),	0,														15,
+											0,						(HM_MastWidth/2 - HM_ColWdt),							15,
+											_oblWdt/cos(_aObl),		(HM_MastWidth/2 - HM_ColWdt),							15,
+											_zPosSidePlate,			(HM_MastWidth/2 - HM_ColWdt) - _yReferLth/tan(_aObl),	15,
+											_zPosSidePlate,			-(HM_MastWidth/2 - HM_ColWdt) + _yReferLth/tan(_aObl),	15,
+											_oblWdt/cos(_aObl),		-(HM_MastWidth/2 - HM_ColWdt),							15
+
+										prism_	nsp/3,	0.025,	get(nsp)
+
+										!	Side Plate(Top)
+										addx	_zPosSidePlate
+											put	0,		-(HM_MastWidth/2 - HM_ColWdt),	15,
+												0,		(HM_MastWidth/2 - HM_ColWdt),	15,
+												0.130,	(HM_MastWidth/2 - HM_ColWdt),	15,
+												0.130,	-(HM_MastWidth/2 - HM_ColWdt),	15
+
+											prism_	nsp/3,	0.025,	get(nsp)
+										del 1
+									del 1
+								del 1
+
+								rotz	90
+							next	i
+
+							del 4
+
+							addz	_modHgt
+						next	n
+
+						del _nSidePlate
+					del 1
+				endif
+
+				!	Remain
+				if	_rSidePlate > HM_PlateWdt	then
+					addz	1.200 + 1.500*(_nSidePlate)
+						for	i = 1	to	4
+							addx	HM_MastWidth/2
+								roty	-90
+									!	대각선 Plate
+									_zPosSidePlate = _rSidePlate - 0.130
+									_tempValue = (_zPosSidePlate - 0.070)/(HM_MastWidth/2 - HM_ColWdt)
+									_aObl = atn(_tempValue)
+									_oblWdt = 0.130
+									_yReferLth = (_zPosSidePlate - _oblWdt/cos(_aObl))
+									_xReferLth = (HM_MastWidth/2 - HM_ColWdt)
+
+									put	0,						-(HM_MastWidth/2 - HM_ColWdt),							15,
+										_xReferLth*tan(_aObl),	0,														15,
+										0,						(HM_MastWidth/2 - HM_ColWdt),							15,
+										_oblWdt/cos(_aObl),		(HM_MastWidth/2 - HM_ColWdt),							15,
+										_zPosSidePlate,			(HM_MastWidth/2 - HM_ColWdt) - _yReferLth/tan(_aObl),	15,
+										_zPosSidePlate,			-(HM_MastWidth/2 - HM_ColWdt) + _yReferLth/tan(_aObl),	15,
+										_oblWdt/cos(_aObl),		-(HM_MastWidth/2 - HM_ColWdt),							15
+
+									prism_	nsp/3,	0.025,	get(nsp)
+
+									!	Side Plate(Top)
+									addx	_zPosSidePlate
+										put	0,		-(HM_MastWidth/2 - HM_ColWdt),	15,
+											0,		(HM_MastWidth/2 - HM_ColWdt),	15,
+											0.130,	(HM_MastWidth/2 - HM_ColWdt),	15,
+											0.130,	-(HM_MastWidth/2 - HM_ColWdt),	15
+
+										prism_	nsp/3,	0.025,	get(nsp)
+									del 1
+								del 1
+							del 1
+
+							rotz	90
+						next	i
+
+						del 4
 
 
-					addz	_modHgt
-				next	n
+					del 1
+				endif
 			del 1
-		del 1
+		endif
 	endgroup
 
 	!	배치
@@ -308,40 +360,40 @@ if	HM_MastType = MAST_RECT_TYPE2	then
 	endgroup
 
 	group	"MastRectType2_Side"
-		!	Beam
-			!	Start Point
-			_zPosBeam = 0.250
-			gosub	"drawHBeam_Type2"
+		if	not(GLOB_FEEDBACK_MODE)	then
+			!	Beam
+				!	Start Point
+				_zPosBeam = 0.250
+				gosub	"drawHBeam_Type2"
 
-			!	End Point
-			_zPosBeam = HM_MastHeight - (0.250 + 0.200)
-			gosub	"drawHBeam_Type2"
+				!	End Point
+				_zPosBeam = HM_MastHeight - (0.250 + 0.200)
+				gosub	"drawHBeam_Type2"
 
-			!	Middle
-			_midLth = HM_MastHeight - (0.250 + 0.200)*2
+				!	Middle
+				_midLth = HM_MastHeight - (0.250 + 0.200)*2
 
-			_zPosBeam = (0.250 + 0.200) + _midLth*0.4 - 0.100
-			gosub	"drawHBeam_Type2"
+				_zPosBeam = (0.250 + 0.200) + _midLth*0.4 - 0.100
+				gosub	"drawHBeam_Type2"
 
-		!	Oblique Beam
-		_oblBeamRad = 0.083
-			!	1st
-			_tempValue = (HM_MastWidth/2)/(_midLth*0.4 - 0.100)
-			_aObl = atn(_tempValue)
-			_zPosOblBeam = (0.250 + 0.200)
-			_oblBeamHgt = (_midLth*0.4 - 0.100)
+			!	Oblique Beam
+			_oblBeamRad = 0.083
+				!	1st
+				_tempValue = (HM_MastWidth/2)/(_midLth*0.4 - 0.100)
+				_aObl = atn(_tempValue)
+				_zPosOblBeam = (0.250 + 0.200)
+				_oblBeamHgt = (_midLth*0.4 - 0.100)
 
-			gosub	"drawOblBeam_Type2"
+				gosub	"drawOblBeam_Type2"
 
-			!	2nd
-			_tempValue = (HM_MastWidth/2)/(_midLth*0.6 - 0.100)
-			_aObl = atn(_tempValue)
-			_zPosOblBeam = (0.250 + 0.200) + _midLth*0.4 + 0.100
-			_oblBeamHgt = (_midLth*0.6 - 0.100)
+				!	2nd
+				_tempValue = (HM_MastWidth/2)/(_midLth*0.6 - 0.100)
+				_aObl = atn(_tempValue)
+				_zPosOblBeam = (0.250 + 0.200) + _midLth*0.4 + 0.100
+				_oblBeamHgt = (_midLth*0.6 - 0.100)
 
-			gosub	"drawOblBeam_Type2"
-
-
+				gosub	"drawOblBeam_Type2"
+		endif
 	endgroup
 
 	!	배치
@@ -363,11 +415,11 @@ end
 !-----------------------------------------------------------------------------------------------
 "coordinate_BasePlate_Type1":
 
-	put	HM_MastWidth/2,			HM_MastWidth/2,			15,
-		HM_MastWidth/2,			HM_MastWidth/2 - 0.500,	15,
-		HM_MastWidth/2 - 0.120,	HM_MastWidth/2 - 0.500,	15,
-		HM_MastWidth/2 - 0.500,	HM_MastWidth/2 - 0.120,	15,
-		HM_MastWidth/2 - 0.500,	HM_MastWidth/2,			15
+	put	HM_MastWidth/2,						HM_MastWidth/2,						15,
+		HM_MastWidth/2,						HM_MastWidth/2 - HM_PlateWdt,		15,
+		HM_MastWidth/2 - HM_PlateWdt*0.24,	HM_MastWidth/2 - HM_PlateWdt,		15,
+		HM_MastWidth/2 - HM_PlateWdt,		HM_MastWidth/2 - HM_PlateWdt*0.24,	15,
+		HM_MastWidth/2 - HM_PlateWdt,		HM_MastWidth/2,						15
 
 return
 
