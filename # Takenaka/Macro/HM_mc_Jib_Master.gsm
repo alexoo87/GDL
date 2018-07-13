@@ -48,7 +48,18 @@ dim	_CraneName_arr[]
 	_CraneName_arr[3] = "U-09H"
 	_CraneName_arr[4] = "OJ-30HR"
 	_CraneName_arr[5] = "KCP-1040"
+
 	_CraneName_arr[6] = "OTA-150H"
+	_CraneName_arr[7] = "OTA-60HN"
+	_CraneName_arr[8] = "OTA-150HN"
+	_CraneName_arr[9] = "OTA-300H"
+	_CraneName_arr[10] = "OTA-600H"
+
+	_CraneName_arr[11] = "OTS-50NL"
+	_CraneName_arr[12] = "MAX-1020"
+	_CraneName_arr[13] = "OTS-70"
+	_CraneName_arr[14] = "OTS-80"
+
 
 
 !	'_CraneName_arr' Index
@@ -59,8 +70,18 @@ OJ_30HR = 4
 KCP_1040 = 5
 
 OTA_150H = 6
+OTA_60HN = 7
+OTA_150HN = 8
+OTA_300H = 9
+OTA_600H = 10
 
-if	HM_CraneName = _CraneName_arr[OTA_150S]	then
+OTS_50NL = 11
+MAX_1020 = 12
+OTS_70 = 13
+OTS_80 = 14
+
+
+if	HM_CraneName = _CraneName_arr[OTA_150S] | HM_CraneName = _CraneName_arr[OTS_70]	then
 	HM_JibWidth = 1.200
 	HM_JibDepth = 1.200
 endif
@@ -83,4 +104,34 @@ endif
 if	HM_CraneName = _CraneName_arr[OTA_150H]	then
 	HM_JibWidth = 1.500
 	HM_JibDepth = 1.200
+endif
+
+if	HM_CraneName = _CraneName_arr[OTA_60HN]	then
+	HM_JibWidth = 0.750
+	HM_JibDepth = 0.750
+endif
+
+if	HM_CraneName = _CraneName_arr[OTA_150HN]	then
+	HM_JibWidth = 1.300
+	HM_JibDepth = 1.300
+endif
+
+if	HM_CraneName = _CraneName_arr[OTA_300H] | HM_CraneName = _CraneName_arr[OTA_600H]	then
+	HM_JibWidth = 1.500
+	HM_JibDepth = 1.500
+endif
+
+if	HM_CraneName = _CraneName_arr[OTS_50NL]	then
+	HM_JibWidth = 0.850
+	HM_JibDepth = 0.850
+endif
+
+if	HM_CraneName = _CraneName_arr[MAX_1020]	then
+	HM_JibWidth = 0.900
+	HM_JibDepth = 0.700
+endif
+
+if	HM_CraneName = _CraneName_arr[OTS_80]	then
+	HM_JibWidth = 1.100
+	HM_JibDepth = 1.100
 endif

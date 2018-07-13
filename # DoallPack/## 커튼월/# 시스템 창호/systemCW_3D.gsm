@@ -1731,51 +1731,75 @@ if	GLOB_VIEW_TYPE # 4	then
 		addx	_offsetL
 
 			if	iProjectHinge[i][j] = Hinge_Top | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_TopRight	then
-				lin_	0,					-gasketThick,	0,
-						WindowsWidth[i]/2,	-gasketThick,	WindowsHeight[j]
-				lin_	WindowsWidth[i]/2,	-gasketThick,	WindowsHeight[j],
-						WindowsWidth[i],	-gasketThick,	0
+				_x1 = 0					:	_y1 = -gasketThick	:	_z1 = 0
+				_x2 = WindowsWidth[i]/2	:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 
-				lin_	0,					-gasketThick + glassThick,	0,
-						WindowsWidth[i]/2,	-gasketThick + glassThick,	WindowsHeight[j]
-				lin_	WindowsWidth[i]/2,	-gasketThick + glassThick,	WindowsHeight[j],
-						WindowsWidth[i],	-gasketThick + glassThick,	0
+				_x1 = WindowsWidth[i]/2	:	_y1 = -gasketThick	:	_z1 = WindowsHeight[j]
+				_x2 = WindowsWidth[i]	:	_y2 = -gasketThick	:	_z2 = 0
+				gosub	"drawLine"
+
+				_x1 = 0					:	_y1 = -gasketThick + glassThick	:	_z1 = 0
+				_x2 = WindowsWidth[i]/2	:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
+
+				_x1 = WindowsWidth[i]/2	:	_y1 = -gasketThick + glassThick	:	_z1 = WindowsHeight[j]
+				_x2 = WindowsWidth[i]	:	_y2 = -gasketThick + glassThick	:	_z2 = 0
+				gosub	"drawLine"
 			endif
 
 			if	iProjectHinge[i][j] = Hinge_Bottom | iProjectHinge[i][j] = Hinge_BottomLeft | iProjectHinge[i][j] = Hinge_BottomRight	then
-				lin_	0,					-gasketThick,	WindowsHeight[j],
-						WindowsWidth[i]/2,	-gasketThick,	0
-				lin_	WindowsWidth[i]/2,	-gasketThick,	0,
-						WindowsWidth[i],	-gasketThick,	WindowsHeight[j]
+				_x1 = 0					:	_y1 = -gasketThick	:	_z1 = WindowsHeight[j]
+				_x2 = WindowsWidth[i]/2	:	_y2 = -gasketThick	:	_z2 = 0
+				gosub	"drawLine"
 
-				lin_	0,					-gasketThick + glassThick,	WindowsHeight[j],
-						WindowsWidth[i]/2,	-gasketThick + glassThick,	0
-				lin_	WindowsWidth[i]/2,	-gasketThick + glassThick,	0,
-						WindowsWidth[i],	-gasketThick + glassThick,	WindowsHeight[j]
+				_x1 = WindowsWidth[i]/2	:	_y1 = -gasketThick	:	_z1 = 0
+				_x2 = WindowsWidth[i]	:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
+
+				_x1 = 0					:	_y1 = -gasketThick + glassThick	:	_z1 = WindowsHeight[j]
+				_x2 = WindowsWidth[i]/2	:	_y2 = -gasketThick + glassThick	:	_z2 = 0
+				gosub	"drawLine"
+
+				_x1 = WindowsWidth[i]/2	:	_y1 = -gasketThick + glassThick	:	_z1 = 0
+				_x2 = WindowsWidth[i]	:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 			endif
 	
 			if	iProjectHinge[i][j] = Hinge_Left | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_BottomLeft	then
-				lin_	0,					-gasketThick,	0,
-						WindowsWidth[i],	-gasketThick,	WindowsHeight[j]/2
-				lin_	WindowsWidth[i],	-gasketThick,	WindowsHeight[j]/2,
-						0,					-gasketThick,	WindowsHeight[j]
+				_x1 = 0					:	_y1 = -gasketThick	:	_z1 = 0
+				_x2 = WindowsWidth[i]	:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]/2
+				gosub	"drawLine"
 
-				lin_	0,					-gasketThick + glassThick,	0,
-						WindowsWidth[i],	-gasketThick + glassThick,	WindowsHeight[j]/2
-				lin_	WindowsWidth[i],	-gasketThick + glassThick,	WindowsHeight[j]/2,
-						0,					-gasketThick + glassThick,	WindowsHeight[j]
+				_x1 = WindowsWidth[i]	:	_y1 = -gasketThick	:	_z1 = WindowsHeight[j]/2
+				_x2 = 0					:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
+
+				_x1 = 0					:	_y1 = -gasketThick + glassThick	:	_z1 = 0
+				_x2 = WindowsWidth[i]	:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]/2
+				gosub	"drawLine"
+
+				_x1 = WindowsWidth[i]	:	_y1 = -gasketThick + glassThick	:	_z1 = WindowsHeight[j]/2
+				_x2 = 0					:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 			endif
 	
 			if	iProjectHinge[i][j] = Hinge_Right | iProjectHinge[i][j] = Hinge_TopRight | iProjectHinge[i][j] = Hinge_BottomRight	then
-				lin_	WindowsWidth[i],	-gasketThick,	0,
-						0,					-gasketThick,	WindowsHeight[j]/2
-				lin_	0,					-gasketThick,	WindowsHeight[j]/2,
-						WindowsWidth[i],	-gasketThick,	WindowsHeight[j]
+				_x1 = WindowsWidth[i]	:	_y1 = -gasketThick	:	_z1 = 0
+				_x2 = 0					:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]/2
+				gosub	"drawLine"
 
-				lin_	WindowsWidth[i],	-gasketThick + glassThick,	0,
-						0,					-gasketThick + glassThick,	WindowsHeight[j]/2
-				lin_	0,					-gasketThick + glassThick,	WindowsHeight[j]/2,
-						WindowsWidth[i],	-gasketThick + glassThick,	WindowsHeight[j]
+				_x1 = 0					:	_y1 = -gasketThick	:	_z1 = WindowsHeight[j]/2
+				_x2 = WindowsWidth[i]	:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
+
+				_x1 = WindowsWidth[i]	:	_y1 = -gasketThick + glassThick	:	_z1 = 0
+				_x2 = 0					:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]/2
+				gosub	"drawLine"
+
+				_x1 = 0					:	_y1 = -gasketThick + glassThick	:	_z1 = WindowsHeight[j]/2
+				_x2 = WindowsWidth[i]	:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 			endif
 
 		del 1
@@ -1783,9 +1807,7 @@ endif
 
 !	textSmoke
 if	iMatrix_Windows[i][j] = Windows_Smoke	then
-
 	addx	_offsetL
-
 		add	WindowsWidth[i]/2,	0,	WindowsHeight[j]/2
 			if	TextScale > GLOB_SCALE	then
 				if	bSmokeText & (GLOB_VIEW_TYPE = 4 | GLOB_VIEW_TYPE = 5)	then
@@ -1850,99 +1872,91 @@ addx	_offsetL
 	pen OpenlinePen
 
 	if	iProjectHinge[i][j] = Hinge_Top | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_TopRight	then
-		lin_	0,										-gasketThick,	0,
-				(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	WindowsHeight[j]
-		lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	WindowsHeight[j],
-				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	0
+		for	t = 1	to	2
+			addx	(WindowsWidth[i]/2 + gasketWidth/2)*(t - 1)
+				_x1 = 0										:	_y1 = -gasketThick	:	_z1 = 0
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)/2	:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 
-		lin_	0,										-gasketThick + glassThick,	0,
-				(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	WindowsHeight[j]
-		lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	WindowsHeight[j],
-				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	0
+				_x1 = (WindowsWidth[i]/2 - gasketWidth/2)/2	:	_y1 = -gasketThick	:	_z1 = WindowsHeight[j]
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y2 = -gasketThick	:	_z2 = 0
+				gosub	"drawLine"
 
-		addx	WindowsWidth[i]/2 + gasketWidth/2
-			lin_	0,										-gasketThick,	0,
-					(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	WindowsHeight[j]
-			lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	WindowsHeight[j],
-					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	0
+				_x1 = 0										:	_y1 = -gasketThick + glassThick	:	_z1 = 0
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)/2	:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 
-			lin_	0,										-gasketThick + glassThick,	0,
-					(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	WindowsHeight[j]
-			lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	WindowsHeight[j],
-					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	0
-		del 1
+				_x1 = (WindowsWidth[i]/2 - gasketWidth/2)/2	:	_y1 = -gasketThick + glassThick	:	_z1 = WindowsHeight[j]
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y2 = -gasketThick + glassThick	:	_z2 = 0
+				gosub	"drawLine"
+			del 1
+		next	t
 	endif
 
 	if	iProjectHinge[i][j] = Hinge_Bottom | iProjectHinge[i][j] = Hinge_BottomLeft | iProjectHinge[i][j] = Hinge_BottomRight	then
-		lin_	0,										-gasketThick,	WindowsHeight[j],
-				(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	0
-		lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	0,
-				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]
+		for	t = 1	to	2
+			addx	(WindowsWidth[i]/2 + gasketWidth/2)*(t - 1)
+				_x1 = 0										:	_y1 = -gasketThick	:	_z1 = WindowsHeight[j]
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)/2	:	_y2 = -gasketThick	:	_z2 = 0
+				gosub	"drawLine"
 
-		lin_	0,										-gasketThick + glassThick,	WindowsHeight[j],
-				(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	0
-		lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	0,
-				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]
+				_x1 = (WindowsWidth[i]/2 - gasketWidth/2)/2	:	_y1 = -gasketThick	:	_z1 = 0
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 
-		addx	WindowsWidth[i]/2 + gasketWidth/2
-			lin_	0,										-gasketThick,	WindowsHeight[j],
-					(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	0
-			lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick,	0,
-					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]
+				_x1 = 0										:	_y1 = -gasketThick + glassThick	:	_z1 = WindowsHeight[j]
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)/2	:	_y2 = -gasketThick + glassThick	:	_z2 = 0
+				gosub	"drawLine"
 
-			lin_	0,										-gasketThick + glassThick,	WindowsHeight[j],
-					(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	0
-			lin_	(WindowsWidth[i]/2 - gasketWidth/2)/2,	-gasketThick + glassThick,	0,
-					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]
-		del 1
+				_x1 = (WindowsWidth[i]/2 - gasketWidth/2)/2	:	_y1 = -gasketThick + glassThick	:	_z1 = 0
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
+			del 1
+		next	t
 	endif
 
 	if	iProjectHinge[i][j] = Hinge_Left | iProjectHinge[i][j] = Hinge_TopLeft | iProjectHinge[i][j] = Hinge_BottomLeft	then
-		lin_	0,										-gasketThick,	0,
-				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]/2
-		lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]/2,
-				0,										-gasketThick,	WindowsHeight[j]
+		for	t = 1	to	2
+			addx	(WindowsWidth[i]/2 + gasketWidth/2)*(t - 1)
+				_x1 = 0										:	_y1 = -gasketThick	:	_z1 = 0
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]/2
+				gosub	"drawLine"
 
-		lin_	0,										-gasketThick + glassThick,	0,
-				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]/2
-		lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]/2,
-				0,										-gasketThick + glassThick,	WindowsHeight[j]
+				_x1 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y1 = -gasketThick	:	_z1 = WindowsHeight[j]/2
+				_x2 = 0										:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 
-		addx	WindowsWidth[i]/2 + gasketWidth/2
-			lin_	0,										-gasketThick,	0,
-					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]/2
-			lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]/2,
-					0,										-gasketThick,	WindowsHeight[j]
+				_x1 = 0										:	_y1 = -gasketThick + glassThick	:	_z1 = 0
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]/2
+				gosub	"drawLine"
 
-			lin_	0,										-gasketThick + glassThick,	0,
-					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]/2
-			lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]/2,
-					0,										-gasketThick + glassThick,	WindowsHeight[j]
-		del 1
+				_x1 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y1 = -gasketThick + glassThick	:	_z1 = WindowsHeight[j]/2
+				_x2 = 0										:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
+			del 1
+		next	t
 	endif
 
 	if	iProjectHinge[i][j] = Hinge_Right | iProjectHinge[i][j] = Hinge_TopRight | iProjectHinge[i][j] = Hinge_BottomRight	then
-		lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	0,
-				0,										-gasketThick,	WindowsHeight[j]/2
-		lin_	0,										-gasketThick,	WindowsHeight[j]/2,
-				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]
+		for	t = 1	to	2
+			addx	(WindowsWidth[i]/2 + gasketWidth/2)*(t - 1)
+				_x1 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y1 = -gasketThick	:	_z1 = 0
+				_x2 = 0										:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]/2
+				gosub	"drawLine"
 
-		lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	0,
-				0,										-gasketThick + glassThick,	WindowsHeight[j]/2
-		lin_	0,										-gasketThick + glassThick,	WindowsHeight[j]/2,
-				(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]
+				_x1 = 0										:	_y1 = -gasketThick	:	_z1 = WindowsHeight[j]/2
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y2 = -gasketThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
 
-		addx	WindowsWidth[i]/2 + gasketWidth/2
-			lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	0,
-					0,										-gasketThick,	WindowsHeight[j]/2
-			lin_	0,										-gasketThick,	WindowsHeight[j]/2,
-					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick,	WindowsHeight[j]
+				_x1 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y1 = -gasketThick + glassThick	:	_z1 = 0
+				_x2 = 0										:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]/2
+				gosub	"drawLine"
 
-			lin_	(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	0,
-					0,										-gasketThick + glassThick,	WindowsHeight[j]/2
-			lin_	0,										-gasketThick + glassThick,	WindowsHeight[j]/2,
-					(WindowsWidth[i]/2 - gasketWidth/2),	-gasketThick + glassThick,	WindowsHeight[j]
-		del 1
+				_x1 = 0										:	_y1 = -gasketThick + glassThick	:	_z1 = WindowsHeight[j]/2
+				_x2 = (WindowsWidth[i]/2 - gasketWidth/2)	:	_y2 = -gasketThick + glassThick	:	_z2 = WindowsHeight[j]
+				gosub	"drawLine"
+			del 1
+		next	t
 	endif
 del 1
 
@@ -2489,30 +2503,45 @@ return
 			!	오픈라인
 			pen	OpenlinePen
 
-				if	GLOB_VIEW_TYPE # 4	then
-					!	손잡이 오른쪽
-					if	iMatrix_Door[i][4] = DoorHandle_Right	then
-						lin_	0,			0,	0,							_doorWdt,	0,	Matrix_DoorLength[i][6]/2
-						lin_	_doorWdt,	0,	Matrix_DoorLength[i][6]/2,	0,			0,	Matrix_DoorLength[i][6]
-			
-						addy	Matrix_DoorLength[i][7]
-							lin_	0,			0,	0,							_doorWdt,	0,	Matrix_DoorLength[i][6]/2
-							lin_	_doorWdt,	0,	Matrix_DoorLength[i][6]/2,	0,			0,	Matrix_DoorLength[i][6]
-						del 1
-					endif
-		
-					!	손잡이 왼쪽
-					if	iMatrix_Door[i][4] = DoorHandle_Left	then
-						lin_	_doorWdt,	0,	0,							0,			0,	Matrix_DoorLength[i][6]/2
-						lin_	0,			0,	Matrix_DoorLength[i][6]/2,	_doorWdt,	0,	Matrix_DoorLength[i][6]
-			
-						addy	Matrix_DoorLength[i][7]
-							lin_	_doorWdt,	0,	0,							0,			0,	Matrix_DoorLength[i][6]/2
-							lin_	0,			0,	Matrix_DoorLength[i][6]/2,	_doorWdt,	0,	Matrix_DoorLength[i][6]
-						del 1
-					endif
+			if	GLOB_VIEW_TYPE # 4	then
+				!	손잡이 오른쪽
+				if	iMatrix_Door[i][4] = DoorHandle_Right	then
+					_x1 = 0			:	_y1 = 0	:	_z1 = 0
+					_x2 = _doorWdt	:	_y2 = 0	:	_z2 = Matrix_DoorLength[i][6]/2
+					gosub	"drawLine"
+
+					_x1 = _doorWdt	:	_y1 = 0	:	_z1 = Matrix_DoorLength[i][6]/2
+					_x2 = 0			:	_y2 = 0	:	_z2 = Matrix_DoorLength[i][6]
+					gosub	"drawLine"
+
+					_x1 = 0			:	_y1 = Matrix_DoorLength[i][7]	:	_z1 = 0
+					_x2 = _doorWdt	:	_y2 = Matrix_DoorLength[i][7]	:	_z2 = Matrix_DoorLength[i][6]/2
+					gosub	"drawLine"
+
+					_x1 = _doorWdt	:	_y1 = Matrix_DoorLength[i][7]	:	_z1 = Matrix_DoorLength[i][6]/2
+					_x2 = 0			:	_y2 = Matrix_DoorLength[i][7]	:	_z2 = Matrix_DoorLength[i][6]
+					gosub	"drawLine"
 				endif
 
+				!	손잡이 왼쪽
+				if	iMatrix_Door[i][4] = DoorHandle_Left	then
+					_x1 = _doorWdt	:	_y1 = 0	:	_z1 = 0
+					_x2 = 0			:	_y2 = 0	:	_z2 = Matrix_DoorLength[i][6]/2
+					gosub	"drawLine"
+
+					_x1 = 0			:	_y1 = 0	:	_z1 = Matrix_DoorLength[i][6]/2
+					_x2 = _doorWdt	:	_y2 = 0	:	_z2 = Matrix_DoorLength[i][6]
+					gosub	"drawLine"
+
+					_x1 = _doorWdt	:	_y1 = Matrix_DoorLength[i][7]	:	_z1 = 0
+					_x2 = 0			:	_y2 = Matrix_DoorLength[i][7]	:	_z2 = Matrix_DoorLength[i][6]/2
+					gosub	"drawLine"
+
+					_x1 = 0			:	_y1 = Matrix_DoorLength[i][7]	:	_z1 = Matrix_DoorLength[i][6]/2
+					_x2 = _doorWdt	:	_y2 = Matrix_DoorLength[i][7]	:	_z2 = Matrix_DoorLength[i][6]
+					gosub	"drawLine"
+				endif
+			endif
 		endif
 
 		!	미닫이문
@@ -2711,30 +2740,45 @@ return
 		!	오픈라인
 		pen	OpenlinePen
 
-			if	GLOB_VIEW_TYPE # 4	then
-				!	손잡이 오른쪽
-				if	iMatrix_Door[i][4] = DoorHandle_Right	then
-					lin_	0,			0,	0,							_doorWdt,	0,	Matrix_DoorLength[i][6]/2
-					lin_	_doorWdt,	0,	Matrix_DoorLength[i][6]/2,	0,			0,	Matrix_DoorLength[i][6]
-		
-					addy	Matrix_DoorLength[i][7]
-						lin_	0,			0,	0,							_doorWdt,	0,	Matrix_DoorLength[i][6]/2
-						lin_	_doorWdt,	0,	Matrix_DoorLength[i][6]/2,	0,			0,	Matrix_DoorLength[i][6]
-					del 1
-				endif
-	
-				!	손잡이 왼쪽
-				if	iMatrix_Door[i][4] = DoorHandle_Left	then
-					lin_	_doorWdt,	0,	0,							0,			0,	Matrix_DoorLength[i][6]/2
-					lin_	0,			0,	Matrix_DoorLength[i][6]/2,	_doorWdt,	0,	Matrix_DoorLength[i][6]
-		
-					addy	Matrix_DoorLength[i][7]
-						lin_	_doorWdt,	0,	0,							0,			0,	Matrix_DoorLength[i][6]/2
-						lin_	0,			0,	Matrix_DoorLength[i][6]/2,	_doorWdt,	0,	Matrix_DoorLength[i][6]
-					del 1
-				endif
+		if	GLOB_VIEW_TYPE # 4	then
+			!	손잡이 오른쪽
+			if	iMatrix_Door[i][4] = DoorHandle_Right	then
+				_x1 = 0			:	_y1 = 0	:	_z1 = 0
+				_x2 = _doorWdt	:	_y2 = 0	:	_z2 = Matrix_DoorLength[i][6]/2
+				gosub	"drawLine"
+
+				_x1 = _doorWdt	:	_y1 = 0	:	_z1 = Matrix_DoorLength[i][6]/2
+				_x2 = 0			:	_y2 = 0	:	_z2 = Matrix_DoorLength[i][6]
+				gosub	"drawLine"
+
+				_x1 = 0			:	_y1 = Matrix_DoorLength[i][7]	:	_z1 = 0
+				_x2 = _doorWdt	:	_y2 = Matrix_DoorLength[i][7]	:	_z2 = Matrix_DoorLength[i][6]/2
+				gosub	"drawLine"
+
+				_x1 = _doorWdt	:	_y1 = Matrix_DoorLength[i][7]	:	_z1 = Matrix_DoorLength[i][6]/2
+				_x2 = 0			:	_y2 = Matrix_DoorLength[i][7]	:	_z2 = Matrix_DoorLength[i][6]
+				gosub	"drawLine"
 			endif
 
+			!	손잡이 왼쪽
+			if	iMatrix_Door[i][4] = DoorHandle_Left	then
+				_x1 = _doorWdt	:	_y1 = 0	:	_z1 = 0
+				_x2 = 0			:	_y2 = 0	:	_z2 = Matrix_DoorLength[i][6]/2
+				gosub	"drawLine"
+
+				_x1 = 0			:	_y1 = 0	:	_z1 = Matrix_DoorLength[i][6]/2
+				_x2 = _doorWdt	:	_y2 = 0	:	_z2 = Matrix_DoorLength[i][6]
+				gosub	"drawLine"
+
+				_x1 = _doorWdt	:	_y1 = Matrix_DoorLength[i][7]	:	_z1 = 0
+				_x2 = 0			:	_y2 = Matrix_DoorLength[i][7]	:	_z2 = Matrix_DoorLength[i][6]/2
+				gosub	"drawLine"
+
+				_x1 = 0			:	_y1 = Matrix_DoorLength[i][7]	:	_z1 = Matrix_DoorLength[i][6]/2
+				_x2 = _doorWdt	:	_y2 = Matrix_DoorLength[i][7]	:	_z2 = Matrix_DoorLength[i][6]
+				gosub	"drawLine"
+			endif
+		endif
 	endif
 
 return
@@ -3297,5 +3341,64 @@ return
 			del 1
 		del 1
 	del 1
+
+return
+
+
+
+!	Draw Line
+!-----------------------------------------------------------------------------------------------
+"drawLine":
+
+	!	Calculate Line Length
+	!-----------------------------------------------------------------------------------------------
+	_lineLth_XY = sqr((_x2 - _x1)^2 + (_y2 - _y1)^2)
+	_lineLth = sqr(_lineLth_XY^2 + (_z2 - _z1)^2)
+
+	!	Calculate Line Angle
+	!-----------------------------------------------------------------------------------------------
+	if	abs(_x2 - _x1) > eps	then
+		_aRotLine_Z = atn((_y2 - _y1)/(_x2 - _x1))
+	else
+		_aRotLine_Z = 0
+	endif
+	if	_x2 - _x1 > 0	then
+		_aRotLine_Y = atn((_z2 - _z1)/_lineLth_XY)
+	else
+		_aRotLine_Y = 180 - atn((_z2 - _z1)/_lineLth_XY)
+	endif
+
+	!	Parameters
+	!-----------------------------------------------------------------------------------------------
+	_dashLth = dashLth*GLOB_SCALE
+	_gapLth = gapLth*GLOB_SCALE
+	_modLth = _dashLth + _gapLth
+
+	_nLine = int(_lineLth/_modLth)
+	_rLineLth = _lineLth - _modLth*_nLine
+
+	!	Draw Line
+	!-----------------------------------------------------------------------------------------------
+	if	iLineType = LINE_SOLID	then
+		lin_	_x1,	_y1,	_z1,	_x2,	_y2,	_z2
+	endif
+
+	if	iLineType = LINE_DOTTED	then
+		add	_x1,	_y1,	_z1
+			rotz	_aRotLine_Z
+				roty	-_aRotLine_Y
+					for	m = 1	to	_nLine
+						lin_	0,	0,	0,	_dashLth,	0,	0
+
+						addx	_modLth
+					next	m
+
+					lin_	0,	0,	0,	_rLineLth,	0,	0
+
+					del	_nLine
+				del 1
+			del 1
+		del 1
+	endif
 
 return

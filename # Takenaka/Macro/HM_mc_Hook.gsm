@@ -190,6 +190,83 @@ material	HM_matHook
 	endif
 
 
+	!	Type3
+	!-----------------------------------------------------------------------------------------------
+	if	HM_HookType = 3	then
+		_pnlThk = 0.015
+		_sumRad = HM_HookRadius + _pnlThk
+
+		addz	HM_HookHeight
+			for	i = 1	to	2
+				muly	-2*i + 3
+					addy	HM_HookDist/2
+						rotz	90
+							call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.080,
+																			HM_Pulley_R1 = _sumRad,
+																			HM_Pulley_R2 = HM_HookRadius,
+																			HM_Pulley_Thick = _pnlThk,
+																			HM_matPulley = HM_matHook,
+																			HM_Pulley_Fixed = 0
+						del 1
+					del 1
+				del 1
+			next	i
+
+			addz	_sumRad
+				rotz	90
+					addy	HM_HookThick/2
+						rotx	90
+							put	HM_HookDist/2 + _sumRad*tan(22.5),				0,				15,
+								HM_HookDist/2 + _sumRad*tan(22.5) + _sumRad,	-_sumRad,		15,
+								0.050,											-_sumRad*2.8,	15,
+								-0.050,											-_sumRad*2.8,	15,
+								-(HM_HookDist/2 + _sumRad*tan(22.5) + _sumRad),	-_sumRad,		15,
+								-(HM_HookDist/2 + _sumRad*tan(22.5)),			0,				15
+
+							prism_	nsp/3,	_pnlThk,	get(nsp)
+						del 1
+					del 1
+
+					addy	-HM_HookThick/2
+						rotx	90
+							put	HM_HookDist/2 + _sumRad*tan(22.5),				0,				15,
+								HM_HookDist/2 + _sumRad*tan(22.5) + _sumRad,	-_sumRad,		15,
+								0.050,											-_sumRad*2.8,	15,
+								-0.050,											-_sumRad*2.8,	15,
+								-(HM_HookDist/2 + _sumRad*tan(22.5) + _sumRad),	-_sumRad,		15,
+								-(HM_HookDist/2 + _sumRad*tan(22.5)),			0,				15
+
+							prism_	nsp/3,	-_pnlThk,	get(nsp)
+						del 1
+					del 1
+				del 1
+			del 1
+		del 1
+
+		!	Hook
+		!----------------------------------------------------------------------------------------------------
+		addz	0.330
+			addx	(HM_HookThick+0.005*2)/2
+				roty	-90
+					cylind HM_HookThick+0.005*2, HM_HookRadius/8
+				del	1
+			del	1
+
+			addz	-0.050
+				cylind 0.050*2, HM_HookThick/2-_pnlThk
+				addz	0.050*2
+					cylind 0.100, HM_HookThick/2-_pnlThk-0.020
+				del	1
+			del	1
+		del	1
+
+		gosub	"shape_Hook"
+
+
+	endif
+
+
+
 
 !======================================================================================================
 end

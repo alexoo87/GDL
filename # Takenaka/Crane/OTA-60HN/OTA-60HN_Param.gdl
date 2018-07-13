@@ -3,6 +3,19 @@
 !======================================================================================================
 !	VER : AC 20
 
+!-----------------------------------------------------------------------------------------------
+!	Select Crane Roping
+!-----------------------------------------------------------------------------------------------
+values{2}	"HM_CraneRoping"	ROP_2PIECE,	"ローピング図(2本掛け)",
+								ROP_4PIECE,	"ローピング図(4本掛け)"
+
+if	HM_CraneRoping = ROP_2PIECE	then
+	HM_ListName = "OTA-60HN(2本)"
+else
+	HM_ListName = "OTA-60HN(4本)"
+endif
+
+
 !----------------------------------------------------------------------------------------------------
 !	Macro
 !----------------------------------------------------------------------------------------------------
@@ -10,7 +23,7 @@
 call	"HM_Global.gsm"	parameters	all
 
 !	Rated Load
-call	"HM_mc_RatedLoad.gsm"	parameters all
+call	"HM_mc_RatedLoad.gsm"	parameters all	returned_parameters	_WorkingR_max,	_WorkingR_min
 
 !	Suspended Load 
 call	"HM_mc_Suspendedloads.gsm"	parameters	all
@@ -19,8 +32,8 @@ call	"HM_mc_Suspendedloads.gsm"	parameters	all
 !	Calculation
 !----------------------------------------------------------------------------------------------------
 !	Jib Length
-if	HM_JibLen = "20.0m"	then	HM_JibLength = 22.500 + _mJib_pulleyR
-if	HM_JibLen = "25.0m"	then	HM_JibLength = 27.500 + _mJib_pulleyR
+if	HM_JibLen = "22.5m"	then	HM_JibLength = 22.500 + _mJib_pulleyR
+if	HM_JibLen = "27.5m"	then	HM_JibLength = 27.500 + _mJib_pulleyR
 
 !	Jib Angle, Jib Height, Working Radius
 if	GLOB_MODPAR_NAME = "HM_JibHeight"	then
@@ -49,18 +62,10 @@ HM_MastHeight_total = (HM_MastNumber*HM_MastHeight) + HM_MastBaseHeight
 !	Define Values
 !----------------------------------------------------------------------------------------------------
 !	Hook
-HM_HookType = 1
-HM_HookRadius = 0.325
-HM_HookHeight = 0.790
+HM_HookType = 3
+HM_HookRadius = 0.154
+HM_HookHeight = 0.649
 
-values{2}	"HM_CraneRoping"	ROP_2PIECE,	"ローピング図(2本掛け)",
-								ROP_4PIECE,	"ローピング図(4本掛け)"
-
-if	HM_CraneRoping = ROP_2PIECE	then
-	HM_ListName = "OTA-60HN(2本)"
-else
-	HM_ListName = "OTA-60HN(4本)"
-endif
 
 !----------------------------------------------------------------------------------------------------
 !	Define Range

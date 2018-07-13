@@ -21,7 +21,7 @@ ROP_4PIECE = 2
 !	Crane Size
 HM_CraneWidth = 4.000
 HM_CraneDepth = 4.000
-HM_CraneHeight = 29.950 + 10.800
+HM_CraneHeight = 18.109 + 6.100
 
 !	Crane Origin (Center Point)
 _mCraneOriginX = 0
@@ -29,7 +29,6 @@ _mCraneOriginY = 0
 
 !	Jib Length
 _mJib_pulleyR = 0.140
-
 
 !	'HM_Judgement' Index
 SAFETY = 1

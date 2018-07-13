@@ -8,7 +8,7 @@ hotspot	0,	0,	0
 ! hotspot	0,	strLth,	strRsr*nRsr
 ! sphere	0.02
 
-if	GLOB_PREVIEW_MODE	then
+if	GLOB_FEEDBACK_MODE	then
 	resol	8
 endif
 

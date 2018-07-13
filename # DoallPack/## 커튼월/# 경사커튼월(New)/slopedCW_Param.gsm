@@ -171,6 +171,18 @@ values{2}	"iHingeType_3Vert"	HINGE_TOP,			stHingeType[HINGE_TOP],
 								HINGE_BOTTOM_LEFT,	stHingeType[HINGE_BOTTOM_LEFT],
 								HINGE_BOTTOM_RIGHT,	stHingeType[HINGE_BOTTOM_RIGHT]
 
+!	열림선 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iLineType"	LINE_SOLID,		stLineType[LINE_SOLID],
+						LINE_DOTTED,	stLineType[LINE_DOTTED]
+
+if	not(iLineType = LINE_DOTTED)	then
+	lock	"dashLth", "gapLth"
+endif
+
+values	"dashLth"	range	(eps,	)
+values	"gapLth"	range	(eps,	)
+
 !	 분할 패널 유형
 !-----------------------------------------------------------------------------------------------
 values	"iSepType"	1,	2,	3,	4,	5

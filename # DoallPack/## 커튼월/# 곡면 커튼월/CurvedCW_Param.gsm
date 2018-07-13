@@ -167,6 +167,18 @@ values{2}	"tempHinge"	Hinge_Top,			stHinge[Hinge_Top],
 						Hinge_BottomLeft,	stHinge[Hinge_BottomLeft],
 						Hinge_BottomRight,	stHinge[Hinge_BottomRight]
 
+!	열림선 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iLineType"	LINE_SOLID,		stLineType[LINE_SOLID],
+						LINE_DOTTED,	stLineType[LINE_DOTTED]
+
+if	not(iLineType = LINE_DOTTED)	then
+	lock	"dashLth", "gapLth"
+endif
+
+values	"dashLth"	range	(eps,	)
+values	"gapLth"	range	(eps,	)
+
 !	코너프레임 선택
 !-----------------------------------------------------------------------------------------------
 values{2}	"iSelectFrame"	Corner_Left,	stSelectFrame[Corner_Left],

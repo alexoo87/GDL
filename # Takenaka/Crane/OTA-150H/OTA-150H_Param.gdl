@@ -10,7 +10,7 @@
 call	"HM_Global.gsm"	parameters	all
 
 !	Rated Load
-call	"HM_mc_RatedLoad.gsm"	parameters all
+call	"HM_mc_RatedLoad.gsm"	parameters all	returned_parameters	_WorkingR_max,	_WorkingR_min
 
 !	Suspended Load 
 call	"HM_mc_Suspendedloads.gsm"	parameters	all

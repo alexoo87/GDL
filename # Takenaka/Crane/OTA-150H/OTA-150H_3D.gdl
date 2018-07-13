@@ -170,7 +170,7 @@ rotz	HM_WorkingAng
 		!	Upper Deck
 		!-----------------------------------------------------------------------------------------------
 			!	1st
-			_zPosDeck_1st = 22.780
+			_zPosDeck_1st = _zPosMast + HM_MastBaseHeight + HM_MastHeight*HM_MastNumber - 7.170
 
 			addz	_zPosDeck_1st
 				gosub	"upperDeck_1st_OTA_150H"
@@ -1076,41 +1076,43 @@ rotz	HM_WorkingAng
 	!-----------------------------------------------------------------------------------------------
 		_zPosJib = _zPosOperCap + 0.200
 
-		addz	_zPosJib
-			addx	-0.600
-				!	Jib
-				call	"HM_mc_Jib.gsm"	parameters	all	HM_Jib_type = 1
+		if	HM_Jib_flag	then
+			addz	_zPosJib
+				addx	-0.600
+					!	Jib
+					call	"HM_mc_Jib.gsm"	parameters	all	HM_Jib_type = 1
 
-				roty	-HM_JibAng
-					addx	HM_JibLength - _mJib_pulleyR
-						!	Jib Pulley
-						roty	90
-							gosub	"draw_Jib_Pulley"
-						del 1
+					roty	-HM_JibAng
+						addx	HM_JibLength - _mJib_pulleyR
+							!	Jib Pulley
+							roty	90
+								gosub	"draw_Jib_Pulley"
+							del 1
 
-						addx	-0.400
-							addz	0.500
-								roty	3
-									gosub	"draw_Jib_Pulley"
+							addx	-0.400
+								addz	0.500
+									roty	3
+										gosub	"draw_Jib_Pulley"
+									del	1
 								del	1
 							del	1
-						del	1
 
-						!	Jib Basket
-						call	"HM_mc_Basket.gsm"	parameters	all		HM_BasketWidth = 0.970,
-																		HM_BasketDepth = 2.400,
-																		HM_BasketHeight = 1.000,
-																		HM_BasketThick = 0.100,
-																		HM_BasketAngle = 14 + HM_jibAng,
-																		HM_BasketPosx = -0.109,
-																		HM_BasketHoleW = 0.420,
-																		HM_BasketHoleD = 1.500,
-																		HM_matBasket = HM_matBody1,
-																		HM_BasketMirror = 0
+							!	Jib Basket
+							call	"HM_mc_Basket.gsm"	parameters	all		HM_BasketWidth = 0.970,
+																			HM_BasketDepth = 2.400,
+																			HM_BasketHeight = 1.000,
+																			HM_BasketThick = 0.100,
+																			HM_BasketAngle = 14 + HM_jibAng,
+																			HM_BasketPosx = -0.109,
+																			HM_BasketHoleW = 0.420,
+																			HM_BasketHoleD = 1.500,
+																			HM_matBasket = HM_matBody1,
+																			HM_BasketMirror = 0
+						del 1
 					del 1
 				del 1
 			del 1
-		del 1
+		endif
 
 	!	Wire
 	!-----------------------------------------------------------------------------------------------

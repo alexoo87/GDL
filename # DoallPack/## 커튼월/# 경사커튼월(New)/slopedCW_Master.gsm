@@ -100,6 +100,17 @@ if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
 		stHingeType[8] = "하단+우측"
 endif
 
+!	열림선 유형
+!-----------------------------------------------------------------------------------------------
+LINE_SOLID = 1
+LINE_DOTTED = 2
+
+if	GLOB_SCRIPT_TYPE<>2 and GLOB_SCRIPT_TYPE<>3	then
+	dim	stLineType[]
+		stLineType[1] = "실선"
+		stLineType[2] = "점선"
+endif
+
 !	Floor Plan Display
 !-----------------------------------------------------------------------------------------------
 DISPLAY_PROJECTED = 1

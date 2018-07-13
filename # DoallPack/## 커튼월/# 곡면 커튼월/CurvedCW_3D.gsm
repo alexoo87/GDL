@@ -3457,152 +3457,203 @@ endif
 if	GLOB_VIEW_TYPE # 4	then
 	!	경기도 신청사 프로젝트용
 	if	iPanelType[i][j] = Panel_Custom1	then
-		lin_	_x1,													_y1,													_windowHeight/2,
-				_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
-		lin_	_x1,													_y1,													_windowHeight/2,
-				_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+		_x1op = _x1													:	_y1op = _y1													:	_z1op = _windowHeight/2
+		_x2op = _x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = 0
+		gosub	"drawLine"
+		_x1op = _x1													:	_y1op = _y1													:	_z1op = _windowHeight/2
+		_x2op = _x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight
+		gosub	"drawLine"
 
-		lin_	_x3,													_y3,													_windowHeight/2,
-				_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
-		lin_	_x3,													_y3,													_windowHeight/2,
-				_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+		_x1op = _x3													:	_y1op = _y3													:	_z1op = _windowHeight/2
+		_x2op = _x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = 0
+		gosub	"drawLine"
+		_x1op = _x3													:	_y1op = _y3													:	_z1op = _windowHeight/2
+		_x2op = _x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight
+		gosub	"drawLine"
 	endif
-
 
 	if	iHinge[i][j] = Hinge_Top | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_TopRight	then
 		if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
-			lin_	_x1,			_y1,			0,
-					(_x1+_x2)/2,	(_y1+_y2)/2,	_windowHeight
-			lin_	(_x1+_x2)/2,	(_y1+_y2)/2,	_windowHeight,
-					_x2,			_y2,			0
+			_x1op = _x1				:	_y1op = _y1				:	_z1op = 0
+			_x2op = (_x1 + _x2)/2	:	_y2op = (_y1 + _y2)/2	:	_z2op = _windowHeight
+			gosub	"drawLine"
+			_x1op = (_x1 + _x2)/2	:	_y1op = (_y1 + _y2)/2	:	_z1op = _windowHeight
+			_x2op = _x2				:	_y2op = _y2				:	_z2op = 0
+			gosub	"drawLine"
 
-			lin_	_x3,			_y3,			0,
-					(_x3+_x4)/2,	(_y3+_y4)/2,	_windowHeight
-			lin_	(_x3+_x4)/2,	(_y3+_y4)/2,	_windowHeight,
-					_x4,			_y4,			0
+			_x1op = _x3				:	_y1op = _y3				:	_z1op = 0
+			_x2op = (_x3 + _x4)/2	:	_y2op = (_y3 + _y4)/2	:	_z2op = _windowHeight
+			gosub	"drawLine"
+			_x1op = (_x3 + _x4)/2	:	_y1op = (_y3 + _y4)/2	:	_z1op = _windowHeight
+			_x2op = _x4				:	_y2op = _y4				:	_z2op = 0
+			gosub	"drawLine"
 		endif
 		if	iPanelType[i][j] = Panel_Project2	then
-			lin_	_x1,													_y1,													0,
-					_x1 + (_x2 - _x1)/4,									_y1 + (_y2 - _y1)/4,									_windowHeight
-			lin_	_x1 + (_x2 - _x1)/4,									_y1 + (_y2 - _y1)/4,									_windowHeight,
-					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
+			_x1op = _x1					:	_y1op = _y1					:	_z1op = 0
+			_x2op = _x1 + (_x2 - _x1)/4	:	_y2op = _y1 + (_y2 - _y1)/4	:	_z2op = _windowHeight
+			gosub	"drawLine"
+			_x1op = _x1 + (_x2 - _x1)/4									:	_y1op = _y1 + (_y2 - _y1)/4									:	_z1op = _windowHeight
+			_x2op = _x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = 0
+			gosub	"drawLine"
 
-			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	0,
-					_x1 + (_x2 - _x1)*3/4,									_y1 + (_y2 - _y1)*3/4,									_windowHeight
-			lin_	_x1 + (_x2 - _x1)*3/4,									_y1 + (_y2 - _y1)*3/4,									_windowHeight,
-					_x2,													_y2,													0
+			_x1op = _x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = 0
+			_x2op = _x1 + (_x2 - _x1)*3/4								:	_y2op = _y1 + (_y2 - _y1)*3/4								:	_z2op = _windowHeight
+			gosub	"drawLine"
+			_x1op = _x1 + (_x2 - _x1)*3/4	:	_y1op = _y1 + (_y2 - _y1)*3/4	:	_z1op = _windowHeight
+			_x2op = _x2						:	_y2op = _y2						:	_z2op = 0
+			gosub	"drawLine"
 
-			lin_	_x3,													_y3,													0,
-					_x3 + (_x4 - _x3)/4,									_y3 + (_y4 - _y3)/4,									_windowHeight
-			lin_	_x3 + (_x4 - _x3)/4,									_y3 + (_y4 - _y3)/4,									_windowHeight,
-					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
+			_x1op = _x3					:	_y1op = _y3					:	_z1op = 0
+			_x2op = _x3 + (_x4 - _x3)/4	:	_y2op = _y3 + (_y4 - _y3)/4	:	_z2op = _windowHeight
+			gosub	"drawLine"
+			_x1op = _x3 + (_x4 - _x3)/4									:	_y1op = _y3 + (_y4 - _y3)/4									:	_z1op = _windowHeight
+			_x2op = _x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = 0
+			gosub	"drawLine"
 
-			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	0,
-					_x3 + (_x4 - _x3)*3/4,									_y3 + (_y4 - _y3)*3/4,									_windowHeight
-			lin_	_x3 + (_x4 - _x3)*3/4,									_y3 + (_y4 - _y3)*3/4,									_windowHeight,
-					_x4,													_y4,													0
+			_x1op = _x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = 0
+			_x2op = _x3 + (_x4 - _x3)*3/4								:	_y2op = _y3 + (_y4 - _y3)*3/4								:	_z2op = _windowHeight
+			gosub	"drawLine"
+			_x1op = _x3 + (_x4 - _x3)*3/4	:	_y1op = _y3 + (_y4 - _y3)*3/4	:	_z1op = _windowHeight
+			_x2op = _x4						:	_y2op = _y4						:	_z2op = 0
+			gosub	"drawLine"
 		endif
 	endif
 	if	iHinge[i][j] = Hinge_Bottom | iHinge[i][j] = Hinge_BottomLeft | iHinge[i][j] = Hinge_BottomRight	then
 		if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
-			lin_	_x1,			_y1,			_windowHeight,
-					(_x1+_x2)/2,	(_y1+_y2)/2,	0
-			lin_	(_x1+_x2)/2,	(_y1+_y2)/2,	0,
-					_x2,			_y2,			_windowHeight
+			_x1op = _x1				:	_y1op = _y1				:	_z1op = _windowHeight
+			_x2op = (_x1 + _x2)/2	:	_y2op = (_y1 + _y2)/2	:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = (_x1 + _x2)/2	:	_y1op = (_y1 + _y2)/2	:	_z1op = 0
+			_x2op = _x2				:	_y2op = _y2				:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x3,			_y3,			_windowHeight,
-					(_x3+_x4)/2,	(_y3+_y4)/2,	0
-			lin_	(_x3+_x4)/2,	(_y3+_y4)/2,	0,
-					_x4,			_y4,			_windowHeight
+			_x1op = _x3				:	_y1op = _y3				:	_z1op = _windowHeight
+			_x2op = (_x3 + _x4)/2	:	_y2op = (_y3 + _y4)/2	:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = (_x3 + _x4)/2	:	_y1op = (_y3 + _y4)/2	:	_z1op = 0
+			_x2op = _x4				:	_y2op = _y4				:	_z2op = _windowHeight
+			gosub	"drawLine"
 		endif
 		if	iPanelType[i][j] = Panel_Project2	then
-			lin_	_x1,													_y1,													_windowHeight,
-					_x1 + (_x2 - _x1)/4,									_y1 + (_y2 - _y1)/4,									0
-			lin_	_x1 + (_x2 - _x1)/4,									_y1 + (_y2 - _y1)/4,									0,
-					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+			_x1op = _x1					:	_y1op = _y1					:	_z1op = _windowHeight
+			_x2op = _x1 + (_x2 - _x1)/4	:	_y2op = _y1 + (_y2 - _y1)/4	:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = _x1 + (_x2 - _x1)/4									:	_y1op = _y1 + (_y2 - _y1)/4									:	_z1op = 0
+			_x2op = _x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight,
-					_x1 + (_x2 - _x1)*3/4,									_y1 + (_y2 - _y1)*3/4,									0
-			lin_	_x1 + (_x2 - _x1)*3/4,									_y1 + (_y2 - _y1)*3/4,									0,
-					_x2,													_y2,													_windowHeight
+			_x1op = _x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = _windowHeight
+			_x2op = _x1 + (_x2 - _x1)*3/4								:	_y2op = _y1 + (_y2 - _y1)*3/4								:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = _x1 + (_x2 - _x1)*3/4	:	_y1op = _y1 + (_y2 - _y1)*3/4	:	_z1op = 0
+			_x2op = _x2						:	_y2op = _y2						:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x3,													_y3,													_windowHeight,
-					_x3 + (_x4 - _x3)/4,									_y3 + (_y4 - _y3)/4,									0
-			lin_	_x3 + (_x4 - _x3)/4,									_y3 + (_y4 - _y3)/4,									0,
-					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+			_x1op = _x3					:	_y1op = _y3					:	_z1op = _windowHeight
+			_x2op = _x3 + (_x4 - _x3)/4	:	_y2op = _y3 + (_y4 - _y3)/4	:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = _x3 + (_x4 - _x3)/4									:	_y1op = _y3 + (_y4 - _y3)/4									:	_z1op = 0
+			_x2op = _x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight,
-					_x3 + (_x4 - _x3)*3/4,									_y3 + (_y4 - _y3)*3/4,									0
-			lin_	_x3 + (_x4 - _x3)*3/4,									_y3 + (_y4 - _y3)*3/4,									0,
-					_x4,													_y4,													_windowHeight
+			_x1op = _x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = _windowHeight
+			_x2op = _x3 + (_x4 - _x3)*3/4								:	_y2op = _y3 + (_y4 - _y3)*3/4								:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = _x3 + (_x4 - _x3)*3/4	:	_y1op = _y3 + (_y4 - _y3)*3/4	:	_z1op = 0
+			_x2op = _x4						:	_y2op = _y4						:	_z2op = _windowHeight
+			gosub	"drawLine"
 		endif
 	endif
 	if	iHinge[i][j] = Hinge_Left | iHinge[i][j] = Hinge_TopLeft | iHinge[i][j] = Hinge_BottomLeft	then
 		if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
-			lin_	_x2,	_y2,	0,
-					_x1,	_y1,	_windowHeight/2
-			lin_	_x1,	_y1,	_windowHeight/2,
-					_x2,	_y2,	_windowHeight
+			_x1op = _x2	:	_y1op = _y2	:	_z1op = 0
+			_x2op = _x1	:	_y2op = _y1	:	_z2op = _windowHeight/2
+			gosub	"drawLine"
+			_x1op = _x1	:	_y1op = _y1	:	_z1op = _windowHeight/2
+			_x2op = _x2	:	_y2op = _y2	:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x4,	_y4,	0,
-					_x3,	_y3,	_windowHeight/2
-			lin_	_x3,	_y3,	_windowHeight/2,
-					_x4,	_y4,	_windowHeight
+			_x1op = _x4	:	_y1op = _y4	:	_z1op = 0
+			_x2op = _x3	:	_y2op = _y3	:	_z2op = _windowHeight/2
+			gosub	"drawLine"
+			_x1op = _x3	:	_y1op = _y3	:	_z1op = _windowHeight/2
+			_x2op = _x4	:	_y2op = _y4	:	_z2op = _windowHeight
+			gosub	"drawLine"
 		endif
 		if	iPanelType[i][j] = Panel_Project2	then
-			lin_	_x1,													_y1,													_windowHeight/2,
-					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
-			lin_	_x1,													_y1,													_windowHeight/2,
-					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+			_x1op = _x1													:	_y1op = _y1													:	_z1op = _windowHeight/2
+			_x2op = _x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = _x1													:	_y1op = _y1													:	_z1op = _windowHeight/2
+			_x2op = _x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2,
-					_x2,													_y2,													0
-			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2,
-					_x2,													_y2,													_windowHeight
+			_x1op = _x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = _windowHeight/2
+			_x2op = _x2													:	_y2op = _y2													:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = _x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = _windowHeight/2
+			_x2op = _x2													:	_y2op = _y2													:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x3,													_y3,													_windowHeight/2,
-					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	0
-			lin_	_x3,													_y3,													_windowHeight/2,
-					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight
+			_x1op = _x3													:	_y1op = _y3													:	_z1op = _windowHeight/2
+			_x2op = _x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = _x3													:	_y1op = _y3													:	_z1op = _windowHeight/2
+			_x2op = _x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2,
-					_x4,													_y4,													0
-			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2,
-					_x4,													_y4,													_windowHeight
+			_x1op = _x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = _windowHeight/2
+			_x2op = _x4													:	_y2op = _y4													:	_z2op = 0
+			gosub	"drawLine"
+			_x1op = _x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = _windowHeight/2
+			_x2op = _x4													:	_y2op = _y4													:	_z2op = _windowHeight
+			gosub	"drawLine"
 		endif
 	endif
 	if	iHinge[i][j] = Hinge_Right | iHinge[i][j] = Hinge_TopRight | iHinge[i][j] = Hinge_BottomRight	then
-		if	iPanelType[i][j] = Panel_Project	then
-			lin_	_x1,	_y1,	0,
-					_x2,	_y2,	_windowHeight/2
-			lin_	_x2,	_y2,	_windowHeight/2,
-					_x1,	_y1,	_windowHeight
+		if	iPanelType[i][j] = Panel_Project | iPanelType[i][j] = Panel_Smoke	then
+			_x1op = _x1	:	_y1op = _y1	:	_z1op = 0
+			_x2op = _x2	:	_y2op = _y2	:	_z2op = _windowHeight/2
+			gosub	"drawLine"
+			_x1op = _x2	:	_y1op = _y2	:	_z1op = _windowHeight/2
+			_x2op = _x1	:	_y2op = _y1	:	_z2op = _windowHeight
+			gosub	"drawLine"
 
-			lin_	_x3,	_y3,	0,
-					_x4,	_y4,	_windowHeight/2
-			lin_	_x4,	_y4,	_windowHeight/2,
-					_x3,	_y3,	_windowHeight
+			_x1op = _x3	:	_y1op = _y3	:	_z1op = 0
+			_x2op = _x4	:	_y2op = _y4	:	_z2op = _windowHeight/2
+			gosub	"drawLine"
+			_x1op = _x4	:	_y1op = _y4	:	_z1op = _windowHeight/2
+			_x2op = _x3	:	_y2op = _y3	:	_z2op = _windowHeight
+			gosub	"drawLine"
 		endif
 		if	iPanelType[i][j] = Panel_Project2	then
-			lin_	_x1,													_y1,													0,
-					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2
-			lin_	_x1,													_y1,													_windowHeight,
-					_x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2
+			_x1op = _x1													:	_y1op = _y1													:	_z1op = 0
+			_x2op = _x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight/2
+			gosub	"drawLine"
+			_x1op = _x1													:	_y1op = _y1													:	_z1op = _windowHeight
+			_x2op = _x1 + (_x2 - _x1)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y1 + (_y2 - _y1)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight/2
+			gosub	"drawLine"
 
-			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	0,
-					_x2,													_y2,													_windowHeight/2
-			lin_	_x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight,
-					_x2,													_y2,													_windowHeight/2
+			_x1op = _x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = 0
+			_x2op = _x2													:	_y2op = _y2													:	_z2op = _windowHeight/2
+			gosub	"drawLine"
+			_x1op = _x1 + (_x2 - _x1)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y1 + (_y2 - _y1)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = _windowHeight
+			_x2op = _x2													:	_y2op = _y2													:	_z2op = _windowHeight/2
+			gosub	"drawLine"
 
-			lin_	_x3,													_y3,													0,
-					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2
-			lin_	_x3,													_y3,													_windowHeight,
-					_x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight/2
+			_x1op = _x3													:	_y1op = _y3													:	_z1op = 0
+			_x2op = _x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight/2
+			gosub	"drawLine"
+			_x1op = _x3													:	_y1op = _y3													:	_z1op = _windowHeight
+			_x2op = _x3 + (_x4 - _x3)/2 + (mlnGskWdt/2)*sin(_halfAngle)	:	_y2op = _y3 + (_y4 - _y3)/2 - (mlnGskWdt/2)*cos(_halfAngle)	:	_z2op = _windowHeight/2
+			gosub	"drawLine"
 
-			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	0,
-					_x4,													_y4,													_windowHeight/2
-			lin_	_x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle),	_y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle),	_windowHeight,
-					_x4,													_y4,													_windowHeight/2
+			_x1op = _x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = 0
+			_x2op = _x4													:	_y2op = _y4													:	_z2op = _windowHeight/2
+			gosub	"drawLine"
+			_x1op = _x3 + (_x4 - _x3)/2 - (mlnGskWdt/2)*sin(_halfAngle)	:	_y1op = _y3 + (_y4 - _y3)/2 + (mlnGskWdt/2)*cos(_halfAngle)	:	_z1op = _windowHeight
+			_x2op = _x4													:	_y2op = _y4													:	_z2op = _windowHeight/2
+			gosub	"drawLine"
 		endif
 	endif
 endif
@@ -4421,48 +4472,76 @@ return
 if	_iDoorType = DoorType_1panel	then
 	!	열림 방향 : 오른쪽
 	if	_iOpenDirect = OpenDirect_Right	then
-		addy	_doorThk/2
-			lin_	_doorWdt,	0,	0,			0,			0,	_doorHgt/2
-			lin_	0,			0,	_doorHgt/2,	_doorWdt,	0,	_doorHgt
-		del 1
+		_x1op = _doorWdt	:	_y1op = _doorThk/2	:	_z1op = 0
+		_x2op = 0			:	_y2op = _doorThk/2	:	_z2op = doorHgt/2
+		gosub	"drawLine"
 
-		addy	-_doorThk/2
-			lin_	_doorWdt,	0,	0,			0,			0,	_doorHgt/2
-			lin_	0,			0,	_doorHgt/2,	_doorWdt,	0,	_doorHgt
-		del 1
+		_x1op = 0			:	_y1op = _doorThk/2	:	_z1op = doorHgt/2
+		_x2op = _doorWdt	:	_y2op = _doorThk/2	:	_z2op = doorHgt
+		gosub	"drawLine"
+
+		_x1op = _doorWdt	:	_y1op = -_doorThk/2	:	_z1op = 0
+		_x2op = 0			:	_y2op = -_doorThk/2	:	_z2op = doorHgt/2
+		gosub	"drawLine"
+
+		_x1op = 0			:	_y1op = -_doorThk/2	:	_z1op = doorHgt/2
+		_x2op = _doorWdt	:	_y2op = -_doorThk/2	:	_z2op = doorHgt
+		gosub	"drawLine"
 	endif
 
 	!	열림 방향 : 왼쪽
 	if	_iOpenDirect = OpenDirect_Left	then
-		addy	_doorThk/2
-			lin_	0,			0,	0,			_doorWdt,	0,	_doorHgt/2
-			lin_	_doorWdt,	0,	_doorHgt/2,	0,			0,	_doorHgt
-		del 1
+		_x1op = 0			:	_y1op = _doorThk/2	:	_z1op = 0
+		_x2op = _doorWdt	:	_y2op = _doorThk/2	:	_z2op = doorHgt/2
+		gosub	"drawLine"
 
-		addy	-_doorThk/2
-			lin_	0,			0,	0,			_doorWdt,	0,	_doorHgt/2
-			lin_	_doorWdt,	0,	_doorHgt/2,	0,			0,	_doorHgt
-		del 1
+		_x1op = _doorWdt	:	_y1op = _doorThk/2	:	_z1op = doorHgt/2
+		_x2op = 0			:	_y2op = _doorThk/2	:	_z2op = doorHgt
+		gosub	"drawLine"
+
+		_x1op = 0			:	_y1op = -_doorThk/2	:	_z1op = 0
+		_x2op = _doorWdt	:	_y2op = -_doorThk/2	:	_z2op = doorHgt/2
+		gosub	"drawLine"
+
+		_x1op = _doorWdt	:	_y1op = -_doorThk/2	:	_z1op = doorHgt/2
+		_x2op = 0			:	_y2op = -_doorThk/2	:	_z2op = doorHgt
+		gosub	"drawLine"
 	endif
 endif
 
 !	유형 : 양문형(2panel)
 if	_iDoorType = DoorType_2panel	then
-	addy	_doorThk/2
-		lin_	_doorWdt/2,	0,	0,			0,			0,	_doorHgt/2
-		lin_	0,			0,	_doorHgt/2,	_doorWdt/2,	0,	_doorHgt
+	_x1op = _doorWdt/2	:	_y1op = _doorThk/2	:	_z1op = 0
+	_x2op = 0			:	_y2op = _doorThk/2	:	_z2op = doorHgt/2
+	gosub	"drawLine"
 
-		lin_	_doorWdt/2,	0,	0,			_doorWdt,	0,	_doorHgt/2
-		lin_	_doorWdt,	0,	_doorHgt/2,	_doorWdt/2,	0,	_doorHgt
-	del 1
+	_x1op = 0			:	_y1op = _doorThk/2	:	_z1op = doorHgt/2
+	_x2op = _doorWdt/2	:	_y2op = _doorThk/2	:	_z2op = doorHgt
+	gosub	"drawLine"
 
-	addy	-_doorThk/2
-		lin_	_doorWdt/2,	0,	0,			0,			0,	_doorHgt/2
-		lin_	0,			0,	_doorHgt/2,	_doorWdt/2,	0,	_doorHgt
+	_x1op = _doorWdt/2	:	_y1op = _doorThk/2	:	_z1op = 0
+	_x2op = _doorWdt	:	_y2op = _doorThk/2	:	_z2op = doorHgt/2
+	gosub	"drawLine"
 
-		lin_	_doorWdt/2,	0,	0,			_doorWdt,	0,	_doorHgt/2
-		lin_	_doorWdt,	0,	_doorHgt/2,	_doorWdt/2,	0,	_doorHgt
-	del 1
+	_x1op = _doorWdt	:	_y1op = _doorThk/2	:	_z1op = doorHgt/2
+	_x2op = _doorWdt/2	:	_y2op = _doorThk/2	:	_z2op = doorHgt
+	gosub	"drawLine"
+
+	_x1op = _doorWdt/2	:	_y1op = -_doorThk/2	:	_z1op = 0
+	_x2op = 0			:	_y2op = -_doorThk/2	:	_z2op = doorHgt/2
+	gosub	"drawLine"
+
+	_x1op = 0			:	_y1op = -_doorThk/2	:	_z1op = doorHgt/2
+	_x2op = _doorWdt/2	:	_y2op = -_doorThk/2	:	_z2op = doorHgt
+	gosub	"drawLine"
+
+	_x1op = _doorWdt/2	:	_y1op = -_doorThk/2	:	_z1op = 0
+	_x2op = _doorWdt	:	_y2op = -_doorThk/2	:	_z2op = doorHgt/2
+	gosub	"drawLine"
+
+	_x1op = _doorWdt	:	_y1op = -_doorThk/2	:	_z1op = doorHgt/2
+	_x2op = _doorWdt/2	:	_y2op = -_doorThk/2	:	_z2op = doorHgt
+	gosub	"drawLine"
 
 endif
 
@@ -4894,6 +4973,64 @@ return
 
 			if	iCornerL = Corner_Angled	then	_offGrl3 = _offGrl3 - (frmThk + gskThk)*tan(aFrmL)
 		endif
+	endif
+
+return
+
+
+!	Draw Line
+!-----------------------------------------------------------------------------------------------
+"drawLine":
+
+	!	Calculate Line Length
+	!-----------------------------------------------------------------------------------------------
+	_lineLth_XY = sqr((_x2op - _x1op)^2 + (_y2op - _y1op)^2)
+	_lineLth = sqr(_lineLth_XY^2 + (_z2op - _z1op)^2)
+
+	!	Calculate Line Angle
+	!-----------------------------------------------------------------------------------------------
+	if	abs(_x2op - _x1op) > eps	then
+		_aRotLine_Z = atn((_y2op - _y1op)/(_x2op - _x1op))
+	else
+		_aRotLine_Z = 0
+	endif
+	if	_x2op - _x1op > 0	then
+		_aRotLine_Y = atn((_z2op - _z1op)/_lineLth_XY)
+	else
+		_aRotLine_Y = 180 - atn((_z2op - _z1op)/_lineLth_XY)
+	endif
+
+	!	Parameters
+	!-----------------------------------------------------------------------------------------------
+	_dashLth = dashLth*GLOB_SCALE
+	_gapLth = gapLth*GLOB_SCALE
+	_modLth = _dashLth + _gapLth
+
+	_nLine = int(_lineLth/_modLth)
+	_rLineLth = _lineLth - _modLth*_nLine
+
+	!	Draw Line
+	!-----------------------------------------------------------------------------------------------
+	if	iLineType = LINE_SOLID	then
+		lin_	_x1op,	_y1op,	_z1op,	_x2op,	_y2op,	_z2op
+	endif
+
+	if	iLineType = LINE_DOTTED	then
+		add	_x1op,	_y1op,	_z1op
+			rotz	_aRotLine_Z
+				roty	-_aRotLine_Y
+					for	m = 1	to	_nLine
+						lin_	0,	0,	0,	_dashLth,	0,	0
+
+						addx	_modLth
+					next	m
+
+					lin_	0,	0,	0,	_rLineLth,	0,	0
+
+					del	_nLine
+				del 1
+			del 1
+		del 1
 	endif
 
 return

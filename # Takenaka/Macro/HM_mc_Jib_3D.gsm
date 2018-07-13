@@ -39,7 +39,7 @@ if	HM_CraneName = _CraneName_arr[OTA_150S] | HM_CraneName = _CraneName_arr[OTA_1
 	_Truss_3rd_len = 5.000
 	_Truss_end_len = 9.000
 	_mTruss_posz = -0.450											!	Move to Origin
-	_mTruss_posy = -HM_JibWidth/2	
+	_mTruss_posy = -HM_JibWidth/2
 	_bTruss_vert = 0
 endif
 
@@ -66,10 +66,86 @@ if	HM_CraneName = _CraneName_arr[KCP_1040]	then
 	_Truss_2nd_len = 5.152
 	_Truss_end_len = 6.096
 	_mTruss_posz = -0.250											!	Move to Origin
+	_mTruss_posy = -HM_JibWidth/2
+	_bTruss_vert = 1												!	Vertical Inner Frame
+endif
+
+if	HM_CraneName = _CraneName_arr[OTA_60HN]	then
+	_Truss_1st_len = 3.500
+	_Truss_2nd_len = 5.000
+	_Truss_end_len = 4.000
+	_mTruss_posz = -0.300											!	Move to Origin
 	_mTruss_posy = -HM_JibWidth/2	
 	_bTruss_vert = 1												!	Vertical Inner Frame
 endif
 
+if	HM_CraneName = _CraneName_arr[OTA_150HN]	then
+	_Truss_1st_len = 6.000
+	_Truss_2nd_len = 6.000
+	_Truss_3rd_len = 5.000
+	_Truss_end_len = 6.000
+	_mTruss_posz = -0.500											!	Move to Origin
+	_mTruss_posy = -HM_JibWidth/2	
+	_bTruss_vert = 1												!	Vertical Inner Frame
+endif
+
+if	HM_CraneName = _CraneName_arr[OTA_300H]	then
+	_Truss_1st_len = 9.000
+	_Truss_2nd_len = 9.000
+	_Truss_3rd_len = 6.000
+	_Truss_4th_len = 5.500
+	_Truss_end_len = 9.000
+	_mTruss_posz = -0.500											!	Move to Origin
+	_mTruss_posy = -HM_JibWidth/2	
+	_bTruss_vert = 0												!	Vertical Inner Frame
+endif
+
+if	HM_CraneName = _CraneName_arr[OTA_600H]	then
+	_Truss_1st_len = 9.000
+	_Truss_2nd_len = 9.000
+	_Truss_3rd_len = 5.000
+	_Truss_end_len = 9.000
+	_mTruss_posz = -0.475											!	Move to Origin
+	_mTruss_posy = -HM_JibWidth/2
+	_bTruss_vert = 0												!	Vertical Inner Frame
+endif
+
+if	HM_CraneName = _CraneName_arr[OTS_50NL]	then
+	_Truss_1st_len = 6.870
+	_Truss_2nd_len = 6.920
+	_Truss_end_len = 6.720
+	_mTruss_posz = -0.375											!	Move to Origin
+	_mTruss_posy = -HM_JibWidth/2	
+	_bTruss_vert = 0												!	Vertical Inner Frame
+endif
+
+if	HM_CraneName = _CraneName_arr[MAX_1020]	then
+	_Truss_1st_len = 6.000
+	_Truss_2nd_len = 5.600
+	_Truss_end_len = 6.000
+	_mTruss_posz = -0.350											!	Move to Origin
+	_mTruss_posy = -HM_JibWidth/2
+	_bTruss_vert = 0												!	Vertical Inner Frame
+endif
+
+if	HM_CraneName = _CraneName_arr[OTS_70]	then
+	_Truss_1st_len = 7.000
+	_Truss_2nd_len = 9.000
+	_Truss_3rd_len = 5.000
+	_Truss_end_len = 9.000
+	_mTruss_posz = -0.610											!	Move to Origin
+	_mTruss_posy = -HM_JibWidth/2
+	_bTruss_vert = 0												!	Vertical Inner Frame
+endif
+
+if	HM_CraneName = _CraneName_arr[OTS_80]	then
+	_Truss_1st_len = 9.085
+	_Truss_2nd_len = 5.000
+	_Truss_end_len = 8.915
+	_mTruss_posz = -0.400											!	Move to Origin
+	_mTruss_posy = -HM_JibWidth/2
+	_bTruss_vert = 0												!	Vertical Inner Frame
+endif
 
 !----------------------------------------------------------------------------------------------------
 !	Representation
@@ -201,13 +277,11 @@ pen		HM_3D_pen
 			!	Jib Angle
 			!----------------------------------------------------------------------------------------------------
 			gosub	"JibAngle"
-
 		endif
 
 		!	OTA-150S/OTA-150H
 		!----------------------------------------------------------------------------------------------------
 		if	HM_CraneName = _CraneName_arr[OTA_150S] | HM_CraneName = _CraneName_arr[OTA_150H]	then
-
 			roty	-HM_JibAng
 			add		0, _mTruss_posy, _mTruss_posz
 
@@ -224,6 +298,9 @@ pen		HM_3D_pen
 
 				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len
+					_offsetValue = 0.200
+					_mOutFrmD_end = 0.400
+					_zPosOutFrm_end = 0.330
 					gosub	"Jib_Truss_end_9000"
 				del	1
 			endif
@@ -246,6 +323,9 @@ pen		HM_3D_pen
 
 				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
+					_offsetValue = 0.200
+					_mOutFrmD_end = 0.400
+					_zPosOutFrm_end = 0.330
 					gosub	"Jib_Truss_end_9000"
 				del	1
 			endif
@@ -273,6 +353,9 @@ pen		HM_3D_pen
 
 				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len*2
+					_offsetValue = 0.200
+					_mOutFrmD_end = 0.400
+					_zPosOutFrm_end = 0.330
 					gosub	"Jib_Truss_end_9000"
 				del	1			
 			endif
@@ -291,13 +374,11 @@ pen		HM_3D_pen
 			!	Jib Angle
 			!----------------------------------------------------------------------------------------------------
 			gosub	"JibAngle"
-
 		endif
 
 		!	KCP-1040
 		!----------------------------------------------------------------------------------------------------
 		if	HM_CraneName = _CraneName_arr[KCP_1040]	then
-
 			roty	-HM_JibAng
 			add		0, _mTruss_posy, _mTruss_posz
 
@@ -325,7 +406,7 @@ pen		HM_3D_pen
 				mat_color = _stMat_Red
 				addx	_Truss_1st_len + _Truss_2nd_len*3
 					gosub	"Jib_Truss_str_5152"
-				del	1																		
+				del	1
 
 				mat_color = _stMat_White
 				addx	_Truss_1st_len + _Truss_2nd_len*4
@@ -426,9 +507,835 @@ pen		HM_3D_pen
 			!	Jib Angle
 			!----------------------------------------------------------------------------------------------------
 			gosub	"JibAngle"
-
 		endif
 
+		!	OTA-60HN
+		!-----------------------------------------------------------------------------------------------
+		if	HM_CraneName = _CraneName_arr[OTA_60HN]	then
+			roty	-HM_JibAng
+			add		0, _mTruss_posy, _mTruss_posz
+
+			!	20.0m
+			if	HM_JibLen = "20.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_3500"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					gosub	"Jib_Truss_end_4000"
+				del	1
+			endif
+
+			!	25.0m
+			if	HM_JibLen = "25.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_3500"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_5000"
+				del	1
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*4
+					gosub	"Jib_Truss_end_4000"
+				del	1
+			endif
+
+			del 2
+
+			!	Anchor
+			!----------------------------------------------------------------------------------------------------
+			addy	-HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+			addy	HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+
+			!	Jib Angle
+			!----------------------------------------------------------------------------------------------------
+			gosub	"JibAngle"
+		endif
+
+		!	OTA-150HN
+		!-----------------------------------------------------------------------------------------------
+		if	HM_CraneName = _CraneName_arr[OTA_150HN]	then
+			roty	-HM_JibAng
+			add		0, _mTruss_posy, _mTruss_posz
+
+			!	24.0m
+			if	HM_JibLen = "24.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_end_6000"
+				del	1
+			endif
+
+			!	30.0m
+			if	HM_JibLen = "30.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					gosub	"Jib_Truss_end_6000"
+				del	1
+			endif
+
+			!	35.0m
+			if	HM_JibLen = "35.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*3 + _Truss_3rd_len
+					gosub	"Jib_Truss_end_6000"
+				del	1
+			endif
+
+			!	40.0m
+			if	HM_JibLen = "40.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*3 + _Truss_3rd_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3 + _Truss_3rd_len*2
+					gosub	"Jib_Truss_end_6000"
+				del	1
+			endif
+
+			del 2
+
+			!	Anchor
+			!----------------------------------------------------------------------------------------------------
+			addy	-HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+			addy	HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+
+			!	Jib Angle
+			!----------------------------------------------------------------------------------------------------
+			gosub	"JibAngle"
+		endif
+
+		!	OTA-300H
+		!-----------------------------------------------------------------------------------------------
+		if	HM_CraneName = _CraneName_arr[OTA_300H]	then
+			roty	-HM_JibAng
+			add		0, _mTruss_posy, _mTruss_posz
+
+			!	33.0m
+			if	HM_JibLen = "33.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
+					_offsetValue = 0.250
+					_mOutFrmD_end = 0.475
+					_zPosOutFrm_end = 0.350
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			!	38.5m
+			if	HM_JibLen = "38.5m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
+					gosub	"Jib_Truss_str_5500"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len + _Truss_4th_len
+					_offsetValue = 0.250
+					_mOutFrmD_end = 0.475
+					_zPosOutFrm_end = 0.350
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			!	44.0m
+			if	HM_JibLen = "44.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
+					gosub	"Jib_Truss_str_5500"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len + _Truss_4th_len
+					gosub	"Jib_Truss_str_5500"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len + _Truss_4th_len*2
+					_offsetValue = 0.250
+					_mOutFrmD_end = 0.475
+					_zPosOutFrm_end = 0.350
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			del 2
+
+			!	Anchor
+			!----------------------------------------------------------------------------------------------------
+			addy	-HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+			addy	HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+
+			!	Jib Angle
+			!----------------------------------------------------------------------------------------------------
+			gosub	"JibAngle"
+		endif
+
+		!	OTA-600H
+		!-----------------------------------------------------------------------------------------------
+		if	HM_CraneName = _CraneName_arr[OTA_600H]	then
+			roty	-HM_JibAng
+			add		0, _mTruss_posy, _mTruss_posz
+
+			!	36.0m
+			if	HM_JibLen = "36.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					_offsetValue = 0.315
+					_mOutFrmD_end = 0.500
+					_zPosOutFrm_end = 0.350
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			!	41.0m
+			if	HM_JibLen = "41.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*2 + _Truss_3rd_len
+					_offsetValue = 0.315
+					_mOutFrmD_end = 0.500
+					_zPosOutFrm_end = 0.350
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			!	45.0m
+			if	HM_JibLen = "45.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					_offsetValue = 0.315
+					_mOutFrmD_end = 0.500
+					_zPosOutFrm_end = 0.350
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			!	50.0m
+			if	HM_JibLen = "50.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*3 + _Truss_3rd_len
+					_offsetValue = 0.315
+					_mOutFrmD_end = 0.500
+					_zPosOutFrm_end = 0.350
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			del 2
+
+			!	Anchor
+			!----------------------------------------------------------------------------------------------------
+			addy	-HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+			addy	HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+
+			!	Jib Angle
+			!----------------------------------------------------------------------------------------------------
+			gosub	"JibAngle"
+		endif
+
+		!	OTS-50NL
+		!-----------------------------------------------------------------------------------------------
+		if	HM_CraneName = _CraneName_arr[OTS_50NL]	then
+			roty	-HM_JibAng
+			add		0, _mTruss_posy, _mTruss_posz
+
+			!	18.0m
+			if	HM_JibLen = "18.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6870"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_6920"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_end_6720"
+				del	1
+			endif
+
+			!	25.0m
+			if	HM_JibLen = "25.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6870"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_6920"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6920"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_end_6720"
+				del	1
+			endif
+
+			!	32.0m
+			if	HM_JibLen = "32.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6870"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_6920"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_6920"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_6920"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					gosub	"Jib_Truss_end_6720"
+				del	1
+			endif
+
+			del 2
+
+			!	Anchor
+			!----------------------------------------------------------------------------------------------------
+			addy	-HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+			addy	HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+
+			!	Jib Angle
+			!----------------------------------------------------------------------------------------------------
+			gosub	"JibAngle"
+		endif
+
+		!	MAX-1020
+		!----------------------------------------------------------------------------------------------------
+		if	HM_CraneName = _CraneName_arr[MAX_1020]	then
+			roty	-HM_JibAng
+			add		0, _mTruss_posy, _mTruss_posz
+
+			!	17.6m
+			!----------------------------------------------------------------------------------------------------
+			if	HM_JibLen = "17.6m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6000_2"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_5600"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_end_6000_2"
+				del	1	
+			endif
+
+			!	23.2m
+			!----------------------------------------------------------------------------------------------------
+			if	HM_JibLen = "23.2m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_6000_2"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_5600"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_5600"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_end_6000_2"
+				del	1
+			endif
+
+			del	2
+
+			!	Anchor
+			!----------------------------------------------------------------------------------------------------
+			addy	-HM_JibWidth/2
+				gosub	"shape_anchor_2"
+			del	1
+			addy	HM_JibWidth/2
+				gosub	"shape_anchor_2"
+			del	1
+
+			!	Jib Angle
+			!----------------------------------------------------------------------------------------------------
+			gosub	"JibAngle"
+		endif
+
+		!	OTS-70
+		!-----------------------------------------------------------------------------------------------
+		if	HM_CraneName = _CraneName_arr[OTS_70]	then
+			roty	-HM_JibAng
+			add		0, _mTruss_posy, _mTruss_posz
+
+			!	25.0m
+			if	HM_JibLen = "25.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_7000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len + _Truss_3rd_len
+					_offsetValue = 0.290
+					_mOutFrmD_end = 0.475
+					_zPosOutFrm_end = 0.500
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			!	30.0m
+			if	HM_JibLen = "30.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_7000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					_offsetValue = 0.290
+					_mOutFrmD_end = 0.475
+					_zPosOutFrm_end = 0.500
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			!	35.0m
+			if	HM_JibLen = "35.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_7000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*2 + _Truss_3rd_len
+					_offsetValue = 0.290
+					_mOutFrmD_end = 0.475
+					_zPosOutFrm_end = 0.500
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			!	40.0m
+			if	HM_JibLen = "40.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_7000"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_9000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*2 + _Truss_3rd_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2 + _Truss_3rd_len*2
+					_offsetValue = 0.290
+					_mOutFrmD_end = 0.475
+					_zPosOutFrm_end = 0.500
+					gosub	"Jib_Truss_end_9000"
+				del	1
+			endif
+
+			del 2
+
+			!	Anchor
+			!----------------------------------------------------------------------------------------------------
+			addy	-HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+			addy	HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+
+			!	Jib Angle
+			!----------------------------------------------------------------------------------------------------
+			gosub	"JibAngle"
+		endif
+
+		!	OTS-70
+		!-----------------------------------------------------------------------------------------------
+		if	HM_CraneName = _CraneName_arr[OTS_80]	then
+			roty	-HM_JibAng
+			add		0, _mTruss_posy, _mTruss_posz
+
+			!	20.0m
+			if	HM_JibLen = "20.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9085"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					_offsetValue = -0.150
+					_zPosOutFrm_end = 0.215
+					_mOutFrmD_end = 0.525
+					gosub	"Jib_Truss_end_8915"
+				del	1
+			endif
+
+			!	25.0m
+			if	HM_JibLen = "25.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9085"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_end_8915"
+				del	1
+			endif
+
+			!	30.0m
+			if	HM_JibLen = "30.0m"	then
+				mat_color = _stMat_Red
+				gosub	"Jib_Truss_1st_9085"
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_White
+				addx	_Truss_1st_len + _Truss_2nd_len*2
+					gosub	"Jib_Truss_str_5000"
+				del	1
+
+				mat_color = _stMat_Red
+				addx	_Truss_1st_len + _Truss_2nd_len*3
+					gosub	"Jib_Truss_end_8915"
+				del	1
+			endif
+
+			del 2
+
+			!	Anchor
+			!----------------------------------------------------------------------------------------------------
+			addy	-HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+			addy	HM_JibWidth/2
+				gosub	"shape_anchor"
+			del	1
+
+			!	Jib Angle
+			!----------------------------------------------------------------------------------------------------
+			gosub	"JibAngle"
+		endif
 	endif
 
 	!	Cylind
@@ -828,19 +1735,19 @@ end
 
 		!	1st
 		!----------------------------------------------------------------------------------------------------
-		"Jib_Truss_1st_9000"	:
+		"Jib_Truss_1st_9085"	:
 
 			!	Outer Frame
 			!----------------------------------------------------------------------------------------------------
 			!	Origin : End Point 
-			_mOutFrmR = 0.076/2										!	Outer Frame Radius
-			_mOutFrmL = 9.000										!	트러스 길이 
-			_mOutFrmL_end = _mOutFrmL - 0.150						!	끝단에서 커팅되는 X축 좌표
-			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
-			_mOutFrmD_end = 0.160									!	끝단 프레임의 깊이
-			_mOutFrmAng_bot = 2.41									!	하부 프레임 각도
-			_mOutFrmAng_top = 4.37									!	상부 프레임 각도
-			_mOutFrm_OffsetZ_bot = 0									!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+			_mOutFrmR = 0.076/2																!	Outer Frame Radius
+			_mOutFrmL = 9.085																!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.150												!	끝단에서 커팅되는 X축 좌표
+			_mOutFrmD_start = HM_JibDepth													!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.160															!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn((abs(_mTruss_posz) - 0.085)/(_mOutFrmL_end))					!	하부 프레임 각도
+			_mOutFrmAng_top = atn(((HM_JibDepth - abs(_mTruss_posz)) - 0.085)/(_mOutFrmL_end))	!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0														!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
 
 			!	Inner Frame
 			!----------------------------------------------------------------------------------------------------
@@ -857,32 +1764,34 @@ end
 		
 		return
 
-		"Jib_Truss_1st_3175"	:
+
+		"Jib_Truss_1st_9000"	:
 
 			!	Outer Frame
 			!----------------------------------------------------------------------------------------------------
 			!	Origin : End Point 
-			_mOutFrmR = 0.060/2										!	Outer Frame Radius
-			_mOutFrmL = 3.175										!	트러스 길이 
-			_mOutFrmL_end = _mOutFrmL - 0.150						!	끝단에서 커팅되는 X축 좌표
-			_mOutFrmD_start = 0.377									!	시작단 프레임의 깊이
-			_mOutFrmD_end = 0.150									!	끝단 프레임의 깊이
-			_mOutFrmAng_bot = 1.20									!	하부 프레임 각도
-			_mOutFrmAng_top = 3.10									!	상부 프레임 각도
-			_mOutFrm_OffsetZ_bot = 0.062								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+			_mOutFrmR = 0.076/2																!	Outer Frame Radius
+			_mOutFrmL = 9.000																!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.150												!	끝단에서 커팅되는 X축 좌표
+			_mOutFrmD_start = HM_JibDepth													!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.160															!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn((abs(_mTruss_posz) - 0.0675)/(_mOutFrmL_end))					!	하부 프레임 각도
+			_mOutFrmAng_top = atn(((HM_JibDepth - abs(_mTruss_posz)) - 0.0675)/(_mOutFrmL_end))	!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0														!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
 
 			!	Inner Frame
 			!----------------------------------------------------------------------------------------------------
 			!	Origin : End Point 
-			_mInner_offsetX = 0.130									!	Start to Outer Frame (Offset X Position)
-			_mBoundary_offsetX = 0.110								!	Start to Outer Frame (Rectangle Boundary Frame)
+			_mInner_offsetX = 0.146									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
 
-			_mTriNum = 4											!	삼각 트러스 개수
-			_mTriW_total = 2.000									!	삼각 트러스 전체 너비
+			_mTriNum = 8											!	삼각 트러스 개수
+			_mTriW_total = 8.000									!	삼각 트러스 전체 너비
 			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth									!	삼각 트러스 높이
 
 			gosub	"Jib_Truss_1st"
-
+		
 		return
 
 		"Jib_Truss_1st_7410"	:
@@ -914,6 +1823,179 @@ end
 		
 		return
 
+		"Jib_Truss_1st_7000"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 7.000										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.150						!	끝단에서 커팅되는 X축 좌표
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.160									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(0.550/_mOutFrmL_end)				!	하부 프레임 각도
+			_mOutFrmAng_top = atn(0.550/_mOutFrmL_end)				!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mInner_offsetX = 0.180							!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120						!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 4										!	삼각 트러스 개수
+			_mTriW_total = 4.500								!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total/_mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth								!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_1st"
+		
+		return
+
+
+		"Jib_Truss_1st_6870"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 6.870										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.150						!	끝단에서 커팅되는 X축 좌표
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.160									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(0.300/_mOutFrmL_end)				!	하부 프레임 각도
+			_mOutFrmAng_top = atn(0.400/_mOutFrmL_end)				!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mInner_offsetX = 0.180							!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120						!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 4										!	삼각 트러스 개수
+			_mTriW_total = 4.500								!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total/_mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth								!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_1st"
+		
+		return
+
+		"Jib_Truss_1st_6000"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 6.000										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.150						!	끝단에서 커팅되는 X축 좌표
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.160									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(420/5850)							!	하부 프레임 각도
+			_mOutFrmAng_top = atn(720/5850)							!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mInner_offsetX = 0.180							!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120						!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 4										!	삼각 트러스 개수
+			_mTriW_total = 4.500								!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total/_mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth								!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_1st"
+		
+		return
+
+		"Jib_Truss_1st_6000_2"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 6.000										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.220						!	끝단에서 커팅되는 X축 좌표
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.400									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(320/5850)							!	하부 프레임 각도
+			_mOutFrmAng_top = atn(270/5850)							!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mInner_offsetX = 0.180							!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120						!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 4										!	삼각 트러스 개수
+			_mTriW_total = 4.5								!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total/_mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth								!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_1st"
+		
+		return
+
+		"Jib_Truss_1st_3500"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 3.500										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.150						!	끝단에서 커팅되는 X축 좌표
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.200									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(214/3500)							!	하부 프레임 각도
+			_mOutFrmAng_top = atn(374/3500)							!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mInner_offsetX = 0.120							!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120						!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 3											!	삼각 트러스 개수
+			_mTriW_total = 2.700									!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth									!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_1st"
+
+		return
+
+		"Jib_Truss_1st_3175"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mOutFrmR = 0.060/2										!	Outer Frame Radius
+			_mOutFrmL = 3.175										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.150						!	끝단에서 커팅되는 X축 좌표
+			_mOutFrmD_start = 0.377									!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.150									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = 1.20									!	하부 프레임 각도
+			_mOutFrmAng_top = 3.10									!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0.062								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			!	Origin : End Point 
+			_mInner_offsetX = 0.130									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.110								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 4											!	삼각 트러스 개수
+			_mTriW_total = 2.000									!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+
+			gosub	"Jib_Truss_1st"
+
+		return
 
 		!	2nd
 		!----------------------------------------------------------------------------------------------------
@@ -965,14 +2047,132 @@ end
 			_mBoundary_offsetX = 0.120						!	Start to Outer Frame (Rectangle Boundary Frame)
 
 			_mTriNum = 7
-			_mTriW = 1.244
-			_mTriW_total = _mTriW*_mTriNum
+			_mTriW_total = (_mOutFrmL-_mInner_offsetX*2)
+			_mTriW = _mTriW_total/_mTriNum
 			_mTriH = HM_JibDepth
 
 			gosub	"Jib_Truss_straight"
 
 		return
 
+		"Jib_Truss_str_6920"	:
+
+			material mat_color 
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2
+			_mOutFrmL = 6.920
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.160							!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120						!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 6
+			_mTriW_total = (_mOutFrmL-_mInner_offsetX*2)
+			_mTriW = _mTriW_total/_mTriNum
+			_mTriH = HM_JibDepth
+
+			gosub	"Jib_Truss_straight"
+
+		return
+
+		"Jib_Truss_str_6000"	:
+
+			material mat_color 
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2
+			_mOutFrmL = 6.000
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.146							!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120						!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 5
+			_mTriW_total = (_mOutFrmL-_mInner_offsetX*2)
+			_mTriW = _mTriW_total/_mTriNum
+			_mTriH = HM_JibDepth
+
+			gosub	"Jib_Truss_straight"
+
+		return
+
+		
+		"Jib_Truss_str_5600"	:
+
+			material mat_color 
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2
+			_mOutFrmL = 5.600
+
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.146									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 4
+			_mTriW_total = _mOutFrmL-_mInner_offsetX*2				!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth
+
+			gosub	"Jib_Truss_straight"
+
+		return
+
+		"Jib_Truss_str_5500"	:
+
+			material mat_color 
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2
+			_mOutFrmL = 5.500
+
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.146									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 4
+			_mTriW_total = _mOutFrmL-_mInner_offsetX*2				!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth
+
+			gosub	"Jib_Truss_straight"
+
+		return
+
+		"Jib_Truss_str_5152"	:
+
+			material mat_color 
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2
+			_mOutFrmL = 5.152
+
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.180									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 3
+			_mTriW_total = _mOutFrmL-_mInner_offsetX*2				!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth
+
+			gosub	"Jib_Truss_straight"
+
+		return	
 
 		"Jib_Truss_str_5000"	:
 
@@ -1023,7 +2223,6 @@ end
 
 		return
 
-
 		"Jib_Truss_str_2000"	:
 
 			material mat_color 
@@ -1049,29 +2248,6 @@ end
 		return	
 
 
-		"Jib_Truss_str_5152"	:
-
-			material mat_color 
-
-			!	Outer Frame
-			!----------------------------------------------------------------------------------------------------
-			_mOutFrmR = 0.076/2
-			_mOutFrmL = 5.152
-
-
-			!	Inner Frame
-			!----------------------------------------------------------------------------------------------------
-			_mInner_offsetX = 0.180									!	Start to Outer Frame (Offset X Position)
-			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
-
-			_mTriNum = 3
-			_mTriW_total = _mOutFrmL-_mInner_offsetX*2				!	삼각 트러스 전체 너비
-			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
-			_mTriH = HM_JibDepth
-
-			gosub	"Jib_Truss_straight"
-
-		return	
 
 
 
@@ -1116,11 +2292,10 @@ end
 			!----------------------------------------------------------------------------------------------------
 			_mOutFrmR = 0.076/2										!	Outer Frame Radius
 			_mOutFrmL = 9.000										!	트러스 길이 
-			_mOutFrmL_end = _mOutFrmL - 0.200						!	Truss End Point Lendth 
+			_mOutFrmL_end = _mOutFrmL - _offsetValue					!	Truss End Point Lendth 
 			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
-			_mOutFrmD_end = 0.400									!	끝단 프레임의 깊이
-			_mOutFrmAng_bot = 2.14									!	하부 프레임 각도
-			_mOutFrmAng_top = 3.12									!	상부 프레임 각도
+			_mOutFrmAng_bot = atn((_zPosOutFrm_end)/(_mOutFrmL_end))									!	하부 프레임 각도
+			_mOutFrmAng_top = atn((HM_JibDepth - (_mOutFrmD_end + _zPosOutFrm_end))/(_mOutFrmL_end))	!	상부 프레임 각도
 			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
 
 
@@ -1143,7 +2318,7 @@ end
 			mAdd = 0.100		
 			mW = HM_JibWidth + mAdd
 			mD = _mOutFrmD_end + mAdd
-			mPosz = 0.330 - mAdd/2
+			mPosz = _zPosOutFrm_end - mAdd/2
 			addz	mPosz
 				addy	-mAdd/2
 					addx	_mOutFrmL_end
@@ -1151,6 +2326,239 @@ end
 					del	1
 				del	1
 			del	1
+
+		return
+
+		"Jib_Truss_end_8915"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 8.915										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - _offsetValue					!	Truss End Point Lendth 
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmAng_bot = atn((_zPosOutFrm_end)/(_mOutFrmL_end))									!	하부 프레임 각도
+			_mOutFrmAng_top = atn((HM_JibDepth - (_mOutFrmD_end + _zPosOutFrm_end))/(_mOutFrmL_end))	!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.146									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 8											!	삼각 트러스 개수
+			_mTriW_total = 8.000									!	삼각 트러스 전체 너비
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth									!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_end"	
+
+
+			!	End Panel
+			!----------------------------------------------------------------------------------------------------
+			mT = 0.009
+			mAdd = 0.100		
+			mW = HM_JibWidth + mAdd
+			mD = _mOutFrmD_end + mAdd
+			mPosz = _zPosOutFrm_end - mAdd/2
+			addz	mPosz
+				addy	-mAdd/2
+					addx	_mOutFrmL_end
+						block	mT, mW, mD
+					del	1
+				del	1
+			del	1
+
+		return
+
+
+		"Jib_Truss_end_6720"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 6.720										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.117						!	Truss End Point Lendth 
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.200									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(0.275/_mOutFrmL_end)				!	하부 프레임 각도
+			_mOutFrmAng_top = atn(0.375/_mOutFrmL_end)				!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.180									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 5											!	삼각 트러스 개수
+			_mTriW_total = _mOutFrmL_end - 0.200					!	삼각 트러스 전체 너비		
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth									!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_end"	
+
+		return
+
+		"Jib_Truss_end_6000"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 6.000										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.216						!	Truss End Point Lendth 
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.400									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(375/5775)							!	하부 프레임 각도
+			_mOutFrmAng_top = atn(525/5775)							!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.180									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 6											!	삼각 트러스 개수
+			_mTriW_total = _mOutFrmL_end-0.200						!	삼각 트러스 전체 너비		
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth									!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_end"	
+
+
+			!	End Panel
+			!----------------------------------------------------------------------------------------------------
+			mT = 0.009
+			mAdd = 0.100		
+			mW = HM_JibWidth + mAdd
+			mD = _mOutFrmD_end + mAdd
+			mPosz = 0.575 - mD/2
+			addz	mPosz
+				addy	-mAdd/2
+					addx	_mOutFrmL_end
+						block	mT, mW, mD
+					del	1
+				del	1
+			del	1
+
+		return
+
+		"Jib_Truss_end_6000_2"	:
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 6.000										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.216						!	Truss End Point Lendth 
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.400									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(375/5775)							!	하부 프레임 각도
+			_mOutFrmAng_top = atn(30/5775)							!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.180									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 6											!	삼각 트러스 개수
+			_mTriW_total = _mOutFrmL_end-0.200						!	삼각 트러스 전체 너비		
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth									!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_end"	
+
+
+			!	End Panel
+			!----------------------------------------------------------------------------------------------------
+			mT = 0.009
+			mAdd = 0.100		
+			mW = HM_JibWidth + mAdd
+			mD = _mOutFrmD_end + mAdd
+			mPosz = 0.575 - mD/2
+			addz	mPosz
+				addy	-mAdd/2
+					addx	_mOutFrmL_end
+						block	mT, mW, mD
+					del	1
+				del	1
+			del	1
+
+		return
+
+
+		"Jib_Truss_end_6096"	:			
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 6.096										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.250						!	Truss End Point Lendth 
+			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.238									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = 1.41									!	하부 프레임 각도
+			_mOutFrmAng_top = 6.81									!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.180									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 5											!	삼각 트러스 개수
+			_mTriW_total = _mOutFrmL_end-0.200						!	삼각 트러스 전체 너비		
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+			_mTriH = HM_JibDepth									!	삼각 트러스 높이
+
+			gosub	"Jib_Truss_end"	
+
+
+			!	End Panel
+			!----------------------------------------------------------------------------------------------------
+			mT = 0.009
+			mAdd = 0.100		
+			mW = HM_JibWidth + mAdd
+			mD = _mOutFrmD_end + mAdd
+			mPosz = 0.144 - mAdd/2
+			addz	mPosz
+				addy	-mAdd/2
+					addx	_mOutFrmL_end
+						block	mT, mW, mD
+					del	1
+				del	1
+			del	1
+
+		return
+
+		"Jib_Truss_end_4000"	:
+
+			material mat_color 
+
+			!	Outer Frame
+			!----------------------------------------------------------------------------------------------------
+			_mOutFrmR = 0.076/2										!	Outer Frame Radius
+			_mOutFrmL = 4.000										!	트러스 길이 
+			_mOutFrmL_end = _mOutFrmL - 0.150						!	Truss End Point Lendth 
+			_mOutFrmD_start = 0.750									!	시작단 프레임의 깊이
+			_mOutFrmD_end = 0.400									!	끝단 프레임의 깊이
+			_mOutFrmAng_bot = atn(185/4000)							!	하부 프레임 각도
+			_mOutFrmAng_top = atn(345/4000)							!	상부 프레임 각도
+			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
+
+			!	Inner Frame
+			!----------------------------------------------------------------------------------------------------
+			_mInner_offsetX = 0.120									!	Start to Outer Frame (Offset X Position)
+			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
+
+			_mTriNum = 3											!	삼각 트러스 개수
+			_mTriW_total = 3.500									!	삼각 트러스 전체 너비			
+			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
+
+			gosub	"Jib_Truss_end"	
 
 		return
 
@@ -1199,49 +2607,6 @@ end
 
 		return
 
-		"Jib_Truss_end_6096"	:
-
-			!	Outer Frame
-			!----------------------------------------------------------------------------------------------------
-			_mOutFrmR = 0.076/2										!	Outer Frame Radius
-			_mOutFrmL = 6.096										!	트러스 길이 
-			_mOutFrmL_end = _mOutFrmL - 0.250						!	Truss End Point Lendth 
-			_mOutFrmD_start = HM_JibDepth							!	시작단 프레임의 깊이
-			_mOutFrmD_end = 0.238									!	끝단 프레임의 깊이
-			_mOutFrmAng_bot = 1.41									!	하부 프레임 각도
-			_mOutFrmAng_top = 6.81									!	상부 프레임 각도
-			_mOutFrm_OffsetZ_bot = 0								!	수평프레임과 최하단을 기준으로 오프셋 되는 높이 값
-
-
-			!	Inner Frame
-			!----------------------------------------------------------------------------------------------------
-			_mInner_offsetX = 0.180									!	Start to Outer Frame (Offset X Position)
-			_mBoundary_offsetX = 0.120								!	Start to Outer Frame (Rectangle Boundary Frame)
-
-			_mTriNum = 5											!	삼각 트러스 개수
-			_mTriW_total = _mOutFrmL_end-0.200						!	삼각 트러스 전체 너비		
-			_mTriW = _mTriW_total / _mTriNum						!	삼각 트러스 너비 (임시값, 도면에 없는 치수라서 프레임 갯수만큼 나눔내부 별도 연산)
-			_mTriH = HM_JibDepth									!	삼각 트러스 높이
-
-			gosub	"Jib_Truss_end"	
-
-
-			!	End Panel
-			!----------------------------------------------------------------------------------------------------
-			mT = 0.009
-			mAdd = 0.100		
-			mW = HM_JibWidth + mAdd
-			mD = _mOutFrmD_end + mAdd
-			mPosz = 0.144 - mAdd/2
-			addz	mPosz
-				addy	-mAdd/2
-					addx	_mOutFrmL_end
-						block	mT, mW, mD
-					del	1
-				del	1
-			del	1
-
-		return
 
 
 
@@ -1529,7 +2894,7 @@ end
 		!	Left
 		roty	90-_mTriAng
 			cylind _mFrmL_left, _mFrmR
-			! lin_	0, 0, 0, 0, 0, _mFrmL_left
+			! lin_	0, 0, 0, 0, 0, _mFrmL_leftf
 		del	1
 
 		!	Right

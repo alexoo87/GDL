@@ -2147,35 +2147,43 @@ return
 	if	not(GLOB_VIEW_TYPE = 2)	then
 		addy	glsLct
 			if	_hingeType = HINGE_TOP | _hingeType = HINGE_TOP_LEFT | _hingeType = HINGE_TOP_RIGHT	then
-				lin_	0,			0,		0,
-						_pnlWdt/2,	_pnlY,	_pnlZ
+				_x1 = 0			:	_y1 = 0		:	_z1 = 0
+				_x2 = _pnlWdt/2	:	_y2 = _pnlY	:	_z2 = _pnlZ
+				gosub	"drawLine"
 
-				lin_	_pnlWdt/2,	_pnlY,	_pnlZ,
-						_pnlWdt,	0,		0
+				_x1 = _pnlWdt/2	:	_y1 = _pnlY	:	_z1 = _pnlZ
+				_x2 = _pnlWdt	:	_y2 = 0		:	_z2 = 0
+				gosub	"drawLine"
 			endif
 
 			if	_hingeType = HINGE_BOTTOM | _hingeType = HINGE_BOTTOM_LEFT | _hingeType = HINGE_BOTTOM_RIGHT	then
-				lin_	0,			_pnlY,	_pnlZ,
-						_pnlWdt/2,	0,		0
+				_x1 = 0			:	_y1 = _pnlY	:	_z1 = _pnlZ
+				_x2 = _pnlWdt/2	:	_y2 = 0		:	_z2 = 0
+				gosub	"drawLine"
 
-				lin_	_pnlWdt/2,	0,		0,
-						_pnlWdt,	_pnlY,	_pnlZ
+				_x1 = _pnlWdt/2	:	_y1 = 0		:	_z1 = 0
+				_x2 = _pnlWdt	:	_y2 = _pnlY	:	_z2 = _pnlZ
+				gosub	"drawLine"
 			endif
 
 			if	_hingeType = HINGE_LEFT | _hingeType = HINGE_TOP_LEFT | _hingeType = HINGE_BOTTOM_LEFT	then
-				lin_	_pnlWdt,	0,			0,
-						0,			_pnlY/2,	_pnlZ/2
+				_x1 = _pnlWdt	:	_y1 = 0			:	_z1 = 0
+				_x2 = 0			:	_y2 = _pnlY/2	:	_z2 = _pnlZ/2
+				gosub	"drawLine"
 
-				lin_	0,			_pnlY/2,	_pnlZ/2,
-						_pnlWdt,	_pnlY,		_pnlZ
+				_x1 = 0			:	_y1 = _pnlY/2	:	_z1 = _pnlZ/2
+				_x2 = _pnlWdt	:	_y2 = _pnlY		:	_z2 = _pnlZ
+				gosub	"drawLine"
 			endif
 
 			if	_hingeType = HINGE_RIGHT | _hingeType = HINGE_TOP_RIGHT | _hingeType = HINGE_BOTTOM_RIGHT	then
-				lin_	0,			0,			0,
-						_pnlWdt,	_pnlY/2,	_pnlZ/2
+				_x1 = 0			:	_y1 = 0			:	_z1 = 0
+				_x2 = _pnlWdt	:	_y2 = _pnlY/2	:	_z2 = _pnlZ/2
+				gosub	"drawLine"
 
-				lin_	_pnlWdt,	_pnlY/2,	_pnlZ/2,
-						0,			_pnlY,		_pnlZ
+				_x1 = _pnlWdt	:	_y1 = _pnlY/2	:	_z1 = _pnlZ/2
+				_x2 = 0			:	_y2 = _pnlY		:	_z2 = _pnlZ
+				gosub	"drawLine"
 			endif
 		del 1
 	endif
@@ -2665,6 +2673,63 @@ return
 			next	m
 
 			del _nGrl
+		del 1
+	endif
+
+return
+
+!	Draw Line
+!-----------------------------------------------------------------------------------------------
+"drawLine":
+
+	!	Calculate Line Length
+	!-----------------------------------------------------------------------------------------------
+	_lineLth_XY = sqr((_x2 - _x1)^2 + (_y2 - _y1)^2)
+	_lineLth = sqr(_lineLth_XY^2 + (_z2 - _z1)^2)
+
+	!	Calculate Line Angle
+	!-----------------------------------------------------------------------------------------------
+	if	abs(_x2 - _x1) > eps	then
+		_aRotLine_Z = atn((_y2 - _y1)/(_x2 - _x1))
+	else
+		_aRotLine_Z = 0
+	endif
+	if	_x2 - _x1 > 0	then
+		_aRotLine_Y = atn((_z2 - _z1)/_lineLth_XY)
+	else
+		_aRotLine_Y = 180 - atn((_z2 - _z1)/_lineLth_XY)
+	endif
+
+	!	Parameters
+	!-----------------------------------------------------------------------------------------------
+	_dashLth = dashLth*GLOB_SCALE
+	_gapLth = gapLth*GLOB_SCALE
+	_modLth = _dashLth + _gapLth
+
+	_nLine = int(_lineLth/_modLth)
+	_rLineLth = _lineLth - _modLth*_nLine
+
+	!	Draw Line
+	!-----------------------------------------------------------------------------------------------
+	if	iLineType = LINE_SOLID	then
+		lin_	_x1,	_y1,	_z1,	_x2,	_y2,	_z2
+	endif
+
+	if	iLineType = LINE_DOTTED	then
+		add	_x1,	_y1,	_z1
+			rotz	_aRotLine_Z
+				roty	-_aRotLine_Y
+					for	m = 1	to	_nLine
+						lin_	0,	0,	0,	_dashLth,	0,	0
+
+						addx	_modLth
+					next	m
+
+					lin_	0,	0,	0,	_rLineLth,	0,	0
+
+					del	_nLine
+				del 1
+			del 1
 		del 1
 	endif
 

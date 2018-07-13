@@ -1,0 +1,747 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+if	GLOB_FEEDBACK_MODE	then
+	HM_3D_resol = 3
+endif
+
+resol	HM_3D_resol
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+if	GLOB_VIEW_TYPE = 2	then
+	HM_3D_pen = HM_2D_cranePen
+endif
+pen	HM_3D_pen
+
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+call	"HM_Material_White.gsm"
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+if	HM_matWarning = ""	then
+	_material = HM_matBody2
+else
+	_material = HM_matWarning
+endif
+
+material	_material
+
+rotz	HM_WorkingAng
+	!	Mast Basement
+	!-----------------------------------------------------------------------------------------------
+		rotz	45
+			call	"HM_mc_OutriggerTower.gsm"	parameters	all	HM_OutrType = 1,	!	Cross
+																HM_OutrWidth = 2.850,
+																HM_OutrDepth = 2.850,
+																HM_OutrHeight = 0.910,
+																mBeamW = 0.300,
+																mBeamFlangeT = 0.028,
+																mBeamWebT = 0.018,
+																bPlate = 0
+		del 1
+
+	!	Mast
+	!-----------------------------------------------------------------------------------------------
+		_zPosMast = 0.955
+
+		addz	_zPosMast
+			!	Base Plate(Bottom)
+			for	i = 1	to	4
+				put	0.625,	0.625,	15,
+					0.625,	0.260,	15,
+					0.525,	0.260,	15,
+					0.260,	0.525,	15,
+					0.260,	0.625,	15
+
+				prism_	nsp/3,	-0.045,		get(nsp)
+
+				rotz	90
+			next	i
+
+			del 4
+
+			!	Mast Paramaters
+			_mastPlateWdt = 0.365
+			_mastPlateThk = 0.040
+			_mastColWdt = 0.150
+			_mastColThk = 0.020
+			_bInnerCol = 1
+
+			_nMast1 = 4
+			_nMast2 = 3
+
+			_mastEntireHgt = _nMast1*4.000 + _nMast2*HM_MastHeight
+
+			!	Mast Type 1
+			call	"HM_mc_Mast.gsm"	parameters	all	HM_MastType = 2,
+														HM_MastNumber = _nMast1,
+														HM_MastHeight = 4.000,
+														HM_PlateWdt = _mastPlateWdt,
+														HM_PlateThk = _mastPlateThk,
+														HM_ColWdt = _mastColWdt,
+														HM_ColThk = _mastColThk,
+														bInnerColumn = _bInnerCol
+
+			_mastPlateWdt = 0.285
+			_mastPlateThk = 0.040
+			_mastColWdt = 0.150
+			_mastColThk = 0.020
+			_bInnerCol = 1
+
+			!	Mast Type 2
+			addz	_nMast1*4.000
+				call	"HM_mc_Mast.gsm"	parameters	all	HM_MastType = 2,
+															HM_MastNumber = _nMast2,
+															HM_PlateWdt = _mastPlateWdt,
+															HM_PlateThk = _mastPlateThk,
+															HM_ColWdt = _mastColWdt,
+															HM_ColThk = _mastColThk,
+															bInnerColumn = _bInnerCol
+			del 1
+		del 1
+
+	!	Upper Deck
+	!-----------------------------------------------------------------------------------------------
+		!	Parameters
+		dim	_coorGR[][]
+		_deckThk = 0.050
+
+		!	1st
+		_zPosDeck_1st = _zPosMast + _mastEntireHgt - 5.006
+
+		addz	_zPosDeck_1st
+			!	L
+			put	0.840,	-1.285,	15,
+				-1.500,	-1.285,	15,
+				-1.800,	-0.985,	15,
+				-1.800,	0.985,	15,
+				-1.500,	1.285,	15,
+				0.840,	1.285,	15,
+				0.840,	0.785,	15,
+				-0.985,	0.785,	15,
+				-0.985,	-0.785,	15,
+				0.840,	-0.785,	15
+
+			prism_	nsp/3,	_deckThk,	get(nsp)
+
+			!	R
+			put	0.855,	-1.280,	15,
+				0.855,	1.280,	15,
+				1.515,	1.280,	15,
+				1.715,	1.080,	15,
+				1.715,	-1.080,	15,
+				1.515,	-1.280,	15
+
+			prism_	nsp/3,	_deckThk,	get(nsp)
+
+			!	Guard Rail
+			addz	_deckThk
+				!	L
+				add	0.810,	-1.255,	0
+					!	Insert Coordinates
+					_coorGR[1][1] = 0
+					_coorGR[1][2] = 0
+
+					_coorGR[2][1] = -2.310 + 0.030*tan(22.5)
+					_coorGR[2][2] = 0
+
+					_coorGR[3][1] = -2.580
+					_coorGR[3][2] = 0.270 + 0.030*tan(22.5)
+
+					_coorGR[4][1] = -2.580
+					_coorGR[4][2] = 2.240 - 0.030*tan(22.5)
+
+					_coorGR[5][1] = -2.310 + 0.030*tan(22.5)
+					_coorGR[5][2] = 2.510
+
+					_coorGR[6][1] = 0
+					_coorGR[6][2] = 2.510
+
+					call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 6,
+																		HM_GRail_Pt = _coorGR,
+																		HM_GRailType = 2,
+																		HM_GRailRef = 1,
+																		HM_GRailH = 1.000 + 0.025/2,
+																		HM_GRailD = 0.025,
+																		HM_GRailT = 0.025,
+																		HM_GRailDist = 1.000,
+																		HM_GRailDist_hori = 0.450,
+																		HM_matGRail = HM_matBody2
+				del 1
+
+				!	R
+				add	0.885,	1.250,	0
+					!	Insert Coordinates
+					_coorGR[1][1] = 0
+					_coorGR[1][2] = 0
+
+					_coorGR[2][1] = 0.630 - 0.030*tan(22.5)
+					_coorGR[2][2] = 0
+
+					_coorGR[3][1] = 0.800
+					_coorGR[3][2] = -0.170 - 0.030*tan(22.5)
+
+					_coorGR[4][1] = 0.800
+					_coorGR[4][2] = -2.330 + 0.030*tan(22.5)
+
+					_coorGR[5][1] = 0.630 - 0.030*tan(22.5)
+					_coorGR[5][2] = -2.500
+
+					_coorGR[6][1] = 0
+					_coorGR[6][2] = -2.500
+
+					call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 6,
+																		HM_GRail_Pt = _coorGR,
+																		HM_GRailType = 2,
+																		HM_GRailRef = 1,
+																		HM_GRailH = 1.000 + 0.025/2,
+																		HM_GRailD = 0.025,
+																		HM_GRailT = 0.025,
+																		HM_GRailDist = 1.000,
+																		HM_GRailDist_hori = 0.450,
+																		HM_matGRail = HM_matBody2
+				del 1
+			del 1
+		del 1
+
+		!	2nd
+		_zPosDeck_2nd = _zPosDeck_1st + 2.825
+
+		addz	_zPosDeck_2nd
+			put	-1.060,	-0.740,	15,
+				-2.300,	-0.740,	15,
+				-2.300,	0.615,	15,
+				-1.560,	0.615,	15,
+				-1.560,	0.990,	15,
+				-1.260,	1.290,	15,
+				1.515,	1.290,	15,
+				1.715,	1.090,	15,
+				1.715,	-1.090,	15,
+				1.515,	-1.290,	15,
+				-1.050,	-1.290,	15,
+				-1.050,	-0.790,	15,
+				1.000,	-0.790,	15,
+				1.000,	0.790,	15,
+				-1.060,	0.790,	15
+
+			prism_	nsp/3,	_deckThk,	get(nsp)
+
+			!	Guard Rail
+			add	-2.270,	-0.710,	_deckThk
+				!	Insert Coordinates
+				_coorGR[1][1] = 1.180
+				_coorGR[1][2] = 0
+
+				_coorGR[2][1] = 0
+				_coorGR[2][2] = 0
+
+				_coorGR[3][1] = 0
+				_coorGR[3][2] = 1.295
+
+				_coorGR[4][1] = 0.740
+				_coorGR[4][2] = 1.295
+
+				_coorGR[5][1] = 0.740
+				_coorGR[5][2] = 1.700 - 0.030*tan(22.5)
+
+				_coorGR[6][1] = 1.010 + 0.030*tan(22.5)
+				_coorGR[6][2] = 1.970
+
+				_coorGR[7][1] = 3.785 - 0.030*tan(22.5)
+				_coorGR[7][2] = 1.970
+
+				_coorGR[8][1] = 3.955
+				_coorGR[8][2] = 1.800 - 0.030*tan(22.5)
+
+				_coorGR[9][1] = 3.955
+				_coorGR[9][2] = -0.380 + 0.030*tan(22.5)
+
+				_coorGR[10][1] = 3.785 - 0.030*tan(22.5)
+				_coorGR[10][2] = -0.550
+
+				_coorGR[11][1] = 1.250
+				_coorGR[11][2] = -0.550
+
+				_coorGR[12][1] = 1.250
+				_coorGR[12][2] = -0.110
+
+				call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 12,
+																	HM_GRail_Pt = _coorGR,
+																	HM_GRailType = 2,
+																	HM_GRailRef = 1,
+																	HM_GRailH = 1.000 + 0.025/2,
+																	HM_GRailD = 0.025,
+																	HM_GRailT = 0.025,
+																	HM_GRailDist = 1.000,
+																	HM_GRailDist_hori = 0.450,
+																	HM_matGRail = HM_matBody2
+			del 1
+
+		del 1
+
+	!	Connect to Main Object
+	!-----------------------------------------------------------------------------------------------
+		_zPosConnect = _zPosMast + _mastEntireHgt
+
+		!	Cylinder
+		addz	_zPosConnect
+			cylind	0.2035,	1.110
+
+			! addz	1.300
+			! 	cylind	0.050,	1.085
+			! del 1
+		del 1
+
+		!	H-Beam
+		addz	_zPosConnect + 0.2035 !+ 0.050
+			add	1.030,	0.880,	0
+				rotz	180
+					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.300,
+																	HM_Beam_Width_EP = 0.300,
+																	HM_Beam_Height_SP = 0.390,
+																	HM_Beam_Height_EP = 0.390,
+																	HM_Beam_Length = 4.110,
+																	HM_Beam_FlangeT = 0.016,
+																	HM_Beam_WebT = 0.010,
+																	HM_matBeam = HM_matBody2
+				del 1
+			del 1
+
+			add	1.030,	-0.880,	0
+				rotz	180
+					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.300,
+																	HM_Beam_Width_EP = 0.300,
+																	HM_Beam_Height_SP = 0.390,
+																	HM_Beam_Height_EP = 0.390,
+																	HM_Beam_Length = 4.110,
+																	HM_Beam_FlangeT = 0.016,
+																	HM_Beam_WebT = 0.010,
+																	HM_matBeam = HM_matBody2
+				del 1
+			del 1
+
+			addy	-0.730
+				addx	0.880
+					gosub	"draw_Connect_Beam_H"
+				del 1
+				addx	-0.880
+					gosub	"draw_Connect_Beam_H"
+				del 1
+				addx	-2.250
+					gosub	"draw_Connect_Beam_H"
+				del 1
+			del 1
+		del 1
+
+	!	Main Deck
+	!-----------------------------------------------------------------------------------------------
+		!	Parameters
+		_deckThk = 0.100
+
+		_zPosMainDeck = _zPosConnect + 0.4275
+
+		addz	_zPosMainDeck
+			put	-1.370,	-2.065,	15,
+				-2.690,	-2.065,	15,
+				-3.195,	-1.140,	15,
+				-3.300,	-0.805,	15,
+				-3.300,	0.805,	15,
+				-3.195,	1.140,	15,
+				-2.745,	1.975,	15,
+				0.350,	1.975,	15,
+				1.495,	1.462,	15,
+				1.495,	-0.350,	15,
+				1.050,	-0.350,	15,
+				1.050,	1.060,	15,
+				-3.075,	1.060,	15,
+				-3.075,	-1.060,	15,
+				-1.370,	-1.060,	15
+
+			prism_	nsp/3,	_deckThk,	get(nsp)
+
+			!	Guard Rail
+			add	-1.400,	-1.090,	_deckThk
+				!	Insert Coordinates
+				_coorGR[1][1] = 0
+				_coorGR[1][2] = 0
+
+				_coorGR[2][1] = 0
+				_coorGR[2][2] = -0.945
+
+				_coorGR[3][1] = -1.272
+				_coorGR[3][2] = -0.945
+
+				_coorGR[4][1] = -1.767
+				_coorGR[4][2] = -0.038
+
+				_coorGR[5][1] = -1.870
+				_coorGR[5][2] = 0.2896
+
+				_coorGR[6][1] = -1.870
+				_coorGR[6][2] = 1.890
+
+				_coorGR[7][1] = -1.767
+				_coorGR[7][2] = 2.218
+
+				_coorGR[8][1] = -1.327
+				_coorGR[8][2] = 3.035
+
+				_coorGR[9][1] = 1.7435
+				_coorGR[9][2] = 3.035
+
+				_coorGR[10][1] = 2.865
+				_coorGR[10][2] = 2.5325
+
+				_coorGR[11][1] = 2.865
+				_coorGR[11][2] = 0.770
+
+				_coorGR[12][1] = 2.481
+				_coorGR[12][2] = 0.770
+
+				call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 12,
+																	HM_GRail_Pt = _coorGR,
+																	HM_GRailType = 1,
+																	HM_GRailRef = 1,
+																	HM_GRailH = 1.000 + 0.025/2,
+																	HM_GRailD = 0.025,
+																	HM_GRailT = 0.025,
+																	HM_GRailDist = 1.000,
+																	HM_GRailDist_hori = 0.450,
+																	HM_matGRail = HM_matBody2
+			del 1
+		del 1
+
+	!	Machinery
+	!-----------------------------------------------------------------------------------------------
+		_zPosMachine = _zPosConnect + 0.5935
+
+		addz	_zPosMachine
+			!	U
+			add	-3.075,	0.020,	0
+				block	0.650,	1.110,	0.165
+			del 1
+
+			add	-2.750,	0.750,	0.450
+				call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.440,
+																HM_Pulley_R1 = 0.285,
+																HM_Pulley_R2 = 0.175,
+																HM_Pulley_Thick = 0.025,
+																HM_Pulley_Fixed = 0,
+																HM_matPulley = HM_matBody2
+			del 1
+
+			!	D
+			add	-1.715,	-0.615,	0
+				block	0.640,	1.260,	0.140
+			del 1
+
+			add	-1.330,	0.200,	0.540
+				call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.600,
+															HM_Pulley_R1 = 0.400,
+															HM_Pulley_R2 = 0.360,
+															HM_Pulley_Thick = 0.025,
+															HM_Pulley_Fixed = 0,
+															HM_matPulley = HM_matBody2
+			del 1
+		del 1
+
+	!	Operator Cap
+	!-----------------------------------------------------------------------------------------------
+		_zPosOperCap = _zPosConnect + 0.4685
+
+		addz	_zPosOperCap
+			add	-0.970,	-2.380,	0
+				!	Under Cap Deck
+				block	0.650,	1.320,	0.169
+
+				!	Guard Rail
+				add	0.030,	0.786,	0.169
+					_coorGR[1][1] = 0
+					_coorGR[1][2] = 0
+
+					_coorGR[2][1] = 0
+					_coorGR[2][2] = -0.756
+
+					_coorGR[3][1] = 0.590
+					_coorGR[3][2] = -0.756
+
+					call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 3,
+																		HM_GRail_Pt = _coorGR,
+																		HM_GRailType = 1,
+																		HM_GRailRef = 1,
+																		HM_GRailH = 1.000 + 0.025/2,
+																		HM_GRailD = 0.025,
+																		HM_GRailT = 0.025,
+																		HM_GRailDist = 1.000,
+																		HM_GRailDist_hori = 0.450,
+																		HM_matGRail = HM_matBody2
+				del 1
+
+				add	0.650,	0.076,	0
+					call	"HM_mc_OperatorCab.gsm"	parameters	all	HM_OP_Type = 2,
+																	HM_OP_Width = 1.100,
+																	HM_OP_Depth_bot = 1.300,
+																	HM_OP_Depth_roo = 1.350,
+																	HM_OP_Height = 2.105
+				del 1
+			del 1
+		del 1
+
+	!	Cat Head
+	!-----------------------------------------------------------------------------------------------
+		_zPosCatHead = _zPosConnect + 0.7435
+
+		addz	_zPosCatHead
+			addx	-2.250
+				call	"HM_mc_CatHead.gsm"	parameters	all	HM_CH_Type = 1,
+															HM_CH_Width = 3.130,
+															HM_CH_Depth = 2.076,
+															HM_CH_Height = 6.850,
+															HM_CH_Radius1 = 0.075,
+															HM_CH_Radius2 = 0.100,
+															HM_CH_Topnt_posx = -0.450,
+															!	Deck1
+															HM_CH_Deck = 1,
+															HM_CH_DeckW = 1.255,
+															HM_CH_DeckD = 3.500,
+															HM_CH_DeckT = 0.150,
+															HM_CH_Deck_HoleW = 0.875,
+															HM_CH_Deck_HoleD = 2.400,
+															HM_CH_Deck_posx = 0.850,
+															HM_CH_Deck_posz = 5.550,
+															!	Pulley
+															HM_CH_Pulley_R1 = 0.179,
+															HM_CH_Pulley_R2 = 0.159
+			del 1
+		del 1
+
+	!	Jib
+	!-----------------------------------------------------------------------------------------------
+		_zPosJib = _zPosConnect + 0.7435
+
+		if	HM_Jib_flag	then
+			addz	_zPosJib
+				addx	-2.000
+					!	Jib
+					call	"HM_mc_Jib.gsm"	parameters	all	HM_Jib_type = 1
+
+					roty	-HM_JibAng
+						addx	HM_JibLength - _mJib_pulleyR
+							!	Jib Pulley
+							addx	-0.150
+								for	i = 1	to	2
+									muly	-2*i + 3
+										addy	-(0.500 + 0.070)/2
+											rotx	90
+												put	0,		0.160,	15,
+													0.050,	0.160,	15,
+													0.150,	0.100,	15,
+													0.150,	0.075,	15,
+													0.150,	0,		900,
+													0.075,	180,	4000+15,
+													0.150,	-0.100,	15,
+													0.050,	-0.160,	15,
+													0,		-0.160,	15
+
+												prism_	nsp/3,	-0.070,	get(nsp)
+											del 1
+										del 1
+									del 1
+								next	i
+							del 1
+
+							rotx	90
+								addz	-0.683
+									cylind	0.683*2,	0.075
+								del 1
+							del 1
+
+							for	i = 1	to	2
+								muly	-2*i + 3
+									addy	0.683 + 0.080/2
+										call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.080,
+																					HM_Pulley_R1 = 0.160,
+																					HM_Pulley_R2 = 0.140,
+																					HM_Pulley_Thick = 0.015,
+																					HM_matPulley = HM_matBody2,
+																					HM_Pulley_Fixed = 0
+									del 1
+								del 1
+							next	i
+						del 1
+					del 1
+				del 1
+			del 1
+		endif
+
+	!	Wire
+	!-----------------------------------------------------------------------------------------------
+		_zPosWire = _zPosMachine
+
+		addz	_zPosWire
+			!	Mirror
+			for	i = 1	to	2
+				muly	(2*i - 3)
+					!	Deck → Cat Head
+					!-----------------------------------------------------------------------------------------------
+					!	Top Machine
+					if	i = 1	then	_y1 = -0.750
+					if	i = 2	then	_y1 = 0.750
+					call	"HM_mc_Wire.gsm"	parameters	all	x1 = -(2.750 - 0.175),
+																x2 = -(2.700 + 0.159),
+																y1 = _y1,
+																y2 = -2.076/2,
+																z1 = 0.450,
+																z2 = 7.000
+
+					!	Bottom Machine
+					if	i = 1	then	_y1 = -0.200
+					if	i = 2	then	_y1 = 0.200
+					call	"HM_mc_Wire.gsm"	parameters	all	x1 = -(1.330 + 0.360),
+																x2 = -(2.700 + 0.159),
+																y1 = _y1,
+																y2 = -2.076/2,
+																z1 = 0.492,
+																z2 = 7.000
+
+					!	Cat Head → Jib
+					!-----------------------------------------------------------------------------------------------
+					_xPosJibPulley = -2.000 + (HM_JibLength - _mJib_pulleyR)*cos(HM_JibAng)
+					_zPosJibPulley = 0.150 + (HM_JibLength - _mJib_pulleyR)*sin(HM_JibAng) + 0.140
+
+					call	"HM_mc_Wire.gsm"	parameters	all	x1 = -2.700,
+																x2 = _xPosJibPulley,
+																y1 = -2.076/2,
+																y2 = -(0.683 + 0.080/2),
+																z1 = 7.000 + 0.159,
+																z2 = _zPosJibPulley
+
+					_xPosJibPulley = -2.000 + (HM_JibLength - _mJib_pulleyR)*cos(HM_JibAng)
+					_zPosJibPulley = 0.150 + (HM_JibLength - _mJib_pulleyR)*sin(HM_JibAng)
+
+					call	"HM_mc_WirePulley.gsm"	parameters	all	HM_WP_startptX1 = -2.700,
+																	HM_WP_startptZ1 = (7.000 - 0.159),
+																	HM_WP_startptX2 = -2.700,
+																	HM_WP_startptZ2 = (7.000 + 0.159),
+																	HM_WP_startptY = -2.076/2,
+																	HM_WP_endptX = _xPosJibPulley,
+																	HM_WP_endptZ = _zPosJibPulley,
+																	HM_WP_endptY = -0.642,
+																	HM_WP_posPulley_ratio = 0.31
+
+					!	Jib → Hook
+					!-----------------------------------------------------------------------------------------------
+					_zPosJibPulley = 0.150 + HM_JibLength*sin(HM_JibAng)
+
+					call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR,
+																x2 = HM_WorkingR,
+																y1 = -(0.683 + 0.080/2),
+																y2 = -(0.330 + HM_HookRadius),
+																z1 = _zPosJibPulley,
+																z2 = _zPosJibPulley - HM_JibWireLen + HM_HookHeight
+				del 1
+			next	i
+		del 1
+
+	!	Hook
+	!-----------------------------------------------------------------------------------------------
+		_zPosHook = _zPosJib + HM_JibLength*sin(HM_JibAng)
+
+		add	HM_WorkingR,	0,	_zPosHook
+			hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3		:	unID = unID + 1
+			hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2		:	unID = unID + 1
+
+			addz	-HM_JibWireLen
+				call	"HM_mc_Hook.gsm"	parameters	all	HM_HookType = 3,
+															HM_HookDist = 0.660,
+															HM_HookThick = 0.160
+
+			del 1
+		del	1
+
+	!	Suspended Load
+	!----------------------------------------------------------------------------------------------------
+		_zPosLoad = _zPosHook - HM_JibWireLen
+
+		if	HM_SLshow	then
+			add	HM_WorkingR,	0,	_zPosLoad
+				hotspot	0,	0,	0,				unID,	HM_SLwireLen,	1	: unID = unID + 1
+				hotspot	0,	0,	-HM_SLwireLen,	unID,	HM_SLwireLen,	2	: unID = unID + 1
+				hotspot	0,	0,	1,				unID,	HM_SLwireLen,	3	: unID = unID + 1
+
+				addz	-HM_SLwireLen
+					rotz	90
+						call	"HM_mc_Suspendedloads.gsm"	parameters	all
+					del	1
+				del	1
+			del	1
+		endif
+
+	!	Load Text
+	!----------------------------------------------------------------------------------------------------
+		_zPosText = _zPosLoad - HM_SLwireLen
+
+		if	HM_3D_text_show_load	then
+			!	On the Load 
+			if	not(GLOB_FEEDBACK_MODE) 	then
+				add	HM_WorkingR + HM_SLdepth/2,	0,	_zPosText
+					rotz	90
+						call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 1,
+																		HM_3D_text_show_plane = 0
+					del	1
+				del	1
+			endif
+		endif
+
+		if	HM_3D_text_show_plane	then
+			!	On the Bottom
+			call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 0,
+															HM_3D_text_show_plane = 1
+		endif
+
+del 1
+
+
+!----------------------------------------------------------------------------------------------------
+!	Dimension
+!----------------------------------------------------------------------------------------------------
+
+	!	Working Radius
+	!----------------------------------------------------------------------------------------------------
+	call	"HM_mc_WorkingR.gsm"	parameters all
+
+
+
+
+end
+
+
+
+!	Connect Beam Horizontal
+!-----------------------------------------------------------------------------------------------
+"draw_Connect_Beam_H":
+
+	rotz	90
+		call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.300,
+														HM_Beam_Width_EP = 0.300,
+														HM_Beam_Height_SP = 0.390,
+														HM_Beam_Height_EP = 0.390,
+														HM_Beam_Length = 1.460,
+														HM_Beam_FlangeT = 0.016,
+														HM_Beam_WebT = 0.010,
+														HM_matBeam = HM_matBody2
+	del 1
+
+return

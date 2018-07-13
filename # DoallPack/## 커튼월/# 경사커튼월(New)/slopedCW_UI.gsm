@@ -49,7 +49,7 @@ posY = 10
 ui_pict	"ui2_matrix.png",	posX,	posY,	130,	130,	1+2
 
 posY = 155
-gapY = 25
+gapY = 24
 
 	ui_style	0,	0
 	ui_outfield	"X축",	posX,	posY	:	posY = posY + gapY
@@ -57,6 +57,7 @@ gapY = 25
 	ui_outfield	"창호유형",	posX,	posY	:	posY = posY + gapY
 	if	iPnlType_ = PNL_PROJECT | iPnlType_ = PNL_PROJECT_SMOKE	then
 		ui_outfield	"힌지위치",	posX,	posY	:	posY = posY + gapY
+		ui_outfield	"열림표현",	posX,	posY	:	posY = posY + gapY
 	endif
 	if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP3_HORIZON | iPnlType_ = PNL_SEP2_VERTICAL | iPnlType_ = PNL_SEP3_VERTICAL	then
 		ui_outfield	"프리셋",	posX,	posY	:	posY = posY + gapY
@@ -70,6 +71,7 @@ posY = 150
 	ui_infield	"iPnlType_",	60,	posY,	80,	20	:	posY = posY + gapY
 	if	iPnlType_ = PNL_PROJECT | iPnlType_ = PNL_PROJECT_SMOKE	then
 		ui_infield	"iHingeType_",	60,	posY	:	posY = posY + gapY
+		ui_infield	"iLineType",	60,	posY	:	posY = posY + gapY
 	endif
 	if	iPnlType_ = PNL_SEP2_HORIZON | iPnlType_ = PNL_SEP3_HORIZON | iPnlType_ = PNL_SEP2_VERTICAL | iPnlType_ = PNL_SEP3_VERTICAL	then
 		ui_infield	"iSepType_",	60,	posY	:	posY = posY + gapY
@@ -511,6 +513,9 @@ ui_listfield	1,	5,	5,	425,	259,	0,	"title",	"value"	:	fieldID = fieldID + 1
 		ui_listitem	fieldID,	1,	"glsFillPen",	1	:	fieldID = fieldID + 1
 		ui_listitem	fieldID,	1,	"glsBackPen",	1	:	fieldID = fieldID + 1
 		ui_listitem	fieldID,	1,	"oplinePen",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"iLineType",	1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"dashLth",		1	:	fieldID = fieldID + 1
+		ui_listitem	fieldID,	1,	"gapLth",		1	:	fieldID = fieldID + 1
 
 		!	단열재
 		ui_listitem	fieldID,	1,	"insElevPen",	1	:	fieldID = fieldID + 1

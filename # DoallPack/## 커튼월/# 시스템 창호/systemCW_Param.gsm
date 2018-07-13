@@ -76,6 +76,18 @@
 								Hinge_BottomLeft,	stProjectHinge[Hinge_BottomLeft],
 								Hinge_BottomRight,	stProjectHinge[Hinge_BottomRight]
 
+	!	열림선 유형
+	!-----------------------------------------------------------------------------------------------
+	values{2}	"iLineType"	LINE_SOLID,		stLineType[LINE_SOLID],
+							LINE_DOTTED,	stLineType[LINE_DOTTED]
+
+	if	not(iLineType = LINE_DOTTED)	then
+		lock	"dashLth", "gapLth"
+	endif
+
+	values	"dashLth"	range	(eps,	)
+	values	"gapLth"	range	(eps,	)
+
 	!	문 유형 선택
 	!-----------------------------------------------------------------------------------------------
 	values{2}	"iDoorType"	DoorType_1panel,	stDoorType[DoorType_1panel],

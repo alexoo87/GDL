@@ -1,0 +1,130 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	Macro
+!----------------------------------------------------------------------------------------------------
+!	Global
+call	"HM_Global.gsm"	parameters	all
+
+!	Rated Load
+call	"HM_mc_RatedLoad.gsm"	parameters all	returned_parameters	_WorkingR_max,	_WorkingR_min
+
+!	Suspended Load 
+call	"HM_mc_Suspendedloads.gsm"	parameters	all
+
+!----------------------------------------------------------------------------------------------------
+!	Calculation
+!----------------------------------------------------------------------------------------------------
+!	Jib Length
+if	HM_JibLen = "46.2m"	then	HM_JibLength = 46.200 + _mJib_pulleyR
+
+!	Jib Angle, Jib Height, Working Radius
+if	GLOB_MODPAR_NAME = "HM_JibHeight"	then
+	HM_jibAng = asn(HM_JibHeight/HM_JibLength)
+	HM_WorkingR = HM_JibLength*cos(HM_jibAng) - _mMast_jib_offset
+else
+	if	GLOB_MODPAR_NAME = "HM_JibAng"	then
+		HM_JibHeight = HM_JibLength*sin(HM_jibAng)
+		HM_WorkingR = HM_JibLength*cos(HM_jibAng) - _mMast_jib_offset
+	else
+		HM_jibAng = acs((HM_WorkingR + _mMast_jib_offset)/HM_JibLength)
+		HM_JibHeight = HM_JibLength*sin(HM_jibAng)
+	endif
+endif
+
+!	Mast
+HM_MastType = 2
+HM_MastWidth = 1.600
+HM_MastHeight = 6.000
+
+HM_MastHeight_total = 4.500*2 + HM_MastHeight*6
+
+!----------------------------------------------------------------------------------------------------
+!	Define Values
+!----------------------------------------------------------------------------------------------------
+!	Hook
+HM_HookType = 1
+HM_HookRadius = 0.250
+HM_HookHeight = 0.880
+
+!----------------------------------------------------------------------------------------------------
+!	Define Range
+!----------------------------------------------------------------------------------------------------
+	!	Jib Angle
+	!----------------------------------------------------------------------------------------------------
+	_JibAng_min = acs((_WorkingR_max + _mMast_jib_offset)/HM_JibLength)
+	_JibAng_max = acs((_WorkingR_min + _mMast_jib_offset)/HM_JibLength)
+	values	"HM_JibAng"	range	[_JibAng_min, _JibAng_max]
+
+	!	Jib Height
+	!----------------------------------------------------------------------------------------------------
+	_mJibHeight_min = HM_JibLength*sin(_JibAng_min)
+	_mJibHeight_max = HM_JibLength*sin(_JibAng_max)
+	values	"HM_JibHeight"	range	[_mJibHeight_min, _mJibHeight_max]
+
+	!	Mast
+	values	"HM_MastNumber"	8
+
+!----------------------------------------------------------------------------------------------------
+!	Insert Value
+!----------------------------------------------------------------------------------------------------
+!	Crane Information
+parameters 	HM_CraneType = HM_CraneType,
+			HM_CraneName = HM_CraneName,
+			HM_CraneMaker = HM_CraneMaker
+
+!	Crane Size
+parameters 	HM_CraneWidth = HM_CraneWidth,
+			HM_CraneDepth = HM_CraneDepth,
+			HM_CraneHeight = HM_CraneHeight
+
+!	Jib Length
+parameters	HM_JibLength = HM_JibLength
+
+
+!	Jib Angle, Jib Height, Working Radius
+if	GLOB_MODPAR_NAME = "HM_JibHeight"	then
+	parameters	HM_WorkingR = HM_WorkingR
+	parameters	HM_jibAng = HM_jibAng
+else
+	if	GLOB_MODPAR_NAME = "HM_JibAng"	then
+		parameters	HM_JibHeight = HM_JibHeight
+		parameters	HM_WorkingR = HM_WorkingR
+	else
+		parameters	HM_JibHeight = HM_JibHeight
+		parameters	HM_jibAng = HM_jibAng
+	endif
+endif
+
+!	Mast
+parameters	HM_MastType = HM_MastType,
+			HM_MastWidth = HM_MastWidth,
+			HM_MastHeight = HM_MastHeight,
+			HM_MastHeight_total = HM_MastHeight_total
+
+!	Hook
+parameters	HM_HookType = HM_HookType,
+			HM_HookRadius = HM_HookRadius,
+			HM_HookHeight = HM_HookHeight
+
+!----------------------------------------------------------------------------------------------------
+!	Parameter Hide/Lock
+!----------------------------------------------------------------------------------------------------
+!	Crane Size
+lock	"HM_CraneWidth", "HM_CraneDepth", "HM_CraneHeight", "HM_CraneWeight"
+
+!	Hide Title
+hideparameter	"HM_Boom"
+
+!	Judgement Color
+lock	"HM_Judgement"
+
+!	Hook Size
+lock	"HM_HookRadius", "HM_HookHeight"
+
+!	Mast
+hideparameter	"HM_MastRadius"
+lock	"HM_MastType", "HM_MastWidth", "HM_MastRadius", "HM_MastHeight", "HM_MastHeight_total"

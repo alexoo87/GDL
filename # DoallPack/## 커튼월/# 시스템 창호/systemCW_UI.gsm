@@ -484,6 +484,9 @@ ui_listfield	1,	5,	5,	425,	259,	0,	"title",	"value"	:	fieldID = fieldID + 1
 	ui_listitem	fieldID,	1,	"glassFillPenBg",	1	:	fieldID = fieldID + 1
 	ui_listitem	fieldID,	1,	"glassPenElv",		1	:	fieldID = fieldID + 1
 	ui_listitem	fieldID,	1,	"OpenlinePen",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"iLineType",		1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"dashLth",			1	:	fieldID = fieldID + 1
+	ui_listitem	fieldID,	1,	"gapLth",			1	:	fieldID = fieldID + 1
 	ui_listitem	fieldID,	1,	"OpenlineType",		1	:	fieldID = fieldID + 1
 
 	ui_listitem	fieldID,	1,	"",	0,	"",	"스팬드럴"	:	fieldID = fieldID + 1
