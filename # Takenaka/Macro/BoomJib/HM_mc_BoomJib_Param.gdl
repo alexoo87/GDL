@@ -1,0 +1,24 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/7/18 WED
+!	VER : AC 20
+
+!-----------------------------------------------------------------------------------------------
+!	Test
+!-----------------------------------------------------------------------------------------------
+if	bTest	then
+	values	"HM_CraneName"	_stCrawName
+endif
+
+!	Crane Mode
+values{2}	"HM_CraneMode"	MODE_HEAVY_BOOM,	_stCraneMode[MODE_HEAVY_BOOM],
+							MODE_MAIN_BOOM,		_stCraneMode[MODE_MAIN_BOOM],
+							MODE_LONG_BOOM,		_stCraneMode[MODE_LONG_BOOM],
+							MODE_LUFFING_JIB,	_stCraneMode[MODE_LUFFING_JIB],
+							MODE_LIGHT_BOOM,	_stCraneMode[MODE_LIGHT_BOOM]
+
+values{2}	"HM_BoomType"	_TYPE_MAIN_BOOM,		_stBoomType[1],
+							_TYPE_MAIN_BOOM_JIB,	_stBoomType[2],
+							_TYPE_TOWER_BOOM,		_stBoomType[3],
+							_TYPE_TOWER_BOOM_JIB,	_stBoomType[4]

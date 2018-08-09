@@ -11,8 +11,6 @@ if	iPlanView = PLANVIEW_SIMPLE	then
 
 	!	핫스팟
 	!-----------------------------------------------------------------------------------------------
-	unID = 100
-
 	HOTSPOT2	0, 0, unID : unID = unID + 1
 	HOTSPOT2	valve_total_len / 2, 0, unID : unID = unID + 1
 	HOTSPOT2	valve_total_len, 0, unID : unID = unID + 1

@@ -1,0 +1,14 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/12/1 FRI
+!	VER : AC 20
+
+!	Hook Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"HM_HookType"	HOOK_TYPE_PULLEY,			stHookType[HOOK_TYPE_PULLEY],
+							HOOK_TYPE_RING,				stHookType[HOOK_TYPE_RING],
+							HOOK_TYPE_DOUBLE_PULLEY,	stHookType[HOOK_TYPE_DOUBLE_PULLEY],
+							HOOK_TYPE_S_SIZE,			stHookType[HOOK_TYPE_S_SIZE],
+							HOOK_TYPE_M_SIZE,			stHookType[HOOK_TYPE_M_SIZE],
+							HOOK_TYPE_L_SIZE,			stHookType[HOOK_TYPE_L_SIZE]

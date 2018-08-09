@@ -1,0 +1,24 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/7/16 THU
+!	VER : AC 20
+
+eps = 0.0001
+unID = 100
+
+
+! !	Boom Index
+! BOOM_BASE = 1
+! BOOM_INSERT = 2
+! BOOM_TAPER = 3
+! BOOM_TOP = 4
+
+! !	Jib Index
+! JIB_BASE = 1
+! JIB_INSERT = 2
+! JIB_TOP = 3
+
+! !	Strut Index
+! STRUT_REAR = 1
+! STRUT_FRONT = 2

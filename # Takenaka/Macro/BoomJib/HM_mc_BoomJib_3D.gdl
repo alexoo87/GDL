@@ -1,0 +1,334 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/7/18 WED
+!	VER : AC 20
+
+!-----------------------------------------------------------------------------------------------
+!	Test
+!-----------------------------------------------------------------------------------------------
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+resol 10
+
+define style "HM_style_Angle1" HM_2D_textFont,	HM_3D_textSize*100,	1,	0
+define style "HM_style_Angle2" HM_2D_textFont,	HM_3D_textSize*100,	8,	0
+
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+call	"HM_Material_White.gsm"
+call	"HM_Material_Black.gsm"
+
+if	HM_matWarning = ""	then
+	_stMat_Red = HM_matBody1
+	_stMat_White = HM_matBody2
+	_stMat_Black = "HM_matBlack"
+else
+	_stMat_Red = HM_matWarning
+	_stMat_White = HM_matWarning
+	_stMat_Black = HM_matWarning
+endif
+
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	Boom/Jib Shape
+!-----------------------------------------------------------------------------------------------
+_prevMat = _stMat_Red
+
+!	Boom
+!-----------------------------------------------------------------------------------------------
+	!	Angle Hotspot
+	hotspot	HM_BoomLength, 					0,	0,								unID,	HM_BoomAng,	4+128	:	unID = unID + 1
+	hotspot	HM_BoomLength*cos(HM_BoomAng),	0,	HM_BoomLength*sin(HM_BoomAng),	unID,	HM_BoomAng,	5		:	unID = unID + 1
+	hotspot	0,								0,	0,								unID,	HM_BoomAng,	6		:	unID = unID + 1
+	hotspot	0,								-1,	0,								unID,	HM_BoomAng,	7		:	unID = unID + 1
+
+roty	-HM_BoomAng
+	gosub	"Draw_Boom_Shape"
+del 1
+
+!	Jib
+if	_bDrawJib	then
+	roty	-HM_BoomAng
+		addx	_xPosPart + _xPosJib
+			addz	-_zPosJib
+				roty	HM_BoomAng
+					!	Angle Hotspot
+					!-----------------------------------------------------------------------------------------------
+					hotspot	HM_JibLength, 					0,	0,								unID,	HM_JibAng,	4+128	:	unID = unID + 1
+					hotspot	HM_JibLength*cos(HM_JibAng),	0,	HM_JibLength*sin(HM_JibAng),	unID,	HM_JibAng,	5		:	unID = unID + 1
+					hotspot	0,								0,	0,								unID,	HM_JibAng,	6		:	unID = unID + 1
+					hotspot	0,								-1,	0,								unID,	HM_JibAng,	7		:	unID = unID + 1
+
+					roty	-HM_JibAng
+						gosub	"Draw_Jib_Shape"
+					del 1
+				del 1
+			del 1
+		del 1
+	del 1
+endif
+
+
+
+
+
+
+
+
+
+
+
+
+end	_xPosPart
+
+!-----------------------------------------------------------------------------------------------
+"Draw_Boom_Shape":
+!-----------------------------------------------------------------------------------------------
+	_xPosPart = 0
+	!	Base Part
+	!-----------------------------------------------------------------------------------------------
+	call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+												modLth = _BP_Lth,
+												modWdt_SP = _BP_Wdt_SP,
+												modWdt_EP = _BP_Wdt_EP,
+												modDpt_SP = _BP_Dpt_SP,
+												modDpt_EP = _BP_Dpt_EP,
+												zOffset_SP = _BP_zOffset_SP,
+												zTruss_SP = _BP_zTruss_SP,
+												zTruss_EP = _BP_zTruss_EP,
+												bAnchor = _BP_bAnchor,
+												matMod = _stMat_Red
+
+	
+	gosub	"Color_Picker"
+
+	_xPosPart = _xPosPart + _BP_Lth
+
+
+	!	Taper Part_Start Point
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_bTaperPart_SP	then
+			call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+														modLth = _TP1_Lth,
+														modWdt_SP = _TP1_Wdt_SP,
+														modWdt_EP = _TP1_Wdt_EP,
+														modDpt_SP = _TP1_Dpt_SP,
+														modDpt_EP = _TP1_Dpt_EP,
+														zTruss_SP = _TP1_zTruss_SP,
+														zTruss_EP = _TP1_zTruss_EP,
+														matMod = _nextMat
+
+			gosub	"Color_Picker"
+			_xPosPart = _xPosPart + _TP1_Lth
+		endif
+	del 1
+
+
+	!	Insert Part_1st
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_nInsertPart_1st > eps	then
+			for	i = 1	to	_nInsertPart_1st
+				if	not(i = _nInsertPart_1st)	then
+					call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+																modLth = _boomLength[i],
+																modWdt_SP = _IP1_Wdt_SP,
+																modWdt_EP = _IP1_Wdt_EP,
+																modDpt_SP = _IP1_Dpt_SP,
+																modDpt_EP = _IP1_Dpt_EP,
+																zTruss_SP = _IP1_zTruss_SP,
+																zTruss_EP = _IP1_zTruss_EP,
+																matMod = _nextMat
+				else
+					call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+																modLth = _boomLength[i],
+																modWdt_SP = _IP1_Wdt_SP,
+																modWdt_EP = _IP1_Wdt_EP,
+																modDpt_SP = _IP1_Dpt_SP,
+																modDpt_EP = _IP1_Dpt_EP,
+																zTruss_SP = _IP1_zTruss_SP,
+																zTruss_EP = _IP1_zTruss_EP,
+																matMod = _nextMat,
+																!	Boom Top
+																bBoomTop = _IP1_bBoomTop,
+																btType = _IP1_btType,
+																btRad = _IP1_btRad,
+																zOffset_Bar = _IP1_zOffset_Bar,
+																btHgt_Rear = _IP1_btHgt_Rear,
+																btHgt_Front = _IP1_btHgt_Front,
+																yPos_Rear = _IP1_yPos_Rear,
+																yPos_Front = _IP1_yPos_Front
+				endif
+
+				gosub	"Color_Picker"
+				_xPosPart = _xPosPart + _boomLength[i]
+				addx	_boomLength[i]
+			next	i
+
+			del	_nInsertPart_1st
+		endif
+	del 1
+
+
+	!	Taper Part_End Point
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_bTaperPart_EP	then
+			call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+														modLth = _TP2_Lth,
+														modWdt_SP = _TP2_Wdt_SP,
+														modWdt_EP = _TP2_Wdt_EP,
+														modDpt_SP = _TP2_Dpt_SP,
+														modDpt_EP = _TP2_Dpt_EP,
+														zTruss_SP = _TP2_zTruss_SP,
+														zTruss_EP = _TP2_zTruss_EP,
+														matMod = _nextMat,
+														!	Boom Top
+														bBoomTop = _TP2_bBoomTop,
+														btType = _TP2_btType,
+														btRad = _TP2_btRad,
+														zOffset_Bar = _TP2_zOffset_Bar,
+														btHgt_Rear = _TP2_btHgt_Rear,
+														btHgt_Front = _TP2_btHgt_Front,
+														yPos_Rear = _TP2_yPos_Rear,
+														yPos_Front = _TP2_yPos_Front
+
+			gosub	"Color_Picker"
+			_xPosPart = _xPosPart + _TP2_Lth
+		endif
+	del 1
+
+
+	!	Insert Part_2nd
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_nInsertPart_2nd > eps	then
+			for	i = 1	to	_nInsertPart_2nd
+				call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+															modLth = _boomLength[i],
+															modWdt_SP = _IP2_Wdt_SP,
+															modWdt_EP = _IP2_Wdt_EP,
+															modDpt_SP = _IP2_Dpt_SP,
+															modDpt_EP = _IP2_Dpt_EP,
+															zTruss_SP = _IP2_zTruss_SP,
+															zTruss_EP = _IP2_zTruss_EP,
+															matMod = _nextMat
+
+				gosub	"Color_Picker"
+				_xPosPart = _xPosPart + _boomLength[i]
+				addx	_boomLength[i]
+			next	i
+
+			del _nInsertPart_2nd
+		endif
+	del 1
+
+
+	!	Top Part
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_bTopPart	then
+			call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+														modLth = _TP_Lth,
+														modWdt_SP = _TP_Wdt_SP,
+														modWdt_EP = _TP_Wdt_EP,
+														modDpt_SP = _TP_Dpt_SP,
+														modDpt_EP = _TP_Dpt_EP,
+														zTruss_SP = _TP_zTruss_SP,
+														zTruss_EP = _TP_zTruss_EP,
+														bEndPanel = _TP_bEndPanel,
+														matMod = _nextMat
+
+			_xPosPart = _xPosPart + _TP_Lth
+		endif
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"Draw_Jib_Shape":
+!-----------------------------------------------------------------------------------------------
+	_xPosPart = 0
+	!	Base Part
+	!-----------------------------------------------------------------------------------------------
+	call	"HM_mc_Module.gsm"	parameters	all	modRad = _jrad,
+												modLth = _jBP_Lth,
+												modWdt_SP = _jBP_Wdt_SP,
+												modWdt_EP = _jBP_Wdt_EP,
+												modDpt_SP = _jBP_Dpt_SP,
+												modDpt_EP = _jBP_Dpt_EP,
+												zOffset_SP = _jBP_zOffset_SP,
+												zTruss_SP = _jBP_zTruss_SP,
+												zTruss_EP = _jBP_zTruss_EP,
+												bAnchor = _jBP_bAnchor,
+												matMod = _nextMat
+
+	
+	gosub	"Color_Picker"
+
+	_xPosPart = _xPosPart + _jBP_Lth
+
+	!	Insert Part_1st
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_jnInsertPart_1st > eps	then
+			for	i = 1	to	_jnInsertPart_1st
+				call	"HM_mc_Module.gsm"	parameters	all	modRad = _jrad,
+															modLth = _jibLength[i],
+															modWdt_SP = _jIP1_Wdt_SP,
+															modWdt_EP = _jIP1_Wdt_EP,
+															modDpt_SP = _jIP1_Dpt_SP,
+															modDpt_EP = _jIP1_Dpt_EP,
+															zTruss_SP = _jIP1_zTruss_SP,
+															zTruss_EP = _jIP1_zTruss_EP,
+															matMod = _nextMat
+
+				gosub	"Color_Picker"
+				_xPosPart = _xPosPart + _jibLength[i]
+				addx	_jibLength[i]
+			next	i
+
+			del	_jnInsertPart_1st
+		endif
+	del 1
+
+	!	Top Part
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_jbTopPart	then
+			call	"HM_mc_Module.gsm"	parameters	all	modRad = _jrad,
+														modLth = _jTP_Lth,
+														modWdt_SP = _jTP_Wdt_SP,
+														modWdt_EP = _jTP_Wdt_EP,
+														modDpt_SP = _jTP_Dpt_SP,
+														modDpt_EP = _jTP_Dpt_EP,
+														zTruss_SP = _jTP_zTruss_SP,
+														zTruss_EP = _jTP_zTruss_EP,
+														bEndPanel = _jTP_bEndPanel,
+														matMod = _nextMat
+
+			_xPosPart = _xPosPart + _jTP_Lth
+		endif
+	del 1
+
+return
+
+
+!-----------------------------------------------------------------------------------------------
+"Color_Picker":
+!-----------------------------------------------------------------------------------------------
+	if	_prevMat = _stMat_Red	then
+		_nextMat = _stMat_White
+	else
+		_nextMat = _stMat_Red
+	endif
+	_prevMat = _nextMat
+
+return

@@ -1,0 +1,180 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/08/08
+!	VER : AC 20
+
+!	Common
+!-----------------------------------------------------------------------------------------------
+if	HM_matWarning = ""	then
+	material	HM_matBody2
+else
+	material	HM_matWarning
+endif
+pen	HM_3D_pen
+
+
+
+
+!	Type : Mast(Normal)
+!-----------------------------------------------------------------------------------------------
+if	iType = TYPE_MAST	then
+	!	Calculate Degree
+	_aRot = -(180 - acs(xPosEnd/mastLth))
+
+	!	Mirror
+	for	i = 1	to	2
+		muly	2*i - 3
+			addy	distMast/2
+				!	Anchor
+				_anchorRad = mastRad*0.6
+				_anchorThk = (mastRad*1.40 - (mastThk + 0.010))
+				addy	_anchorThk/2
+					if	bAnchor	then
+						put	-_anchorRad*2,			0,								15,
+							-_anchorRad*2,			_anchorRad*2,					15,
+							-_anchorRad*cos(30),	zPosMast + _anchorRad*sin(30),	13,
+							0,						zPosMast,						900,
+							_anchorRad,				-120,							4000+13,
+							_anchorRad*cos(30),		zPosMast + _anchorRad*sin(30),	15,
+							_anchorRad*2,			_anchorRad*2,					15,
+							_anchorRad*2,			0,								15
+
+						rotx	90
+							prism_	nsp/3,	_anchorThk,	get(nsp)
+						del 1
+					endif
+				del 1
+
+				!	Column
+				addz	zPosMast
+					roty	_aRot
+						!	Start Point
+						_spLth = mastLth*0.04
+						_spRad = _anchorRad
+						for	j = 1	to	2
+							muly	2*j - 3
+								addy	mastRad*0.70 + mastThk/2
+									put	_spLth,				mastRad*0.8,		15,
+										-_spRad*sin(25),	_spRad*cos(25),		13,
+										0,					0,					900,
+										_spRad,				130,				4000+13,
+										-_spRad*sin(25),	-_spRad*cos(25),	15,
+										_spLth,				-mastRad*0.8,		15
+
+									rotx	90
+										prism_	nsp/3,	mastThk,	get(nsp)
+									del 1
+								del 1
+							del 1
+						next	j
+
+						!	Middle Point
+						_mpRad = mastRad*1.20
+						_mpLth = mastLth*0.92 - mastThk*2
+
+						addx	_spLth
+							roty	90
+								cylind	mastThk,	_mpRad
+							del 1
+						del 1
+
+						addx	_spLth + mastThk
+							roty	90
+								cylind	_mpLth,	mastRad
+							del 1
+						del 1
+
+						addx	_spLth + mastThk + _mpLth
+							roty	90
+								cylind	mastThk,	_mpRad
+							del 1
+						del 1
+
+						!	End Point
+						_epRad = mastRad!*0.8
+						_epLth = mastLth*0.04
+
+						addx	_spLth + mastThk*2 + _mpLth
+							addy	mastThk/2
+								put	0,		-_epRad,	15,
+									_epLth,	-_epRad,	13,
+									_epLth,	0,			900,
+									_epRad,	180,		4000+13,
+									_epLth,	_epRad,		15,
+									0,		_epRad,		15
+
+								rotx	90
+									prism_	nsp/3,	mastThk,	get(nsp)
+								del 1
+							del 1
+						del 1
+					del 1
+				del 1
+			del 1
+		del 1
+	next	i
+
+	!	Between
+	addz	zPosMast
+		roty	_aRot
+			!	Center Plate
+			addx	mastLth/2
+				_cntPltWdt = distMast
+				_cntPltLth = mastLth*0.08
+
+				put	-_cntPltLth/2,	-_cntPltWdt/2,	15,
+					-_cntPltLth/2,	_cntPltWdt/2,	15,
+					_cntPltLth/2,	_cntPltWdt/2,	15,
+					_cntPltLth/2,	-_cntPltWdt/2,	15
+
+				addz	-mastThk/2
+					prism_	nsp/3,	mastThk,	get(nsp)
+				del 1
+			del 1
+
+			!	End Rod/Pulley
+			addx	mastLth
+				!	End Rod
+				_eRodHgt = distMast - mastThk
+				_eRodRad = mastRad*0.8
+
+				addy	-_eRodHgt/2
+					rotx	-90
+						cylind	_eRodHgt,	_eRodRad
+					del 1
+				del 1
+
+				!	Pulley
+				_pulleyWdt = distMast*0.6
+
+				call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _pulleyWdt,
+																HM_Pulley_R1 = pulleyRad_1,
+																HM_Pulley_R2 = pulleyRad_2,
+																HM_Pulley_Thick = 0.020,
+																HM_matPulley = HM_matBody2,
+																HM_Pulley_Fixed = 0
+			del 1
+		del 1
+	del 1
+endif
+
+!	Type : Mast(Heavy_Lift)
+!-----------------------------------------------------------------------------------------------
+if	iType = TYPE_MAST_HEAVY_LIFT	then
+
+endif
+
+
+!	Type : Strut(Normal)
+!-----------------------------------------------------------------------------------------------
+if	iType = TYPE_STRUT	then
+
+endif
+
+
+!	Type : Mast(Heavy_Lift)
+!-----------------------------------------------------------------------------------------------
+if	iType = TYPE_STRUT_HEAVY_LIFT	then
+
+endif

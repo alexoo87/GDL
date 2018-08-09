@@ -1,0 +1,91 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/7/16 THU
+!	VER : AC 20
+
+
+!----------------------------------------------------------------------------------------------------
+!	Define Values
+!----------------------------------------------------------------------------------------------------
+!	Calculation
+values{2}	"HM_Judgement"	SAFETY,			_stJudgementColor[SAFETY],
+							WARNING_YELLOW,	_stJudgementColor[WARNING_YELLOW],
+							WARNING_RED,	_stJudgementColor[WARNING_RED]
+
+!	2D Repersentation
+dim _stFont[]
+nFonts = REQUEST ("FONTNAMES_LIST", "", _stFont)
+values "HM_2D_textFont" _stFont,	custom
+
+!----------------------------------------------------------------------------------------------------
+!	Define Range
+!----------------------------------------------------------------------------------------------------
+
+	!	Working Radius
+	!----------------------------------------------------------------------------------------------------
+	_WorkingR_min = 0
+	_WorkingR_max = 0
+
+	_nCount_Zero = 0
+	for	i = 1	to	_iDataNum_row
+		if	_rLoad[i][_xPosData_RLoad] < eps	then
+			if	_nCount_Zero > eps 	then
+				_WorkingR_max = _rWorkR[i - 1]
+				i = _iDataNum_row
+			endif
+		else
+			if	_nCount_Zero < eps	then
+				_WorkingR_min = _rWorkR[i]
+				_nCount_Zero = _nCount_Zero + 1
+			endif
+			if	abs(i - _iDataNum_row) < eps	then
+				_WorkingR_max = _rWorkR[_iDataNum_row]
+			endif
+		endif
+	next	i
+
+	values	"HM_WorkingR"	range [_WorkingR_min, _WorkingR_max]
+
+	!	Suspended Loads
+	!----------------------------------------------------------------------------------------------------
+	values	"HM_SLweight"	range [0, )
+
+
+!----------------------------------------------------------------------------------------------------
+!	Insert Value
+!----------------------------------------------------------------------------------------------------
+parameters	_RatedLoad = _RatedLoad
+parameters	_JudgementColor = _JudgementColor
+
+parameters	HM_RatedLoad = str(_RatedLoad, 3, 2)
+parameters	HM_Judgement = _JudgementColor
+
+
+
+!	Warning Color
+if	_JudgementColor = SAFETY then
+	parameters	HM_matWarning = ""
+else
+	if	_JudgementColor = WARNING_YELLOW	then
+		parameters	HM_matWarning = "HM_matYellow"
+	endif
+	if	_JudgementColor = WARNING_RED	then
+		parameters	HM_matWarning = "HM_matRed"
+	endif
+endif
+
+!	Working Radius
+parameters	_WorkingR_max = _WorkingR_max,
+			_WorkingR_min = _WorkingR_min
+
+
+!----------------------------------------------------------------------------------------------------
+!	Hide / Lock
+!----------------------------------------------------------------------------------------------------
+lock	"HM_Judgement", "HM_RatedLoad"
+
+
+
+end	_WorkingR_max,	_WorkingR_min
+

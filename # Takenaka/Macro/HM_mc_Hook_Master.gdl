@@ -1,0 +1,27 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/12/1 FRI
+!	VER : AC 20
+
+eps = 0.0001
+unID = 100
+
+!	Hook Type
+!-----------------------------------------------------------------------------------------------
+HOOK_TYPE_PULLEY = 1
+HOOK_TYPE_RING = 2
+HOOK_TYPE_DOUBLE_PULLEY = 3
+HOOK_TYPE_S_SIZE = 4
+HOOK_TYPE_M_SIZE = 5
+HOOK_TYPE_L_SIZE = 6
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stHookType[]
+		stHookType[1] = "Pulley"
+		stHookType[2] = "Ring"
+		stHookType[3] = "Double Pulley"
+		stHookType[4] = "S-Size"
+		stHookType[5] = "M-Size"
+		stHookType[6] = "L-Size"
+endif

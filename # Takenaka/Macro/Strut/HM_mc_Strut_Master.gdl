@@ -1,0 +1,23 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/08/08
+!	VER : AC 20
+
+eps = 0.0001
+unID = 100
+
+!	Mast/Strut Type
+!-----------------------------------------------------------------------------------------------
+TYPE_MAST = 1
+TYPE_MAST_HEAVY_LIFT = 2
+TYPE_STRUT = 3
+TYPE_STRUT_HEAVY_LIFT = 4
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stType[]
+		stType[1] = "Mast(Normal)"
+		stType[2] = "Mast(Heavy_Lift)"
+		stType[3] = "Strut(Normal)"
+		stType[4] = "Strut(Heavy_Lift)"
+endif

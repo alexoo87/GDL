@@ -1,0 +1,669 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/7/16 THU
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot	0, 0, 0
+	model	wire
+	circle	0.1
+	circle	0.2
+	model	solid
+endif
+
+if	bTest	then
+endif
+
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+material	matMod
+pen			HM_3D_pen
+
+rotz	-90
+	rotx	-90
+		!	Draw Jib/Boom
+		!-----------------------------------------------------------------------------------------------
+		_modRad = modRad				!	Radius
+		_modWdt_SP = modWdt_SP			!	Width(Start Point)
+		_modWdt_EP = modWdt_EP			!	Width(End Point)
+		_modDpt_SP = modDpt_SP			!	Depth(Start Point)
+		_modDpt_EP = modDpt_EP			!	Depth(End Point)
+		_modLth = modLth				!	Length
+		_yOffset_SP = yOffset_SP		!	Y Offset Value(Start Point)
+		_yOffset_EP = yOffset_EP		!	Y Offset Value(End Point)
+		_zOffset_SP = zOffset_SP		!	Z Offset Value(Start Point)
+		_zOffset_EP = zOffset_EP		!	Z Offset Value(End Point)
+
+		_zTruss_SP = zTruss_SP			!	Z Offset of Truss(Start Point)
+		_zTruss_EP = zTruss_EP			!	Z Offset of Truss(End Point)
+
+		gosub	"ModuleShape"
+
+		!	Start Anchor
+		!-----------------------------------------------------------------------------------------------
+		if	bAnchor	then
+			resol	12
+
+			!	Parameters
+			_anchorRad = _modDpt_SP/2 + (_modRad/cos(_aCutY_B) + _modRad/cos(_aCutY_T))/2
+			_centerPos = _modRad/cos(_aCutY_B) - _modRad/cos(_aCutY_T)
+
+			!	Draw Anchor
+			for	i = 1	to	2
+				mulx	-2*i + 3
+					addx	_modWdt_SP/2 + _zOffset_SP*tan(_aCutZ)
+
+						roty	90
+							addz	-_modRad
+								put	-_zOffset_SP,	_modDpt_SP/2 + _zOffset_SP*tan(_aCutY_T) + _modRad/cos(_aCutY_T),		15,
+									-_zOffset_SP,	-(_modDpt_SP/2 + _zOffset_SP*tan(_aCutY_B) + _modRad/cos(_aCutY_B)),	15,
+									0,				-(_modDpt_SP/2 + _modRad/cos(_aCutY_B)),								15,
+									0,				_centerPos,																900,
+									_anchorRad,		180,																	4000+15,
+									0,				_modDpt_SP/2 + _modRad/cos(_aCutY_T),									15,
+									-_zOffset_SP,	_modDpt_SP/2 + _zOffset_SP*tan(_aCutY_T) + _modRad/cos(_aCutY_T),		-1,
+
+									!	Hole
+									0,				-_modDpt_SP/4,	15,
+									0,				0,				900,
+									_modDpt_SP/4,	180,			4000+15,
+									0,				_modDpt_SP/4,	15,
+									0,				0,				900,
+									_modDpt_SP/4,	180,			4000+15,
+									0,				-_modDpt_SP/4,	-1
+
+								prism_	nsp/3,	_modRad*2,	get(nsp)
+							del 1
+						del 1
+
+					del 1
+				del 1
+			next	i
+		endif
+
+		!	End Panel
+		!-----------------------------------------------------------------------------------------------
+		if	bEndPanel	then
+			resol	6
+
+			!	Parameters
+			_pnlWdt = _modWdt_EP - (_zOffset_EP*tan(_aCutZ)*2) + (_modRad/cos(_aCutZ))*2
+			_pnlDpt = _modDpt_EP - (_zOffset_EP*tan(_aCutY_T) + _zOffset_EP*tan(_aCutY_B)) + (_modRad/cos(_aCutY_B) + _modRad/cos(_aCutY_T))
+			_pnlThk = pnlThk
+
+			!	Draw End Panel
+			addz	_modLth - _zOffset_EP
+				addy	yOffset_EP
+					put	-_pnlWdt/2,	-_pnlDpt/2,	15,
+						-_pnlWdt/2,	_pnlDpt/2,	15,
+						_pnlWdt/2,	_pnlDpt/2,	15,
+						_pnlWdt/2,	-_pnlDpt/2,	15
+
+					prism_	nsp/3,	_pnlThk,	get(nsp)
+				del 1
+			del 1
+		endif
+
+		!	Boom Top
+		!-----------------------------------------------------------------------------------------------
+		if	bBoomTop	then
+			!	Parameters
+			group	"sphere_BoomTop"
+				resol	6
+				sphere	btRad
+			endgroup
+
+			!	Draw Boom Top Type1
+			if	btType = 1	then
+				addz	_modLth
+					!	Mirror
+					for	i = 1	to	2
+						mulx	-2*i + 3
+							!	Connector
+							_stGroup = "sphere_main"
+
+							_x1 = _modWdt_EP/2
+							_y1 = _modDpt_EP/2
+							_z1 = 0
+
+							_x2 = _modWdt_EP/2
+							_y2 = _modDpt_EP/2
+							_z2 = zOffset_Bar
+
+							gosub	"draw_SweepGroup"
+
+							_x1 = _modWdt_EP/2
+							_y1 = -_modDpt_EP/2
+							_z1 = 0
+
+							_x2 = _modWdt_EP/2
+							_y2 = -_modDpt_EP/2
+							_z2 = zOffset_Bar
+
+							gosub	"draw_SweepGroup"
+
+							!	Boom Top
+							_stGroup = "sphere_BoomTop"
+
+							_x1 = _modWdt_EP/2
+							_y1 = _modDpt_EP/2
+							_z1 = zOffset_Bar
+
+							_x2 = _modWdt_EP/2
+							_y2 = -_modDpt_EP/2
+							_z2 = zOffset_Bar
+
+							gosub	"draw_SweepGroup"
+
+
+							_x1 = _modWdt_EP/2
+							_y1 = _modDpt_EP/2
+							_z1 = zOffset_Bar
+
+							_x2 = _modWdt_EP/2
+							_y2 = yPos_Rear
+							_z2 = btHgt_Rear
+
+							gosub	"draw_SweepGroup"
+
+							_x1 = _modWdt_EP/2
+							_y1 = -_modDpt_EP/2
+							_z1 = zOffset_Bar
+
+							_x2 = _modWdt_EP/2
+							_y2 = yPos_Rear
+							_z2 = btHgt_Rear
+
+							gosub	"draw_SweepGroup"
+
+
+							_x1 = _modWdt_EP/2
+							_y1 = yPos_Rear
+							_z1 = btHgt_Rear
+
+							_x2 = _modWdt_EP/2
+							_y2 = yPos_Front
+							_z2 = btHgt_Front
+
+							gosub	"draw_SweepGroup"
+
+							_x1 = _modWdt_EP/2
+							_y1 = _modDpt_EP/2
+							_z1 = zOffset_Bar
+
+							_x2 = _modWdt_EP/2
+							_y2 = yPos_Front
+							_z2 = btHgt_Front
+
+							gosub	"draw_SweepGroup"
+						del 1
+					next	i
+
+					!	Middle
+					_stGroup = "sphere_BoomTop"
+
+					_x1 = _modWdt_EP/2
+					_y1 = _modDpt_EP/2
+					_z1 = zOffset_Bar
+
+					_x2 = -_modWdt_EP/2
+					_y2 = _modDpt_EP/2
+					_z2 = zOffset_Bar
+
+					gosub	"draw_SweepGroup"
+
+					_x1 = _modWdt_EP/2
+					_y1 = -_modDpt_EP/2
+					_z1 = zOffset_Bar
+
+					_x2 = -_modWdt_EP/2
+					_y2 = -_modDpt_EP/2
+					_z2 = zOffset_Bar
+
+					gosub	"draw_SweepGroup"
+
+					_x1 = _modWdt_EP/2
+					_y1 = yPos_Rear
+					_z1 = btHgt_Rear
+
+					_x2 = -_modWdt_EP/2
+					_y2 = yPos_Rear
+					_z2 = btHgt_Rear
+
+					gosub	"draw_SweepGroup"
+
+					_x1 = _modWdt_EP/2
+					_y1 = yPos_Front
+					_z1 = btHgt_Front
+
+					_x2 = -_modWdt_EP/2
+					_y2 = yPos_Front
+					_z2 = btHgt_Front
+
+					gosub	"draw_SweepGroup"
+				del 1
+			endif
+
+			!	Draw Boom Top Type2
+			if	btType = 2	then
+				resol	12
+				addz	_modLth
+					!	Mirror
+					for	i = 1	to	2
+						mulx	-2*i + 3
+							addx	_modWdt_EP/2 + 0.045/2
+								roty	-90
+									put	0,								_modDpt_EP/2 - 0.110,		15,
+										0,								_modDpt_EP/2 + 0.110,		15,
+										zOffset_Bar,					_modDpt_EP/2 + 0.110,		15,
+										btHgt_Front - 0.145*sin(30),	yPos_Front + 0.145*cos(30),	15,
+										btHgt_Front,					yPos_Front,					900,
+										0.145,							-120,						4000+15,
+										btHgt_Front + 0.145,			-(_modDpt_EP/2 - 0.110),	15,
+										btHgt_Rear + 0.120,				yPos_Rear,					15,
+										btHgt_Rear,						yPos_Rear,					900,
+										0.120,							-120,						4000+15,
+										zOffset_Bar,					-(_modDpt_EP/2 + 0.110),	15,
+										0,								-(_modDpt_EP/2 + 0.110),	15,
+										0,								-(_modDpt_EP/2 - 0.110),	15,
+										zOffset_Bar - 0.080,			-(_modDpt_EP/2 - 0.110),	15,
+										zOffset_Bar - 0.080,			_modDpt_EP/2 - 0.110,		15
+
+									prism_	nsp/3,	0.045,	get(nsp)
+								del 1
+							del 1
+						del 1
+					next	i
+
+					!	Middle
+					_stGroup = "sphere_BoomTop"
+
+					_x1 = _modWdt_EP/2
+					_y1 = _modDpt_EP/2
+					_z1 = zOffset_Bar
+
+					_x2 = -_modWdt_EP/2
+					_y2 = _modDpt_EP/2
+					_z2 = zOffset_Bar
+
+					gosub	"draw_SweepGroup"
+
+					_x1 = _modWdt_EP/2
+					_y1 = -_modDpt_EP/2
+					_z1 = zOffset_Bar
+
+					_x2 = -_modWdt_EP/2
+					_y2 = -_modDpt_EP/2
+					_z2 = zOffset_Bar
+
+					gosub	"draw_SweepGroup"
+
+					_x1 = _modWdt_EP/2
+					_y1 = yPos_Rear
+					_z1 = btHgt_Rear
+
+					_x2 = -_modWdt_EP/2
+					_y2 = yPos_Rear
+					_z2 = btHgt_Rear
+
+					gosub	"draw_SweepGroup"
+
+					_x1 = _modWdt_EP/2
+					_y1 = yPos_Front
+					_z1 = btHgt_Front
+
+					_x2 = -_modWdt_EP/2
+					_y2 = yPos_Front
+					_z2 = btHgt_Front
+
+					gosub	"draw_SweepGroup"
+				del 1
+			endif
+		endif
+
+	del 1
+del 1
+
+
+end
+
+
+
+!-----------------------------------------------------------------------------------------------
+"ModuleShape":
+!-----------------------------------------------------------------------------------------------
+
+	!	Main Bar
+	!-----------------------------------------------------------------------------------------------
+	group	"sphere_main"
+		resol	8
+		sphere	_modRad
+	endgroup
+
+	addz	_zOffset_SP
+		cutplane	1,	1,	0,	1
+	del 1
+	addz	_modLth - _zOffset_EP
+		cutplane	1,	1,	0,	0
+	del 1
+
+		for	i = 1	to	2
+			mulx	-2*i + 3
+				add	_modWdt_SP/2,	_modDpt_SP/2 + _yOffset_SP,	0
+					if	GLOB_FEEDBACK_MODE	then
+						lin_	0,	0,	0,	(_modWdt_EP/2 - _modWdt_SP/2),	((_modDpt_EP/2 + _yOffset_EP) - (_modDpt_SP/2 + _yOffset_SP)),	_modLth
+					else
+						placegroup	sweepgroup{3}("sphere_main",	(_modWdt_EP/2 - _modWdt_SP/2),	((_modDpt_EP/2 + _yOffset_EP) - (_modDpt_SP/2 + _yOffset_SP)),	_modLth,	0,	0,	0,	0)
+					endif
+				del 1
+				add	_modWdt_SP/2,	-_modDpt_SP/2 + _yOffset_SP,	0
+					if	GLOB_FEEDBACK_MODE	then
+						lin_	0,	0,	0,	(_modWdt_EP/2 - _modWdt_SP/2),	((-_modDpt_EP/2 + _yOffset_EP) - (-_modDpt_SP/2 + _yOffset_SP)),	_modLth
+					else
+						placegroup	sweepgroup{3}("sphere_main",	(_modWdt_EP/2 - _modWdt_SP/2),	((-_modDpt_EP/2 + _yOffset_EP) - (-_modDpt_SP/2 + _yOffset_SP)),	_modLth,	0,	0,	0,	0)
+					endif
+				del 1
+			del 1
+		next	i
+
+	cutend
+	cutend
+
+	!	Common Truss Parameter
+	!-----------------------------------------------------------------------------------------------
+	group	"sphere_truss"
+		resol	6
+		sphere	_modRad*0.66
+	endgroup
+	_stGroup = "sphere_truss"
+
+	_nDivide = int((_modLth - (_zTruss_SP + _zTruss_EP))/divideLth)
+	if	_nDivide < eps	then	_nDivide = 1
+
+		!	Truss_Top
+		!-----------------------------------------------------------------------------------------------
+		if	abs((_modWdt_EP - _modWdt_SP)/2) > eps	then
+			_aCutZ = atn(((_modWdt_EP - _modWdt_SP)/2)/_modLth)
+		else
+			_aCutZ = 0
+		endif
+		if	abs(((_modDpt_EP/2 + _yOffset_EP) - (_modDpt_SP/2 + _yOffset_SP))) > eps	then
+			_aCutY_T = atn(((_modDpt_EP/2 + _yOffset_EP) - (_modDpt_SP/2 + _yOffset_SP))/_modLth)
+		else
+			_aCutY_T = 0
+		endif
+
+		_remainLth = _modLth - (_zOffset_SP + _zOffset_EP) - (_zTruss_SP + _zTruss_EP)
+
+		_gapWdt_T = (_modWdt_EP - _modWdt_SP)/2 - (_zOffset_SP*tan(_aCutZ) + _zOffset_EP*tan(_aCutZ)) - (_zTruss_SP*tan(_aCutZ) + _zTruss_EP*tan(_aCutZ))
+		_gapDpt_T = ((_modDpt_EP/2 + _yOffset_EP) - (_modDpt_SP/2 + _yOffset_SP)) - (_zOffset_SP*tan(_aCutY_T) + _zOffset_EP*tan(_aCutY_T)) - (_zTruss_SP*tan(_aCutY_T) + _zTruss_EP*tan(_aCutY_T))
+
+		addz	_zOffset_SP + _zTruss_SP
+		
+			for	i = 1	to	_nDivide + 1
+				if	i = 1	then
+					_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+					_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+					_z1 = (_remainLth/_nDivide)*(i - 1)
+
+					_x2 = -(_modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1))
+					_y2 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+					_z2 = (_remainLth/_nDivide)*(i - 1)
+
+					gosub	"draw_SweepGroup"
+				endif
+
+				!	Odd Number
+				if	fra(i/2) > eps & i # (_nDivide + 1)	then
+					_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+					_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+					_z1 = (_remainLth/_nDivide)*(i - 1)
+
+					_x2 = -(_modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*i)
+					_y2 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*i
+					_z2 = (_remainLth/_nDivide)*i
+
+					gosub	"draw_SweepGroup"
+				endif
+				!	Even Number
+				if	fra(i/2) < eps & i # (_nDivide + 1)	then
+					_x1 = -(_modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1))
+					_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+					_z1 = (_remainLth/_nDivide)*(i - 1)
+
+					_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*i
+					_y2 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*i
+					_z2 = (_remainLth/_nDivide)*i
+
+					gosub	"draw_SweepGroup"
+				endif
+
+				if	i = (_nDivide + 1)	then
+					_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+					_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+					_z1 = (_remainLth/_nDivide)*(i - 1)
+
+					_x2 = -(_modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1))
+					_y2 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+					_z2 = (_remainLth/_nDivide)*(i - 1)
+
+					gosub	"draw_SweepGroup"
+				endif
+			next	i
+
+		del 1
+
+		!	Truss_Bottom
+		!-----------------------------------------------------------------------------------------------
+		if	abs((_modWdt_EP - _modWdt_SP)/2) > eps	then
+			_aCutZ = atn(((_modWdt_EP - _modWdt_SP)/2)/_modLth)
+		else
+			_aCutZ = 0
+		endif
+		if	abs(((_modDpt_EP/2 - _yOffset_EP) - (_modDpt_SP/2 - _yOffset_SP))) > eps	then
+			_aCutY_B = atn(((_modDpt_EP/2 - _yOffset_EP) - (_modDpt_SP/2 - _yOffset_SP))/_modLth)
+		else
+			_aCutY_B = 0
+		endif
+
+		_remainLth = _modLth - (_zOffset_SP + _zOffset_EP) - (_zTruss_SP + _zTruss_EP)
+
+		_gapWdt_B = (_modWdt_EP - _modWdt_SP)/2 - (_zOffset_SP*tan(_aCutZ) + _zOffset_EP*tan(_aCutZ)) - (_zTruss_SP*tan(_aCutZ) + _zTruss_EP*tan(_aCutZ))
+		_gapDpt_B = ((_modDpt_EP/2 - _yOffset_EP) - (_modDpt_SP/2 - _yOffset_SP)) - (_zOffset_SP*tan(_aCutY_B) + _zOffset_EP*tan(_aCutY_B)) - (_zTruss_SP*tan(_aCutY_B) + _zTruss_EP*tan(_aCutY_B))
+
+		addz	_zOffset_SP + _zTruss_SP
+			mul	1,	-1,	1
+
+				for	i = 1	to	_nDivide + 1
+					if	i = 1	then
+						_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1)
+						_y1 = (_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1)
+						_z1 = (_remainLth/_nDivide)*(i - 1)
+
+						_x2 = -(_modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1))
+						_y2 = (_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1)
+						_z2 = (_remainLth/_nDivide)*(i - 1)
+
+						gosub	"draw_SweepGroup"
+					endif
+
+					!	Odd Number
+					if	fra(i/2) > eps & i # (_nDivide + 1)	then
+						_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1)
+						_y1 = (_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1)
+						_z1 = (_remainLth/_nDivide)*(i - 1)
+
+						_x2 = -(_modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*i)
+						_y2 = (_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*i
+						_z2 = (_remainLth/_nDivide)*i
+
+						gosub	"draw_SweepGroup"
+					endif
+					!	Even Number
+					if	fra(i/2) < eps & i # (_nDivide + 1)	then
+						_x1 = -(_modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1))
+						_y1 = (_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1)
+						_z1 = (_remainLth/_nDivide)*(i - 1)
+
+						_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*i
+						_y2 = (_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*i
+						_z2 = (_remainLth/_nDivide)*i
+
+						gosub	"draw_SweepGroup"
+					endif
+
+					if	i = (_nDivide + 1)	then
+						_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1)
+						_y1 = (_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1)
+						_z1 = (_remainLth/_nDivide)*(i - 1)
+
+						_x2 = -(_modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1))
+						_y2 = (_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1)
+						_z2 = (_remainLth/_nDivide)*(i - 1)
+
+						gosub	"draw_SweepGroup"
+					endif
+				next	i
+
+			del 1
+		del 1
+
+		!	Truss_Left/Right
+		!-----------------------------------------------------------------------------------------------
+		addz	_zOffset_SP + _zTruss_SP
+			for	j = 1	to	2
+				mulx	-2*j + 3
+
+					for	i = 1	to	_nDivide + 1
+						if	i = 1	then
+							_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+							_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+							_z1 = (_remainLth/_nDivide)*(i - 1)
+
+							_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1)
+							_y2 = -((_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1))
+							_z2 = (_remainLth/_nDivide)*(i - 1)
+
+							gosub	"draw_SweepGroup"
+						endif
+
+						!	Odd Number
+						if	fra(i/2) > eps & i # (_nDivide + 1)	then
+							_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+							_y1 = -((_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1))
+							_z1 = (_remainLth/_nDivide)*(i - 1)
+
+							_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*i
+							_y2 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*i
+							_z2 = (_remainLth/_nDivide)*i
+
+							gosub	"draw_SweepGroup"
+						endif
+						!	Even Number
+						if	fra(i/2) < eps & i # (_nDivide + 1)	then
+							_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+							_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+							_z1 = (_remainLth/_nDivide)*(i - 1)
+
+							_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*i
+							_y2 = -((_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*i)
+							_z2 = (_remainLth/_nDivide)*i
+
+							gosub	"draw_SweepGroup"
+						endif
+
+						if	i = (_nDivide + 1)	then
+							_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+							_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+							_z1 = (_remainLth/_nDivide)*(i - 1)
+
+							_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1)
+							_y2 = -((_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1))
+							_z2 = (_remainLth/_nDivide)*(i - 1)
+
+							gosub	"draw_SweepGroup"
+						endif
+					next	i
+
+				del 1
+			next	j
+		del 1
+
+		! !	Truss_Right
+		! !-----------------------------------------------------------------------------------------------
+		! addz	_zOffset_SP + _zTruss_SP
+
+		! 	for	i = 1	to	_nDivide + 1
+		! 		if	i = 1	then
+		! 			_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+		! 			_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+		! 			_z1 = (_remainLth/_nDivide)*(i - 1)
+
+		! 			_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1)
+		! 			_y2 = -((_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1))
+		! 			_z2 = (_remainLth/_nDivide)*(i - 1)
+
+		! 			gosub	"draw_SweepGroup"
+		! 		endif
+
+		! 		!	Odd Number
+		! 		if	fra(i/2) > eps & i # (_nDivide + 1)	then
+		! 			_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+		! 			_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+		! 			_z1 = (_remainLth/_nDivide)*(i - 1)
+
+		! 			_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*i
+		! 			_y2 = -((_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*i)
+		! 			_z2 = (_remainLth/_nDivide)*i
+
+		! 			gosub	"draw_SweepGroup"
+		! 		endif
+		! 		!	Even Number
+		! 		if	fra(i/2) < eps & i # (_nDivide + 1)	then
+		! 			_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+		! 			_y1 = -((_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1))
+		! 			_z1 = (_remainLth/_nDivide)*(i - 1)
+
+		! 			_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*i
+		! 			_y2 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*i
+		! 			_z2 = (_remainLth/_nDivide)*i
+
+		! 			gosub	"draw_SweepGroup"
+		! 		endif
+
+		! 		if	i = (_nDivide + 1)	then
+		! 			_x1 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_T/_nDivide)*(i - 1)
+		! 			_y1 = (_modDpt_SP/2 + _yOffset_SP) + _zTruss_SP*tan(_aCutY_T) + _zOffset_SP*tan(_aCutY_T) + (_gapDpt_T/_nDivide)*(i - 1)
+		! 			_z1 = (_remainLth/_nDivide)*(i - 1)
+
+		! 			_x2 = _modWdt_SP/2 + _zTruss_SP*tan(_aCutZ) + _zOffset_SP*tan(_aCutZ) + (_gapWdt_B/_nDivide)*(i - 1)
+		! 			_y2 = -((_modDpt_SP/2 - _yOffset_SP) + _zTruss_SP*tan(_aCutY_B) + _zOffset_SP*tan(_aCutY_B) + (_gapDpt_B/_nDivide)*(i - 1))
+		! 			_z2 = (_remainLth/_nDivide)*(i - 1)
+
+		! 			gosub	"draw_SweepGroup"
+		! 		endif
+		! 	next	i
+
+		! del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"draw_SweepGroup":
+!-----------------------------------------------------------------------------------------------
+
+	add	_x1,	_y1,	_z1
+		if	GLOB_FEEDBACK_MODE	then
+			lin_	0,	0,	0,	(_x2 - _x1),	(_y2 - _y1),	(_z2 - _z1)
+		else
+			placegroup	sweepgroup{3}(_stGroup,	(_x2 - _x1),	(_y2 - _y1),	(_z2 - _z1),	0,	0,	0,	0)
+		endif
+	del 1
+
+return

@@ -1,0 +1,113 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/7/16 THU
+!	VER : AC 20
+
+
+!----------------------------------------------------------------------------------------------------
+!	TEST
+!----------------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot2	0, 0
+	circle2	0, 0, 0.1
+	circle2	0, 0, 0.2
+endif
+
+if	bTest	then
+	HM_2D_textFont = "Yu Gothic UI 일본어"
+	HM_2D_textSize = 4
+	define style{2} "HM_style" 		HM_2D_textFont, HM_2D_textSize/1000*GLOB_SCALE,0
+	define style	"HM_style_2"	HM_2D_textFont,	HM_2D_textSize/GLOB_SCALE*100,	1,	0
+	r = request("Height_of_style",	"HM_style_2",	textHeight)
+	style "HM_style_2"
+
+	text2	0, 0, _stJudgementColor[_JudgementColor]
+
+	if	_bType1	then
+		for	iCol = 1	to	_iDataNum_col+1
+			for	iRow = 1	to	_iDataNum_row+1
+				if	iCol = 1	then
+					if	iRow = 1	then
+						stValue_temp = ""
+					else
+						stValue_temp = str(_rWorkR[iRow-1], 2, 1) + "m"
+					endif
+				else
+					if	iRow = 1	then
+						! stValue_temp = str(_rJibL[iCol-1], 2, 1)
+						stValue_temp = _stBoomL[iCol-1]
+					else
+						stValue_temp = str(_rLoad[iRow-1][iCol-1], 2, 1) + "t"
+					endif
+				endif
+
+				text2	(iCol-1)*3, -iRow, stValue_temp
+			next iRow
+		next iCol
+	endif
+
+	if	_bType2	then
+		for	i = 1	to	_nBoomAng + 1
+			for	j = 1	to	_iDataNum_row + 1
+				if	i = 1	then
+					if	j = 1	then
+						stValue_temp = ""
+					else
+						stValue_temp = str(_rWorkR[j - 1], 2, 1) + "m"
+					endif
+				else
+					if	j = 1	then
+						stValue_temp = _stBoomL[i - 1]
+					else
+						stValue_temp = str(_rLoad[j - 1][i - 1], 2, 1) + "t"
+					endif
+				endif
+
+				text2	(i - 1)*3, -j, stValue_temp
+			next	j
+		next	i
+	endif
+
+
+	!	Crane
+	!----------------------------------------------------------------------------------------------------
+	if	HM_matWarning = ""	then
+		project2	3, 270, 2
+	else
+		project2	3, 270, 3
+	endif
+
+	!	Working Radius
+	!----------------------------------------------------------------------------------------------------
+	call	"HM_mc_WorkingR.gsm"	parameters all
+
+	!	Load Text
+	!----------------------------------------------------------------------------------------------------
+	call	"HM_mc_LoadText.gsm"	parameters all
+
+
+endif
+ 
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+unID = 100
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Symbol
+!----------------------------------------------------------------------------------------------------
+
+	
+

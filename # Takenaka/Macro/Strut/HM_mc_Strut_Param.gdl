@@ -1,0 +1,14 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2018/08/08
+!	VER : AC 20
+
+!	Mast/Strut Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iType"	TYPE_MAST,				stType[TYPE_MAST],
+					TYPE_MAST_HEAVY_LIFT,	stType[TYPE_MAST_HEAVY_LIFT],
+					TYPE_STRUT,				stType[TYPE_STRUT],
+					TYPE_STRUT_HEAVY_LIFT,	stType[TYPE_STRUT_HEAVY_LIFT]
+
+values	"nStrut"	1, 2
