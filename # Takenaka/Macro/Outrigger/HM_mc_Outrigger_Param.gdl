@@ -1,0 +1,23 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+
+!----------------------------------------------------------------------------------------------------
+!	Define Parameter
+!----------------------------------------------------------------------------------------------------
+values{2}	"HM_OutrType"	OTA_150S,	stOutrType[OTA_150S],
+							U_06H,		stOutrType[U_06H],
+							U_09H,		stOutrType[U_09H],
+							OJ_30HR,	stOutrType[OJ_30HR]
+
+
+values{2}	"HM_OutrSubType"	SUB_FIX_5000,	stOutrSubType[SUB_FIX_5000],
+								SUB_FIX_6000,	stOutrSubType[SUB_FIX_6000],
+								SUB_FIX,		stOutrSubType[SUB_FIX],
+								SUB_RAIL_5000,	stOutrSubType[SUB_RAIL_5000],
+								SUB_RAIL_6000,	stOutrSubType[SUB_RAIL_6000]
+
+values{2}	"HM_OutrLiftType"	LIFT_OFF,	stOutrLiftType[LIFT_OFF],
+								LIFT_1793,	stOutrLiftType[LIFT_1793],
+								LIFT_2263,	stOutrLiftType[LIFT_2263],
+								LIFT_2733,	stOutrLiftType[LIFT_2733]

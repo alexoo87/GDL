@@ -1,0 +1,310 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+if	GLOB_FEEDBACK_MODE	then
+	HM_3D_resol = 3
+endif
+
+resol	HM_3D_resol
+
+!----------------------------------------------------------------------------------------------------
+!	Representation
+!----------------------------------------------------------------------------------------------------
+if	GLOB_VIEW_TYPE = 2	then
+	HM_3D_pen = HM_2D_cranePen
+endif
+pen	HM_3D_pen
+
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+call	"HM_Material_White.gsm"
+
+
+!----------------------------------------------------------------------------------------------------
+!	Shape
+!----------------------------------------------------------------------------------------------------
+if	HM_matWarning = ""	then
+	_material = HM_matBody2
+else
+	_material = HM_matWarning
+endif
+
+material	_material
+
+	!	Crawler Wheel
+	!-----------------------------------------------------------------------------------------------
+		rotz	-90
+			call	"HM_mc_Wheel.gsm"	parameters	all	HM_wheelHeight_total = 1.350,
+														HM_wheelWidth = 1.118,
+														HM_wheelLen = 7.860,
+														HM_wheelDistance = 5.282,
+														HM_wheelBeltThk = 0.107
+		del 1
+
+	!	Connector to Main Object - Part1
+	!-----------------------------------------------------------------------------------------------
+		_zPosConnect = 0.4415
+
+		_ConnectThk = 0.780
+
+		addz	_zPosConnect
+			put	-1.760,	-2.641,	15,
+				-1.580,	-2.250,	15,
+				-1.480,	-2.250,	15,
+				-1.480,	2.250,	15,
+				-1.580,	2.250,	15,
+				-1.760,	2.641,	15,
+				1.760,	2.641,	15,
+				1.580,	2.250,	15,
+				1.480,	2.250,	15,
+				1.480,	-2.250,	15,
+				1.580,	-2.250,	15,
+				1.760,	-2.641,	15
+
+			prism_	nsp/3,	_ConnectThk,	get(nsp)
+		del 1
+
+rotz	HM_WorkingAng
+	!	Connector to Main Object - Part2
+	!-----------------------------------------------------------------------------------------------
+		_zPosConnect = 0.4415
+
+		_ConnectThk = 0.780
+
+		addz	_zPosConnect
+			addz	_ConnectThk
+				cylind	0.635,	1.400
+			del 1
+		del 1
+
+	!	Main Deck
+	!-----------------------------------------------------------------------------------------------
+		_zPosMain = 1.8565
+
+		addz	_zPosMain
+
+			!	Main Deck
+			_mainDeckThk = 0.283
+
+			put	-3.690,	-1.644,	15,
+				-3.690,	-0.663,	15,
+				-4.070,	-0.663,	15,
+				-4.070,	0.847,	15,
+				-3.690,	0.847,	15,
+				-3.690,	1.555,	15,
+				1.560,	1.555,	15,
+				1.560,	-1.644,	15
+
+			prism_	nsp/3,	_mainDeckThk,	get(nsp)
+
+			!	Main Object
+			_mainDpt = 1.623
+
+			addy	0.1485 + _mainDpt/2
+				rotx	90
+					put	-4.070,	0.288,	15,
+						-4.070,	1.466,	15,
+						0.657,	1.466,	15,
+						1.560,	0.905,	15,
+						1.560,	0.288,	15
+
+					prism_	nsp/3,	_mainDpt,	get(nsp)
+				del 1
+			del 1
+
+			!	Machine
+			_machHgt = 1.275
+
+			addz	_mainDeckThk + 0.005
+				put	-3.690,	-1.644,	15,
+					-3.690,	-0.633,	15,
+					0.775,	-0.633,	15,
+					0.775,	-1.644,	15
+
+				prism_	nsp/3,	_machHgt,	get(nsp)
+
+				put	-3.690,	0.960,	15,
+					-3.690,	1.555,	15,
+					1.465,	1.555,	15,
+					1.465,	0.960,	15
+
+				prism_	nsp/3,	_machHgt,	get(nsp)
+			del 1
+
+			!	Counter Weight
+			resol	36
+
+			_nCW = 5
+			_CWHgt = 0.420
+
+			for	i = 1	to	_nCW
+				addz	0.032 + (_CWHgt + 0.010)*(i - 1)
+					put	-5.454,	2.500,		15,
+						-4.070,	2.500,		15,
+						-4.070,	-2.500,		15,
+						-5.454,	-2.500,		13,
+						0,		0,			900,
+						0,		-49.2486,	4000+15
+
+					prism_	nsp/3,	_CWHgt,	get(nsp)
+				del 1
+			next	i
+
+			resol	HM_3D_resol
+		del 1
+
+	!	Boom/Jib
+	!-----------------------------------------------------------------------------------------------
+		_zPosBoom = 2.730
+
+		addz	_zPosBoom
+			addy	_yPosBoom
+				addx	_xPosBoom
+					!	Boom
+					call	"HM_mc_BoomJib.gsm"	parameters	all
+
+					roty	-HM_BoomAng
+						addx	HM_BoomLength
+							!	Jib Pulley
+							for	i = 1	to	2
+								muly	-2*i + 3
+									if	(HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
+										addz	-_zPosMainPulley
+											call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.076,
+																						HM_Pulley_R1 = 0.380,
+																						HM_Pulley_R2 = 0.350,
+																						HM_Pulley_Thick = 0.012,
+																						HM_matPulley = HM_matBody2,
+																						HM_Pulley_Fixed = 0
+										del 1
+									endif
+									! if	HM_CraneMode = MODE_LUFFING_JIB	then
+									! 	addx	_xPosJib
+									! 		addz	-_zPosJib
+									! 			roty	HM_BoomAng - HM_JibAng
+									! 				addx	HM_JibLength
+									! 					addz	-_zPosJibPulley
+									! 						call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.180,
+									! 																	HM_Pulley_R1 = 0.350,
+									! 																	HM_Pulley_R2 = 0.325,
+									! 																	HM_Pulley_Thick = 0.012,
+									! 																	HM_matPulley = HM_matBody2,
+									! 																	HM_Pulley_Fixed = 0
+									! 					del 1
+									! 				del 1
+									! 			del 1
+									! 		del 1
+									! 	del 1
+									! endif
+								del 1
+							next	i
+						del 1
+					del 1
+				del 1
+			del 1
+		del 1
+
+	!	Wire
+	!-----------------------------------------------------------------------------------------------
+		if	(HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
+			_zAddPos = HM_BoomLength*sin(HM_BoomAng) - _zPosMainPulley*cos(HM_BoomAng)
+		endif
+		if	HM_CraneMode = MODE_LUFFING_JIB	then
+			! _zAddPos = (HM_BoomLength + _xPosJib)*sin(HM_BoomAng) - _zPosJib*cos(HM_BoomAng) + HM_JibLength*sin(HM_JibAng) - _zPosJibPulley*cos(HM_JibAng)
+		endif
+
+		!	Boom or Jib → Hook
+		!-----------------------------------------------------------------------------------------------
+		_zPosJibPulley = _zPosBoom + _zAddPos
+
+		addy	_yPosBoom
+			! for	i = 1	to	2
+			! 	muly	2*i - 3
+					call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR,
+																x2 = HM_WorkingR,
+																y1 = 0,
+																y2 = 0,
+																z1 = _zPosJibPulley,
+																z2 = _zPosJibPulley - HM_JibWireLen + HM_HookHeight
+			! 	del 1
+			! next	i
+		del 1
+
+	!	Hook
+	!-----------------------------------------------------------------------------------------------
+		_zPosHook = _zPosBoom + _zAddPos
+
+		add	HM_WorkingR,	_yPosBoom,	_zPosHook
+			hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3		:	unID = unID + 1
+			hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2		:	unID = unID + 1
+
+			addz	-HM_JibWireLen
+				call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = 0.300
+			del 1
+		del	1
+
+	!	Suspended Load
+	!----------------------------------------------------------------------------------------------------
+		_zPosLoad = _zPosHook - HM_JibWireLen
+
+		if	HM_SLshow	then
+			add	HM_WorkingR,	_yPosBoom,	_zPosLoad
+				hotspot	0,	0,	0,				unID,	HM_SLwireLen,	1	: unID = unID + 1
+				hotspot	0,	0,	-HM_SLwireLen,	unID,	HM_SLwireLen,	2	: unID = unID + 1
+				hotspot	0,	0,	1,				unID,	HM_SLwireLen,	3	: unID = unID + 1
+
+				addz	-HM_SLwireLen
+					rotz	90
+						call	"HM_mc_Suspendedloads.gsm"	parameters	all
+					del	1
+				del	1
+			del	1
+		endif
+
+	!	Load Text
+	!-----------------------------------------------------------------------------------------------
+		_zPosText = _zPosLoad - HM_SLwireLen
+
+		if	HM_3D_text_show_load	then
+			!	On the Load 
+			if	not(GLOB_FEEDBACK_MODE) 	then
+				add	HM_WorkingR + HM_SLdepth/2,	_yPosBoom,	_zPosText
+					rotz	90
+						call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 1,
+																		HM_3D_text_show_plane = 0
+					del	1
+				del	1
+			endif
+		endif
+
+		if	HM_3D_text_show_plane	then
+			!	On the Bottom
+			call	"HM_mc_LoadText.gsm"	parameters all	HM_3D_text_show_load = 0,
+															HM_3D_text_show_plane = 1
+		endif
+
+
+del 1
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Dimension
+!----------------------------------------------------------------------------------------------------
+
+	!	Working Radius
+	!----------------------------------------------------------------------------------------------------
+	addy	_yPosBoom
+		call	"HM_mc_WorkingR.gsm"	parameters all
+	del 1
+
+
+
+end

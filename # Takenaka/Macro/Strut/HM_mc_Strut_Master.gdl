@@ -21,3 +21,27 @@ if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
 		stType[3] = "Strut(Normal)"
 		stType[4] = "Strut(Heavy_Lift)"
 endif
+
+!	Crane Name(Strut)
+!-----------------------------------------------------------------------------------------------
+CRANE_SL4500J = 1
+CRANE_SL6000J = 2
+CRANE_6000SLX = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stCraneName[]
+		stCraneName[1] = "SL4500J"
+		stCraneName[2] = "SL6000J"
+		stCraneName[3] = "6000SLX"
+endif
+
+!	Strut Location
+!-----------------------------------------------------------------------------------------------
+STRUT_FRONT = 1
+STRUT_REAR = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stStrutLct[]
+		stStrutLct[1] = "Front"
+		stStrutLct[2] = "Rear"
+endif

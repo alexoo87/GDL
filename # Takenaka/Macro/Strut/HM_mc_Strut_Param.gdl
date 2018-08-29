@@ -12,3 +12,26 @@ values{2}	"iType"	TYPE_MAST,				stType[TYPE_MAST],
 					TYPE_STRUT_HEAVY_LIFT,	stType[TYPE_STRUT_HEAVY_LIFT]
 
 values	"nStrut"	1, 2
+
+!	Crane Name(Strut)
+!-----------------------------------------------------------------------------------------------
+values{2}	"iCraneName"	CRANE_SL4500J,	stCraneName[CRANE_SL4500J],
+							CRANE_SL6000J,	stCraneName[CRANE_SL6000J],
+							CRANE_6000SLX,	stCraneName[CRANE_6000SLX]
+
+if	HM_CraneName = "SL4500J"	then
+	_iCraneName = CRANE_SL4500J
+endif
+if	HM_CraneName = "SL6000J"	then
+	_iCraneName = CRANE_SL6000J
+endif
+if	HM_CraneName = "6000SLX"	then
+	_iCraneName = CRANE_6000SLX
+endif
+
+parameters	iCraneName = _iCraneName
+
+!	Strut Location
+!-----------------------------------------------------------------------------------------------
+values{2}	"iStrutLct"	STRUT_FRONT,	stStrutLct[STRUT_FRONT],
+						STRUT_REAR,		stStrutLct[STRUT_REAR]

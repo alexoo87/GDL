@@ -1,0 +1,82 @@
+
+!	변수 범위
+!-----------------------------------------------------------------------------------------------
+values	"txtDrwSize"	range	(0,	]
+values	"txtSclSize"	range	(0,	]
+values	"txtIDSize"		range	(0,	]
+
+values	"Rd"		range	(0,	]
+values	"RdOff"		range	(0,	]
+values	"TxtOff"	range	(0,	]
+
+
+!	Title Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iTitleType"	TITLE_TYPE1,	stTitleType[TITLE_TYPE1],
+							TITLE_TYPE2,	stTitleType[TITLE_TYPE2]
+
+
+!	Scale Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iScaleType"	SCALE_A1,		stScaleType[SCALE_A1],
+							SCALE_A3,		stScaleType[SCALE_A3],
+							SCALE_A1_A3,	stScaleType[SCALE_A1_A3]
+
+!	도면명 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iDrwName"	DRW_NAME_LAYOUT,	stDrwName[DRW_NAME_LAYOUT],
+						DRW_NAME_DRAWING,	stDrwName[DRW_NAME_DRAWING]
+
+!	원 분할 유형
+!-----------------------------------------------------------------------------------------------
+values{2}	"iCircleType"	CIRCLE_NORMAL,	stCircleType[CIRCLE_NORMAL],
+							CIRCLE_HALF,	stCircleType[CIRCLE_HALF]
+
+!	원 하부 내용
+!-----------------------------------------------------------------------------------------------
+values{2}	"iContentB"	CONTENT_B_LAYOUT,	stContentB[CONTENT_B_LAYOUT],
+						CONTENT_B_CUSTOM,	stContentB[CONTENT_B_CUSTOM]
+
+!	Lock Parameter
+!-----------------------------------------------------------------------------------------------
+lock	"ac_drawingName", "ac_drawingNumber", "ac_drawingScale"
+
+!	Text
+!-----------------------------------------------------------------------------------------------
+values	"txtDrwWF"	range	(0,	5]
+values	"txtDrwCF"	range	(0,	5]
+
+values	"txtSclWF"	range	(0,	5]
+values	"txtSclCF"	range	(0,	5]
+
+values	"txtIDWF"	range	(0,	5]
+values	"txtIDCF"	range	(0,	5]
+
+!	스케일 OFF시 A1스케일 온오프 락
+!-----------------------------------------------------------------------------------------------
+if	not(bScale)	then
+	lock	"bScaleA1", "nCustomScale", "bCustomScale", "iScaleType"
+endif
+
+if	not(bCustomScale)	then
+	lock	"nCustomScale"
+endif
+
+!	Type2 _ 변수 숨기기
+!-----------------------------------------------------------------------------------------------
+if	iTitleType = TITLE_TYPE1	then
+	hideparameter	"iScaleType", "iCircleType", "iContentB", "stCustomB"
+endif
+if	iTitleType = TITLE_TYPE2	then
+	hideparameter	"txtPrc", "txtCst", "bScaleA1"
+
+	if	iCircleType = CIRCLE_NORMAL	then
+		hideparameter	"iContentB", "stCustomB"
+	endif
+	if	iCircleType = CIRCLE_HALF	then
+		if	not(iContentB = CONTENT_B_CUSTOM)	then
+			hideparameter	"stCustomB"
+		endif
+	endif
+endif
+ 

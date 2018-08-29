@@ -1,0 +1,84 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+EPS = 0.0001
+unID = 1000
+
+!	Crane Information
+HM_CraneType = 3
+HM_CraneName = "SCX2000"
+HM_CraneMaker = "日立住友"
+
+!	Crane Size
+HM_CraneWidth = 9.000
+HM_CraneDepth = 7.520
+HM_CraneHeight = 1.855
+
+!	Crane Origin (Center Point)
+_mCraneOriginX = 0
+_mCraneOriginY = 0
+
+!	Crane Mode
+MODE_HEAVY_BOOM = 1
+MODE_MAIN_BOOM = 2
+MODE_LONG_BOOM = 3
+MODE_LUFFING_JIB = 4
+
+dim	_stCraneMode[]
+	_stCraneMode[1] = "ヘビーブーム"
+	_stCraneMode[2] = "メインブーム"
+	_stCraneMode[3] = "ロングブーム"
+	_stCraneMode[4] = "ラッフィングジブ"
+
+!	Boom Type Index
+_IDX_CRANE_TYPE = 1000
+_TYPE_MAIN_BOOM = _IDX_CRANE_TYPE + 1
+_TYPE_MAIN_BOOM_JIB = _IDX_CRANE_TYPE + 2
+_TYPE_TOWER_BOOM = _IDX_CRANE_TYPE + 3
+_TYPE_TOWER_BOOM_JIB = _IDX_CRANE_TYPE + 4
+
+dim	_stBoomType[]
+	_stBoomType[1] = "MAIN BOOM"
+	_stBoomType[2] = "MAIN BOOM + JIB"
+	_stBoomType[3] = "TOWER BOOM"
+	_stBoomType[4] = "TOWER BOOM + JIB"
+
+!	Radius
+_xOffset_Rad = 0.350
+
+!	'HM_Judgement' Index
+SAFETY = 1
+WARNING_YELLOW = 2
+WARNING_RED = 3
+
+!	Part Pos
+_xPosJib = 1.350
+_zPosJib = 2.250
+_zPosJibPulley = 0.600
+
+if	HM_CraneMode = MODE_MAIN_BOOM	then
+	_zPosMainPulley = 1.510
+endif
+if	HM_CraneMode = MODE_LONG_BOOM	then
+	_zPosMainPulley = 0.550
+endif
+
+!----------------------------------------------------------------------------------------------------
+!	Size 
+!----------------------------------------------------------------------------------------------------
+_xPosBoom = 1.400
+_yPosBoom = 0.150
+
+!----------------------------------------------------------------------------------------------------
+!	Rated Load
+!----------------------------------------------------------------------------------------------------
+
+
+!----------------------------------------------------------------------------------------------------
+!	Calculation
+!----------------------------------------------------------------------------------------------------

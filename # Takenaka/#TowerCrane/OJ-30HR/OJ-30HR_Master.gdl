@@ -1,0 +1,90 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/12/07 THU
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+EPS = 0.0001
+
+!	Crane Information
+HM_CraneType = 6
+HM_CraneName = "OJ-30HR"
+HM_CraneMaker = "㈱竹中工務店 東日本機材センター"
+
+!	Crane Size
+HM_CraneWidth = 5.350
+HM_CraneDepth = 5.364
+HM_CraneHeight = 5.972
+
+!	Crane Origin (Center Point)
+_mCraneOriginX = HM_CraneWidth/2
+_mCraneOriginY = HM_CraneDepth/2
+
+!	Jib Length
+_mJib_pulleyR = 0.142
+if	HM_JibLen = "18.0m"	then	HM_JibLength = 18.500 + _mJib_pulleyR
+if	HM_JibLen = "20.0m"	then	HM_JibLength = 20.500 + _mJib_pulleyR
+
+!	'HM_Judgement' Index
+SAFETY = 1
+WARNING_YELLOW = 2
+WARNING_RED = 3
+
+!	Outrigger Sub Type Index
+SUB_FIX_5000 = 1
+SUB_FIX_6000 = 2
+SUB_FIX = 3
+SUB_RAIL_5000 = 4
+SUB_RAIL_6000 = 5
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stOutrSubType[]
+		stOutrSubType[1] = "定置式アウトリガースパン(5000)"
+		stOutrSubType[2] = "定置式アウトリガースパン(6000)"
+		stOutrSubType[3] = "固定式"
+		stOutrSubType[4] = "走行式レールスパン(5000)"
+		stOutrSubType[5] = "走行式レールスパン(6000)"
+endif
+
+!	Outrigger Lift Type Index
+LIFT_OFF = 1
+LIFT_1793 = 2
+LIFT_2263 = 3
+LIFT_2733 = 4
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stOutrLiftType[]
+		stOutrLiftType[1] = "OFF"
+		stOutrLiftType[2] = "1,793mm"
+		stOutrLiftType[3] = "2,263mm"
+		stOutrLiftType[4] = "2,733mm"
+endif
+
+
+!----------------------------------------------------------------------------------------------------
+!	Size 
+!----------------------------------------------------------------------------------------------------
+_mCenter_jib_offset = 0.675					!	Center to Jib Origin Offset X axis
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Rated Load
+!----------------------------------------------------------------------------------------------------
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Calculation
+!----------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+

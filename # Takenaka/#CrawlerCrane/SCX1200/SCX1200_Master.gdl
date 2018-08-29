@@ -11,13 +11,13 @@ unID = 1000
 
 !	Crane Information
 HM_CraneType = 3
-HM_CraneName = "SL4500J"
-HM_CraneMaker = "KOBELCO"
+HM_CraneName = "SCX1200"
+HM_CraneMaker = "日立住友"
 
 !	Crane Size
-HM_CraneWidth = 10.520
-HM_CraneDepth = 8.720
-HM_CraneHeight = 3.330
+HM_CraneWidth = 7.914
+HM_CraneDepth = 6.365
+HM_CraneHeight = 1.605
 
 !	Crane Origin (Center Point)
 _mCraneOriginX = 0
@@ -48,8 +48,8 @@ dim	_stBoomType[]
 	_stBoomType[3] = "TOWER BOOM"
 	_stBoomType[4] = "TOWER BOOM + JIB"
 
-!	Jib
-_mJib_pulleyR = 0.325
+!	Radius
+_xOffset_Rad = 0.350
 
 !	'HM_Judgement' Index
 SAFETY = 1
@@ -62,16 +62,17 @@ _zPosJib = 2.250
 _zPosJibPulley = 0.600
 
 if	HM_CraneMode = MODE_MAIN_BOOM	then
-	_zPosMainPulley = 1.300
+	_zPosMainPulley = 1.510
 endif
 if	HM_CraneMode = MODE_LONG_BOOM	then
-	_zPosMainPulley = 0.600
+	_zPosMainPulley = 0.510
 endif
 
 !----------------------------------------------------------------------------------------------------
 !	Size 
 !----------------------------------------------------------------------------------------------------
-_xPosBoom = 1.600
+_xPosBoom = 1.350
+_yPosBoom = 0.085
 
 !----------------------------------------------------------------------------------------------------
 !	Rated Load

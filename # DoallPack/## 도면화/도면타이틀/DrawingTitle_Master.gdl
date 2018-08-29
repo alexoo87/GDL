@@ -1,0 +1,106 @@
+!===============================================================================================
+!	License Locking Source
+
+call	"macroL"	parameters	all	returned_parameters	keyValue
+
+if	not(keyValue)	then
+	hideparameter	all
+	lock			all
+endif
+
+!	License Locking Source
+!===============================================================================================
+
+!	기본설정
+!-----------------------------------------------------------------------------------------------
+eps = 0.0001
+
+
+!	Drawing Title
+!-----------------------------------------------------------------------------------------------
+TITLE_TYPE1 = 1
+TITLE_TYPE2 = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stTitleType[2]
+		stTitleType[1] = `Type1`
+		stTitleType[2] = `Type2`
+endif
+
+!	Scale Type
+!-----------------------------------------------------------------------------------------------
+SCALE_A1 = 1
+SCALE_A3 = 2
+SCALE_A1_A3 = 3
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stScaleType[]
+		stScaleType[1] = "A1"
+		stScaleType[2] = "A3"
+		stScaleType[3] = "A1+A3"
+endif
+
+!	도면명 유형
+!-----------------------------------------------------------------------------------------------
+DRW_NAME_LAYOUT = 1
+DRW_NAME_DRAWING = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stDrwName[]
+		stDrwName[1] = "Layout Name"
+		stDrwName[2] = "Drawing Name"
+endif
+
+!	원 분할 유형
+!-----------------------------------------------------------------------------------------------
+CIRCLE_NORMAL = 1
+CIRCLE_HALF = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stCircleType[]
+		stCircleType[1] = "분할없음"
+		stCircleType[2] = "2분할 원"
+endif
+
+!	원 하부 내용
+!-----------------------------------------------------------------------------------------------
+CONTENT_B_LAYOUT = 1
+CONTENT_B_CUSTOM = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stContentB[]
+		stContentB[1] = "Layout ID"
+		stContentB[2] = "Custom"
+endif
+
+!	폰트 불러오기
+!-----------------------------------------------------------------------------------------------
+	dim	fontnames[]
+	nFonts = request("FONTNAMES_LIST", "", fontnames)
+	values	"stFontType"	fontnames,	CUSTOM
+
+!	폰트 스타일 정의
+!-----------------------------------------------------------------------------------------------
+	define style{2}	drwNsty		stFontType,	txtDrwSize/1000,	txtDrwB + 2*txtDrwI
+	define style{2}	drwSsty		stFontType,	txtSclSize/1000,	txtSclB + 2*txtSclI
+	define style{2}	drwIDsty	stFontType,	txtIDSize/1000,		txtIDB + 2*txtIDI
+
+!	스케일 변수 숫자화
+!-----------------------------------------------------------------------------------------------
+	!	A3
+	!-----------------------------------------------------------------------------------------------
+	_stScale = ac_drawingScale
+	ScaleNum1 = 0
+	ScaleNum2 = 0
+
+	n = split(_stScale,	"%n:%n",	ScaleNum1,	stra3,	ScaleNum2)
+	
+	if	bCustomScale	then
+		a3B = nCustomScale
+	else
+		a3B = ScaleNum2
+	endif
+
+	a1B = a3B/2
+	a1 = str("%~",	a1B)
+	a3 = str("%~",	a3B)

@@ -60,7 +60,16 @@ else
 	_typeName = _stBoomType_Main
 endif
 
-_bType1 = (_typeName = "メインブーム") | (_typeName = "ロングブーム")	 | (_typeName = "ヘビーブーム") | (_typeName = "主ブーム") | (_typeName = "補助シーブ")	!	Type that has only Main Boom
+!	Insert Values
+! parameters	stCraneName = _stCraneName,
+! 			stBoomType = _stBoomType,
+! 			stBoomType_Main = _stBoomType_Main,
+! 			stBoomType_Sub = _stBoomType_Sub,
+! 			stOption = _stOption,
+! 			typeName = _typeName
+
+_bType1 = (_typeName = "メインブーム") | (_typeName = "ロングブーム")	 | (_typeName = "ヘビーブーム") | (_typeName = "主ブーム") | (_typeName = "補助シーブ") \
+			| (_typeName = "補助シーブ付き主ブーム") | (_typeName = "第３ウインチ使用時の主ブーム") | (_typeName = "第３ウインチ使用時の補助シーブ付き主ブーム")		!	Type that has only Main Boom
 _bType2 = (_typeName = "ラッフィングジブ") | (_typeName = "タワー") 																					!	Type that has Main Boom, Addtional Jib, Boom Angle
 _bType3 = (_typeName = "クレーンジブ") | (_typeName = "クレーンジブ付き主ブーム")																			!	Type that has Main Boom, Addtional Jib, Jib Angle
 
@@ -353,6 +362,7 @@ if	_bType2	then
 
 	dim	_sortList_jibLth[]
 
+	_sortIdx = 1
 	for	n = 1	to	_nJib
 		_nCount_rLoad_jibLth = 0
 		_sIdx = 1 + _nBoomAng*(n - 1)
@@ -368,9 +378,9 @@ if	_bType2	then
 		next	i
 
 		if	abs(_nCount_rLoad_jibLth) > eps	then
-			_sortList_jibLth[n] = _stJibL[n]
+			_sortList_jibLth[_sortIdx] = _stJibL[n]	:	_sortIdx = _sortIdx + 1
 		else
-			n = _nJib
+			! n = _nJib
 		endif
 	next	n
 
@@ -462,7 +472,6 @@ if	_bType3	then
 		text2	0, 0, "Can not find Crane Text File. Please check DB folder."
 		end
 	endif
-
 
 		!	Data Check
 		!-----------------------------------------------------------------------------------------------
@@ -584,7 +593,7 @@ if	_bType3	then
 		_xPosData_RLoad = 0
 
 		for	i = 1	to	_nJibAng
-			if	abs(_boomAng[i] - HM_jibAng) < eps	then
+			if	abs(_jibAng[i] - HM_jibAng) < eps	then
 				_xPosData_RLoad = i
 			endif
 		next	i

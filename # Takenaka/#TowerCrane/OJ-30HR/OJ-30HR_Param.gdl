@@ -1,0 +1,196 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	DATE : 2017/12/07 THU
+!	VER : AC 20
+
+!-----------------------------------------------------------------------------------------------
+!	Jib Length/Outrigger Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"HM_OutrSubType"	SUB_FIX_5000,	stOutrSubType[SUB_FIX_5000],
+								SUB_FIX_6000,	stOutrSubType[SUB_FIX_6000],
+								SUB_FIX,		stOutrSubType[SUB_FIX],
+								SUB_RAIL_5000,	stOutrSubType[SUB_RAIL_5000],
+								SUB_RAIL_6000,	stOutrSubType[SUB_RAIL_6000]
+
+values{2}	"HM_OutrLiftType"	LIFT_OFF,	stOutrLiftType[LIFT_OFF],
+								LIFT_1793,	stOutrLiftType[LIFT_1793],
+								LIFT_2263,	stOutrLiftType[LIFT_2263],
+								LIFT_2733,	stOutrLiftType[LIFT_2733]
+
+!	Crane Size
+if	HM_OutrSubType = SUB_FIX_5000	then
+	HM_CraneWidth = 5.350
+	HM_CraneDepth = 5.364
+	HM_CraneHeight = 5.972
+endif
+if	HM_OutrSubType = SUB_FIX_6000	then
+	HM_CraneWidth = 6.350
+	HM_CraneDepth = 6.364
+	HM_CraneHeight = 5.972
+endif
+if	HM_OutrSubType = SUB_FIX	then
+	HM_CraneWidth = 2.000
+	HM_CraneDepth = 1.320
+	HM_CraneHeight = 5.535
+endif
+if	HM_OutrSubType = SUB_RAIL_5000	then
+	HM_CraneWidth = 5.715
+	HM_CraneDepth = 5.364
+	HM_CraneHeight = 6.088
+endif
+if	HM_OutrSubType = SUB_RAIL_6000	then
+	HM_CraneWidth = 6.715
+	HM_CraneDepth = 6.364
+	HM_CraneHeight = 6.088
+endif
+
+!	Jib Length
+if	not(HM_OutrSubType = SUB_FIX)	then
+	values	"HM_JibLen"	"18.0m"
+	parameters	HM_OutrLiftType = LIFT_OFF
+	lock	"HM_OutrLiftType"
+else
+	values	"HM_JibLen"	"18.0m", "20.0m"
+endif
+
+!	Outrigger Width/Length
+if	(HM_OutrSubType = SUB_FIX_5000) | (HM_OutrSubType = SUB_RAIL_5000)	then
+	_outrWdt = 5.000
+	_outrLen = 5.000
+endif
+if	(HM_OutrSubType = SUB_FIX_6000) | (HM_OutrSubType = SUB_RAIL_6000)	then
+	_outrWdt = 6.000
+	_outrLen = 6.000
+endif
+if	(HM_OutrSubType = SUB_FIX)	then
+	_outrWdt = 1.070
+	_outrLen = 1.700
+endif
+
+lock	"HM_OutrWidth", "HM_OutrLen"
+parameters	HM_OutrWidth = _outrWdt,
+			HM_OutrLen = _outrLen
+
+!	Outrigger Height
+if	(HM_OutrSubType = SUB_FIX_5000) | (HM_OutrSubType = SUB_FIX_6000)	then
+	_outrHgt = 1.149
+endif
+if	(HM_OutrSubType = SUB_RAIL_5000) | (HM_OutrSubType = SUB_RAIL_6000)	then
+	_outrHgt = 1.275
+endif
+if	(HM_OutrSubType = SUB_FIX)	then
+	_outrHgt = 0.495
+	if	HM_OutrLiftType = LIFT_1793	then
+		_outrHgt = 1.793 + 0.133
+	endif
+	if	HM_OutrLiftType = LIFT_2263	then
+		_outrHgt = 2.263 + 0.133
+	endif
+	if	HM_OutrLiftType = LIFT_2733	then
+		_outrHgt = 2.733 + 0.133
+	endif
+endif
+
+lock	"HM_OutrHeight"
+parameters	HM_OutrHeight = _outrHgt
+
+!----------------------------------------------------------------------------------------------------
+!	Calculation
+!----------------------------------------------------------------------------------------------------
+!	Jib Angle, Jib Height, Working Radius
+if	GLOB_MODPAR_NAME = "JibLen"	then
+	HM_WorkingR = (_WorkingR_max-_WorkingR_min)/2
+	HM_jibAng = acs((HM_WorkingR-_mCenter_jib_offset)/HM_JibLength)
+	HM_JibHeight = HM_JibLength*sin(HM_jibAng)
+else
+	if	GLOB_MODPAR_NAME = "HM_JibHeight"	then
+		HM_jibAng = asn(HM_JibHeight/HM_JibLength)
+		HM_WorkingR = HM_JibLength*cos(HM_jibAng) + _mCenter_jib_offset
+	else
+		if	GLOB_MODPAR_NAME = "HM_JibAng"	then
+			HM_JibHeight = HM_JibLength*sin(HM_jibAng)
+			HM_WorkingR = HM_JibLength*cos(HM_jibAng) + _mCenter_jib_offset
+		else
+			HM_jibAng = acs((HM_WorkingR-_mCenter_jib_offset)/HM_JibLength)
+			HM_JibHeight = HM_JibLength*sin(HM_jibAng)
+		endif
+	endif
+endif
+
+
+
+
+!----------------------------------------------------------------------------------------------------
+!	Macro
+!----------------------------------------------------------------------------------------------------
+!	Global
+call	"HM_Global.gsm"	parameters	all
+
+!	Rated Load
+call	"HM_mc_RatedLoad.gsm"	parameters all	returned_parameters	_WorkingR_max,	_WorkingR_min
+
+!	Suspended Load 
+call	"HM_mc_Suspendedloads.gsm"	parameters	all
+
+
+!----------------------------------------------------------------------------------------------------
+!	Define Values
+!----------------------------------------------------------------------------------------------------
+   
+
+
+!----------------------------------------------------------------------------------------------------
+!	Define Range
+!----------------------------------------------------------------------------------------------------
+
+	!	Jib Angle
+	!----------------------------------------------------------------------------------------------------
+	_JibAng_min = acs((_WorkingR_max-_mCenter_jib_offset)/HM_JibLength)
+	_JibAng_max = acs((_WorkingR_min-_mCenter_jib_offset)/HM_JibLength)
+	values	"HM_JibAng"	range [_JibAng_min, _JibAng_max]
+
+	!	Jib Height
+	!----------------------------------------------------------------------------------------------------
+	_mJibHeight_min = HM_JibLength*sin(_JibAng_min)
+	_mJibHeight_max = HM_JibLength*sin(_JibAng_max)
+	values	"HM_JibHeight"	range [_mJibHeight_min, _mJibHeight_max]
+
+
+!----------------------------------------------------------------------------------------------------
+!	Insert Value
+!----------------------------------------------------------------------------------------------------
+!	Crane Information
+parameters 	HM_CraneType = HM_CraneType,
+			HM_CraneName = HM_CraneName,
+			HM_CraneMaker = HM_CraneMaker 
+
+!	Crane Size
+parameters 	HM_CraneWidth = HM_CraneWidth,
+			HM_CraneDepth = HM_CraneDepth,
+			HM_CraneHeight = HM_CraneHeight
+
+!	Jib Length
+parameters	HM_JibLength = HM_JibLength
+
+
+!	Jib Angle, Jib Height, Working Radius
+if	GLOB_MODPAR_NAME = "JibLen" 	then
+	parameters	HM_WorkingR = HM_WorkingR
+	parameters	HM_jibAng = HM_jibAng
+	parameters	HM_JibHeight = HM_JibHeight
+else
+	if	GLOB_MODPAR_NAME = "HM_JibHeight" 	then
+		parameters	HM_WorkingR = HM_WorkingR
+		parameters	HM_jibAng = HM_jibAng
+	else
+		if	GLOB_MODPAR_NAME = "HM_JibAng"	then
+			parameters	HM_JibHeight = HM_JibHeight
+			parameters	HM_WorkingR = HM_WorkingR
+		else
+			parameters	HM_JibHeight = HM_JibHeight
+			parameters	HM_jibAng = HM_jibAng
+		endif
+	endif
+endif
+

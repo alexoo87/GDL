@@ -1,11 +1,8 @@
-
 !======================================================================================================
 !	TAKENAKA CRANE LIBRARY 
 !======================================================================================================
 !	DATE : 2017/12/07 THU
 !	VER : AC 20
-!	DEV : JO HYUNG JUN
-
 
 !----------------------------------------------------------------------------------------------------
 !	TEST
@@ -41,11 +38,11 @@ call	"HM_Material_White.gsm"
 !	Hotspot
 !----------------------------------------------------------------------------------------------------
 add	-_mCraneOriginX, -_mCraneOriginY, 0
-	hotspot	_mCraneOriginX, _mCraneOriginY, 	0, unID : unID = unID+1		!	Origin
-	hotspot	0, 0, 								0, unID : unID = unID+1
-	hotspot	HM_CraneWidth, 0, 					0, unID : unID = unID+1
-	hotspot	HM_CraneWidth, HM_CraneDepth, 		0, unID : unID = unID+1
-	hotspot	0, HM_CraneDepth, 					0, unID : unID = unID+1
+	hotspot	_mCraneOriginX, _mCraneOriginY,		0, unID : unID = unID+1		!	Origin
+	hotspot	0,	0,								0, unID : unID = unID+1
+	hotspot	HM_CraneWidth, 0,					0, unID : unID = unID+1
+	hotspot	HM_CraneWidth, HM_CraneDepth,		0, unID : unID = unID+1
+	hotspot	0, HM_CraneDepth,					0, unID : unID = unID+1
 del	1
 
 
@@ -53,22 +50,21 @@ del	1
 !	Shape
 !----------------------------------------------------------------------------------------------------
 !	Elevation
-_mDeck_posz = 1.489
-_mDeck_panel_posz = 1.366
+_mDeck_posz = HM_OutrHeight + 0.340
+_mDeck_panel_posz = HM_OutrHeight + 0.207
 _mJib_posz = _mDeck_posz
-_mCatHead_posz = _mDeck_posz + 0.120
+_mCatHead_posz = _mDeck_posz + 0.110
 
 rotz	HM_WorkingAng
-
 
 	!	Outrigger
 	!----------------------------------------------------------------------------------------------------
 	OJ_30HR = 4
 	
 	if	bTest	then
-		hotspot 	0, 	0, 	0,				unID, HM_OutrHeight, 1 			: unID = unID + 1			
-		hotspot 	0, 	0, 	HM_OutrHeight,	unID, HM_OutrHeight, 2			: unID = unID + 1		
-		hotspot 	0, 	0, 	-1,				unID, HM_OutrHeight, 3			: unID = unID + 1		
+		hotspot	0,	0,	0,				unID, HM_OutrHeight, 1			: unID = unID + 1
+		hotspot	0,	0,	HM_OutrHeight,	unID, HM_OutrHeight, 2			: unID = unID + 1
+		hotspot	0,	0,	-1,				unID, HM_OutrHeight, 3			: unID = unID + 1
 
 		lin_ 0, 0, 0, 0, 0, HM_OutrHeight
 	endif
@@ -117,10 +113,10 @@ rotz	HM_WorkingAng
 	addx	-0.502
 		addy	_mPanel_posy
 			addz	_mDeck_panel_posz
-				call	"HM_mc_OperatorCab.gsm"	parameters	all		HM_OP_Depth = _mOperD,
-																	HM_OP_Width = _mOperW,
-																	HM_OP_Height = _mOperH,
-																	HM_OP_Depth_bot = _mOperD2
+				call	"HM_mc_OperatorCab.gsm"	parameters	all	HM_OP_Depth = _mOperD,
+																HM_OP_Width = _mOperW,
+																HM_OP_Height = _mOperH,
+																HM_OP_Depth_bot = _mOperD2
 			del	1
 		del	1
 	del	1
@@ -185,20 +181,19 @@ rotz	HM_WorkingAng
 	!	Working Angle Hotspot
 	! _hLth = (HM_JibLength/2)*cos(HM_JibAng)
 	! add	_mOutr_Jib_offset_x,	0,	HM_OutrHeight + _mOutr_Jib_offset + HM_JibHeight/2
-	! 	hotspot	_hLth,						0,							0,	unID,	HM_WorkingAng,	4	: unID = unID + 1
-	! 	hotspot	_hLth*cos(HM_WorkingAng),	_hLth*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng,	5	: unID = unID + 1
-	! 	hotspot	0,							0,							0,	unID,	HM_WorkingAng,	6	: unID = unID + 1
-	! 	hotspot	0,							0,							1,	unID,	HM_WorkingAng,	7	: unID = unID + 1
+	!	hotspot	_hLth,						0,							0,	unID,	HM_WorkingAng,	4	: unID = unID + 1
+	!	hotspot	_hLth*cos(HM_WorkingAng),	_hLth*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng,	5	: unID = unID + 1
+	!	hotspot	0,							0,							0,	unID,	HM_WorkingAng,	6	: unID = unID + 1
+	!	hotspot	0,							0,							1,	unID,	HM_WorkingAng,	7	: unID = unID + 1
 	! del 1
-
 
 	_hLth = (HM_JibLength/2)*cos(HM_JibAng) + _mOutr_Jib_offset_x
 	rotz	-HM_WorkingAng
 	addz	HM_OutrHeight + _mOutr_Jib_offset + HM_JibHeight/2 
 		hotspot	_hLth,						0,							0,	unID,	HM_WorkingAng,	4+128	: unID = unID + 1
-		hotspot	_hLth*cos(HM_WorkingAng),	_hLth*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng,	5	: unID = unID + 1
-		hotspot	0,							0,							0,	unID,	HM_WorkingAng,	6	: unID = unID + 1
-		hotspot	0,							0,							1,	unID,	HM_WorkingAng,	7	: unID = unID + 1
+		hotspot	_hLth*cos(HM_WorkingAng),	_hLth*sin(HM_WorkingAng),	0,	unID,	HM_WorkingAng,	5		: unID = unID + 1
+		hotspot	0,							0,							0,	unID,	HM_WorkingAng,	6		: unID = unID + 1
+		hotspot	0,							0,							1,	unID,	HM_WorkingAng,	7		: unID = unID + 1
 	del 1
 	del	1
 
@@ -227,20 +222,20 @@ rotz	HM_WorkingAng
 	if	bTest	then
 		addz	HM_OutrHeight + _mOutr_Jib_offset
 			addx	HM_WorkingR
-				addz	HM_JibLength*sin(HM_jibAng)					
+				addz	HM_JibLength*sin(HM_jibAng)
 						lin_ 0, 0, 0, 0, 0, -HM_JibWireLen
 				del	1
 			del	1
-		del	1					
+		del	1
 	endif
 
 	!	Wire Hotspot
 	addz	HM_OutrHeight + _mOutr_Jib_offset
 		addx	HM_WorkingR
 			addz	HM_JibLength*sin(HM_jibAng)
-				hotspot 	0, 	0, 	0,				unID, HM_JibWireLen, 1			: unID = unID + 1			
-				hotspot 	0, 	0, 	-HM_JibWireLen,	unID, HM_JibWireLen, 2			: unID = unID + 1		
-				hotspot 	0, 	0, 	1,				unID, HM_JibWireLen, 3			: unID = unID + 1		
+				hotspot	0,	0,	0,				unID, HM_JibWireLen, 1	: unID = unID + 1
+				hotspot	0,	0,	-HM_JibWireLen,	unID, HM_JibWireLen, 2	: unID = unID + 1
+				hotspot	0,	0,	1,				unID, HM_JibWireLen, 3	: unID = unID + 1
 			del	1
 		del	1
 	del	1
@@ -248,13 +243,13 @@ rotz	HM_WorkingAng
 		!	Deck -> CatHead
 		!----------------------------------------------------------------------------------------------------
 		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mPulley_posx - _mPulley_R2,
-														x2 = _mOutr_CH_offset + HM_CH_Topnt_posx - 0.150,													
+														x2 = _mOutr_CH_offset + HM_CH_Topnt_posx - 0.150,
 														y1 = 0.100,
 														y2 = HM_CH_Depth/2,
 														z1 = _mDeck_posz + _mPulley_posz,
 														z2 = _mJib_posz + HM_CH_Height + 0.120
 		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mPulley_posx - _mPulley_R2,
-														x2 = _mOutr_CH_offset + HM_CH_Topnt_posx - 0.150,													
+														x2 = _mOutr_CH_offset + HM_CH_Topnt_posx - 0.150,
 														y1 = -0.100,
 														y2 = -HM_CH_Depth/2,
 														z1 = _mDeck_posz + _mPulley_posz,
@@ -265,14 +260,14 @@ rotz	HM_WorkingAng
 		_mPulley_posx = (HM_JibLength-_mJib_pulleyR)*cos(HM_jibAng) -_mJib_pulleyR2*cos(90-HM_jibAng)
 		_mPulley_posz = (HM_JibLength-_mJib_pulleyR)*sin(HM_jibAng) +_mJib_pulleyR2*sin(90-HM_jibAng)
 
-		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mOutr_CH_offset + HM_CH_Topnt_posx,	
-														x2 = _mOutr_Jib_offset_x + _mPulley_posx ,														
+		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+														x2 = _mOutr_Jib_offset_x + _mPulley_posx,
 														y1 = HM_CH_Depth/2,
 														y2 = _mJib_pulleyDist/2,
 														z1 = _mJib_posz + HM_CH_Height + 0.200,
 														z2 = _mJib_posz + _mPulley_posz
-		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mOutr_CH_offset + HM_CH_Topnt_posx,	
-														x2 = _mOutr_Jib_offset_x + _mPulley_posx,													
+		call	"HM_mc_Wire.gsm"	parameters	all		x1 = _mOutr_CH_offset + HM_CH_Topnt_posx,
+														x2 = _mOutr_Jib_offset_x + _mPulley_posx,
 														y1 = -HM_CH_Depth/2,
 														y2 = -_mJib_pulleyDist/2,
 														z1 = _mJib_posz + HM_CH_Height + 0.200,
@@ -317,10 +312,6 @@ rotz	HM_WorkingAng
 														z1 = _mJib_posz + HM_JibLength*sin(HM_jibAng),
 														z2 = _mJib_posz + HM_JibLength*sin(HM_jibAng) -HM_JibWireLen + HM_HookHeight
 
-
-
-
-
 		!	Hook -> Suspended Load
 		!----------------------------------------------------------------------------------------------------
 		!	in "HM_mc_Suspendedloads.gsm" Macro
@@ -347,7 +338,7 @@ rotz	HM_WorkingAng
 	if	bTest	then
 		addz	HM_OutrHeight + _mOutr_Jib_offset
 			addx	HM_WorkingR
-				addz	HM_JibLength*sin(HM_jibAng)-HM_JibWireLen						
+				addz	HM_JibLength*sin(HM_jibAng)-HM_JibWireLen
 						lin_ 0, 0, 0, 0, 0, -HM_SLwireLen
 				del	1
 			del	1
@@ -358,9 +349,9 @@ rotz	HM_WorkingAng
 		addz	HM_OutrHeight + _mOutr_Jib_offset
 			addx	HM_WorkingR
 				addz	HM_JibLength*sin(HM_jibAng)-HM_JibWireLen
-					hotspot 	0, 	0, 	0,				unID, HM_SLwireLen, 1 			: unID = unID + 1			
-					hotspot 	0, 	0, 	-HM_SLwireLen,	unID, HM_SLwireLen, 2			: unID = unID + 1		
-					hotspot 	0, 	0, 	1,				unID, HM_SLwireLen, 3			: unID = unID + 1		
+					hotspot	0,	0,	0,				unID, HM_SLwireLen, 1	: unID = unID + 1
+					hotspot	0,	0,	-HM_SLwireLen,	unID, HM_SLwireLen, 2	: unID = unID + 1
+					hotspot	0,	0,	1,				unID, HM_SLwireLen, 3	: unID = unID + 1
 
 					addz	-HM_SLwireLen
 						rotz	90
@@ -377,7 +368,7 @@ rotz	HM_WorkingAng
 	!	Load Text
 	!----------------------------------------------------------------------------------------------------
 	if	HM_3D_text_show_load	then
-		if	GLOB_CONTEXT <> 23 	then
+		if	GLOB_CONTEXT <> 23	then
 			addx	HM_SLdepth/2
 				addz	HM_OutrHeight + _mOutr_Jib_offset
 					addx	HM_WorkingR
@@ -403,11 +394,11 @@ rotz	HM_WorkingAng
 
 	!	Machine
 	!----------------------------------------------------------------------------------------------------
-	add -1.060, 0.669, 1.338
+	add -1.060, 0.669, HM_OutrHeight + 0.207
 		gosub	"shape_machine_controlpanel"
 	del 1
 
-	add	-0.705, 0.100, 0.694
+	add	-0.705, 0.100, HM_OutrHeight - 0.455
 		gosub	"shape_machine_turningdevice"
 	del 1
 

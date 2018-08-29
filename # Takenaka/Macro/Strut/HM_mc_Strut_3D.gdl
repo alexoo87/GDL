@@ -6,6 +6,22 @@
 
 !	Common
 !-----------------------------------------------------------------------------------------------
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+call	"HM_Material_Blue.gsm"
+call	"HM_Material_White.gsm"
+call	"HM_Material_Black.gsm"
+
+if	HM_matWarning = ""	then
+	_stMat_Red = HM_matBody1
+	_stMat_White = HM_matBody2
+	_stMat_Black = "HM_matBlack"
+else
+	_stMat_Red = HM_matWarning
+	_stMat_White = HM_matWarning
+	_stMat_Black = HM_matWarning
+endif
+
 if	HM_matWarning = ""	then
 	material	HM_matBody2
 else
@@ -13,7 +29,10 @@ else
 endif
 pen	HM_3D_pen
 
-
+_prevMat = _stMat_Red
+_bStraightPart = 0 
+_bInsertPart = 0
+_bTopPart = 0
 
 
 !	Type : Mast(Normal)
@@ -36,7 +55,6 @@ if	iType = TYPE_MAST	then
 							-_anchorRad*cos(30),	zPosMast + _anchorRad*sin(30),	13,
 							0,						zPosMast,						900,
 							_anchorRad,				-120,							4000+13,
-							_anchorRad*cos(30),		zPosMast + _anchorRad*sin(30),	15,
 							_anchorRad*2,			_anchorRad*2,					15,
 							_anchorRad*2,			0,								15
 
@@ -50,8 +68,8 @@ if	iType = TYPE_MAST	then
 				addz	zPosMast
 					roty	_aRot
 						!	Start Point
-						_spLth = mastLth*0.04
 						_spRad = _anchorRad
+						_spLth = mastLth*0.04
 						for	j = 1	to	2
 							muly	2*j - 3
 								addy	mastRad*0.70 + mastThk/2
@@ -59,7 +77,6 @@ if	iType = TYPE_MAST	then
 										-_spRad*sin(25),	_spRad*cos(25),		13,
 										0,					0,					900,
 										_spRad,				130,				4000+13,
-										-_spRad*sin(25),	-_spRad*cos(25),	15,
 										_spLth,				-mastRad*0.8,		15
 
 									rotx	90
@@ -92,7 +109,7 @@ if	iType = TYPE_MAST	then
 						del 1
 
 						!	End Point
-						_epRad = mastRad!*0.8
+						_epRad = mastRad
 						_epLth = mastLth*0.04
 
 						addx	_spLth + mastThk*2 + _mpLth
@@ -101,7 +118,6 @@ if	iType = TYPE_MAST	then
 									_epLth,	-_epRad,	13,
 									_epLth,	0,			900,
 									_epRad,	180,		4000+13,
-									_epLth,	_epRad,		15,
 									0,		_epRad,		15
 
 								rotx	90
@@ -162,19 +178,749 @@ endif
 !	Type : Mast(Heavy_Lift)
 !-----------------------------------------------------------------------------------------------
 if	iType = TYPE_MAST_HEAVY_LIFT	then
+	!	Crane : SL6000J
+	!-----------------------------------------------------------------------------------------------
+	if	iCraneName = CRANE_SL6000J	then
+		!	Calculate Degree
+		_aRot = -(180 - acs(xPosEnd/mastLth))
+		_rad = 0.0762
 
+			!	Base Part
+			_BP_Lth = 9.000
+			_BP_Wdt_SP = 2.250
+			_BP_Wdt_EP = 2.350
+			_BP_Dpt_SP = 0.335
+			_BP_Dpt_EP = 1.850
+			_BP_zOffset_SP = 0.500
+			_BP_zOffset_EP = 0
+			_BP_zTruss_SP = 2.930
+			_BP_zTruss_EP = 0.300
+			_BP_bAnchor = 1
+
+			!	Straight Part
+			_bStraightPart = 1
+			_SP_Lth = 12.000
+			_SP_Wdt_SP = 2.350
+			_SP_Wdt_EP = 2.350
+			_SP_Dpt_SP = 1.850
+			_SP_Dpt_EP = 1.850
+			_SP_zTruss_SP = 0.300
+			_SP_zTruss_EP = 0.300
+
+			!	Top Part
+			_bTopPart = 1
+			_TP_Lth = 9.250
+			_TP_Wdt_SP = 2.350
+			_TP_Wdt_EP = 2.350
+			_TP_Dpt_SP = 1.850
+			_TP_Dpt_EP = 0.514
+			_TP_zTruss_SP = 0.300
+			_TP_zTruss_EP = 2.490
+			_TP_bEndPanel = 1
+
+		roty	_aRot
+			gosub	"draw_Strut"
+
+			addx	mastLth
+				! !	Pulley
+				! call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.635,
+				! 												HM_Pulley_R1 = 0.325,
+				! 												HM_Pulley_R2 = 0.295,
+				! 												HM_Pulley_Thick = 0.020,
+				! 												HM_matPulley = HM_matBody2,
+				! 												HM_Pulley_Fixed = 0
+			del 1
+		del 1
+	endif
 endif
 
 
 !	Type : Strut(Normal)
 !-----------------------------------------------------------------------------------------------
 if	iType = TYPE_STRUT	then
+	!	Strut_1
+	!-----------------------------------------------------------------------------------------------
+		!	Calculate Degree
+		_aRot_1 = -(180 - acs(xPosEnd_Strut_1/strutLth_1))
 
+		!	Group
+		group	"gSphere_Strut_1"
+			resol	8
+			sphere	strutRad_1
+		endgroup
+		group	"gSphere_Strut_2"
+			resol	8
+			sphere	strutRad_2
+		endgroup
+
+		!	Mirror
+		for	i = 1	to	2
+			muly	2*i - 3
+				addy	distStrut_SP/2
+					roty	_aRot_1
+						!	Start Point
+						_spRad = strutRad_1
+						_spLth = strutLth_1*0.04
+						for	j = 1	to	2
+							muly	2*j - 3
+								addy	strutRad_1*0.70 + strutThk/2
+									put	_spLth,	-_spRad,	15,
+										0,		-_spRad,	13,
+										0,		0,			900,
+										_spRad,	-180,		4000+13,
+										_spLth,	_spRad,		15
+
+									rotx	90
+										prism_	nsp/3,	strutThk,	get(nsp)
+									del 1
+								del 1
+							del 1
+						next	j
+
+						!	Middle Point
+						_mpRad = strutRad_1*1.30
+						_mpLth = strutLth_1*0.87 - strutThk*2
+
+						addx	_spLth
+							roty	90
+								cylind	strutThk,	_mpRad
+							del 1
+						del 1
+
+						addx	_spLth + strutThk
+							!	Cut
+							roty	90
+								cutplane	1,	1,	0,	1
+							del 1
+							addx	_mpLth
+								roty	90
+									cutplane	1,	1,	0,	0
+								del 1
+							del 1
+
+							placegroup	sweepgroup{3} ("gSphere_Strut_1",	_mpLth,	(distStrut_EP - distStrut_SP)/2,	0,	0,	0,	0,	0)
+
+							cutend
+							cutend
+						del 1
+
+						add	_spLth + strutThk + _mpLth,	(distStrut_EP - distStrut_SP)/2,	0
+							roty	90
+								cylind	strutThk,	_mpRad
+							del 1
+						del 1
+
+						!	End Point
+						_epRad = strutRad_1
+						_epLth = strutLth_1*0.09
+
+						add	_spLth + strutThk*2 + _mpLth,	(distStrut_EP - distStrut_SP)/2,	0
+							for	j = 1	to	2
+								muly	2*j - 3
+									addy	strutRad_1*0.70 + strutThk/2
+										put	0,		-_epRad,	15,
+											_epLth,	-_epRad,	13,
+											_epLth,	0,			900,
+											_epRad,	180,		4000+13,
+											0,		_epRad,		15
+
+										rotx	90
+											prism_	nsp/3,	strutThk,	get(nsp)
+										del 1
+									del 1
+								del 1
+							next	j
+						del 1
+					del 1
+
+				del 1
+			del 1
+		next	i
+
+		!	Between
+		roty	_aRot_1
+			!	Center Plate
+			addx	strutLth_1/2
+				_cntPltLth = strutLth_1*0.08
+				_cntPltWdt_1 = (distStrut_SP + distStrut_EP)*((_mpLth/2 + _cntPltLth/2)/_mpLth)
+				_cntPltWdt_2 = (distStrut_SP + distStrut_EP)*((_mpLth/2 - _cntPltLth/2)/_mpLth)
+
+				put	-_cntPltLth/2,	-_cntPltWdt_1/2,	15,
+					-_cntPltLth/2,	_cntPltWdt_1/2,		15,
+					_cntPltLth/2,	_cntPltWdt_2/2,		15,
+					_cntPltLth/2,	-_cntPltWdt_2/2,	15
+
+				addz	-strutThk/2
+					prism_	nsp/3,	strutThk,	get(nsp)
+				del 1
+			del 1
+
+			!	End Rod/Pulley
+			addx	strutLth_1
+				!	End Rod
+				_eRodHgt = distStrut_EP + strutRad_1*1.40 - strutThk
+				_eRodRad = strutRad_1*0.8
+
+				addy	-_eRodHgt/2
+					rotx	-90
+						cylind	_eRodHgt,	_eRodRad
+					del 1
+				del 1
+			del 1
+		del 1
+
+	!	Strut_2
+	!-----------------------------------------------------------------------------------------------
+	if	nStrut = 2	then
+		!	Calculate Degree
+		_aRot_2 = -(180 - acs(xPosEnd_Strut_2/strutLth_2))
+
+		!	Mirror
+		for	i = 1	to	2
+			muly	2*i - 3
+				addy	distStrut_SP/2
+					roty	_aRot_2
+						!	Start Point
+						_spRad = strutRad_2
+						_spLth = strutLth_2*0.08
+
+						!	Cut
+						addx	_spLth
+							roty	90
+								cutplane	1,	1,	0,	0
+							del 1
+						del 1
+						
+						placegroup	sweepgroup{3} ("gSphere_Strut_2",	_spLth,	0,	0,	0,	0,	0,	0)
+
+						cutend
+
+						!	Middle Point
+						_mpRad = strutRad_2*1.30
+						_mpLth = strutLth_2*0.89 - strutThk*2
+
+						addx	_spLth
+							roty	90
+								cylind	strutThk,	_mpRad
+							del 1
+						del 1
+
+						addx	_spLth + strutThk
+							!	Cut
+							roty	90
+								cutplane	1,	1,	0,	1
+							del 1
+							addx	_mpLth
+								roty	90
+									cutplane	1,	1,	0,	0
+								del 1
+							del 1
+
+							placegroup	sweepgroup{3} ("gSphere_Strut_2",	_mpLth,	(distStrut_EP - distStrut_SP)/2,	0,	0,	0,	0,	0)
+
+							cutend
+							cutend
+						del 1
+
+						add	_spLth + strutThk + _mpLth,	(distStrut_EP - distStrut_SP)/2,	0
+							roty	90
+								cylind	strutThk,	_mpRad
+							del 1
+						del 1
+
+						!	End Point
+						_epRad = strutRad_2
+						_epLth = strutLth_2*0.03
+
+						add	_spLth + strutThk*2 + _mpLth,	(distStrut_EP - distStrut_SP)/2,	0
+							for	j = 1	to	2
+								muly	2*j - 3
+									addy	strutRad_2*0.70 + strutThk/2
+										put	0,		-_epRad,	15,
+											_epLth,	-_epRad,	13,
+											_epLth,	0,			900,
+											_epRad,	180,		4000+13,
+											0,		_epRad,		15
+
+										rotx	90
+											prism_	nsp/3,	strutThk,	get(nsp)
+										del 1
+									del 1
+								del 1
+							next	j
+						del 1
+					del 1
+
+				del 1
+			del 1
+		next	i
+
+		!	Between
+		roty	_aRot_2
+			!	Center Plate
+			addx	strutLth_2/2
+				_cntPltLth = strutLth_2*0.08
+				_cntPltWdt_1 = (distStrut_SP + distStrut_EP)*((_mpLth/2 + _cntPltLth/2)/_mpLth)
+				_cntPltWdt_2 = (distStrut_SP + distStrut_EP)*((_mpLth/2 - _cntPltLth/2)/_mpLth)
+
+				put	-_cntPltLth/2,	-_cntPltWdt_1/2,	15,
+					-_cntPltLth/2,	_cntPltWdt_1/2,		15,
+					_cntPltLth/2,	_cntPltWdt_2/2,		15,
+					_cntPltLth/2,	-_cntPltWdt_2/2,	15
+
+				addz	-strutThk/2
+					prism_	nsp/3,	strutThk,	get(nsp)
+				del 1
+			del 1
+
+			!	End Rod/Pulley
+			addx	strutLth_2
+				!	End Rod
+				_eRodHgt = distStrut_EP + strutRad_2*1.40 - strutThk
+				_eRodRad = strutRad_2*0.8
+
+				addy	-_eRodHgt/2
+					rotx	-90
+						cylind	_eRodHgt,	_eRodRad
+					del 1
+				del 1
+			del 1
+		del 1
+
+		!	Wire
+		for	i = 1	to	2
+			muly	2*i - 3
+				addy	distStrut_EP/2
+					_x1 = strutLth_1*cos(_aRot_1)
+					_y1 = 0
+					_z1 = strutLth_1*sin(_aRot_1)
+					_x2 = strutLth_2*cos(_aRot_2)
+					_y2 = 0
+					_z2 = -strutLth_2*sin(_aRot_2)
+
+					call	"HM_mc_Wire.gsm"	parameters	all	x1 = _x1,
+																x2 = _x2,
+																y1 = _y1,
+																y2 = _y2,
+																z1 = _z1,
+																z2 = _z2
+				del 1
+			del 1
+		next	i
+	endif
 endif
-
 
 !	Type : Mast(Heavy_Lift)
 !-----------------------------------------------------------------------------------------------
 if	iType = TYPE_STRUT_HEAVY_LIFT	then
+	!	Common
+	!-----------------------------------------------------------------------------------------------
 
+	!	Crane : SL4500J
+	!-----------------------------------------------------------------------------------------------
+	if	iCraneName = CRANE_SL4500J	then
+		!	Front Strut
+		if	iStrutLct = STRUT_FRONT	then
+			_aRot_Front = -(180 - acs(7.900/10.000))
+			_rad = 0.0445
+
+				!	Base Part
+				_BP_Lth = 10.000
+				_BP_Wdt_SP = 2.000
+				_BP_Wdt_EP = 2.000
+				_BP_Dpt_SP = 0.5945
+				_BP_Dpt_EP = 0.5945
+				_BP_zOffset_SP = 0.500
+				_BP_zOffset_EP = 0.290
+				_BP_zTruss_SP = 1.180
+				_BP_zTruss_EP = 1.300
+				_BP_bAnchor = 1
+				_BP_bEndPanel = 1
+
+			roty	_aRot_Front
+				gosub	"draw_Strut"
+
+				addx	_BP_Lth
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _BP_Wdt_EP*0.8,
+																	HM_Pulley_R1 = 0.2875,
+																	HM_Pulley_R2 = 0.260,
+																	HM_Pulley_Thick = 0.020,
+																	HM_matPulley = HM_matBody2,
+																	HM_Pulley_Fixed = 0
+				del 1
+			del 1
+		endif
+		!	Rear Strut
+		if	iStrutLct = STRUT_REAR	then
+			_aRot_Rear = -(180 + acs(8.780/8.800))
+			_rad = 0.0445
+
+				!	Base Part
+				_BP_Lth = 8.800
+				_BP_Wdt_SP = 2.000
+				_BP_Wdt_EP = 2.000
+				_BP_Dpt_SP = 0.5945
+				_BP_Dpt_EP = 0.5945
+				_BP_zOffset_SP = 0.500
+				_BP_zOffset_EP = 0.290
+				_BP_zTruss_SP = 0.850
+				_BP_zTruss_EP = 1.150
+				_BP_bAnchor = 1
+				_BP_bEndPanel = 1
+
+			roty	_aRot_Rear
+				gosub	"draw_Strut"
+
+				addx	_BP_Lth
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = _BP_Wdt_EP*0.8,
+																	HM_Pulley_R1 = 0.2875,
+																	HM_Pulley_R2 = 0.260,
+																	HM_Pulley_Thick = 0.020,
+																	HM_matPulley = HM_matBody2,
+																	HM_Pulley_Fixed = 0
+				del 1
+			del 1
+		endif
+	endif
+
+	!	Crane : SL6000J
+	!-----------------------------------------------------------------------------------------------
+	if	iCraneName = CRANE_SL6000J	then
+		!	Front Strut
+		if	iStrutLct = STRUT_FRONT	then
+			_aRot_Front = -(180 - acs(12.600/14.400))
+			_rad = 0.0572
+
+				!	Base Part
+				_BP_Lth = 7.200
+				_BP_Wdt_SP = 1.400
+				_BP_Wdt_EP = 1.400
+				_BP_Dpt_SP = 0.390
+				_BP_Dpt_EP = 1.200
+				_BP_zOffset_SP = 0.510
+				_BP_zOffset_EP = 0
+				_BP_zTruss_SP = 1.025
+				_BP_zTruss_EP = 0.185
+				_BP_bAnchor = 1
+
+				!	Top Part
+				_bTopPart = 1
+				_TP_Lth = 7.550
+				_TP_Wdt_SP = 1.400
+				_TP_Wdt_EP = 1.000
+				_TP_Dpt_SP = 1.200
+				_TP_Dpt_EP = 0.508
+				_TP_zTruss_SP = 0.185
+				_TP_zTruss_EP = 2.240
+				_TP_bEndPanel = 1
+
+			roty	_aRot_Front
+				gosub	"draw_Strut"
+
+				addx	14.400
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.830,
+																	HM_Pulley_R1 = 0.300,
+																	HM_Pulley_R2 = 0.2875,
+																	HM_Pulley_Thick = 0.020,
+																	HM_matPulley = HM_matBody2,
+																	HM_Pulley_Fixed = 0
+				del 1
+			del 1
+		endif
+		!	Rear Strut
+		if	iStrutLct = STRUT_REAR	then
+			_aRot_Front = -(180 + acs(12.880/12.950))
+			_rad = 0.0572
+
+				!	Base Part
+				_BP_Lth = 6.600
+				_BP_Wdt_SP = 2.350
+				_BP_Wdt_EP = 1.400
+				_BP_Dpt_SP = 0.400
+				_BP_Dpt_EP = 1.200
+				_BP_zOffset_SP = 0.450
+				_BP_zOffset_EP = 0
+				_BP_zTruss_SP = 1.000
+				_BP_zTruss_EP = 0.185
+				_BP_bAnchor = 1
+
+				!	Top Part
+				_bTopPart = 1
+				_TP_Lth = 6.880
+				_TP_Wdt_SP = 1.400
+				_TP_Wdt_EP = 1.078
+				_TP_Dpt_SP = 1.200
+				_TP_Dpt_EP = 0.322
+				_TP_zTruss_SP = 0.185
+				_TP_zTruss_EP = 2.500
+				_TP_bEndPanel = 1
+
+			roty	_aRot_Front
+				gosub	"draw_Strut"
+
+				addx	12.950
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.755,
+																	HM_Pulley_R1 = 0.300,
+																	HM_Pulley_R2 = 0.2875,
+																	HM_Pulley_Thick = 0.020,
+																	HM_matPulley = HM_matBody2,
+																	HM_Pulley_Fixed = 0
+				del 1
+			del 1
+		endif
+	endif
+
+	!	Crane : 6000SLX
+	!-----------------------------------------------------------------------------------------------
+	if	iCraneName = CRANE_6000SLX	then
+		!	Front Strut
+		if	iStrutLct = STRUT_FRONT	then
+			_aRot_Front = -(180 - acs(12.475/13.700))
+			_rad = 0.0572
+
+				!	Base Part
+				_BP_Lth = 2.600
+				_BP_Wdt_SP = 1.400
+				_BP_Wdt_EP = 1.400
+				_BP_Dpt_SP = 0.090
+				_BP_Dpt_EP = 0.750
+				_BP_zOffset_SP = 0.500
+				_BP_zOffset_EP = 0
+				_BP_zTruss_SP = 0.800
+				_BP_zTruss_EP = 0.150
+				_BP_bAnchor = 1
+
+				!	Straight Part
+				_bStraightPart = 1
+				_SP_Lth = 6.600
+				_SP_Wdt_SP = 1.400
+				_SP_Wdt_EP = 1.400
+				_SP_Dpt_SP = 0.750
+				_SP_Dpt_EP = 0.750
+				_SP_zTruss_SP = 0.150
+				_SP_zTruss_EP = 0.150
+
+				!	Insert Part
+				_bInsertPart = 1
+				_IP_Lth = 2.000
+				_IP_Wdt_SP = 1.400
+				_IP_Wdt_EP = 0.990
+				_IP_Dpt_SP = 0.750
+				_IP_Dpt_EP = 0.500
+				_IP_zTruss_SP = 0.150
+				_IP_zTruss_EP = 0.150
+
+				!	Top Part
+				_bTopPart = 1
+				_TP_Lth = 2.500
+				_TP_Wdt_SP = 0.990
+				_TP_Wdt_EP = 0.990
+				_TP_Dpt_SP = 0.500
+				_TP_Dpt_EP = 0.180
+				_TP_zTruss_SP = 0.150
+				_TP_zTruss_EP = 1.000
+				_TP_bEndPanel = 0
+
+			roty	_aRot_Front
+				gosub	"draw_Strut"
+
+				addx	13.700
+					!	End Rod
+					_eRodHgt = _TP_Wdt_EP + _rad*2
+					_eRodRad = 0.150
+
+					addy	-_eRodHgt/2
+						rotx	-90
+							cylind	_eRodHgt,	_eRodRad
+						del 1
+					del 1
+
+					!	Pulley
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.635,
+																	HM_Pulley_R1 = 0.325,
+																	HM_Pulley_R2 = 0.295,
+																	HM_Pulley_Thick = 0.020,
+																	HM_matPulley = HM_matBody2,
+																	HM_Pulley_Fixed = 0
+				del 1
+			del 1
+		endif
+		!	Rear Strut
+		if	iStrutLct = STRUT_REAR	then
+			_aRot_Front = -(180 - acs(12.745/12.750))
+			_rad = 0.0572
+
+				!	Base Part
+				_BP_Lth = 3.450
+				_BP_Wdt_SP = 2.350
+				_BP_Wdt_EP = 1.400
+				_BP_Dpt_SP = 0.120
+				_BP_Dpt_EP = 0.750
+				_BP_zOffset_SP = 0.500
+				_BP_zOffset_EP = 0
+				_BP_zTruss_SP = 0.950
+				_BP_zTruss_EP = 0.150
+				_BP_bAnchor = 1
+
+				!	Straight Part
+				_bStraightPart = 1
+				_SP_Lth = 4.800
+				_SP_Wdt_SP = 1.400
+				_SP_Wdt_EP = 1.400
+				_SP_Dpt_SP = 0.750
+				_SP_Dpt_EP = 0.750
+				_SP_zTruss_SP = 0.150
+				_SP_zTruss_EP = 0.150
+
+				!	Insert Part
+				_bInsertPart = 1
+				_IP_Lth = 2.000
+				_IP_Wdt_SP = 1.400
+				_IP_Wdt_EP = 0.990
+				_IP_Dpt_SP = 0.750
+				_IP_Dpt_EP = 0.500
+				_IP_zTruss_SP = 0.150
+				_IP_zTruss_EP = 0.150
+
+				!	Top Part
+				_bTopPart = 1
+				_TP_Lth = 2.500
+				_TP_Wdt_SP = 0.990
+				_TP_Wdt_EP = 0.990
+				_TP_Dpt_SP = 0.500
+				_TP_Dpt_EP = 0.180
+				_TP_zTruss_SP = 0.150
+				_TP_zTruss_EP = 1.000
+				_TP_bEndPanel = 0
+
+			roty	_aRot_Front
+				gosub	"draw_Strut"
+
+				addx	12.750
+					!	End Rod
+					_eRodHgt = _TP_Wdt_EP + _rad*2
+					_eRodRad = 0.150
+
+					addy	-_eRodHgt/2
+						rotx	-90
+							cylind	_eRodHgt,	_eRodRad
+						del 1
+					del 1
+
+					!	Pulley
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = 0.635,
+																	HM_Pulley_R1 = 0.325,
+																	HM_Pulley_R2 = 0.295,
+																	HM_Pulley_Thick = 0.020,
+																	HM_matPulley = HM_matBody2,
+																	HM_Pulley_Fixed = 0
+				del 1
+			del 1
+		endif
+	endif
 endif
+
+
+
+
+end
+
+
+
+!-----------------------------------------------------------------------------------------------
+"draw_Strut":
+!-----------------------------------------------------------------------------------------------
+	_xPosPart = 0
+
+	!	Base Part
+	!-----------------------------------------------------------------------------------------------
+	call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+												modLth = _BP_Lth,
+												modWdt_SP = _BP_Wdt_SP,
+												modWdt_EP = _BP_Wdt_EP,
+												modDpt_SP = _BP_Dpt_SP,
+												modDpt_EP = _BP_Dpt_EP,
+												zOffset_SP = _BP_zOffset_SP,
+												zOffset_EP = _BP_zOffset_EP,
+												zTruss_SP = _BP_zTruss_SP,
+												zTruss_EP = _BP_zTruss_EP,
+												bAnchor = _BP_bAnchor,
+												bEndPanel = _BP_bEndPanel,
+												matMod = _stMat_Red
+
+	gosub	"Color_Picker"
+	_xPosPart = _xPosPart + _BP_Lth
+
+	!	Straight Part
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_bStraightPart	then
+			call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+														modLth = _SP_Lth,
+														modWdt_SP = _SP_Wdt_SP,
+														modWdt_EP = _SP_Wdt_EP,
+														modDpt_SP = _SP_Dpt_SP,
+														modDpt_EP = _SP_Dpt_EP,
+														zTruss_SP = _SP_zTruss_SP,
+														zTruss_EP = _SP_zTruss_EP,
+														bAnchor = 0,
+														matMod = _nextMat
+
+			gosub	"Color_Picker"
+			_xPosPart = _xPosPart + _SP_Lth
+		endif
+	del 1
+
+	!	Insert Part
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_bInsertPart	then
+			call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+														modLth = _IP_Lth,
+														modWdt_SP = _IP_Wdt_SP,
+														modWdt_EP = _IP_Wdt_EP,
+														modDpt_SP = _IP_Dpt_SP,
+														modDpt_EP = _IP_Dpt_EP,
+														zTruss_SP = _IP_zTruss_SP,
+														zTruss_EP = _IP_zTruss_EP,
+														bAnchor = 0,
+														matMod = _nextMat
+
+			gosub	"Color_Picker"
+			_xPosPart = _xPosPart + _IP_Lth
+		endif
+	del 1
+
+	!	Top Part
+	!-----------------------------------------------------------------------------------------------
+	addx	_xPosPart
+		if	_bTopPart	then
+			call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
+														modLth = _TP_Lth,
+														modWdt_SP = _TP_Wdt_SP,
+														modWdt_EP = _TP_Wdt_EP,
+														modDpt_SP = _TP_Dpt_SP,
+														modDpt_EP = _TP_Dpt_EP,
+														zTruss_SP = _TP_zTruss_SP,
+														zTruss_EP = _TP_zTruss_EP,
+														bAnchor = 0,
+														bEndPanel = _TP_bEndPanel,
+														matMod = _nextMat
+
+			_xPosPart = _xPosPart + _TP_Lth
+		endif
+	del 1
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"Color_Picker":
+!-----------------------------------------------------------------------------------------------
+	if	_prevMat = _stMat_Red	then
+		_nextMat = _stMat_White
+	else
+		_nextMat = _stMat_Red
+	endif
+	_prevMat = _nextMat
+
+return

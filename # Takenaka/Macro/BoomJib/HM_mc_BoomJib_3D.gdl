@@ -105,7 +105,6 @@ end	_xPosPart
 												bAnchor = _BP_bAnchor,
 												matMod = _stMat_Red
 
-	
 	gosub	"Color_Picker"
 
 	_xPosPart = _xPosPart + _BP_Lth

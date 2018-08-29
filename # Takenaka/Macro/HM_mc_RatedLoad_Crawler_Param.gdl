@@ -22,6 +22,8 @@ values "HM_2D_textFont" _stFont,	custom
 !	Define Range
 !----------------------------------------------------------------------------------------------------
 
+breakpoint	1
+
 	!	Working Radius
 	!----------------------------------------------------------------------------------------------------
 	_WorkingR_min = 0
@@ -45,7 +47,7 @@ values "HM_2D_textFont" _stFont,	custom
 		endif
 	next	i
 
-	values	"HM_WorkingR"	range [_WorkingR_min, _WorkingR_max]
+	! values	"HM_WorkingR"	range [_WorkingR_min, _WorkingR_max]
 
 	!	Suspended Loads
 	!----------------------------------------------------------------------------------------------------

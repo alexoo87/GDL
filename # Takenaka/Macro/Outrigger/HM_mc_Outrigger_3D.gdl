@@ -1180,289 +1180,602 @@ endif
 	!	OJ-30HR
 	!----------------------------------------------------------------------------------------------------
 	if	HM_OutrType = OJ_30HR	then
-		!	Basement
-		!----------------------------------------------------------------------------------------------------
-		add	-HM_OutrLen/2,	-HM_OutrWidth/2,	0
-			gosub	"basement_OJ_30HR"
-		del 1
-		add	-HM_OutrLen/2,	HM_OutrWidth/2,	0
-			gosub	"basement_OJ_30HR"
-		del 1
-		add	HM_OutrLen/2,	HM_OutrWidth/2,	0
-			gosub	"basement_OJ_30HR"
-		del 1
-		add	HM_OutrLen/2,	-HM_OutrWidth/2,	0
-			gosub	"basement_OJ_30HR"
-		del 1
+		dim	_coorGR[][]
+		if	not(HM_OutrSubType = SUB_FIX)	then
+			!	Common
+			!-----------------------------------------------------------------------------------------------
+			if	(HM_OutrSubType = SUB_FIX_5000) | (HM_OutrSubType = SUB_RAIL_5000)	then
+				_addLth = 0
+			else
+				_addLth = 1.000
+			endif
+			if	(HM_OutrSubType = SUB_FIX_5000) | (HM_OutrSubType = SUB_FIX_6000)	then
+				_zPosOffset = 0
+			else
+				_zPosOffset = 0.126
+			endif
 
-		!	Bottom Beam
-		!----------------------------------------------------------------------------------------------------
-		_plgThk = 0.016
-		_webThk = 0.014
-
-		!	HBeam
-		add	-HM_OutrLen/2,	-HM_OutrWidth/2,	0
-			gosub	"HBeam_OJ_30HR"
-		del 1
-		add	-HM_OutrLen/2,	HM_OutrWidth/2,	0
-			gosub	"HBeam_OJ_30HR"
-		del 1
-
-		!	VBeam
-		_xPosVBeam = 0.850
-		_zPosVBeam = 0.264
-		_vBeamWdt = 0.300
-		_vBeamLth = 4.700
-		_vBeamHgt = 0.390
-
-		add	_xPosVBeam,	_vBeamLth/2,	_zPosVBeam
-			rotz	-90
-				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _vBeamWdt,
-																HM_Beam_Width_EP = _vBeamWdt,
-																HM_Beam_Height_SP = _vBeamHgt,
-																HM_Beam_Height_EP = _vBeamHgt,
-																HM_Beam_Offset_SP = 0,
-																HM_Beam_Offset_EP = 0,
-																HM_Beam_Length = _vBeamLth,
-																HM_Beam_FlangeT = _plgThk,
-																HM_Beam_WebT = _webThk,
-																HM_matBeam = HM_matBody2
+			!	Basement
+			!----------------------------------------------------------------------------------------------------
+			add	-HM_OutrLen/2,	-HM_OutrWidth/2,	0
+				gosub	"basement_OJ_30HR"
 			del 1
-		del 1
-
-		add	-_xPosVBeam,	_vBeamLth/2,	_zPosVBeam
-			rotz	-90
-				call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _vBeamWdt,
-																HM_Beam_Width_EP = _vBeamWdt,
-																HM_Beam_Height_SP = _vBeamHgt,
-																HM_Beam_Height_EP = _vBeamHgt,
-																HM_Beam_Offset_SP = 0,
-																HM_Beam_Offset_EP = 0,
-																HM_Beam_Length = _vBeamLth,
-																HM_Beam_FlangeT = _plgThk,
-																HM_Beam_WebT = _webThk,
-																HM_matBeam = HM_matBody2
+			add	-HM_OutrLen/2,	HM_OutrWidth/2,	0
+				gosub	"basement_OJ_30HR"
 			del 1
-		del 1
+			add	HM_OutrLen/2,	HM_OutrWidth/2,	0
+				gosub	"basement_OJ_30HR"
+			del 1
+			add	HM_OutrLen/2,	-HM_OutrWidth/2,	0
+				gosub	"basement_OJ_30HR"
+			del 1
 
-		!	Oblique Beam
-		_zPosObq = 0.654
-		_obqPltThk = 0.010
-		_xCenter1 = 2.2415
-		_yCenter1 = 2.264
-		_xCenter2 = 1.100
-		_yCenter2 = 0.764
-		_obqBeamLth = sqr((_xCenter1 - _xCenter2)^2 + (_yCenter1 - _yCenter2)^2)
-		_aObqBeam = atn((_xCenter1 - _xCenter2)/(_yCenter1 - _yCenter2))
-		_obqBeamWdt = 0.126
-		_obqBeamHgt = 0.126
+			!	Bottom Beam
+			!----------------------------------------------------------------------------------------------------
+			_plgThk = 0.016
+			_webThk = 0.014
 
-			!	Front/Right
-			gosub	"ObliqueBeam_OJ_30HR"
+			!	HBeam
+			add	-HM_OutrLen/2,	-HM_OutrWidth/2,	_zPosOffset
+				gosub	"HBeam_OJ_30HR"
+			del 1
+			add	-HM_OutrLen/2,	HM_OutrWidth/2,	_zPosOffset
+				gosub	"HBeam_OJ_30HR"
+			del 1
 
-			!	Front/Left
-			muly	-1
+			!	VBeam
+			_xPosVBeam = 0.850
+			_zPosVBeam = 0.264 + _zPosOffset
+			_vBeamWdt = 0.300
+			_vBeamLth = 4.700 + _addLth
+			_vBeamHgt = 0.390
+
+			add	_xPosVBeam,	_vBeamLth/2,	_zPosVBeam
+				rotz	-90
+					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _vBeamWdt,
+																	HM_Beam_Width_EP = _vBeamWdt,
+																	HM_Beam_Height_SP = _vBeamHgt,
+																	HM_Beam_Height_EP = _vBeamHgt,
+																	HM_Beam_Offset_SP = 0,
+																	HM_Beam_Offset_EP = 0,
+																	HM_Beam_Length = _vBeamLth,
+																	HM_Beam_FlangeT = _plgThk,
+																	HM_Beam_WebT = _webThk,
+																	HM_matBeam = HM_matBody2
+				del 1
+			del 1
+
+			add	-_xPosVBeam,	_vBeamLth/2,	_zPosVBeam
+				rotz	-90
+					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _vBeamWdt,
+																	HM_Beam_Width_EP = _vBeamWdt,
+																	HM_Beam_Height_SP = _vBeamHgt,
+																	HM_Beam_Height_EP = _vBeamHgt,
+																	HM_Beam_Offset_SP = 0,
+																	HM_Beam_Offset_EP = 0,
+																	HM_Beam_Length = _vBeamLth,
+																	HM_Beam_FlangeT = _plgThk,
+																	HM_Beam_WebT = _webThk,
+																	HM_matBeam = HM_matBody2
+				del 1
+			del 1
+
+			!	Oblique Beam
+			_zPosObq = 0.654 + _zPosOffset
+			_obqPltThk = 0.010
+			_xCenter1 = 2.2415
+			_yCenter1 = 2.264 + _addLth/2
+			_xCenter2 = 1.100
+			_yCenter2 = 0.764
+			_obqBeamLth = sqr((_xCenter1 - _xCenter2)^2 + (_yCenter1 - _yCenter2)^2)
+			_aObqBeam = atn((_xCenter1 - _xCenter2)/(_yCenter1 - _yCenter2))
+			_obqBeamWdt = 0.126
+			_obqBeamHgt = 0.126
+
+				!	Front/Right
 				gosub	"ObliqueBeam_OJ_30HR"
-			del 1
 
-			!	Back/Right
-			mulx	-1
-				gosub	"ObliqueBeam_OJ_30HR"
-			del 1
-
-			!	Back/Left
-			mulx	-1
+				!	Front/Left
 				muly	-1
 					gosub	"ObliqueBeam_OJ_30HR"
 				del 1
-			del 1
 
-		!	Deck
-		!----------------------------------------------------------------------------------------------------
-		_zPosDeck = 0.654
-		_yPosDeck = 1.010
-		_deckThk = 0.016
-
-		addz	_zPosDeck - _deckThk
-			put	-0.685,	0,		15,
-				-0.685,	1.160,	15,
-				-0.610,	1.160,	15,
-				-0.610,	1.330,	15,
-				0.610,	1.330,	15,
-				0.610,	1.160,	15,
-				0.685,	1.160,	15,
-				0.685,	0,		15
-
-			addy	_yPosDeck
-				prism_	nsp/3,	_deckThk,	use(nsp)
-			del 1
-			addy	-_yPosDeck
-				muly	-1
-					prism_	nsp/3,	_deckThk,	get(nsp)
-				del 1
-			del 1
-		del 1
-
-		!	Top Beam
-		!----------------------------------------------------------------------------------------------------
-		_plgThk = 0.014
-		_webThk = 0.010
-
-		_yPosTBeam = 0.510
-		_zPosTBeam = 0.676
-		_tBeamWdt = 0.300
-		_tBeamLth = 2.000
-		_tBeamHgt = 0.340
-
-		addz	_zPosTBeam
-			addx	-_tBeamLth/2
-				addy	_yPosTBeam
-					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _tBeamWdt,
-																	HM_Beam_Width_EP = _tBeamWdt,
-																	HM_Beam_Height_SP = _tBeamHgt,
-																	HM_Beam_Height_EP = _tBeamHgt,
-																	HM_Beam_Offset_SP = 0,
-																	HM_Beam_Offset_EP = 0,
-																	HM_Beam_Length = _tBeamLth,
-																	HM_Beam_FlangeT = _plgThk,
-																	HM_Beam_WebT = _webThk,
-																	HM_matBeam = HM_matBody2
+				!	Back/Right
+				mulx	-1
+					gosub	"ObliqueBeam_OJ_30HR"
 				del 1
 
-				addy	-_yPosTBeam
-					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _tBeamWdt,
-																	HM_Beam_Width_EP = _tBeamWdt,
-																	HM_Beam_Height_SP = _tBeamHgt,
-																	HM_Beam_Height_EP = _tBeamHgt,
-																	HM_Beam_Offset_SP = 0,
-																	HM_Beam_Offset_EP = 0,
-																	HM_Beam_Length = _tBeamLth,
-																	HM_Beam_FlangeT = _plgThk,
-																	HM_Beam_WebT = _webThk,
-																	HM_matBeam = HM_matBody2
-				del 1
-			del 1
-		del 1
-
-		!	Cylinder
-		!----------------------------------------------------------------------------------------------------
-		_zPosCyd = 1.016
-		_cydRad1 = 0.6375
-		_cydHgt1 = 0.020
-		_cydRad2 = 0.660
-		_cydHgt2 = 0.077
-		_cydRad3 = 0.585
-		_cydHgt3 = 0.036
-
-		addz	_zPosCyd
-			cylind	_cydHgt1,	_cydRad1
-
-			addz	_cydHgt1
-				cylind	_cydHgt2,	_cydRad2
-
-				addz	_cydHgt2
-					cylind	_cydHgt3,	_cydRad3
-				del 1
-			del 1
-		del 1
-
-		!	Ladder
-		!----------------------------------------------------------------------------------------------------
-		_yPosLdr = 2.800
-		_zPosLdr = 0.034
-		_ldrRad = 0.0135
-		_ldrHgt = 0.695
-		_ldrLth = 0.430
-		_ldrWdt = 0.400
-
-			!	Vertical Bar
-				!	Section
-				put	0,			0,		900,
-					_ldrRad,	360,	4000
-
-				_nPoly = 2
-
-				!	Path
-				put	0,	0,				_zPosLdr - 1,			0,
-					0,	0,				_zPosLdr,				0,
-					0,	0,				_zPosLdr + _ldrHgt,		0,
-					0,	_ldrLth,		_zPosLdr + _ldrHgt,		0,
-					0,	_ldrLth + 1,	_zPosLdr + _ldrHgt,		0
-
-				_nPath = 5
-
-				!	Bottom
-				addy	-_yPosLdr
-					addx	_ldrWdt/2
-						tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
-					del 1
-
-					addx	-_ldrWdt/2
-						tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
-					del 1
-				del 1
-
-				!	Top
-				addy	_yPosLdr
+				!	Back/Left
+				mulx	-1
 					muly	-1
+						gosub	"ObliqueBeam_OJ_30HR"
+					del 1
+				del 1
+
+			!	Deck
+			!----------------------------------------------------------------------------------------------------
+			_zPosDeck = 0.654 + _zPosOffset
+			_yPosDeck = 1.010 + _addLth/2
+			_deckThk = 0.016
+
+			addz	_zPosDeck - _deckThk
+				put	-0.685,	0,		15,
+					-0.685,	1.160,	15,
+					-0.610,	1.160,	15,
+					-0.610,	1.330,	15,
+					0.610,	1.330,	15,
+					0.610,	1.160,	15,
+					0.685,	1.160,	15,
+					0.685,	0,		15
+
+				addy	_yPosDeck
+					prism_	nsp/3,	_deckThk,	use(nsp)
+				del 1
+				addy	-_yPosDeck
+					muly	-1
+						prism_	nsp/3,	_deckThk,	get(nsp)
+					del 1
+				del 1
+			del 1
+
+			!	Top Beam
+			!----------------------------------------------------------------------------------------------------
+			_plgThk = 0.014
+			_webThk = 0.010
+
+			_yPosTBeam = 0.510
+			_zPosTBeam = 0.676 + _zPosOffset
+			_tBeamWdt = 0.300
+			_tBeamLth = 2.000
+			_tBeamHgt = 0.340
+
+			addz	_zPosTBeam
+				addx	-_tBeamLth/2
+					addy	_yPosTBeam
+						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _tBeamWdt,
+																		HM_Beam_Width_EP = _tBeamWdt,
+																		HM_Beam_Height_SP = _tBeamHgt,
+																		HM_Beam_Height_EP = _tBeamHgt,
+																		HM_Beam_Offset_SP = 0,
+																		HM_Beam_Offset_EP = 0,
+																		HM_Beam_Length = _tBeamLth,
+																		HM_Beam_FlangeT = _plgThk,
+																		HM_Beam_WebT = _webThk,
+																		HM_matBeam = HM_matBody2
+					del 1
+
+					addy	-_yPosTBeam
+						call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = _tBeamWdt,
+																		HM_Beam_Width_EP = _tBeamWdt,
+																		HM_Beam_Height_SP = _tBeamHgt,
+																		HM_Beam_Height_EP = _tBeamHgt,
+																		HM_Beam_Offset_SP = 0,
+																		HM_Beam_Offset_EP = 0,
+																		HM_Beam_Length = _tBeamLth,
+																		HM_Beam_FlangeT = _plgThk,
+																		HM_Beam_WebT = _webThk,
+																		HM_matBeam = HM_matBody2
+					del 1
+				del 1
+			del 1
+
+			!	Cylinder
+			!----------------------------------------------------------------------------------------------------
+			_zPosCyd = 1.016 + _zPosOffset
+			_cydRad1 = 0.6375
+			_cydHgt1 = 0.020
+			_cydRad2 = 0.660
+			_cydHgt2 = 0.077
+			_cydRad3 = 0.585
+			_cydHgt3 = 0.036
+
+			addz	_zPosCyd
+				cylind	_cydHgt1,	_cydRad1
+
+				addz	_cydHgt1
+					cylind	_cydHgt2,	_cydRad2
+
+					addz	_cydHgt2
+						cylind	_cydHgt3,	_cydRad3
+					del 1
+				del 1
+			del 1
+
+			!	Ladder
+			!----------------------------------------------------------------------------------------------------
+			_yPosLdr = 2.800 + _addLth/2
+			_zPosLdr = 0.034
+			_ldrRad = 0.0135
+			_ldrHgt = 0.695 + _zPosOffset
+			_ldrLth = 0.430
+			_ldrWdt = 0.400
+
+				!	Vertical Bar
+					!	Section
+					put	0,			0,		900,
+						_ldrRad,	360,	4000
+
+					_nPoly = 2
+
+					!	Path
+					put	0,	0,				_zPosLdr - 1,			0,
+						0,	0,				_zPosLdr,				0,
+						0,	0,				_zPosLdr + _ldrHgt,		0,
+						0,	_ldrLth,		_zPosLdr + _ldrHgt,		0,
+						0,	_ldrLth + 1,	_zPosLdr + _ldrHgt,		0
+
+					_nPath = 5
+
+					!	Bottom
+					addy	-_yPosLdr
 						addx	_ldrWdt/2
 							tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
 						del 1
 
 						addx	-_ldrWdt/2
-							tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
-						del 1
-					del 1
-				del 1
-
-			!	Horizontal Bar
-				addz	_zPosLdr + 0.020
-					!	Bottom
-					addy	-_yPosLdr
-						addx	-_ldrWdt/2
-							roty	90
-								cylind	_ldrWdt,	_ldrRad
-							del 1
-
-							addz	0.300
-								roty	90
-									cylind	_ldrWdt,	_ldrRad
-								del 1
-
-								addz	0.375
-									addy	0.400
-										roty	90
-											cylind	_ldrWdt,	_ldrRad
-										del 1
-									del 1
-								del 1
-							del 1
+							tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
 						del 1
 					del 1
 
 					!	Top
 					addy	_yPosLdr
-						addx	-_ldrWdt/2
-							roty	90
-								cylind	_ldrWdt,	_ldrRad
+						muly	-1
+							addx	_ldrWdt/2
+								tube	_nPoly,	_nPath,	1+2+16+32,	use(nsp)
 							del 1
 
-							addz	0.300
+							addx	-_ldrWdt/2
+								tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+							del 1
+						del 1
+					del 1
+
+				!	Horizontal Bar
+					addz	_zPosLdr + 0.020
+						!	Bottom
+						addy	-_yPosLdr
+							addx	-_ldrWdt/2
 								roty	90
 									cylind	_ldrWdt,	_ldrRad
 								del 1
 
-								addz	0.375
-									addy	-0.400
-										roty	90
-											cylind	_ldrWdt,	_ldrRad
+								addz	0.300
+									roty	90
+										cylind	_ldrWdt,	_ldrRad
+									del 1
+
+									addz	0.375
+										addy	0.400
+											roty	90
+												cylind	_ldrWdt,	_ldrRad
+											del 1
+										del 1
+									del 1
+								del 1
+							del 1
+						del 1
+
+						!	Top
+						addy	_yPosLdr
+							addx	-_ldrWdt/2
+								roty	90
+									cylind	_ldrWdt,	_ldrRad
+								del 1
+
+								addz	0.300
+									roty	90
+										cylind	_ldrWdt,	_ldrRad
+									del 1
+
+									addz	0.375
+										addy	-0.400
+											roty	90
+												cylind	_ldrWdt,	_ldrRad
+											del 1
 										del 1
 									del 1
 								del 1
 							del 1
 						del 1
 					del 1
+		endif
+		if	HM_OutrSubType = SUB_FIX	then
+			_zPosBase_Common = 0
+			_baseThk = 0.362
+			if	not(HM_OutrLiftType = LIFT_OFF)	then
+				_baseThk = 0.272
+
+				!	Common Shape
+				for	i = 1	to	2
+					muly	2*i - 3
+						add	-1.450,	-0.750,	0
+							call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.250,
+																			HM_Beam_Width_EP = 0.250,
+																			HM_Beam_Height_SP = 0.266,
+																			HM_Beam_Height_EP = 0.266,
+																			HM_Beam_Length = 2.900,
+																			HM_Beam_FlangeT = 0.014,
+																			HM_Beam_WebT = 0.009,
+																			HM_matBeam = HM_matBody2
+						del 1
+					del 1
+					mulx	2*i - 3
+						add	-0.850,	0.625,	0
+							rotz	-90
+								call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.250,
+																				HM_Beam_Width_EP = 0.250,
+																				HM_Beam_Height_SP = 0.266,
+																				HM_Beam_Height_EP = 0.266,
+																				HM_Beam_Length = 1.250,
+																				HM_Beam_FlangeT = 0.014,
+																				HM_Beam_WebT = 0.009,
+																				HM_matBeam = HM_matBody2
+							del 1
+						del 1
+					del 1
+				next	i
+
+				if	HM_OutrLiftType = LIFT_1793	then
+					_zPosBase_Common = 1.521
+					_nSupport = 0
+
+				endif
+				if	HM_OutrLiftType = LIFT_2263	then
+					_zPosBase_Common = 1.991
+					_nSupport = 1
+
+				endif
+				if	HM_OutrLiftType = LIFT_2733	then
+					_zPosBase_Common = 2.461
+					_nSupport = 2
+
+					!	Deck
+					addz	1.643
+						put	-1.470,	-1.650,	15,
+							-3.000,	-1.650,	15,
+							-3.000,	1.650,	15,
+							-1.470,	1.650,	15,
+							-1.470,	1.110,	15,
+							1.800,	1.110,	15,
+							1.800,	-1.110,	15,
+							-1.470,	-1.110,	15,
+							-1.470,	-1.650,	-1,
+							!	Hole
+							-0.806,	-0.680,	15,
+							-0.806,	0.680,	15,
+							0.786,	0.680,	15,
+							0.786,	-0.680,	15,
+							-0.806,	-0.680,	-1
+
+						prism_	nsp/3,	0.100,	get(nsp)
+
+						!	Guard Rail
+						addz	0.100
+							!	Insert Coordinates
+							_coorGR[1][1] = -1.500
+							_coorGR[1][2] = -1.620
+
+							_coorGR[2][1] = -2.970
+							_coorGR[2][2] = -1.620
+
+							_coorGR[3][1] = -2.970
+							_coorGR[3][2] = 1.620
+
+							_coorGR[4][1] = -1.500
+							_coorGR[4][2] = 1.620
+
+							_coorGR[5][1] = -1.500
+							_coorGR[5][2] = 1.080
+
+							_coorGR[6][1] = 1.770
+							_coorGR[6][2] = 1.080
+
+							_coorGR[7][1] = 1.770
+							_coorGR[7][2] = -1.080
+
+							_coorGR[8][1] = -1.500
+							_coorGR[8][2] = -1.080
+
+							_coorGR[9][1] = -1.500
+							_coorGR[9][2] = -1.620
+
+							call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 9,
+																				HM_GRail_Pt = _coorGR,
+																				HM_GRailType = 2,
+																				HM_GRailRef = 1,
+																				HM_GRailH = 0.900 + 0.025/2,
+																				HM_GRailD = 0.025,
+																				HM_GRailT = 0.025,
+																				HM_GRailDist = 0.900,
+																				HM_GRailDist_hori = 0.450,
+																				HM_matGRail = HM_matBody2
+
+						del 1
+					del 1
+				endif
+
+				!	Common Shape
+				addz	0.266
+					for	i = 1	to	2
+						for j = 1	to	2
+							mulx	2*i - 3
+								muly	2*j - 3
+									put	0.990,	-0.770,	15,
+										0.375,	-0.770,	15,
+										0.375,	-0.460,	15,
+										0.460,	-0.375,	15,
+										0.990,	-0.375,	15
+
+									prism_	nsp/3,	0.019,	get(nsp)
+								del 1
+							del 1
+						next	j
+					next	i
+
+					if	_nSupport > eps	then
+						for	n = 1	to	_nSupport
+							for	i = 1	to	2
+								for j = 1	to	2
+									mulx	2*i - 3
+										muly	2*j - 3
+
+											addz	0.470*(n - 1)
+												add	0.489,	0.489,	0.019
+													cylind	0.025,	0.060
+													addz	0.025
+														cylind	0.470 - 0.025*2,	0.050
+													del 1
+													addz	0.470 - 0.025
+														cylind	0.025,	0.060
+													del 1
+												del 1
+												add	0.610,	0.610,	0.019
+													cylind	0.025,	0.060
+													addz	0.025
+														cylind	0.470 - 0.025*2,	0.050
+													del 1
+													addz	0.470 - 0.025
+														cylind	0.025,	0.060
+													del 1
+												del 1
+											del 1
+
+										del 1
+									del 1
+								next	j
+							next	i
+						next	n
+					endif
 				del 1
+
+				addz	0.266 + 0.470*_nSupport
+					!	Support Bar/H-Beam
+					for	i = 1	to	2
+						for j = 1	to	2
+							!	Support Bar
+							mulx	2*i - 3
+								muly	2*j - 3
+									add	0.489,	0.489,	0.019
+										cylind	0.025,	0.060
+										addz	0.025
+											cylind	1.236 - 0.025*2,	0.050
+										del 1
+										addz	1.236 - 0.025
+											cylind	0.025,	0.060
+										del 1
+									del 1
+									add	0.610,	0.610,	0.019
+										cylind	0.025,	0.060
+										addz	0.025
+											cylind	1.236 - 0.025*2,	0.050
+										del 1
+										addz	1.236 - 0.025
+											cylind	0.025,	0.060
+										del 1
+									del 1
+								del 1
+							del 1
+
+							!	H-Beam
+							mulx	2*i - 3
+								add	0.660,	-0.550,	0.239
+									rotz	90
+										call	"HM_mc_H-Beam.gsm"	parameters	all	HM_Beam_Width_SP = 0.200,
+																					HM_Beam_Width_EP = 0.200,
+																					HM_Beam_Height_SP = 0.400,
+																					HM_Beam_Height_EP = 0.400,
+																					HM_Beam_Length = 1.100,
+																					HM_Beam_FlangeT = 0.020,
+																					HM_Beam_WebT = 0.012,
+																					HM_Beam_Web_Offset = 0.094,
+																					HM_matBeam = HM_matBody2
+									del 1
+								del 1
+							del 1
+
+							muly	2*i - 3
+								add	-0.550,	-0.660,	0.239
+									call	"HM_mc_H-Beam.gsm"	parameters	all	HM_Beam_Width_SP = 0.200,
+																				HM_Beam_Width_EP = 0.200,
+																				HM_Beam_Height_SP = 0.400,
+																				HM_Beam_Height_EP = 0.400,
+																				HM_Beam_Length = 1.100,
+																				HM_Beam_FlangeT = 0.020,
+																				HM_Beam_WebT = 0.012,
+																				HM_Beam_Web_Offset = 0.094,
+																				HM_matBeam = HM_matBody2
+								del 1
+							del 1
+						next	j
+					next	i
+				del 1
+			endif
+
+			!	Common Shape
+			addz	_zPosBase_Common
+				!	H-Beam
+				for	i = 1	to	2
+					muly	2*i - 3
+						add	-1.000,	-0.535,	0
+							call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.250,
+																			HM_Beam_Width_EP = 0.250,
+																			HM_Beam_Height_SP = _baseThk,
+																			HM_Beam_Height_EP = _baseThk,
+																			HM_Beam_Length = 2.000,
+																			HM_Beam_FlangeT = 0.014,
+																			HM_Beam_WebT = 0.009,
+																			HM_matBeam = HM_matBody2
+						del 1
+					del 1
+					mulx	2*i - 3
+						add	-0.6275,	0.410,	0
+							rotz	-90
+								call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.135,
+																				HM_Beam_Width_EP = 0.135,
+																				HM_Beam_Height_SP = _baseThk,
+																				HM_Beam_Height_EP = _baseThk,
+																				HM_Beam_Length = 0.820,
+																				HM_Beam_FlangeT = 0.014,
+																				HM_Beam_WebT = 0.009,
+																				HM_Beam_Web_Offset = 0.063,
+																				HM_matBeam = HM_matBody2
+							del 1
+						del 1
+					del 1
+				next	i
+				addx	-0.560
+					call	"HM_mc_H-Beam.gsm"	parameters	all		HM_Beam_Width_SP = 0.245,
+																	HM_Beam_Width_EP = 0.245,
+																	HM_Beam_Height_SP = _baseThk,
+																	HM_Beam_Height_EP = _baseThk,
+																	HM_Beam_Length = 1.120,
+																	HM_Beam_FlangeT = 0.014,
+																	HM_Beam_WebT = 0.009,
+																	HM_matBeam = HM_matBody2
+				del 1
+
+				!	Cylind
+				_zPosCyd = _baseThk
+				_cydRad1 = 0.6375
+				_cydHgt1 = 0.020
+				_cydRad2 = 0.660
+				_cydHgt2 = 0.077
+				_cydRad3 = 0.585
+				_cydHgt3 = 0.036
+
+				addz	_zPosCyd
+					cylind	_cydHgt1,	_cydRad1
+
+					addz	_cydHgt1
+						cylind	_cydHgt2,	_cydRad2
+
+						addz	_cydHgt2
+							cylind	_cydHgt3,	_cydRad3
+						del 1
+					del 1
+				del 1
+			del 1
+		endif
 	endif
 
 
@@ -1740,72 +2053,111 @@ return
 
 "basement_OJ_30HR":
 
-	!	Basement Plate
-	_zPosBsmPlt = 0.013
-	_bsmPltWdt = 0.200
-	_bsmPltThk = 0.008
+	if	(HM_OutrSubType = SUB_FIX_5000) | (HM_OutrSubType = SUB_FIX_6000)	then
+		!	Basement Plate
+		_zPosBsmPlt = 0.013
+		_bsmPltWdt = 0.200
+		_bsmPltThk = 0.008
 
-	addz	_zPosBsmPlt
-		put	-_bsmPltWdt/2,	-_bsmPltWdt/2,	15,
-			-_bsmPltWdt/2,	_bsmPltWdt/2,	15,
-			_bsmPltWdt/2,	_bsmPltWdt/2,	15,
-			_bsmPltWdt/2,	-_bsmPltWdt/2,	15
+		addz	_zPosBsmPlt
+			put	-_bsmPltWdt/2,	-_bsmPltWdt/2,	15,
+				-_bsmPltWdt/2,	_bsmPltWdt/2,	15,
+				_bsmPltWdt/2,	_bsmPltWdt/2,	15,
+				_bsmPltWdt/2,	-_bsmPltWdt/2,	15
 
-		prism_	nsp/3,	_bsmPltThk,	get(nsp)
-	del 1
-
-	!	Basement Around
-		!	Section
-		put	0,	0,	0,
-			-0.025,	-0.013,	0,
-			-0.050,	0,		0,
-			-0.050,	-0.008,	0,
-			-0.025,	-0.021,	0,
-			0,		-0.008,	0
-
-		_nPoly = 6
-
-		!	Path
-		put	-_bsmPltWdt/2,	_bsmPltWdt/2,	0,	0,
-			-_bsmPltWdt/2,	-_bsmPltWdt/2,	0,	0,
-			_bsmPltWdt/2,	-_bsmPltWdt/2,	0,	0,
-			_bsmPltWdt/2,	_bsmPltWdt/2,	0,	0,
-			-_bsmPltWdt/2,	_bsmPltWdt/2,	0,	0,
-			-_bsmPltWdt/2,	-_bsmPltWdt/2,	0,	0,
-			_bsmPltWdt/2,	-_bsmPltWdt/2,	0,	0
-
-		_nPath = 7
-
-		addz	_zPosBsmPlt + _bsmPltThk
-			tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+			prism_	nsp/3,	_bsmPltThk,	get(nsp)
 		del 1
 
-	!	Support Bar
-	_zPosSptBar = _zPosBsmPlt + _bsmPltThk
-	_SptBarRad1 = 0.060
-	_SptBarHgt1 = 0.060
-	_SptBarRad2 = 0.020
-	_SptBarHgt2 = 0.018
-	_SptBarRad3 = 0.031
-	_SptBarHgt3 = 0.255
-	_SptBarRad4 = 0.031
-	_SptBarHgt4 = 0.065
+		!	Basement Around
+			!	Section
+			put	0,	0,	0,
+				-0.025,	-0.013,	0,
+				-0.050,	0,		0,
+				-0.050,	-0.008,	0,
+				-0.025,	-0.021,	0,
+				0,		-0.008,	0
 
-	addz	_zPosSptBar
-		cylind	_SptBarHgt1,	_SptBarRad1
+			_nPoly = 6
 
-		addz	_SptBarHgt1
-			cylind	_SptBarHgt2,	_SptBarRad2
+			!	Path
+			put	-_bsmPltWdt/2,	_bsmPltWdt/2,	0,	0,
+				-_bsmPltWdt/2,	-_bsmPltWdt/2,	0,	0,
+				_bsmPltWdt/2,	-_bsmPltWdt/2,	0,	0,
+				_bsmPltWdt/2,	_bsmPltWdt/2,	0,	0,
+				-_bsmPltWdt/2,	_bsmPltWdt/2,	0,	0,
+				-_bsmPltWdt/2,	-_bsmPltWdt/2,	0,	0,
+				_bsmPltWdt/2,	-_bsmPltWdt/2,	0,	0
 
-			addz	_SptBarHgt2
-				cylind	_SptBarHgt3,	_SptBarRad3
+			_nPath = 7
 
-				addz	_SptBarHgt3 + 0.300
-					cylind	_SptBarHgt4,	_SptBarRad4
+			addz	_zPosBsmPlt + _bsmPltThk
+				tube	_nPoly,	_nPath,	1+2+16+32,	get(nsp)
+			del 1
+
+		!	Support Bar
+		_zPosSptBar = _zPosBsmPlt + _bsmPltThk
+		_SptBarRad1 = 0.060
+		_SptBarHgt1 = 0.060
+		_SptBarRad2 = 0.020
+		_SptBarHgt2 = 0.018
+		_SptBarRad3 = 0.031
+		_SptBarHgt3 = 0.255
+		_SptBarRad4 = 0.031
+		_SptBarHgt4 = 0.065
+
+		addz	_zPosSptBar
+			cylind	_SptBarHgt1,	_SptBarRad1
+
+			addz	_SptBarHgt1
+				cylind	_SptBarHgt2,	_SptBarRad2
+
+				addz	_SptBarHgt2
+					cylind	_SptBarHgt3,	_SptBarRad3
+
+					addz	_SptBarHgt3 + 0.300
+						cylind	_SptBarHgt4,	_SptBarRad4
+					del 1
 				del 1
 			del 1
 		del 1
-	del 1
+	else
+		!	Wheel
+		_sideThk = 0.010
+		_wheelThk = 0.100
+		_wheelRad = 0.170
+
+		addz	_wheelRad
+			addy	_wheelThk/2
+				rotx	90
+					cylind	_wheelThk,	_wheelRad
+				del 1
+			del 1
+
+			for	i = 1	to	2
+				muly	2*i - 3
+					addy	_wheelThk/2 + _sideThk/2
+						rotx	90
+							cylind	_sideThk,	_wheelRad*0.7
+						del 1
+					del 1
+				del 1
+			next	i
+		del 1
+
+		!	Support Bar
+		_zPosSptBar = _wheelRad
+		_SptBarRad1 = 0.045
+		_SptBarHgt1 = 0.310
+		_SptBarRad2 = 0.045
+		_SptBarHgt2 = 0.065
+
+		addz	_zPosSptBar
+			cylind	_SptBarHgt1,	_SptBarRad1
+		del 1
+		addz	_zPosSptBar + _SptBarHgt1 + 0.300
+			cylind	_SptBarHgt2,	_SptBarRad2
+		del 1
+	endif
 
 return
 
@@ -1857,7 +2209,7 @@ return
 	!	3rd
 	_zPos3rd = 0.264
 	_3rdWdt = 0.300
-	_3rdLth = 3.350
+	_3rdLth = 3.350 + _addLth
 	_3rdHgt = 0.390
 
 	addz	_zPos3rd

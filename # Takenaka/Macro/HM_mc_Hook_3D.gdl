@@ -324,48 +324,45 @@ material	HM_matHook
 		_midThk = 0.040
 
 		addz	_btmHgt
-			!	Side Plates
-			for	i = 1	to	2
-				muly	(2*i - 3)
-					addy	HM_HookThick/2
-						rotx	90
-							put	-HM_HookRadius*0.55,	0,					15,
-								-HM_HookRadius,			_midHgt*0.3,		15,
-								-HM_HookRadius,			_midHgt,			15,
-								-HM_HookRadius*0.40,	_midHgt,			15,
-								-HM_HookRadius*0.20,	_midHgt + _topHgt,	13,
-								0,						_midHgt + _topHgt,	900,
-								HM_HookRadius*0.20,		-180,				4000+13,
-								HM_HookRadius*0.20,		_midHgt + _topHgt,	13,
-								HM_HookRadius*0.40,		_midHgt,			15,
-								HM_HookRadius,			_midHgt,			15,
-								HM_HookRadius,			_midHgt*0.3,		15,
-								HM_HookRadius*0.55,		0,					15
+			rotz	90
+				!	Side Plates
+					for	i = 1	to	2
+						muly	(2*i - 3)
+							addy	HM_HookThick/2
+								rotx	90
+									put	-HM_HookRadius*0.55,	0,					15,
+										-HM_HookRadius,			_midHgt*0.3,		15,
+										-HM_HookRadius,			_midHgt,			15,
+										-HM_HookRadius*0.40,	_midHgt,			15,
+										-HM_HookRadius*0.20,	_midHgt + _topHgt,	13,
+										0,						_midHgt + _topHgt,	900,
+										HM_HookRadius*0.20,		-180,				4000+13,
+										HM_HookRadius*0.20,		_midHgt + _topHgt,	13,
+										HM_HookRadius*0.40,		_midHgt,			15,
+										HM_HookRadius,			_midHgt,			15,
+										HM_HookRadius,			_midHgt*0.3,		15,
+										HM_HookRadius*0.55,		0,					15
 
-							prism_	nsp/3,	-_midThk,	get(nsp)
+									prism_	nsp/3,	-_midThk,	get(nsp)
+								del 1
+							del 1
 						del 1
-					del 1
+					next	i
+
+				!	Connection
+				_cntThk = _midHgt*0.15
+
+				cylind	_cntThk,	HM_HookThick/2
+
+				!	Pulley
+				addz	_midHgt*0.625
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_HookThick,
+																	HM_Pulley_R1 = HM_HookRadius,
+																	HM_Pulley_R2 = HM_HookRadius*0.9,
+																	HM_Pulley_Thick = HM_HookThick*0.1,
+																	HM_matPulley = HM_matHook,
+																	HM_Pulley_Fixed = 0
 				del 1
-			next	i
-
-			!	Connection
-			_cntThk = _midHgt*0.15
-
-			put	-HM_HookRadius*0.4,	-HM_HookThick/2,	15,
-				-HM_HookRadius*0.4,	HM_HookThick/2,	15,
-				HM_HookRadius*0.4,	HM_HookThick/2,	15,
-				HM_HookRadius*0.4,	-HM_HookThick/2,	15
-
-			prism_	nsp/3,	_cntThk,	get(nsp)
-
-			!	Pulley
-			addz	_midHgt*0.625
-				call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_HookThick,
-																HM_Pulley_R1 = HM_HookRadius,
-																HM_Pulley_R2 = HM_HookRadius*0.9,
-																HM_Pulley_Thick = HM_HookThick*0.1,
-																HM_matPulley = HM_matHook,
-																HM_Pulley_Fixed = 0
 			del 1
 		del 1
 
@@ -373,9 +370,11 @@ material	HM_matHook
 		_topHgt = HM_HookHeight*_topRate
 
 		addz	_btmHgt + _midHgt + _topHgt
-			addy	HM_HookThick/2
-				rotx	90
-					cylind	HM_HookThick,	HM_HookRadius*0.10
+			rotz	90
+				addy	HM_HookThick/2
+					rotx	90
+						cylind	HM_HookThick,	HM_HookRadius*0.10
+					del 1
 				del 1
 			del 1
 		del 1
@@ -407,48 +406,45 @@ material	HM_matHook
 		_midThk = 0.060
 
 		addz	_btmHgt
-			!	Side Plates
-			for	i = 1	to	2
-				muly	(2*i - 3)
-					addy	HM_HookThick/2
-						rotx	90
-							put	-HM_HookRadius*0.55,	0,					15,
-								-HM_HookRadius,			_midHgt*0.3,		15,
-								-HM_HookRadius,			_midHgt,			15,
-								-HM_HookRadius*0.40,	_midHgt,			15,
-								-HM_HookRadius*0.20,	_midHgt + _topHgt,	13,
-								0,						_midHgt + _topHgt,	900,
-								HM_HookRadius*0.20,		-180,				4000+13,
-								HM_HookRadius*0.20,		_midHgt + _topHgt,	13,
-								HM_HookRadius*0.40,		_midHgt,			15,
-								HM_HookRadius,			_midHgt,			15,
-								HM_HookRadius,			_midHgt*0.3,		15,
-								HM_HookRadius*0.55,		0,					15
+			rotz	90
+				!	Side Plates
+				for	i = 1	to	2
+					muly	(2*i - 3)
+						addy	HM_HookThick/2
+							rotx	90
+								put	-HM_HookRadius*0.55,	0,					15,
+									-HM_HookRadius,			_midHgt*0.3,		15,
+									-HM_HookRadius,			_midHgt,			15,
+									-HM_HookRadius*0.40,	_midHgt,			15,
+									-HM_HookRadius*0.20,	_midHgt + _topHgt,	13,
+									0,						_midHgt + _topHgt,	900,
+									HM_HookRadius*0.20,		-180,				4000+13,
+									HM_HookRadius*0.20,		_midHgt + _topHgt,	13,
+									HM_HookRadius*0.40,		_midHgt,			15,
+									HM_HookRadius,			_midHgt,			15,
+									HM_HookRadius,			_midHgt*0.3,		15,
+									HM_HookRadius*0.55,		0,					15
 
-							prism_	nsp/3,	-_midThk,	get(nsp)
+								prism_	nsp/3,	-_midThk,	get(nsp)
+							del 1
 						del 1
 					del 1
+				next	i
+
+				!	Connection
+				_cntThk = _midHgt*0.15
+
+				cylind	_cntThk,	HM_HookThick/2
+
+				!	Pulley
+				addz	_midHgt*0.625
+					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_HookThick,
+																	HM_Pulley_R1 = HM_HookRadius,
+																	HM_Pulley_R2 = HM_HookRadius*0.9,
+																	HM_Pulley_Thick = HM_HookThick*0.1,
+																	HM_matPulley = HM_matHook,
+																	HM_Pulley_Fixed = 0
 				del 1
-			next	i
-
-			!	Connection
-			_cntThk = _midHgt*0.15
-
-			put	-HM_HookRadius*0.4,	-HM_HookThick/2,	15,
-				-HM_HookRadius*0.4,	HM_HookThick/2,	15,
-				HM_HookRadius*0.4,	HM_HookThick/2,	15,
-				HM_HookRadius*0.4,	-HM_HookThick/2,	15
-
-			prism_	nsp/3,	_cntThk,	get(nsp)
-
-			!	Pulley
-			addz	_midHgt*0.625
-				call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_HookThick,
-																HM_Pulley_R1 = HM_HookRadius,
-																HM_Pulley_R2 = HM_HookRadius*0.9,
-																HM_Pulley_Thick = HM_HookThick*0.1,
-																HM_matPulley = HM_matHook,
-																HM_Pulley_Fixed = 0
 			del 1
 		del 1
 
@@ -456,9 +452,11 @@ material	HM_matHook
 		_topHgt = HM_HookHeight*_topRate
 
 		addz	_btmHgt + _midHgt + _topHgt
-			addy	HM_HookThick/2
-				rotx	90
-					cylind	HM_HookThick,	HM_HookRadius*0.10
+			rotz	90
+				addy	HM_HookThick/2
+					rotx	90
+						cylind	HM_HookThick,	HM_HookRadius*0.10
+					del 1
 				del 1
 			del 1
 		del 1

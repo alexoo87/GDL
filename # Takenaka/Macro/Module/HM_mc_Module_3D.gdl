@@ -51,7 +51,11 @@ rotz	-90
 			resol	12
 
 			!	Parameters
+			_bStraight = abs(_modWdt_SP - _modWdt_EP) < eps
 			_anchorRad = _modDpt_SP/2 + (_modRad/cos(_aCutY_B) + _modRad/cos(_aCutY_T))/2
+			if	not(_bStraight)	then
+				_anchorRad = _modDpt_SP/4
+			endif
 			_centerPos = _modRad/cos(_aCutY_B) - _modRad/cos(_aCutY_T)
 
 			!	Draw Anchor
@@ -63,20 +67,20 @@ rotz	-90
 							addz	-_modRad
 								put	-_zOffset_SP,	_modDpt_SP/2 + _zOffset_SP*tan(_aCutY_T) + _modRad/cos(_aCutY_T),		15,
 									-_zOffset_SP,	-(_modDpt_SP/2 + _zOffset_SP*tan(_aCutY_B) + _modRad/cos(_aCutY_B)),	15,
-									0,				-(_modDpt_SP/2 + _modRad/cos(_aCutY_B)),								15,
+									0,				-(_modDpt_SP/4 + _modRad/cos(_aCutY_B)),								15,
 									0,				_centerPos,																900,
 									_anchorRad,		180,																	4000+15,
-									0,				_modDpt_SP/2 + _modRad/cos(_aCutY_T),									15,
-									-_zOffset_SP,	_modDpt_SP/2 + _zOffset_SP*tan(_aCutY_T) + _modRad/cos(_aCutY_T),		-1,
+									0,				_modDpt_SP/4 + _modRad/cos(_aCutY_T),									15
+									! -_zOffset_SP,	_modDpt_SP/2 + _zOffset_SP*tan(_aCutY_T) + _modRad/cos(_aCutY_T),		-1,
 
-									!	Hole
-									0,				-_modDpt_SP/4,	15,
-									0,				0,				900,
-									_modDpt_SP/4,	180,			4000+15,
-									0,				_modDpt_SP/4,	15,
-									0,				0,				900,
-									_modDpt_SP/4,	180,			4000+15,
-									0,				-_modDpt_SP/4,	-1
+									! !	Hole
+									! 0,				-_modDpt_SP/4,	15,
+									! 0,				0,				900,
+									! _modDpt_SP/4,	180,			4000+15,
+									! 0,				_modDpt_SP/4,	15,
+									! 0,				0,				900,
+									! _modDpt_SP/4,	180,			4000+15,
+									! 0,				-_modDpt_SP/4,	-1
 
 								prism_	nsp/3,	_modRad*2,	get(nsp)
 							del 1

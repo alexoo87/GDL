@@ -152,7 +152,7 @@ rotz	HM_WorkingAng
 		_zPosBoom = 3.326
 
 		addz	_zPosBoom
-			addx	1.600
+			addx	_xPosBoom
 				!	Boom
 				call	"HM_mc_BoomJib.gsm"	parameters	all
 
@@ -196,16 +196,62 @@ rotz	HM_WorkingAng
 			del 1
 		del 1
 
-	!	Load Text
+	!	Wire
 	!-----------------------------------------------------------------------------------------------
 		if	(HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
-			_zAddPos = HM_BoomLength*cos(HM_BoomAng)
+			_zAddPos = HM_BoomLength*sin(HM_BoomAng) - _zPosMainPulley*cos(HM_BoomAng)
 		endif
 		if	HM_CraneMode = MODE_LUFFING_JIB	then
-			_zAddPos = (HM_BoomLength + _zPosJib)*sin(HM_BoomAng) + _zPosJib*cos(HM_BoomAng) + _zPosJibPulley*cos(HM_JibAng)
+			_zAddPos = (HM_BoomLength + _xPosJib)*sin(HM_BoomAng) - _zPosJib*cos(HM_BoomAng) + HM_JibLength*sin(HM_JibAng) - _zPosJibPulley*cos(HM_JibAng)
 		endif
 
-		_zPosText = _zPosBoom + _zAddPos - HM_SLwireLen
+
+		!	Boom or Jib → Hook
+		!-----------------------------------------------------------------------------------------------
+		_zPosJibPulley = _zPosBoom + _zAddPos
+
+		call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR,
+													x2 = HM_WorkingR,
+													y1 = 0,
+													y2 = 0,
+													z1 = _zPosJibPulley,
+													z2 = _zPosJibPulley - HM_JibWireLen + HM_HookHeight
+
+	!	Hook
+	!-----------------------------------------------------------------------------------------------
+		_zPosHook = _zPosBoom + _zAddPos
+
+		add	HM_WorkingR,	0,	_zPosHook
+			hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3		:	unID = unID + 1
+			hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2		:	unID = unID + 1
+
+			addz	-HM_JibWireLen
+				call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = 0.100
+			del 1
+		del	1
+
+	!	Suspended Load
+	!----------------------------------------------------------------------------------------------------
+		_zPosLoad = _zPosHook - HM_JibWireLen
+
+		if	HM_SLshow	then
+			add	HM_WorkingR,	0,	_zPosLoad
+				hotspot	0,	0,	0,				unID,	HM_SLwireLen,	1	: unID = unID + 1
+				hotspot	0,	0,	-HM_SLwireLen,	unID,	HM_SLwireLen,	2	: unID = unID + 1
+				hotspot	0,	0,	1,				unID,	HM_SLwireLen,	3	: unID = unID + 1
+
+				addz	-HM_SLwireLen
+					rotz	90
+						call	"HM_mc_Suspendedloads.gsm"	parameters	all
+					del	1
+				del	1
+			del	1
+		endif
+
+	!	Load Text
+	!-----------------------------------------------------------------------------------------------
+		_zPosText = _zPosLoad - HM_SLwireLen
 
 		if	HM_3D_text_show_load	then
 			!	On the Load 
