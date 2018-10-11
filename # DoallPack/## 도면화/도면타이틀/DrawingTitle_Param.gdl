@@ -25,7 +25,18 @@ values{2}	"iScaleType"	SCALE_A1,		stScaleType[SCALE_A1],
 !	도면명 유형
 !-----------------------------------------------------------------------------------------------
 values{2}	"iDrwName"	DRW_NAME_LAYOUT,	stDrwName[DRW_NAME_LAYOUT],
-						DRW_NAME_DRAWING,	stDrwName[DRW_NAME_DRAWING]
+						DRW_NAME_DRAWING,	stDrwName[DRW_NAME_DRAWING],
+						DRW_NAME_CUSTOM,	stDrwName[DRW_NAME_CUSTOM]
+
+!	스케일 내용
+!-----------------------------------------------------------------------------------------------
+values{2}	"iContentS"	CONTENT_S_SCALE,	stContentS[CONTENT_S_SCALE],
+						CONTENT_S_CUSTOM,	stContentS[CONTENT_S_CUSTOM]
+
+!	원 내부 내용
+!-----------------------------------------------------------------------------------------------
+values{2}	"iContentT"	CONTENT_T_DRWID,	stContentT[CONTENT_T_DRWID],
+						CONTENT_T_CUSTOM,	stContentT[CONTENT_T_CUSTOM]
 
 !	원 분할 유형
 !-----------------------------------------------------------------------------------------------
@@ -62,16 +73,30 @@ if	not(bCustomScale)	then
 	lock	"nCustomScale"
 endif
 
-!	Type2 _ 변수 숨기기
+!	변수 숨기기
 !-----------------------------------------------------------------------------------------------
+!	공통
+if	not(iDrwName = DRW_NAME_CUSTOM)	then
+	hideparameter	"stCustomDrw"
+endif
+if	not(iContentS = CONTENT_S_CUSTOM)	then
+	hideparameter	"stCustomS"
+endif
+if	not(iContentT = CONTENT_T_CUSTOM)	then
+	hideparameter	"stCustomT"
+endif
+
+!	Type1
 if	iTitleType = TITLE_TYPE1	then
 	hideparameter	"iScaleType", "iCircleType", "iContentB", "stCustomB"
 endif
+
+!	Type2
 if	iTitleType = TITLE_TYPE2	then
 	hideparameter	"txtPrc", "txtCst", "bScaleA1"
 
 	if	iCircleType = CIRCLE_NORMAL	then
-		hideparameter	"iContentB", "stCustomB"
+		hideparameter	"iContentB", "stCustomB", "txtIDWF_B", "txtIDCF_B"
 	endif
 	if	iCircleType = CIRCLE_HALF	then
 		if	not(iContentB = CONTENT_B_CUSTOM)	then

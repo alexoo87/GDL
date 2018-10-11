@@ -4,115 +4,138 @@
 !	VER : AC 20
 
 !-----------------------------------------------------------------------------------------------
+!	Default Value
+!-----------------------------------------------------------------------------------------------
+breakpoint	1
+
+!-----------------------------------------------------------------------------------------------
 !	Change List Name
 !-----------------------------------------------------------------------------------------------
-!	Crane Type
-values{2}	"HM_CraneMode"	MODE_MAIN_BOOM,		_stCraneMode[MODE_MAIN_BOOM]
-							! MODE_LONG_BOOM,		_stCraneMode[MODE_LONG_BOOM],
-							! MODE_LUFFING_JIB,	_stCraneMode[MODE_LUFFING_JIB]
+!	Crane Specification
+values{2}	"HM_CraneSpec"	SPEC_STANDARD,			stCraneSpec[SPEC_STANDARD],
+							SPEC_HEAVY_LIFT,		stCraneSpec[SPEC_HEAVY_LIFT],
+							SPEC_SUPER_HEAVY_LIFT,	stCraneSpec[SPEC_SUPER_HEAVY_LIFT]
 
-if	HM_CraneMode = MODE_MAIN_BOOM	then
-	_stCraneList = "SL6000J_メインブーム,STD_ダブルドラム"
+!	Crane Sub Specification
+dim	_iCraneSubSpec[],	_stCraneSubSpec[]
+
+if	HM_CraneMode = MODE_HEAVY_BOOM	then
+	_iCraneSubSpec[1] = SUB_SPEC_DOUBLE_DRUM
+
+	_stCraneSubSpec[1] = stCraneSubSpec[SUB_SPEC_DOUBLE_DRUM]
 endif
-! if	HM_CraneMode = MODE_LONG_BOOM	then
-! 	_stCraneList = "SL4500J_ロングブーム"
-! endif
-! if	HM_CraneMode = MODE_LUFFING_JIB	then
-! 	_stCraneList = "SL4500J_ラッフィングジブ"
-! endif
+if	HM_CraneMode = MODE_MAIN_BOOM	then
+	_iCraneSubSpec[1] = SUB_SPEC_DOUBLE_DRUM
+	_iCraneSubSpec[2] = SUB_SPEC_SINGLE_DRUM
+	_iCraneSubSpec[3] = SUB_SPEC_SHEAVE_2WIRE
+	_iCraneSubSpec[4] = SUB_SPEC_SHEAVE_1WIRE
+
+	_stCraneSubSpec[1] = stCraneSubSpec[SUB_SPEC_DOUBLE_DRUM]
+	_stCraneSubSpec[2] = stCraneSubSpec[SUB_SPEC_SINGLE_DRUM]
+	_stCraneSubSpec[3] = stCraneSubSpec[SUB_SPEC_SHEAVE_2WIRE]
+	_stCraneSubSpec[4] = stCraneSubSpec[SUB_SPEC_SHEAVE_1WIRE]
+endif
+if	HM_CraneMode = MODE_LONG_BOOM	then
+	_iCraneSubSpec[1] = SUB_SPEC_SINGLE_DRUM
+	_iCraneSubSpec[2] = SUB_SPEC_SHEAVE_2WIRE
+	_iCraneSubSpec[3] = SUB_SPEC_SHEAVE_1WIRE
+
+	_stCraneSubSpec[1] = stCraneSubSpec[SUB_SPEC_SINGLE_DRUM]
+	_stCraneSubSpec[2] = stCraneSubSpec[SUB_SPEC_SHEAVE_2WIRE]
+	_stCraneSubSpec[3] = stCraneSubSpec[SUB_SPEC_SHEAVE_1WIRE]
+endif
+if	HM_CraneMode = MODE_LUFFING_JIB	then
+	_iCraneSubSpec[1] = SUB_SPEC_DOUBLE_DRUM
+	_iCraneSubSpec[2] = SUB_SPEC_SINGLE_DRUM
+
+	_stCraneSubSpec[1] = stCraneSubSpec[SUB_SPEC_DOUBLE_DRUM]
+	_stCraneSubSpec[2] = stCraneSubSpec[SUB_SPEC_SINGLE_DRUM]
+endif
+
+values{2}	"HM_CraneSubSpec"	_iCraneSubSpec,	_stCraneSubSpec
+
+!	Pallet Weight
+if	HM_CraneSpec = SPEC_SUPER_HEAVY_LIFT	then
+	values{2}	"HM_PWeight"	PALLET_11M,	stPWeight[PALLET_11M],
+								PALLET_13M,	stPWeight[PALLET_13M],
+								PALLET_16M,	stPWeight[PALLET_16M]
+else
+	lock	"HM_PWeight"
+endif
+
+!	Crane Type
+values{2}	"HM_CraneMode"	MODE_HEAVY_BOOM,	_stCraneMode[MODE_HEAVY_BOOM],
+							MODE_MAIN_BOOM,		_stCraneMode[MODE_MAIN_BOOM],
+							MODE_LONG_BOOM,		_stCraneMode[MODE_LONG_BOOM],
+							MODE_LUFFING_JIB,	_stCraneMode[MODE_LUFFING_JIB]
+
+!	Crane List Name
+gosub	"ListName"
 
 parameters	HM_ListName = _stCraneList
 lock	"HM_ListName"
 
 if	GLOB_MODPAR_NAME = "HM_CraneMode"	then
+	if	HM_CraneMode = MODE_HEAVY_BOOM	then
+		_default_subSpec = SUB_SPEC_DOUBLE_DRUM
+		if	HM_CraneSpec = SPEC_STANDARD	then
+			_default_boomLen = "21.0m"
+		endif
+		if	HM_CraneSpec = SPEC_HEAVY_LIFT | HM_CraneSpec = SPEC_SUPER_HEAVY_LIFT	then
+			_default_boomLen = "36.0m"
+		endif
+	endif
 	if	HM_CraneMode = MODE_MAIN_BOOM	then
-		_default_boomLen = "30.0m"
+		_default_subSpec = SUB_SPEC_DOUBLE_DRUM
+		if	HM_CraneSpec = SPEC_STANDARD	then
+			_default_boomLen = "30.0m"
+		endif
+		if	HM_CraneSpec = SPEC_HEAVY_LIFT | HM_CraneSpec = SPEC_SUPER_HEAVY_LIFT	then
+			_default_boomLen = "36.0m"
+		endif
 	endif
 	if	HM_CraneMode = MODE_LONG_BOOM	then
-		_default_boomLen = "48.0m"
+		_default_subSpec = SUB_SPEC_SINGLE_DRUM
+		_default_boomLen = "90.0m"
 	endif
 	if	HM_CraneMode = MODE_LUFFING_JIB	then
-		_default_boomLen = "48.0m"
-	endif
-	_default_jibLen = "30.0m"
+		_default_subSpec = SUB_SPEC_DOUBLE_DRUM
+		if	HM_CraneSpec = SPEC_STANDARD	then
+			_default_boomLen = "30.0m"
+		endif
+		if	HM_CraneSpec = SPEC_HEAVY_LIFT | HM_CraneSpec = SPEC_SUPER_HEAVY_LIFT	then
+			_default_boomLen = "36.0m"
+		endif
 
-	parameters	HM_BoomLen = _default_boomLen,
+		!	Boom Angle
+		_default_boomAng = 86
+		parameters	HM_BoomAng = _default_boomAng
+	endif
+	_default_jibLen = "24.0m"
+
+	parameters	HM_CraneSubSpec = _default_subSpec,
+				HM_BoomLen = _default_boomLen,
 				HM_JibLen = _default_jibLen
 endif
+
+if	GLOB_MODPAR_NAME = "HM_BoomLen"	goto	"reCalculate"
+
+breakpoint	1
 
 !-----------------------------------------------------------------------------------------------
 !	Macro
 !-----------------------------------------------------------------------------------------------
-!	Global
-call	"HM_Global.gsm"	parameters	all
-
 !	Rated Load
-call	"HM_mc_RatedLoad_Crawler.gsm"	parameters all	returned_parameters	_WorkingR_max,	_WorkingR_min
+"reCalculate":
+call	"HM_mc_RatedLoad_Crawler.gsm"	parameters	all	HM_ListName = _stCraneList,	returned_parameters	_WorkingR_max,	_WorkingR_min
 parameters	_WorkingR_max = _WorkingR_max,
 			_WorkingR_min = _WorkingR_min
 
+!	Global
+call	"HM_Global.gsm"	parameters	all
+
 !	Suspended Load 
 call	"HM_mc_Suspendedloads.gsm"	parameters	all
-
-!-----------------------------------------------------------------------------------------------
-!	Define Range
-!-----------------------------------------------------------------------------------------------
-
-	!	Working Radius
-	!-----------------------------------------------------------------------------------------------
-	if	GLOB_MODPAR_NAME = "HM_WorkingR"	then
-		_HM_WorkingR = HM_WorkingR
-		if	HM_WorkingR - _WorkingR_max > eps	then
-			_HM_WorkingR = _WorkingR_max
-		endif
-		if	HM_WorkingR - _WorkingR_min < -eps	then
-			_HM_WorkingR = _WorkingR_min
-		endif
-
-		parameters	HM_WorkingR = _HM_WorkingR
-	endif
-
-	!	Boom Angle
-	!-----------------------------------------------------------------------------------------------
-	if	HM_CraneMode = MODE_MAIN_BOOM | HM_CraneMode = MODE_LONG_BOOM	then
-		_bCondition_BoomAng_Min = ((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength <= 1 \
-								& (_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength >= -1)
-		_bCondition_BoomAng_Max = ((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength <= 1 \
-								& (_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength >= -1)
-		if	_bCondition_BoomAng_Min	then
-			_BoomAng_Min = acs((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
-		endif
-		if	_bCondition_BoomAng_Max	then
-			_BoomAng_Max = acs((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
-		endif
-
-		values	"HM_BoomAng"	range	[_BoomAng_Min,	_BoomAng_Max]
-	endif
-
-	!	Jib Angle
-	!-----------------------------------------------------------------------------------------------
-	if	HM_CraneMode = MODE_LUFFING_JIB	then
-		_bCondition_JibAng_Min = ((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength <= 1 \
-								& (_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength >= -1)
-		_bCondition_JibAng_Max = ((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength <= 1 \
-								& (_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength >= -1)
-
-		if	_bCondition_JibAng_Min	then
-			_JibAng_Min = acs((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength)
-		endif
-		if	_bCondition_JibAng_Max	then
-			_JibAng_Max = acs((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength)
-		endif
-
-		values	"HM_JibAng"	range	[_JibAng_Min, _JibAng_Max]
-	endif
-
-	! !	Jib Height
-	! !-----------------------------------------------------------------------------------------------
-	! _mJibHeight_min = HM_JibLength*sin(_JibAng_min)
-	! _mJibHeight_max = HM_JibLength*sin(_JibAng_max)
-	! values	"HM_JibHeight"	range	[_mJibHeight_min, _mJibHeight_max]
-
 
 !-----------------------------------------------------------------------------------------------
 !	Calculation
@@ -123,7 +146,7 @@ parameters	HM_BoomLength = _BoomLength
 lock	"HM_BoomLength"
 
 !	Boom Angle, Working Radius
-if	HM_CraneMode = MODE_MAIN_BOOM | HM_CraneMode = MODE_LONG_BOOM	then
+if	HM_CraneMode = MODE_HEAVY_BOOM | HM_CraneMode = MODE_MAIN_BOOM | HM_CraneMode = MODE_LONG_BOOM	then
 	if	GLOB_MODPAR_NAME = "HM_BoomAng"	then
 		HM_WorkingR = _xPosBoom + HM_BoomLength*cos(HM_BoomAng) + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad
 	else
@@ -134,6 +157,8 @@ if	HM_CraneMode = MODE_MAIN_BOOM | HM_CraneMode = MODE_LONG_BOOM	then
 			HM_BoomAng = acs((HM_WorkingR - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
 		endif
 	endif
+
+	gosub	"range_BoomAng"
 endif
 
 !	Jib Length
@@ -158,15 +183,128 @@ if	HM_CraneMode = MODE_LUFFING_JIB	then
 			endif
 		endif
 	endif
+
+	gosub	"range_JibAng"
 endif
+
+!-----------------------------------------------------------------------------------------------
+!	Define Range
+!-----------------------------------------------------------------------------------------------
+
+	!	Working Radius
+	!-----------------------------------------------------------------------------------------------
+
+	!	Boom Angle
+	!-----------------------------------------------------------------------------------------------
+
+	!	Jib Angle
+	!-----------------------------------------------------------------------------------------------
+
+	! !	Jib Height
+	! !-----------------------------------------------------------------------------------------------
+	! _mJibHeight_min = HM_JibLength*sin(_JibAng_min)
+	! _mJibHeight_max = HM_JibLength*sin(_JibAng_max)
+	! values	"HM_JibHeight"	range	[_mJibHeight_min, _mJibHeight_max]
 
 !-----------------------------------------------------------------------------------------------
 !	Define Values
 !-----------------------------------------------------------------------------------------------
 !	Hook
-HM_HookType = 5
-HM_HookRadius = 0.450
-HM_HookHeight = 1.750
+!-----------------------------------------------------------------------------------------------
+	!	Hook List
+	dim	_iHookList[],	_stHookList[]
+
+	if	HM_CraneMode = MODE_HEAVY_BOOM | HM_CraneMode = MODE_MAIN_BOOM	then
+		_idx_HookList = 1
+	endif
+	if	HM_CraneMode = MODE_LONG_BOOM	then
+		_idx_HookList = 5
+	endif
+	if	HM_CraneMode = MODE_LUFFING_JIB	then
+		_idx_HookList = 3
+	endif
+
+	for	i = 1	to	7 - (_idx_HookList - 1)
+		_iHookList[i] = _idx_HookList
+		_stHookList[i] = stHookList[_idx_HookList]
+
+		_idx_HookList = _idx_HookList + 1
+	next	i
+
+	values{2}	"HM_HookList"	_iHookList,	_stHookList
+
+	!	Hook Size
+		!	L Size
+		if	HM_HookList = HOOK_500T	then
+			HM_HookType = HOOK_TYPE_L_SIZE
+			HM_HookRadius = 0.394
+			HM_HookHeight = 1.770
+			HM_HookWeight = 11.7
+		endif
+		if	HM_HookList = HOOK_300T	then
+			HM_HookType = HOOK_TYPE_L_SIZE
+			HM_HookRadius = 0.394
+			HM_HookHeight = 1.850
+			HM_HookWeight = 7.8
+		endif
+		if	HM_HookList = HOOK_200T_WITH | HM_HookList = HOOK_200T_WITHOUT	then
+			HM_HookType = HOOK_TYPE_L_SIZE
+			HM_HookRadius = 0.394
+			HM_HookHeight = 1.850
+			HM_HookWeight = 7.1
+		endif
+		if	HM_HookList = HOOK_120T	then
+			HM_HookType = HOOK_TYPE_L_SIZE
+			HM_HookRadius = 0.282
+			HM_HookHeight = 1.450
+			HM_HookWeight = 4.5
+		endif
+
+		!	M Size
+		if	HM_HookList = HOOK_70T	then
+			HM_HookType = HOOK_TYPE_M_SIZE
+			HM_HookRadius = 0.282
+			HM_HookHeight = 1.350
+			HM_HookWeight = 3.1
+		endif
+		if	HM_HookList = HOOK_40T	then
+			HM_HookType = HOOK_TYPE_M_SIZE
+			HM_HookRadius = 0.282
+			HM_HookHeight = 1.130
+			HM_HookWeight = 2.0
+		endif
+
+	!	Hook Wire Max Value
+	if	HM_CraneMode = MODE_HEAVY_BOOM | HM_CraneMode = MODE_MAIN_BOOM	then
+		if	HM_HookList = HOOK_500T	then	_maxWireLth = 7.900
+		if	HM_HookList = HOOK_300T	then	_maxWireLth = 7.300
+		if	HM_HookList = HOOK_200T_WITH	then	_maxWireLth = 7.300
+		if	HM_HookList = HOOK_200T_WITHOUT	then	_maxWireLth = 5.000
+		if	HM_HookList = HOOK_120T	then	_maxWireLth = 4.500
+		if	HM_HookList = HOOK_70T	then	_maxWireLth = 4.500
+		if	HM_HookList = HOOK_40T	then	_maxWireLth = 4.200
+	endif
+	if	HM_CraneMode = MODE_LONG_BOOM	then
+		! if	HM_HookList = HOOK_500T	then	_maxWireLth = 7.900
+		! if	HM_HookList = HOOK_300T	then	_maxWireLth = 7.300
+		! if	HM_HookList = HOOK_200T_WITH	then	_maxWireLth = 7.300
+		! if	HM_HookList = HOOK_200T_WITHOUT	then	_maxWireLth = 5.000
+		if	HM_HookList = HOOK_120T	then	_maxWireLth = 7.300
+		if	HM_HookList = HOOK_70T	then	_maxWireLth = 7.300
+		if	HM_HookList = HOOK_40T	then	_maxWireLth = 7.000
+	endif
+	if	HM_CraneMode = MODE_LUFFING_JIB	then
+		! if	HM_HookList = HOOK_500T	then	_maxWireLth = 7.900
+		! if	HM_HookList = HOOK_300T	then	_maxWireLth = 7.300
+		if	HM_HookList = HOOK_200T_WITH	then	_maxWireLth = 8.700
+		if	HM_HookList = HOOK_200T_WITHOUT	then	_maxWireLth = 6.500
+		if	HM_HookList = HOOK_120T	then	_maxWireLth = 6.000
+		if	HM_HookList = HOOK_70T	then	_maxWireLth = 6.000
+		if	HM_HookList = HOOK_40T	then	_maxWireLth = 5.700
+	endif
+
+	values	"HM_JibWireLen"		range	(0.1, _maxWireLth]
+	values	"HM_boomWireLen"	range	(0.1, _maxWireLth]
 
 !	Crane Mode
 values{2}	"HM_BoomType"	_TYPE_MAIN_BOOM,		_stBoomType[1],
@@ -174,6 +312,9 @@ values{2}	"HM_BoomType"	_TYPE_MAIN_BOOM,		_stBoomType[1],
 							_TYPE_TOWER_BOOM,		_stBoomType[3],
 							_TYPE_TOWER_BOOM_JIB,	_stBoomType[4]
 
+if	HM_CraneMode = MODE_HEAVY_BOOM 	then
+	_HM_BoomType = _TYPE_TOWER_BOOM
+endif
 if	HM_CraneMode = MODE_MAIN_BOOM 	then
 	_HM_BoomType = _TYPE_TOWER_BOOM
 endif
@@ -201,7 +342,7 @@ parameters 	HM_CraneWidth = HM_CraneWidth,
 			HM_CraneHeight = HM_CraneHeight
 
 !	Boom Angle, Working Radius
-if	HM_CraneMode = MODE_MAIN_BOOM | HM_CraneMode = MODE_LONG_BOOM	then
+if	HM_CraneMode = MODE_HEAVY_BOOM | HM_CraneMode = MODE_MAIN_BOOM | HM_CraneMode = MODE_LONG_BOOM	then
 	if	GLOB_MODPAR_NAME = "HM_BoomAng"	then
 		parameters	HM_WorkingR = HM_WorkingR
 	else
@@ -231,7 +372,8 @@ endif
 !	Hook
 parameters	HM_HookType = HM_HookType,
 			HM_HookRadius = HM_HookRadius,
-			HM_HookHeight = HM_HookHeight
+			HM_HookHeight = HM_HookHeight,
+			HM_HookWeight = HM_HookWeight
 
 !	Working Radius
 
@@ -244,7 +386,7 @@ lock	"HM_CraneWidth", "HM_CraneDepth", "HM_CraneHeight", "HM_CraneWeight"
 !	Hide Title
 hideparameter	"HM_Mast", "HM_Outrigger"
 
-if	(HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
+if	(HM_CraneMode = MODE_HEAVY_BOOM) | (HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
 	hideparameter	"HM_Jib"
 endif
 
@@ -252,4 +394,215 @@ endif
 lock	"HM_Judgement"
 
 !	Hook Size
-lock	"HM_HookRadius", "HM_HookHeight"
+lock	"HM_HookRadius", "HM_HookHeight", "HM_HookWeight"
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"ListName":
+!-----------------------------------------------------------------------------------------------
+	!	Base
+	_stCraneList = ""
+
+	!	Crane List Name : STD
+	if	HM_CraneSpec = SPEC_STANDARD	then
+		if	HM_CraneMode = MODE_HEAVY_BOOM	then
+			_stCraneList = "SL6000J_ヘビーブーム,STD_ダブルドラム"
+		endif
+		if	HM_CraneMode = MODE_MAIN_BOOM	then
+			if	HM_CraneSubSpec = SUB_SPEC_DOUBLE_DRUM	then
+				_stCraneList = "SL6000J_メインブーム,STD_ダブルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				_stCraneList = "SL6000J_メインブーム,STD_シングルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_2WIRE	then
+				_stCraneList = "SL6000J_メインブーム,STD_主ブームにフックなし2本掛け"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_1WIRE	then
+				_stCraneList = "SL6000J_メインブーム,STD_主ブームにフックなし1本掛け"
+			endif
+		endif
+		if	HM_CraneMode = MODE_LONG_BOOM	then
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				_stCraneList = "SL6000J_ロングブーム,STD_シングルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_2WIRE	then
+				_stCraneList = "SL6000J_ロングブーム,STD_主ブームにフックなし2本掛け"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_1WIRE	then
+				_stCraneList = "SL6000J_ロングブーム,STD_主ブームにフックなし1本掛け"
+			endif
+		endif
+		if	HM_CraneMode = MODE_LUFFING_JIB	then
+			if	HM_CraneSubSpec = SUB_SPEC_DOUBLE_DRUM	then
+				_stCraneList = "SL6000J_ラッフィングジブ,STD_ダブルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				_stCraneList = "SL6000J_ラッフィングジブ,STD_シングルドラム"
+			endif
+		endif
+	endif
+
+	!	Crane List Name : HL
+	if	HM_CraneSpec = SPEC_HEAVY_LIFT	then
+		if	HM_CraneMode = MODE_HEAVY_BOOM	then
+			_stCraneList = "SL6000J_ヘビーブーム,HL_ダブルドラム"
+		endif
+		if	HM_CraneMode = MODE_MAIN_BOOM	then
+			if	HM_CraneSubSpec = SUB_SPEC_DOUBLE_DRUM	then
+				_stCraneList = "SL6000J_メインブーム,HL_ダブルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				_stCraneList = "SL6000J_メインブーム,HL_シングルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_2WIRE	then
+				_stCraneList = "SL6000J_メインブーム,HL_主ブームにフックなし2本掛け"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_1WIRE	then
+				_stCraneList = "SL6000J_メインブーム,HL_主ブームにフックなし1本掛け"
+			endif
+		endif
+		if	HM_CraneMode = MODE_LONG_BOOM	then
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				_stCraneList = "SL6000J_ロングブーム,HL_シングルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_2WIRE	then
+				_stCraneList = "SL6000J_ロングブーム,HL_主ブームにフックなし2本掛け"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_1WIRE	then
+				_stCraneList = "SL6000J_ロングブーム,HL_主ブームにフックなし1本掛け"
+			endif
+		endif
+		if	HM_CraneMode = MODE_LUFFING_JIB	then
+			if	HM_CraneSubSpec = SUB_SPEC_DOUBLE_DRUM	then
+				_stCraneList = "SL6000J_ラッフィングジブ,HL_ダブルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				_stCraneList = "SL6000J_ラッフィングジブ,HL_シングルドラム"
+			endif
+		endif
+	endif
+
+	!	Crane List Name : SHL
+	if	HM_CraneSpec = SPEC_SUPER_HEAVY_LIFT	then
+		if	HM_CraneMode = MODE_HEAVY_BOOM	then
+			if	HM_PWeight = PALLET_11M	then	_stCraneList = "SL6000J_ヘビーブーム,SHL_ダブルドラム(11m)"
+			if	HM_PWeight = PALLET_13M	then	_stCraneList = "SL6000J_ヘビーブーム,SHL_ダブルドラム(13m)"
+			if	HM_PWeight = PALLET_16M	then	_stCraneList = "SL6000J_ヘビーブーム,SHL_ダブルドラム(16m)"
+		endif
+		if	HM_CraneMode = MODE_MAIN_BOOM	then
+			if	HM_CraneSubSpec = SUB_SPEC_DOUBLE_DRUM	then
+				if	HM_PWeight = PALLET_11M	then	_stCraneList = "SL6000J_メインブーム,SHL_ダブルドラム(11m)"
+				if	HM_PWeight = PALLET_13M	then	_stCraneList = "SL6000J_メインブーム,SHL_ダブルドラム(13m)"
+				if	HM_PWeight = PALLET_16M	then	_stCraneList = "SL6000J_メインブーム,SHL_ダブルドラム(16m)"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				if	HM_PWeight = PALLET_11M	then	_stCraneList = "SL6000J_メインブーム,SHL_シングルドラム(11m)"
+				if	HM_PWeight = PALLET_13M	then	_stCraneList = "SL6000J_メインブーム,SHL_シングルドラム(13m)"
+				if	HM_PWeight = PALLET_16M	then	_stCraneList = "SL6000J_メインブーム,SHL_シングルドラム(16m)"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_2WIRE	then
+				if	HM_PWeight = PALLET_11M	then	_stCraneList = "SL6000J_メインブーム,SHL_主ブームにフックなし2本掛け(11m)"
+				if	HM_PWeight = PALLET_13M	then	_stCraneList = "SL6000J_メインブーム,SHL_主ブームにフックなし2本掛け(13m)"
+				if	HM_PWeight = PALLET_16M	then	_stCraneList = "SL6000J_メインブーム,SHL_主ブームにフックなし2本掛け(16m)"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_1WIRE	then
+				if	HM_PWeight = PALLET_11M	then	_stCraneList = "SL6000J_メインブーム,SHL_主ブームにフックなし1本掛け(11m)"
+				if	HM_PWeight = PALLET_13M	then	_stCraneList = "SL6000J_メインブーム,SHL_主ブームにフックなし1本掛け(13m)"
+				if	HM_PWeight = PALLET_16M	then	_stCraneList = "SL6000J_メインブーム,SHL_主ブームにフックなし1本掛け(16m)"
+			endif
+		endif
+		if	HM_CraneMode = MODE_LONG_BOOM	then
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				_stCraneList = "SL6000J_ロングブーム,HL_シングルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_2WIRE	then
+				_stCraneList = "SL6000J_ロングブーム,HL_主ブームにフックなし2本掛け"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SHEAVE_1WIRE	then
+				_stCraneList = "SL6000J_ロングブーム,HL_主ブームにフックなし1本掛け"
+			endif
+		endif
+		if	HM_CraneMode = MODE_LUFFING_JIB	then
+			if	HM_CraneSubSpec = SUB_SPEC_DOUBLE_DRUM	then
+				_stCraneList = "SL6000J_ラッフィングジブ,HL_ダブルドラム"
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_SINGLE_DRUM	then
+				_stCraneList = "SL6000J_ラッフィングジブ,HL_シングルドラム"
+			endif
+		endif
+	endif
+return
+
+!-----------------------------------------------------------------------------------------------
+"range_BoomAng":
+!-----------------------------------------------------------------------------------------------
+
+	!	Get Boom Angle Limit Value
+	_bCondition_BoomAng_Max = ((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength <= 1 \
+							& (_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength >= -1)
+	_bCondition_BoomAng_Min = ((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength <= 1 \
+							& (_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength >= -1)
+
+	if	_bCondition_BoomAng_Max	then
+		_BoomAng_Max = acs((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
+	endif
+	if	_bCondition_BoomAng_Min	then
+		_BoomAng_Min = acs((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
+	endif
+
+	for	r = 1	to	10
+		_bCondition_BoomAng_Max = ((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Max) + _xOffset_Rad))/HM_BoomLength <= 1 \
+								& (_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Max) + _xOffset_Rad))/HM_BoomLength >= -1)
+		_bCondition_BoomAng_Min = ((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Min) + _xOffset_Rad))/HM_BoomLength <= 1 \
+								& (_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Min) + _xOffset_Rad))/HM_BoomLength >= -1)
+
+		if	_bCondition_BoomAng_Max	then
+			_BoomAng_Max = acs((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Max) + _xOffset_Rad))/HM_BoomLength)
+		endif
+		if	_bCondition_BoomAng_Min	then
+			_BoomAng_Min = acs((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Min) + _xOffset_Rad))/HM_BoomLength)
+		endif
+	next	r
+
+	values	"HM_BoomAng"	range	[_BoomAng_Min,	_BoomAng_Max]
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"range_JibAng":
+!-----------------------------------------------------------------------------------------------
+
+	!	Get Jib Angle Limit Value
+	_bCondition_JibAng_Max = ((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength <= 1 \
+							& (_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength >= -1)
+	_bCondition_JibAng_Min = ((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength <= 1 \
+							& (_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength >= -1)
+
+	if	_bCondition_JibAng_Max	then
+		_JibAng_Max = acs((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength)
+	endif
+	if	_bCondition_JibAng_Min	then
+		_JibAng_Min = acs((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength)
+	endif
+
+	for	r = 1	to	5
+		_bCondition_JibAng_Max = ((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Max) + _xOffset_Rad))/HM_JibLength <= 1 \
+								& (_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Max) + _xOffset_Rad))/HM_JibLength >= -1)
+		_bCondition_JibAng_Min = ((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Min) + _xOffset_Rad))/HM_JibLength <= 1 \
+								& (_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Min) + _xOffset_Rad))/HM_JibLength >= -1)
+
+		if	_bCondition_JibAng_Max	then
+			_JibAng_Max = acs((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Max) + _xOffset_Rad))/HM_JibLength)
+		endif
+		if	_bCondition_JibAng_Min	then
+			_JibAng_Min = acs((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Min) + _xOffset_Rad))/HM_JibLength)
+		endif
+	next	r
+
+	values	"HM_JibAng"	range	[_JibAng_Min,	_JibAng_Max]
+
+return

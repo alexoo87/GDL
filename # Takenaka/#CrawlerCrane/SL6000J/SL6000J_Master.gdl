@@ -23,6 +23,38 @@ HM_CraneHeight = 3.080
 _mCraneOriginX = 0
 _mCraneOriginY = 0
 
+!	Crane Specification
+SPEC_STANDARD = 1
+SPEC_HEAVY_LIFT = 2
+SPEC_SUPER_HEAVY_LIFT = 3
+
+dim	stCraneSpec[]
+	stCraneSpec[1] = "STD(STANDARD)"
+	stCraneSpec[2] = "HL(HEAVY LIFT)"
+	stCraneSpec[3] = "SHL(SUPER HEAVY LIFT)"
+
+!	Crane Sub Specification
+SUB_SPEC_DOUBLE_DRUM = 1
+SUB_SPEC_SINGLE_DRUM = 2
+SUB_SPEC_SHEAVE_2WIRE = 3
+SUB_SPEC_SHEAVE_1WIRE = 4
+
+dim	stCraneSubSpec[]
+	stCraneSubSpec[1] = "ダブルドラム"
+	stCraneSubSpec[2] = "シングルドラム"
+	stCraneSubSpec[3] = "主ブームにフックなし2本掛け"
+	stCraneSubSpec[4] = "主ブームにフックなし1本掛け"
+
+!	Pallet Weight
+PALLET_11M = 1
+PALLET_13M = 2
+PALLET_16M = 3
+
+dim	stPWeight[]
+	stPWeight[1] = "11M"
+	stPWeight[2] = "13M"
+	stPWeight[3] = "16M"
+
 !	Crane Mode
 MODE_HEAVY_BOOM = 1
 MODE_MAIN_BOOM = 2
@@ -48,30 +80,145 @@ dim	_stBoomType[]
 	_stBoomType[3] = "TOWER BOOM"
 	_stBoomType[4] = "TOWER BOOM + JIB"
 
-!	Radius
-_xOffset_Rad = 0.353
-
 !	'HM_Judgement' Index
 SAFETY = 1
 WARNING_YELLOW = 2
 WARNING_RED = 3
 
-!	Part Pos
-_xPosJib = 1.350
-_zPosJib = 2.250
-_zPosJibPulley = 0.600
+!-----------------------------------------------------------------------------------------------
+!	Hook
+!-----------------------------------------------------------------------------------------------
+!	Hook Index
+HOOK_TYPE_S_SIZE = 4
+HOOK_TYPE_M_SIZE = 5
+HOOK_TYPE_L_SIZE = 6
 
-if	HM_CraneMode = MODE_MAIN_BOOM	then
-	_zPosMainPulley = 1.510
+!	List
+HOOK_500T = 1
+HOOK_300T = 2
+HOOK_200T_WITH = 3
+HOOK_200T_WITHOUT = 4
+HOOK_120T = 5
+HOOK_70T = 6
+HOOK_40T = 7
+
+dim	stHookList[]
+	stHookList[1] = "500t"
+	stHookList[2] = "300t"
+	stHookList[3] = "200t(with sheave)"
+	stHookList[4] = "200t(without sheave)"
+	stHookList[5] = "120t"
+	stHookList[6] = "70t"
+	stHookList[7] = "40t"
+
+!	Hook Rotation Angle
+_aRot_Hook = 90
+if	HM_HookType = HOOK_TYPE_S_SIZE	then
+	_aRot_Hook = 0
 endif
-if	HM_CraneMode = MODE_LONG_BOOM	then
-	_zPosMainPulley = 0.600
-endif
+
+!	Hook Thickness
+HM_HookThick = 0
+if	HM_HookList = HOOK_500T	then	HM_HookThick = 0.728
+if	HM_HookList = HOOK_300T	then	HM_HookThick = 0.565
+if	HM_HookList = HOOK_200T_WITH	then	HM_HookThick = 0.565
+if	HM_HookList = HOOK_200T_WITHOUT	then	HM_HookThick = 0.565
+if	HM_HookList = HOOK_120T	then	HM_HookThick = 0.520
+if	HM_HookList = HOOK_70T	then	HM_HookThick = 0.300
+if	HM_HookList = HOOK_40T	then	HM_HookThick = 0.300
 
 !----------------------------------------------------------------------------------------------------
 !	Size 
 !----------------------------------------------------------------------------------------------------
 _xPosBoom = 2.000
+
+!	Radius
+_xOffset_Rad = 0
+if	HM_HookType = HOOK_TYPE_S_SIZE	then
+	_xOffset_Rad = 0.353
+endif
+
+!	Part Pos
+_xPosJib = 1.200
+_zPosJib = 2.370
+_zPosJibPulley = 0.430
+
+_zPosMainPulley = 0
+if	HM_CraneMode = MODE_HEAVY_BOOM	then
+	_zPosMainPulley = 1.320
+endif
+if	HM_CraneMode = MODE_MAIN_BOOM	then
+	_zPosMainPulley = 1.500
+endif
+if	HM_CraneMode = MODE_LONG_BOOM	then
+	_zPosMainPulley = 0.430
+endif
+
+!	Mast/Strut Index
+TYPE_MAST = 1
+TYPE_MAST_HEAVY_LIFT = 2
+TYPE_STRUT = 3
+TYPE_STRUT_HEAVY_LIFT = 4
+
+STRUT_FRONT = 1
+STRUT_REAR = 2
+
+CRANE_SL4500J = 1
+CRANE_SL6000J = 2
+CRANE_6000SLX = 3
+
+!	Mast/Strut Value
+if	HM_CraneSpec = SPEC_STANDARD	then
+	_mastType = TYPE_MAST
+	_mastLth = 10.200
+	if	HM_CraneMode = MODE_HEAVY_BOOM	then
+		_xPosEnd = 6.360
+	endif
+	if	HM_CraneMode = MODE_MAIN_BOOM	then
+		_xPosEnd = 6.360
+	endif
+	if	HM_CraneMode = MODE_LONG_BOOM	then
+		_xPosEnd = 9.800
+	endif
+	if	HM_CraneMode = MODE_LUFFING_JIB	then
+		_xPosEnd = 9.700
+	endif
+endif
+
+if	HM_CraneSpec = SPEC_HEAVY_LIFT	then
+	!	1st
+	_mastType = TYPE_MAST
+	_mastLth = 10.200
+	_xPosEnd = 9.865
+
+	!	2nd
+	_iCraneName = CRANE_SL6000J
+	_mastType_2nd = TYPE_MAST_HEAVY_LIFT
+	_mastLth_2nd = 30.000
+	_xPosEnd_2nd = 17.495
+endif
+
+if	HM_CraneSpec = SPEC_SUPER_HEAVY_LIFT	then
+	!	1st
+	_mastType = TYPE_MAST
+	_mastLth = 10.200
+	_xPosEnd = 9.900
+
+	!	2nd
+	_iCraneName = CRANE_SL6000J
+	_mastType_2nd = TYPE_MAST_HEAVY_LIFT
+	_mastLth_2nd = 30.000
+
+	if	HM_PWeight = PALLET_11M	then
+		_xPosEnd_2nd = 11.000 + 1.000 + 0.780
+	endif
+	if	HM_PWeight = PALLET_13M	then
+		_xPosEnd_2nd = 13.000 + 1.000 + 0.780
+	endif
+	if	HM_PWeight = PALLET_16M	then
+		_xPosEnd_2nd = 16.000 + 1.000 + 0.780
+	endif
+endif
 
 !----------------------------------------------------------------------------------------------------
 !	Rated Load

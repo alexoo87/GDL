@@ -22,18 +22,9 @@ call	"HM_Material_Blue.gsm"
 call	"HM_Material_White.gsm"
 call	"HM_Material_Black.gsm"
 
-if	HM_matWarning = ""	then
 	_stMat_Red = HM_matBody1
 	_stMat_White = HM_matBody2
 	_stMat_Black = "HM_matBlack"
-else
-	_stMat_Red = HM_matWarning
-	_stMat_White = HM_matWarning
-	_stMat_Black = HM_matWarning
-endif
-
-
-
 
 !-----------------------------------------------------------------------------------------------
 !	Boom/Jib Shape
@@ -57,18 +48,32 @@ if	_bDrawJib	then
 	roty	-HM_BoomAng
 		addx	_xPosPart + _xPosJib
 			addz	-_zPosJib
-				roty	HM_BoomAng
+				if	_iBoomType = _TYPE_MAIN_BOOM_JIB	then
 					!	Angle Hotspot
 					!-----------------------------------------------------------------------------------------------
 					hotspot	HM_JibLength, 					0,	0,								unID,	HM_JibAng,	4+128	:	unID = unID + 1
-					hotspot	HM_JibLength*cos(HM_JibAng),	0,	HM_JibLength*sin(HM_JibAng),	unID,	HM_JibAng,	5		:	unID = unID + 1
+					hotspot	HM_JibLength*cos(HM_JibAng),	0,	-HM_JibLength*sin(HM_JibAng),	unID,	HM_JibAng,	5		:	unID = unID + 1
 					hotspot	0,								0,	0,								unID,	HM_JibAng,	6		:	unID = unID + 1
-					hotspot	0,								-1,	0,								unID,	HM_JibAng,	7		:	unID = unID + 1
+					hotspot	0,								1,	0,								unID,	HM_JibAng,	7		:	unID = unID + 1
 
-					roty	-HM_JibAng
+					roty	HM_JibAng
 						gosub	"Draw_Jib_Shape"
 					del 1
-				del 1
+				endif
+				if	_iBoomType = _TYPE_TOWER_BOOM_JIB	then
+					roty	HM_BoomAng
+						!	Angle Hotspot
+						!-----------------------------------------------------------------------------------------------
+						hotspot	HM_JibLength, 					0,	0,								unID,	HM_JibAng,	4+128	:	unID = unID + 1
+						hotspot	HM_JibLength*cos(HM_JibAng),	0,	HM_JibLength*sin(HM_JibAng),	unID,	HM_JibAng,	5		:	unID = unID + 1
+						hotspot	0,								0,	0,								unID,	HM_JibAng,	6		:	unID = unID + 1
+						hotspot	0,								-1,	0,								unID,	HM_JibAng,	7		:	unID = unID + 1
+
+						roty	-HM_JibAng
+							gosub	"Draw_Jib_Shape"
+						del 1
+					del 1
+				endif
 			del 1
 		del 1
 	del 1
@@ -135,7 +140,7 @@ end	_xPosPart
 	addx	_xPosPart
 		if	_nInsertPart_1st > eps	then
 			for	i = 1	to	_nInsertPart_1st
-				if	not(i = _nInsertPart_1st)	then
+				if	not(i = _nInsertPart_1st & _IP1_bBoomTop = 1)	then
 					call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
 																modLth = _boomLength[i],
 																modWdt_SP = _IP1_Wdt_SP,
@@ -211,7 +216,7 @@ end	_xPosPart
 		if	_nInsertPart_2nd > eps	then
 			for	i = 1	to	_nInsertPart_2nd
 				call	"HM_mc_Module.gsm"	parameters	all	modRad = _rad,
-															modLth = _boomLength[i],
+															modLth = _boomLength_2nd[i],
 															modWdt_SP = _IP2_Wdt_SP,
 															modWdt_EP = _IP2_Wdt_EP,
 															modDpt_SP = _IP2_Dpt_SP,
@@ -221,8 +226,8 @@ end	_xPosPart
 															matMod = _nextMat
 
 				gosub	"Color_Picker"
-				_xPosPart = _xPosPart + _boomLength[i]
-				addx	_boomLength[i]
+				_xPosPart = _xPosPart + _boomLength_2nd[i]
+				addx	_boomLength_2nd[i]
 			next	i
 
 			del _nInsertPart_2nd
@@ -243,6 +248,7 @@ end	_xPosPart
 														zTruss_SP = _TP_zTruss_SP,
 														zTruss_EP = _TP_zTruss_EP,
 														bEndPanel = _TP_bEndPanel,
+														pnlThk = _TP_pnlThk,
 														matMod = _nextMat
 
 			_xPosPart = _xPosPart + _TP_Lth
@@ -267,6 +273,7 @@ return
 												zTruss_SP = _jBP_zTruss_SP,
 												zTruss_EP = _jBP_zTruss_EP,
 												bAnchor = _jBP_bAnchor,
+												divideLth = 0.450,
 												matMod = _nextMat
 
 	
@@ -287,6 +294,7 @@ return
 															modDpt_EP = _jIP1_Dpt_EP,
 															zTruss_SP = _jIP1_zTruss_SP,
 															zTruss_EP = _jIP1_zTruss_EP,
+															divideLth = 0.450,
 															matMod = _nextMat
 
 				gosub	"Color_Picker"
@@ -311,6 +319,7 @@ return
 														zTruss_SP = _jTP_zTruss_SP,
 														zTruss_EP = _jTP_zTruss_EP,
 														bEndPanel = _jTP_bEndPanel,
+														divideLth = 0.450,
 														matMod = _nextMat
 
 			_xPosPart = _xPosPart + _jTP_Lth

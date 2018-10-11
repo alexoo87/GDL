@@ -44,11 +44,35 @@ endif
 !-----------------------------------------------------------------------------------------------
 DRW_NAME_LAYOUT = 1
 DRW_NAME_DRAWING = 2
+DRW_NAME_CUSTOM = 3
 
 if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
 	dim	stDrwName[]
 		stDrwName[1] = "Layout Name"
 		stDrwName[2] = "Drawing Name"
+		stDrwName[3] = "Custom"
+endif
+
+!	스케일 내용
+!-----------------------------------------------------------------------------------------------
+CONTENT_S_SCALE = 1
+CONTENT_S_CUSTOM = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stContentS[]
+		stContentS[1] = "Scale"
+		stContentS[2] = "Custom"
+endif
+
+!	원 내부 내용
+!-----------------------------------------------------------------------------------------------
+CONTENT_T_DRWID = 1
+CONTENT_T_CUSTOM = 2
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stContentT[]
+		stContentT[1] = "Drawing ID"
+		stContentT[2] = "Custom"
 endif
 
 !	원 분할 유형

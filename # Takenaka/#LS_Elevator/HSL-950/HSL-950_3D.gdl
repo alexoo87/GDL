@@ -1,0 +1,736 @@
+!===============================================================================================
+!	HSL - 950
+!===============================================================================================
+
+!	Common
+!-----------------------------------------------------------------------------------------------
+pen	ev_3d_pen
+
+!	Mast F Type
+!-----------------------------------------------------------------------------------------------
+if	iMastType = MAST_F_TYPE	then
+
+	!	Basement
+	!-----------------------------------------------------------------------------------------------
+		material	ev_matMast
+
+		_baseThk = 0.050
+
+		for	i = 1	to	2
+			mulx	-2*i + 3
+				addx	-ev_width/2
+					put	-0.150,	-0.425,	15,
+						-0.150,	0.425,	15,
+						0.750,	0.425,	15,
+						0.750,	0.325,	15,
+						0.350,	0.325,	15,
+						0.350,	-0.325,	15,
+						0.750,	-0.325,	15,
+						0.750,	-0.425,	15
+
+					prism_	nsp/3,	_baseThk,	get(nsp)
+				del 1
+			del 1
+		next	i
+
+	!	Mast
+	!-----------------------------------------------------------------------------------------------
+		_zPosMast = _baseThk
+
+		addz	_zPosMast
+			for	i = 1	to	2
+				mulx	-2*i + 3
+					addx	-ev_width/2
+						call	"HM_mc_EVmast.gsm"	parameters	all
+
+						gosub	"hsp_MastHeight"
+					del 1
+				del 1
+			next	i
+		del 1
+
+	!	Elevator
+	!-----------------------------------------------------------------------------------------------
+		_zPosElev = _zPosMast + ev_zPos
+
+		!	Hotspot
+		addz	_zPosMast
+			hotspot	0,	0,	0,			unID,	ev_zPos,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	ev_zPos,	3		:	unID = unID + 1
+			hotspot	0,	0,	ev_zPos,	unID,	ev_zPos,	2		:	unID = unID + 1
+		del 1
+
+		addz	_zPosElev
+
+			!	Elevator Base
+			_elev_baseThk = -0.174
+
+			put	-(ev_width/2 - 0.040),	-0.6325,	15,
+				-(ev_width/2 - 0.040),	-0.4865,	15,
+				-(ev_width/2 - 0.455),	-0.4865,	15,
+				-(ev_width/2 - 0.455),	0.4865,		15,
+				-(ev_width/2 - 0.040),	0.4865,		15,
+				-(ev_width/2 - 0.040),	0.6325,		15,
+				ev_width/2 - 0.040,		0.6325,		15,
+				ev_width/2 - 0.040,		0.4865,		15,
+				ev_width/2 - 0.455,		0.4865,		15,
+				ev_width/2 - 0.455,		-0.4865,	15,
+				ev_width/2 - 0.040,		-0.4865,	15,
+				ev_width/2 - 0.040,		-0.6325,	15
+
+			prism_	nsp/3,	_elev_baseThk,	get(nsp)
+
+			!	Elevator Room
+			_elevHgt = 2.420
+
+				!	Span Length : 5.4m
+				if	iSpanLength = SPAN_LENGTH_54	then
+					for	i = 1	to	2
+						mulx	-2*i + 3
+							addx	-(ev_width/2 - 0.480)
+								!	Column/Net
+								for	j = 1	to	2
+									muly	-2*j + 3
+										addy	0.503
+											!	Column
+											put	-0.025,	-0.025,	15,
+												-0.025,	0.025,	15,
+												0.025,	0.025,	15,
+												0.025,	-0.025,	15
+
+											prism_	nsp/3,	_elevHgt,	get(nsp)
+
+											!	Net - F/B
+											addx	0.025
+												call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.8825,
+																						netHgt = _elevHgt,
+																						offsetX = 0.130,
+																						offsetY = 0.075
+											del 1
+										del 1
+									del 1
+								next	J
+
+								!	Net - Side
+								addy	-0.478
+									rotz	90
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.956,
+																				netHgt = _elevHgt,
+																				offsetX = 0.130,
+																				offsetY = 0.075
+									del 1
+								del 1
+
+								!	Net - Top
+								add	0.025,	-0.478,	_elevHgt + 0.025
+									rotx	-90
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.8825,
+																				netHgt = 0.956,
+																				offsetX = 0.130,
+																				offsetY = 0.075
+									del 1
+								del 1
+
+								!	Top Beam
+								addz	_elevHgt
+									put	-0.025,	-0.478,	15,
+										-0.025,	0.478,	15,
+										0.025,	0.478,	15,
+										0.025,	-0.478,	15
+
+									prism_	nsp/3,	0.050,	get(nsp)
+								del 1
+							del 1
+
+							addx	-(ev_width/2 - 1.413)
+								!	Column
+								for	j = 1	to	2
+									muly	-2*j + 3
+										addy	0.503
+											put	-0.025,	-0.025,	15,
+												-0.025,	0.025,	15,
+												0.025,	0.025,	15,
+												0.025,	-0.025,	15
+
+											prism_	nsp/3,	_elevHgt,	get(nsp)
+										del 1
+									del 1
+								next	J
+
+								!	Top Beam
+								addz	_elevHgt
+									put	-0.025,	-0.478,	15,
+										-0.025,	0.478,	15,
+										0.025,	0.478,	15,
+										0.025,	-0.478,	15
+
+									prism_	nsp/3,	0.050,	get(nsp)
+								del 1
+							del 1
+						del 1
+					next	i
+				endif
+
+				!	Span Length : 3.6m
+				if	iSpanLength = SPAN_LENGTH_36	then
+					for	i = 1	to	2
+						mulx	-2*i + 3
+							addx	-(ev_width/2 - 0.480)
+								!	Column/Net
+								for	j = 1	to	2
+									muly	-2*j + 3
+										addy	0.503
+											!	Column
+											put	-0.025,	-0.025,	15,
+												-0.025,	0.025,	15,
+												0.025,	0.025,	15,
+												0.025,	-0.025,	15
+
+											prism_	nsp/3,	_elevHgt,	get(nsp)
+
+											!	Net - F/B
+											if	i = 1	then
+												addx	0.025
+													call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.8825,
+																							netHgt = _elevHgt,
+																							offsetX = 0.130,
+																							offsetY = 0.075
+												del 1
+											endif
+										del 1
+									del 1
+								next	J
+
+								!	Net - Side
+								addy	-0.478
+									rotz	90
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.956,
+																				netHgt = _elevHgt,
+																				offsetX = 0.130,
+																				offsetY = 0.075
+									del 1
+								del 1
+
+								!	Net - Top
+								add	0.025,	-0.478,	_elevHgt + 0.025
+									rotx	-90
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.8825,
+																				netHgt = 0.956,
+																				offsetX = 0.130,
+																				offsetY = 0.075
+									del 1
+								del 1
+
+								!	Top Beam
+								addz	_elevHgt
+									put	-0.025,	-0.478,	15,
+										-0.025,	0.478,	15,
+										0.025,	0.478,	15,
+										0.025,	-0.478,	15
+
+									prism_	nsp/3,	0.050,	get(nsp)
+								del 1
+							del 1
+
+							addx	-(ev_width/2 - 1.413)
+								!	Column
+								if	i = 1	then
+									for	j = 1	to	2
+										muly	-2*j + 3
+											addy	0.503
+												put	-0.025,	-0.025,	15,
+													-0.025,	0.025,	15,
+													0.025,	0.025,	15,
+													0.025,	-0.025,	15
+
+												prism_	nsp/3,	_elevHgt,	get(nsp)
+											del 1
+										del 1
+									next	j
+								endif
+
+								!	Top Beam
+								addz	_elevHgt
+									put	-0.025,	-0.478,	15,
+										-0.025,	0.478,	15,
+										0.025,	0.478,	15,
+										0.025,	-0.478,	15
+
+									prism_	nsp/3,	0.050,	get(nsp)
+								del 1
+							del 1
+						del 1
+					next	i
+				endif
+
+			!	Elevator Door
+			_elev_doorHgt = 1.643
+
+				!	Span Length : 5.4m
+				if	iSpanLength = SPAN_LENGTH_54	then
+					for	i = 1	to	2
+						muly	-2*i + 3
+							addy	0.6075
+								!	Parameter
+								_doorWdt = (ev_width/2 - 1.413) + (ev_width/2 - 1.413)
+
+								!	Column
+								addx	-(ev_width/2 - 1.413)
+									cylind	_elevHgt,	0.021
+								del 1
+
+								cylind	_elevHgt,	0.021
+
+								addx	ev_width/2 - 1.413
+									cylind	_elevHgt,	0.021
+								del 1
+
+								!	Net
+								addx	-(ev_width/2 - 1.4130 - 0.021)
+									call	"HM_mc_EVnet.gsm"	parameters	netWdt = (_doorWdt/2 - 0.021*2),
+																			netHgt = _elev_doorHgt,
+																			offsetX = 0.280,
+																			offsetY = 0.500
+								del 1
+
+								addx	0.021
+									call	"HM_mc_EVnet.gsm"	parameters	netWdt = (_doorWdt/2 - 0.021*2),
+																			netHgt = _elev_doorHgt,
+																			offsetX = 0.280,
+																			offsetY = 0.500
+								del 1
+
+
+							del 1
+						del 1
+					next	i
+				endif
+
+				!	Span Length : 3.6m
+				if	iSpanLength = SPAN_LENGTH_36	then
+					_elev_doorHgt = 1.800
+
+					for	i = 1	to	2
+						muly	-2*i + 3
+							addy	0.6075
+								!	Parameter
+								_doorWdt = (ev_width/2 - 1.413) + (ev_width/2 - 0.275)
+
+								!	Column
+								addx	-(ev_width/2 - 1.413)
+									cylind	_elevHgt,	0.021
+								del 1
+
+								addx	-(ev_width/2 - 1.413) + _doorWdt/2
+									cylind	_elevHgt,	0.021
+								del 1
+
+								addx	ev_width/2 - 0.275
+									cylind	_elevHgt,	0.021
+								del 1
+
+								!	Net
+								addx	-(ev_width/2 - 1.413 - 0.021)
+									call	"HM_mc_EVnet.gsm"	parameters	netWdt = (_doorWdt/2 - 0.021*2),
+																			netHgt = _elev_doorHgt,
+																			offsetX = 0.280,
+																			offsetY = 0.500
+								del 1
+
+								addx	-(ev_width/2 - 1.413) + _doorWdt/2 + 0.021
+									call	"HM_mc_EVnet.gsm"	parameters	netWdt = (_doorWdt/2 - 0.021*2),
+																			netHgt = _elev_doorHgt,
+																			offsetX = 0.280,
+																			offsetY = 0.500
+								del 1
+							del 1
+						del 1
+					next	i
+				endif
+
+			!	Elevator Top
+			_elev_topThk = 0.100
+
+			addz	_elevHgt
+				for	i = 1	to	2
+					muly	-2*i + 3
+						put	-(ev_width/2 - 0.134),	0.4780,	15,
+							-(ev_width/2 - 0.134),	0.6325,	15,
+							ev_width/2 - 0.134,		0.6325,	15,
+							ev_width/2 - 0.134,		0.4780,	15
+
+						prism_	nsp/3,	_elev_topThk,	get(nsp)
+					del 1
+				next	i
+			del 1
+
+			!	Machine
+		del 1
+endif
+
+!	Mast F Type
+!-----------------------------------------------------------------------------------------------
+if	iMastType = MAST_B_TYPE	then
+
+	!	Basement
+	!-----------------------------------------------------------------------------------------------
+		material	ev_matMast
+
+		_baseThk = 0.046
+
+		for	i = 1	to	2
+			mulx	-2*i + 3
+				addx	-ev_width/2
+					put	-0.0375,	-0.425,	15,
+						-0.0375,	0.425,	15,
+						0.5375,		0.425,	15,
+						0.5375,		-0.425,	15
+
+					prism_	nsp/3,	_baseThk,	get(nsp)
+				del 1
+			del 1
+		next	i
+
+	!	Mast
+	!-----------------------------------------------------------------------------------------------
+		_zPosMast = _baseThk
+
+		addz	_zPosMast
+			for	i = 1	to	2
+				mulx	-2*i + 3
+					addx	-ev_width/2
+						call	"HM_mc_EVmast.gsm"	parameters	all
+
+						gosub	"hsp_MastHeight"
+					del 1
+				del 1
+			next	i
+		del 1
+
+	!	Elevator
+	!-----------------------------------------------------------------------------------------------
+		_zPosElev = _zPosMast + ev_zPos
+
+		!	Hotspot
+		addz	_zPosMast
+			hotspot	0,	0,	0,			unID,	ev_zPos,	1+128	:	unID = unID + 1
+			hotspot	0,	0,	-1,			unID,	ev_zPos,	3		:	unID = unID + 1
+			hotspot	0,	0,	ev_zPos,	unID,	ev_zPos,	2		:	unID = unID + 1
+		del 1
+
+		addz	_zPosElev
+
+			!	Elevator Base
+			_elev_baseThk = -0.174
+
+			put	-(ev_width/2 + 0.060),	-0.6325,	15,
+				-(ev_width/2 + 0.060),	-0.4865,	15,
+				-(ev_width/2 - 0.355),	-0.4865,	15,
+				-(ev_width/2 - 0.355),	0.4865,		15,
+				-(ev_width/2 + 0.060),	0.4865,		15,
+				-(ev_width/2 + 0.060),	0.6325,		15,
+				ev_width/2 + 0.060,		0.6325,		15,
+				ev_width/2 + 0.060,		0.4865,		15,
+				ev_width/2 - 0.355,		0.4865,		15,
+				ev_width/2 - 0.355,		-0.4865,	15,
+				ev_width/2 + 0.060,		-0.4865,	15,
+				ev_width/2 + 0.060,		-0.6325,	15
+
+			prism_	nsp/3,	_elev_baseThk,	get(nsp)
+
+			!	Elevator Room
+			_elevHgt = 2.420
+
+				!	Span Length : 5.4m
+				if	iSpanLength = SPAN_LENGTH_54	then
+					for	i = 1	to	2
+						mulx	-2*i + 3
+							addx	-(ev_width/2 - 0.380)
+								!	Column/Net
+								for	j = 1	to	2
+									muly	-2*j + 3
+										addy	0.503
+											!	Column
+											put	-0.025,	-0.025,	15,
+												-0.025,	0.025,	15,
+												0.025,	0.025,	15,
+												0.025,	-0.025,	15
+
+											prism_	nsp/3,	_elevHgt,	get(nsp)
+
+											!	Net - F/B
+											addx	0.025
+												call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.8825,
+																						netHgt = _elevHgt,
+																						offsetX = 0.130,
+																						offsetY = 0.075
+											del 1
+										del 1
+									del 1
+								next	J
+
+								!	Net - Side
+								addy	-0.478
+									rotz	90
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.956,
+																				netHgt = _elevHgt,
+																				offsetX = 0.130,
+																				offsetY = 0.075
+									del 1
+								del 1
+
+								!	Net - Top
+								add	0.025,	-0.478,	_elevHgt + 0.025
+									rotx	-90
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.8825,
+																				netHgt = 0.956,
+																				offsetX = 0.130,
+																				offsetY = 0.075
+									del 1
+								del 1
+
+								!	Top Beam
+								addz	_elevHgt
+									put	-0.025,	-0.478,	15,
+										-0.025,	0.478,	15,
+										0.025,	0.478,	15,
+										0.025,	-0.478,	15
+
+									prism_	nsp/3,	0.050,	get(nsp)
+								del 1
+							del 1
+							addx	-(ev_width/2 - 1.3130)
+								!	Column
+								for	j = 1	to	2
+									muly	-2*j + 3
+										addy	0.503
+											put	-0.025,	-0.025,	15,
+												-0.025,	0.025,	15,
+												0.025,	0.025,	15,
+												0.025,	-0.025,	15
+
+											prism_	nsp/3,	_elevHgt,	get(nsp)
+										del 1
+									del 1
+								next	J
+
+								!	Top Beam
+								addz	_elevHgt
+									put	-0.025,	-0.478,	15,
+										-0.025,	0.478,	15,
+										0.025,	0.478,	15,
+										0.025,	-0.478,	15
+
+									prism_	nsp/3,	0.050,	get(nsp)
+								del 1
+							del 1
+						del 1
+					next	i
+				endif
+
+				!	Span Length : 3.6m
+				if	iSpanLength = SPAN_LENGTH_36	then
+					for	i = 1	to	2
+						mulx	-2*i + 3
+							addx	-(ev_width/2 - 0.380)
+								!	Column/Net
+								for	j = 1	to	2
+									muly	-2*j + 3
+										addy	0.503
+											!	Column
+											put	-0.025,	-0.025,	15,
+												-0.025,	0.025,	15,
+												0.025,	0.025,	15,
+												0.025,	-0.025,	15
+
+											prism_	nsp/3,	_elevHgt,	get(nsp)
+
+											!	Net - F/B
+											if	i = 1	then
+												addx	0.025
+													call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.8825,
+																							netHgt = _elevHgt,
+																							offsetX = 0.130,
+																							offsetY = 0.075
+												del 1
+											endif
+										del 1
+									del 1
+								next	J
+
+								!	Net - Side
+								addy	-0.478
+									rotz	90
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.956,
+																				netHgt = _elevHgt,
+																				offsetX = 0.130,
+																				offsetY = 0.075
+									del 1
+								del 1
+
+								!	Net - Top
+								add	0.025,	-0.478,	_elevHgt + 0.025
+									rotx	-90
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.8825,
+																				netHgt = 0.956,
+																				offsetX = 0.130,
+																				offsetY = 0.075
+									del 1
+								del 1
+
+								!	Top Beam
+								addz	_elevHgt
+									put	-0.025,	-0.478,	15,
+										-0.025,	0.478,	15,
+										0.025,	0.478,	15,
+										0.025,	-0.478,	15
+
+									prism_	nsp/3,	0.050,	get(nsp)
+								del 1
+							del 1
+							addx	-(ev_width/2 - 1.3130)
+								!	Column
+								if	i = 1	then
+									for	j = 1	to	2
+										muly	-2*j + 3
+											addy	0.503
+												put	-0.025,	-0.025,	15,
+													-0.025,	0.025,	15,
+													0.025,	0.025,	15,
+													0.025,	-0.025,	15
+
+												prism_	nsp/3,	_elevHgt,	get(nsp)
+											del 1
+										del 1
+									next	j
+								endif
+
+								!	Top Beam
+								addz	_elevHgt
+									put	-0.025,	-0.478,	15,
+										-0.025,	0.478,	15,
+										0.025,	0.478,	15,
+										0.025,	-0.478,	15
+
+									prism_	nsp/3,	0.050,	get(nsp)
+								del 1
+							del 1
+						del 1
+					next	i
+				endif
+
+			!	Elevator Door
+				!	Span Length : 5.4m
+				if	iSpanLength = SPAN_LENGTH_54	then
+					_elev_doorHgt = 1.643
+
+					for	i = 1	to	2
+						muly	-2*i + 3
+							addy	0.6075
+								!	Parameter
+								_doorWdt = (ev_width/2 - 1.413) + (ev_width/2 - 1.413)
+
+								!	Column
+								addx	-(ev_width/2 - 1.413)
+									cylind	_elevHgt,	0.021
+								del 1
+
+								cylind	_elevHgt,	0.021
+
+								addx	ev_width/2 - 1.4130
+									cylind	_elevHgt,	0.021
+								del 1
+
+								!	Net
+								addx	-(ev_width/2 - 1.413 - 0.021)
+									call	"HM_mc_EVnet.gsm"	parameters	netWdt = (_doorWdt/2 - 0.021*2),
+																			netHgt = _elev_doorHgt,
+																			offsetX = 0.280,
+																			offsetY = 0.500
+								del 1
+
+								addx	0.021
+									call	"HM_mc_EVnet.gsm"	parameters	netWdt = (_doorWdt/2 - 0.021*2),
+																			netHgt = _elev_doorHgt,
+																			offsetX = 0.280,
+																			offsetY = 0.500
+								del 1
+							del 1
+						del 1
+					next	i
+				endif
+
+				!	Span Length : 3.6m
+				if	iSpanLength = SPAN_LENGTH_36	then
+					_elev_doorHgt = 1.800
+
+					for	i = 1	to	2
+						muly	-2*i + 3
+							addy	0.6075
+								!	Parameter
+								_doorWdt = (ev_width/2 - 1.313) + (ev_width/2 - 0.175)
+
+								!	Column
+								addx	-(ev_width/2 - 1.313)
+									cylind	_elevHgt,	0.021
+								del 1
+
+								addx	-(ev_width/2 - 1.313) + _doorWdt/2
+									cylind	_elevHgt,	0.021
+								del 1
+
+								addx	ev_width/2 - 0.175
+									cylind	_elevHgt,	0.021
+								del 1
+
+								!	Net
+								addx	-(ev_width/2 - 1.313 - 0.021)
+									call	"HM_mc_EVnet.gsm"	parameters	netWdt = (_doorWdt/2 - 0.021*2),
+																			netHgt = _elev_doorHgt,
+																			offsetX = 0.280,
+																			offsetY = 0.500
+								del 1
+
+								addx	-(ev_width/2 - 1.313) + _doorWdt/2 + 0.021
+									call	"HM_mc_EVnet.gsm"	parameters	netWdt = (_doorWdt/2 - 0.021*2),
+																			netHgt = _elev_doorHgt,
+																			offsetX = 0.280,
+																			offsetY = 0.500
+								del 1
+							del 1
+						del 1
+					next	i
+				endif
+
+			!	Elevator Top
+			_elev_topThk = 0.100
+
+			addz	_elevHgt
+				for	i = 1	to	2
+					muly	-2*i + 3
+						put	-(ev_width/2 - 0.034),	0.4780,	15,
+							-(ev_width/2 - 0.034),	0.6325,	15,
+							ev_width/2 - 0.034,		0.6325,	15,
+							ev_width/2 - 0.034,		0.4780,	15
+
+						prism_	nsp/3,	_elev_topThk,	get(nsp)
+					del 1
+				next	i
+			del 1
+
+			!	Machine
+		del 1
+endif
+
+
+
+end
+
+!-----------------------------------------------------------------------------------------------
+"hsp_MastHeight":
+!-----------------------------------------------------------------------------------------------
+	hotspot	0,	0,	0,		unID,	hspHgt,	1+128,	nMast	:	unID = unID + 1
+	hotspot	0,	0,	-1,		unID,	hspHgt,	3,		nMast	:	unID = unID + 1
+	hotspot	0,	0,	hspHgt,	unID,	hspHgt,	2,		nMast	:	unID = unID + 1
+
+return

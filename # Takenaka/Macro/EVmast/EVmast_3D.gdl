@@ -1,0 +1,321 @@
+!===============================================================================================
+!	Elevator Mast
+!===============================================================================================
+
+!-----------------------------------------------------------------------------------------------
+!	Common Settings
+!-----------------------------------------------------------------------------------------------
+material	matMast
+resol	8
+
+! hotspot	0,	0,	0,	unID	:	unID = unID + 1
+
+!-----------------------------------------------------------------------------------------------
+!	Mast - F Type
+!-----------------------------------------------------------------------------------------------
+if	iMastType = MAST_F_TYPE	then
+
+	!	Parameters
+	!-----------------------------------------------------------------------------------------------
+	_radMast = radMast
+
+	_ratioHgt_B = 117/1600
+	_ratioHgt_T = (1600 - 117)/1600
+	_ratioRadH = 136/243
+	_ratioRadV = 65/243
+
+	group	"gBraceV_Base_F"
+		resol	8
+		sphere	radMast*_ratioRadV
+	endgroup
+
+	!	Shape
+	!-----------------------------------------------------------------------------------------------
+	for	n = 1	to	nMast
+		addz	mastHgt*(n- 1)
+
+			!	Column
+			!-----------------------------------------------------------------------------------------------
+				for	i = 1	to	2
+					for	j = 1	to	2
+						mulx	-2*i + 3
+							muly	-2*j + 3
+
+								addx	mastWdt/2
+									addy	mastDpt/2
+										if	GLOB_FEEDBACK_MODE	then
+											lin_	0,	0,	0,	0,	0,	mastHgt
+										else
+											cylind	mastHgt,	_radMast
+										endif
+									del 1
+								del 1
+
+							del 1
+						del 1
+					next	j
+				next	i
+
+			!	Horizontal Bracing
+			!-----------------------------------------------------------------------------------------------
+				addz	mastHgt*_ratioHgt_B
+					gosub	"draw_BraceH_F"
+				del 1
+				addz	mastHgt/2
+					gosub	"draw_BraceH_F"
+				del 1
+				addz	mastHgt*_ratioHgt_T
+					gosub	"draw_BraceH_F"
+				del 1
+
+			!	Vertical Bracing
+			!-----------------------------------------------------------------------------------------------
+				for	i = 1	to	2
+					mulx	-2*i + 3
+						muly	-2*i + 3
+							addx	mastWdt/2
+								add	0,	-mastDpt/2,	mastHgt*_ratioHgt_B
+									if	GLOB_FEEDBACK_MODE	then
+										lin_	0,	0,	0,	0,	mastDpt,	(mastHgt/2 - mastHgt*_ratioHgt_B)
+									else
+										placegroup	sweepgroup{3}("gBraceV_Base_F",	0,	mastDpt,	(mastHgt/2 - mastHgt*_ratioHgt_B),	0,	0,	0,	0)
+									endif
+								del 1
+								add	0,	mastDpt/2,	mastHgt/2
+									if	GLOB_FEEDBACK_MODE	then
+										lin_	0,	0,	0,	0,	-mastDpt,	(mastHgt*_ratioHgt_T - mastHgt/2)
+									else
+										placegroup	sweepgroup{3}("gBraceV_Base_F",	0,	-mastDpt,	(mastHgt*_ratioHgt_T - mastHgt/2),	0,	0,	0,	0)
+									endif
+								del 1
+							del 1
+						del 1
+					del 1
+				next	i
+
+				for	i = 1	to	2
+					muly	-2*i + 3
+						mulx	-2*i + 3
+							addy	mastDpt/2
+								add	mastWdt/2,	0,	mastHgt*_ratioHgt_B
+									if	GLOB_FEEDBACK_MODE	then
+										lin_	0,	0,	0,	-mastWdt,	0,	(mastHgt/2 - mastHgt*_ratioHgt_B)
+									else
+										placegroup	sweepgroup{3}("gBraceV_Base_F",	-mastWdt,	0,	(mastHgt/2 - mastHgt*_ratioHgt_B),	0,	0,	0,	0)
+									endif
+								del 1
+								add	-mastWdt/2,	0,	mastHgt/2
+									if	GLOB_FEEDBACK_MODE	then
+										lin_	0,	0,	0,	mastWdt,	0,	(mastHgt*_ratioHgt_T - mastHgt/2)
+									else
+										placegroup	sweepgroup{3}("gBraceV_Base_F",	mastWdt,	0,	(mastHgt*_ratioHgt_T - mastHgt/2),	0,	0,	0,	0)
+									endif
+								del 1
+							del 1
+						del 1
+					del 1
+				next	i
+
+			!	Rail
+			!-----------------------------------------------------------------------------------------------
+				if	not(n = nMast)	then
+					_mastHgt = mastHgt
+				else
+					_mastHgt = mastHgt/2
+					if	bFullLth_Top	then	_mastHgt = mastHgt
+				endif
+
+				gosub	"draw_Rail"
+		del 1
+	next	n
+
+endif
+
+!	Mast - B Type
+!-----------------------------------------------------------------------------------------------
+if	iMastType = MAST_B_TYPE	then
+
+	!	Parameters
+	!-----------------------------------------------------------------------------------------------
+	_radMast = radMast
+
+	_ratio_zPos1 = 35/1600
+	_ratio_zPos2 = 370/1600
+	_ratio_zPos3 = 762/1600
+	_ratio_zPos4 = 1153/1600
+	_ratio_zPos5 = 1287/1600
+	_ratio_zPos6 = 1565/1600
+	_ratio_Hgt = 50/1600
+
+	_ratio_Thk = 90/243
+
+	!	Shape
+	!-----------------------------------------------------------------------------------------------
+	for	n = 1	to	nMast
+		addz	mastHgt*(n- 1)
+
+			!	Column
+			!-----------------------------------------------------------------------------------------------
+				for	i = 1	to	2
+					muly	-2*i + 3
+						addy	mastDpt/2
+							if	GLOB_FEEDBACK_MODE	then
+								lin_	0,	0,	0,	0,	0,	mastHgt
+							else
+								cylind	mastHgt,	_radMast
+							endif
+						del 1
+					del 1
+				next	i
+
+			!	Horizontal Bracing
+			!-----------------------------------------------------------------------------------------------
+				addz	mastHgt*_ratio_zPos1
+					gosub	"draw_BraceH_H"
+				del 1
+				addz	mastHgt*_ratio_zPos2
+					gosub	"draw_BraceH_H"
+				del 1
+				addz	mastHgt*_ratio_zPos3
+					gosub	"draw_BraceH_H"
+				del 1
+				addz	mastHgt*_ratio_zPos4
+					gosub	"draw_BraceH_H"
+				del 1
+				addz	mastHgt*_ratio_zPos5
+					gosub	"draw_BraceH_H"
+				del 1
+				addz	mastHgt*_ratio_zPos6
+					gosub	"draw_BraceH_H"
+				del 1
+
+			!	Vertical Bracing
+			!-----------------------------------------------------------------------------------------------
+
+
+			!	Rail
+			!-----------------------------------------------------------------------------------------------
+				if	not(n = nMast)	then
+					_mastHgt = mastHgt
+				else
+					_mastHgt = mastHgt/2
+					if	bFullLth_Top	then	_mastHgt = mastHgt
+				endif
+
+				gosub	"draw_Rail"
+
+		del 1
+	next	n
+
+endif
+
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"draw_BraceH_F":
+!-----------------------------------------------------------------------------------------------
+	for	i = 1	to	2
+		mulx	-2*i + 3
+			addx	mastWdt/2
+				rotx	90
+					addz	-mastDpt/2
+						if	GLOB_FEEDBACK_MODE	then
+							lin_	0,	0,	0,	0,	0,	mastDpt
+						else
+							cylind	mastDpt,	radMast*_ratioRadH
+						endif
+					del 1
+				del 1
+			del 1
+		del 1
+	next	i
+
+	for	i = 1	to	2
+		muly	-2*i + 3
+			addy	mastDpt/2 - mastDpt/10
+				roty	90
+					addz	-mastWdt/2
+						if	GLOB_FEEDBACK_MODE	then
+							lin_	0,	0,	0,	0,	0,	mastWdt
+						else
+							cylind	mastWdt,	radMast*_ratioRadH
+						endif
+					del 1
+				del 1
+			del 1
+		del 1
+	next	i
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"draw_BraceH_H":
+!-----------------------------------------------------------------------------------------------
+	if	GLOB_FEEDBACK_MODE	then
+		lin_	0,	-mastDpt/2,	0,	0,	mastDpt/2,	0
+	else
+		addz	-(mastHgt*_ratio_Hgt)/2
+			put	-(radMast*_ratio_Thk)/2,	-mastDpt/2,	15,
+				-(radMast*_ratio_Thk)/2,	mastDpt/2,	15,
+				(radMast*_ratio_Thk)/2,		mastDpt/2,	15,
+				(radMast*_ratio_Thk)/2,		-mastDpt/2,	15
+
+			prism_	nsp/3,	mastHgt*_ratio_Hgt,	get(nsp)
+		del 1
+	endif
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"draw_Rail":
+!-----------------------------------------------------------------------------------------------
+
+	addx	xPosRail
+
+		if	iRailType = RAIL_H_TYPE	then
+			for	i = 1	to	2
+				mulx	-2*i + 3
+					add	railWdt/2,	-railDpt/2,	0
+						put	0,				0,			15,
+							-railSideThk,	0,			15,
+							-railSideThk,	railDpt,	15,
+							0,				railDpt,	15
+
+						prism_	nsp/3,	_mastHgt,	get(nsp)
+					del 1
+				del 1
+			next	i
+			
+			put	-railWdt/2 + railSideThk,	-railCenterThk/2,	15,
+				-railWdt/2 + railSideThk,	railCenterThk/2,	15,
+				railWdt/2 - railSideThk,	railCenterThk/2,	15,
+				railWdt/2 - railSideThk,	-railCenterThk/2,	15
+
+			prism_	nsp/3,	_mastHgt,	get(nsp)
+		endif
+
+		if	iRailType = RAIL_C_TYPE	then
+			for	i = 1	to	2
+				muly	-2*i + 3
+					addy	yPosRail
+						put	-railWdt/2,					0,				15,
+							-railWdt/2,					railDpt,		15,
+							-railWdt/2 + railSideThk,	railDpt,		15,
+							-railWdt/2 + railSideThk,	railCenterThk,	15,
+							railWdt/2 - railSideThk,	railCenterThk,	15,
+							railWdt/2 - railSideThk,	railDpt,		15,
+							railWdt/2,					railDpt,		15,
+							railWdt/2,					0,				15
+
+						prism_	nsp/3,	_mastHgt,	get(nsp)
+					del 1
+				del 1
+			next	i
+		endif
+
+	del 1
+
+return

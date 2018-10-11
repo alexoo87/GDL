@@ -42,14 +42,14 @@ MODE_HEAVY_BOOM = 1
 MODE_MAIN_BOOM = 2
 MODE_LONG_BOOM = 3
 MODE_LUFFING_JIB = 4
-MODE_LIGHT_BOOM = 5
+MODE_TOWER_BOOM = 5
 
 dim	_stCraneMode[]
 	_stCraneMode[1] = "ヘビーブーム"
 	_stCraneMode[2] = "メインブーム"
 	_stCraneMode[3] = "ロングブーム"
 	_stCraneMode[4] = "ラッフィングジブ"
-	_stCraneMode[5] = "ライトブーム"
+	_stCraneMode[5] = "タワー"
 
 !	Boom Type Index
 _IDX_CRANE_TYPE = 1000
@@ -77,12 +77,13 @@ next	i
 ! _BOOM_TOP_TYPE2 = _IDX_BOOM_TOP_TYPE + 2
 
 !	DB
-dim	_boomLength[],	_jibLength[]
+dim	_boomLength[],	_boomLength_2nd[],	_jibLength[]
 _bTopPart = 0
 _bTaperPart_SP = 0
 _bTaperPart_EP = 0
 _nInsertPart_1st = 0
 _nInsertPart_2nd = 0
+_IP1_bBoomTop = 0
 _TP2_bBoomTop = 0
 
 _bDrawJib = 0
@@ -195,29 +196,29 @@ if	_iCraneType = CRAW_SL4500J	then
 				if	HM_BoomLen = "78.0m"	then
 					_nInsertPart_2nd = 1
 
-					_boomLength[1] = 6.000
+					_boomLength_2nd[1] = 6.000
 				endif
 				!	84.0m
 				if	HM_BoomLen = "84.0m"	then
 					_nInsertPart_2nd = 2
 
-					_boomLength[1] = 6.000
-					_boomLength[2] = 6.000
+					_boomLength_2nd[1] = 6.000
+					_boomLength_2nd[2] = 6.000
 				endif
 				!	90.0m
 				if	HM_BoomLen = "90.0m"	then
 					_nInsertPart_2nd = 2
 
-					_boomLength[1] = 9.000
-					_boomLength[2] = 9.000
+					_boomLength_2nd[1] = 9.000
+					_boomLength_2nd[2] = 9.000
 				endif
 				!	96.0m
 				if	HM_BoomLen = "96.0m"	then
 					_nInsertPart_2nd = 3
 
-					_boomLength[1] = 6.000
-					_boomLength[2] = 9.000
-					_boomLength[3] = 9.000
+					_boomLength_2nd[1] = 6.000
+					_boomLength_2nd[2] = 9.000
+					_boomLength_2nd[3] = 9.000
 				endif
 
 			!	Top Part
@@ -552,43 +553,43 @@ if	_iCraneType = CRAW_SL6000J	then
 				if	HM_BoomLen = "90.0m"	then
 					_nInsertPart_2nd = 2
 
-					_boomLength[1] = 5.000
-					_boomLength[2] = 6.000
+					_boomLength_2nd[1] = 5.000
+					_boomLength_2nd[2] = 6.000
 				endif
 				!	96.0m/102.0m
 				if	HM_BoomLen = "96.0m" | HM_BoomLen = "102.0m"	then
 					_nInsertPart_2nd = 3
 
-					_boomLength[1] = 5.000
-					_boomLength[2] = 3.000
-					_boomLength[3] = 9.000
+					_boomLength_2nd[1] = 5.000
+					_boomLength_2nd[2] = 3.000
+					_boomLength_2nd[3] = 9.000
 				endif
 				!	108.0m/114.0m
 				if	HM_BoomLen = "108.0m" | HM_BoomLen = "114.0m"	then
 					_nInsertPart_2nd = 3
 
-					_boomLength[1] = 5.000
-					_boomLength[2] = 9.000
-					_boomLength[3] = 9.000
+					_boomLength_2nd[1] = 5.000
+					_boomLength_2nd[2] = 9.000
+					_boomLength_2nd[3] = 9.000
 				endif
 				!	120.0m
 				if	HM_BoomLen = "120.0m"	then
 					_nInsertPart_2nd = 4
 
-					_boomLength[1] = 5.000
-					_boomLength[2] = 6.000
-					_boomLength[3] = 9.000
-					_boomLength[4] = 9.000
+					_boomLength_2nd[1] = 5.000
+					_boomLength_2nd[2] = 6.000
+					_boomLength_2nd[3] = 9.000
+					_boomLength_2nd[4] = 9.000
 				endif
 				!	126.0m
 				if	HM_BoomLen = "126.0m"	then
 					_nInsertPart_2nd = 5
 
-					_boomLength[1] = 5.000
-					_boomLength[2] = 3.000
-					_boomLength[3] = 9.000
-					_boomLength[4] = 9.000
-					_boomLength[5] = 9.000
+					_boomLength_2nd[1] = 5.000
+					_boomLength_2nd[2] = 3.000
+					_boomLength_2nd[3] = 9.000
+					_boomLength_2nd[4] = 9.000
+					_boomLength_2nd[5] = 9.000
 				endif
 
 			!	Top Part
@@ -787,7 +788,7 @@ if	_iCraneType = CRAW_SL6000J	then
 		_jrad = 0.0603
 
 			!	Base Part
-			_jBP_Lth = 9.000
+			_jBP_Lth = 10.000
 			_jBP_Wdt_SP = 2.350
 			_jBP_Wdt_EP = 2.350
 			_jBP_Dpt_SP = 0.440
@@ -1113,7 +1114,7 @@ if	_iCraneType = CRAW_SCX900	then
 		!	Jib
 		!-----------------------------------------------------------------------------------------------
 		_bDrawJib = 1
-		_xPosJib = 0.450
+		_xPosJib = -0.090
 		_zPosJib = 0
 
 		_jrad = 0.0254
@@ -1130,7 +1131,7 @@ if	_iCraneType = CRAW_SCX900	then
 			_jBP_bAnchor = 1
 
 			!	Insert Part_1st
-			_jIP1_Wdt_SP = 0.750
+			_jIP1_Wdt_SP = 0.940
 			_jIP1_Wdt_EP = _jIP1_Wdt_SP
 			_jIP1_Dpt_SP = 0.750
 			_jIP1_Dpt_EP = _jIP1_Dpt_SP
@@ -1163,7 +1164,7 @@ if	_iCraneType = CRAW_SCX900	then
 			_jbTopPart = 1
 
 			_jTP_Lth = 5.316
-			_jTP_Wdt_SP = 0.750
+			_jTP_Wdt_SP = 0.940
 			_jTP_Wdt_EP = 0.157
 			_jTP_Dpt_SP = 0.750
 			_jTP_Dpt_EP = 0.165
@@ -1504,7 +1505,7 @@ if	_iCraneType = CRAW_SCX1200	then
 			_jBP_bAnchor = 1
 
 			!	Insert Part_1st
-			_jIP1_Wdt_SP = 0.750
+			_jIP1_Wdt_SP = 0.940
 			_jIP1_Wdt_EP = _jIP1_Wdt_SP
 			_jIP1_Dpt_SP = 0.750
 			_jIP1_Dpt_EP = _jIP1_Dpt_SP
@@ -1537,7 +1538,7 @@ if	_iCraneType = CRAW_SCX1200	then
 			_jbTopPart = 1
 
 			_jTP_Lth = 5.316
-			_jTP_Wdt_SP = 0.750
+			_jTP_Wdt_SP = 0.940
 			_jTP_Wdt_EP = 0.157
 			_jTP_Dpt_SP = 0.750
 			_jTP_Dpt_EP = 0.165
@@ -1711,17 +1712,17 @@ if	_iCraneType = CRAW_SCX2000	then
 	if	_iBoomType = _TYPE_MAIN_BOOM | _iBoomType = _TYPE_MAIN_BOOM_JIB	then
 		!	Boom
 		!-----------------------------------------------------------------------------------------------
-		_rad = 0.0635
+		_rad = 0.0639
 
 			!	Base Part
-			_BP_Lth = 7.600
-			_BP_Wdt_SP = 1.350
+			_BP_Lth = 8.500
+			_BP_Wdt_SP = 2.350
 			_BP_Wdt_EP = 2.100
-			_BP_Dpt_SP = 0.225
+			_BP_Dpt_SP = 0.235
 			_BP_Dpt_EP = 2.100
-			_BP_zOffset_SP = 1.090
-			_BP_zTruss_SP = 1.365
-			_BP_zTruss_EP = 0.250
+			_BP_zOffset_SP = 1.185
+			_BP_zTruss_SP = 1.235
+			_BP_zTruss_EP = 0.255
 			_BP_bAnchor = 1
 
 			!	Taper Part_SP
@@ -1732,183 +1733,113 @@ if	_iCraneType = CRAW_SCX2000	then
 			_IP1_Wdt_EP = _IP1_Wdt_SP
 			_IP1_Dpt_SP = 2.100
 			_IP1_Dpt_EP = _IP1_Dpt_SP
-			_IP1_zTruss_SP = 0.240
-			_IP1_zTruss_EP = 0.240
+			_IP1_zTruss_SP = 0.225
+			_IP1_zTruss_EP = 0.225
 
-				!	18.30m/21.35m/24.40m
-				if	HM_BoomLen = "18.30m" | HM_BoomLen = "21.35m" | HM_BoomLen = "24.40m"	then
+				!	19.0m/22.0m/25.0m
+				if	HM_BoomLen = "19.0m" | HM_BoomLen = "22.0m" | HM_BoomLen = "25.0m"	then
 					_nInsertPart_1st = 1
 
-					if	HM_BoomLen = "18.30m"	then	_boomLength[1] = 3.050
-					if	HM_BoomLen = "21.35m"	then	_boomLength[1] = 6.100
-					if	HM_BoomLen = "24.40m"	then	_boomLength[1] = 9.150
+					if	HM_BoomLen = "19.0m"	then	_boomLength[1] = 3.000
+					if	HM_BoomLen = "22.0m"	then	_boomLength[1] = 6.000
+					if	HM_BoomLen = "25.0m"	then	_boomLength[1] = 9.000
 				endif
-				!	27.45m/30.50m/33.50m
-				if	HM_BoomLen = "27.45m" | HM_BoomLen = "30.50m" | HM_BoomLen = "33.50m"	then
+				!	28.0m/31.0m/34.0m
+				if	HM_BoomLen = "28.0m" | HM_BoomLen = "31.0m" | HM_BoomLen = "34.0m"	then
 					_nInsertPart_1st = 2
 
-					if	HM_BoomLen = "27.45m"	then	_boomLength[1] = 3.050
-					if	HM_BoomLen = "30.50m"	then	_boomLength[1] = 6.100
-					if	HM_BoomLen = "33.50m"	then	_boomLength[1] = 9.150
-					_boomLength[2] = 9.150
+					if	HM_BoomLen = "28.0m"	then	_boomLength[1] = 3.000
+					if	HM_BoomLen = "31.0m"	then	_boomLength[1] = 6.000
+					if	HM_BoomLen = "34.0m"	then	_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
 				endif
-				!	36.55m/39.60m/42.65m
-				if	HM_BoomLen = "36.55m" | HM_BoomLen = "39.60m" | HM_BoomLen = "42.65m"	then
+				!	37.0m/40.0m/43.0m
+				if	HM_BoomLen = "37.0m" | HM_BoomLen = "40.0m" | HM_BoomLen = "43.0m"	then
 					_nInsertPart_1st = 3
 
-					if	HM_BoomLen = "36.55m"	then	_boomLength[1] = 3.050
-					if	HM_BoomLen = "39.60m"	then	_boomLength[1] = 6.100
-					if	HM_BoomLen = "42.65m"	then	_boomLength[1] = 9.150
-					_boomLength[2] = 9.150
-					_boomLength[3] = 9.150
+					if	HM_BoomLen = "37.0m"	then	_boomLength[1] = 3.000
+					if	HM_BoomLen = "40.0m"	then	_boomLength[1] = 6.000
+					if	HM_BoomLen = "43.0m"	then	_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					_boomLength[3] = 9.000
 				endif
-				!	45.70m/48.75m/51.80m
-				if	HM_BoomLen = "45.70m" | HM_BoomLen = "48.75m" | HM_BoomLen = "51.80m"	then
+				!	46.0m/49.0m/52.0m
+				if	HM_BoomLen = "46.0m" | HM_BoomLen = "49.0m" | HM_BoomLen = "52.0m"	then
 					_nInsertPart_1st = 4
 
-					if	HM_BoomLen = "45.70m"	then	_boomLength[1] = 3.050
-					if	HM_BoomLen = "48.75m"	then	_boomLength[1] = 6.100
-					if	HM_BoomLen = "51.80m"	then	_boomLength[1] = 9.150
-					_boomLength[2] = 9.150
-					_boomLength[3] = 9.150
-					_boomLength[4] = 9.150
+					if	HM_BoomLen = "46.0m"	then	_boomLength[1] = 3.000
+					if	HM_BoomLen = "49.0m"	then	_boomLength[1] = 6.000
+					if	HM_BoomLen = "52.0m"	then	_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					_boomLength[3] = 9.000
+					_boomLength[4] = 9.000
 				endif
-				!	54.85m/57.90m/60.95m
-				if	HM_BoomLen = "54.85m" | HM_BoomLen = "57.90m" | HM_BoomLen = "60.95m"	then
+				!	55.0m/58.0m/61.0m
+				if	HM_BoomLen = "55.0m" | HM_BoomLen = "58.0m" | HM_BoomLen = "61.0m"	then
 					_nInsertPart_1st = 5
 
-					if	HM_BoomLen = "54.85m"	then	_boomLength[1] = 3.050
-					if	HM_BoomLen = "57.90m"	then	_boomLength[1] = 6.100
-					if	HM_BoomLen = "60.95m"	then	_boomLength[1] = 9.150
-					_boomLength[2] = 9.150
-					_boomLength[3] = 9.150
-					_boomLength[4] = 9.150
-					_boomLength[5] = 9.150
+					if	HM_BoomLen = "55.0m"	then	_boomLength[1] = 3.000
+					if	HM_BoomLen = "58.0m"	then	_boomLength[1] = 6.000
+					if	HM_BoomLen = "61.0m"	then	_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					_boomLength[3] = 9.000
+					_boomLength[4] = 9.000
+					_boomLength[5] = 9.000
 				endif
-				!	64.00m/67.05m
-				if	HM_BoomLen = "64.00m" | HM_BoomLen = "67.05m"	then
+				!	64.0m/67.0m/70.0m
+				if	HM_BoomLen = "64.0m" | HM_BoomLen = "67.0m" | HM_BoomLen = "70.0m"	then
 					_nInsertPart_1st = 6
 
-					if	HM_BoomLen = "64.00m"	then	_boomLength[1] = 3.050
-					if	HM_BoomLen = "67.05m"	then	_boomLength[1] = 6.100
-					_boomLength[2] = 9.150
-					_boomLength[3] = 9.150
-					_boomLength[4] = 9.150
-					_boomLength[5] = 9.150
-					_boomLength[6] = 9.150
+					if	HM_BoomLen = "64.0m"	then	_boomLength[1] = 3.000
+					if	HM_BoomLen = "67.0m"	then	_boomLength[1] = 6.000
+					if	HM_BoomLen = "70.0m"	then	_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					_boomLength[3] = 9.000
+					_boomLength[4] = 9.000
+					_boomLength[5] = 9.000
+					_boomLength[6] = 9.000
 				endif
-				!	70.10m
-				if	HM_BoomLen = "70.10m"	then
+				!	73.0m/76.0m
+				if	HM_BoomLen = "73.0m" | HM_BoomLen = "76.0m"	then
 					_nInsertPart_1st = 7
 
-					_boomLength[1] = 3.050
-					_boomLength[2] = 6.100
-					_boomLength[3] = 9.150
-					_boomLength[4] = 9.150
-					_boomLength[5] = 9.150
-					_boomLength[6] = 9.150
-					_boomLength[7] = 9.150
+					if	HM_BoomLen = "73.0m"	then	_boomLength[1] = 3.000
+					if	HM_BoomLen = "76.0m"	then	_boomLength[1] = 6.000
+					_boomLength[2] = 9.000
+					_boomLength[3] = 9.000
+					_boomLength[4] = 9.000
+					_boomLength[5] = 9.000
+					_boomLength[6] = 9.000
+					_boomLength[7] = 9.000
 				endif
-				!	73.15m
-				if	HM_BoomLen = "73.15m"	then
+				!	79.0m
+				if	HM_BoomLen = "79.0m"	then
 					_nInsertPart_1st = 8
 
-					_boomLength[1] = 3.050
-					_boomLength[2] = 3.050
-					_boomLength[3] = 6.100
-					_boomLength[4] = 9.150
-					_boomLength[5] = 9.150
-					_boomLength[6] = 9.150
-					_boomLength[7] = 9.150
-					_boomLength[8] = 9.150
-				endif
-				!	76.20m/79.25m/82.30m/85.35m/88.40m
-				if	HM_BoomLen = "76.20m" | HM_BoomLen = "79.25m" | HM_BoomLen = "82.30m" | HM_BoomLen = "85.35m" | HM_BoomLen = "88.40m"	then
-					_nInsertPart_1st = 7
-
-					_boomLength[1] = 3.050
-					_boomLength[2] = 3.050
-					_boomLength[3] = 9.150
-					_boomLength[4] = 9.150
-					_boomLength[5] = 9.150
-					_boomLength[6] = 9.150
-					_boomLength[7] = 9.150
+					_boomLength[1] = 3.000
+					_boomLength[2] = 6.000
+					_boomLength[3] = 9.000
+					_boomLength[4] = 9.000
+					_boomLength[5] = 9.000
+					_boomLength[6] = 9.000
+					_boomLength[7] = 9.000
+					_boomLength[8] = 9.000
 				endif
 
-			!	Taper On & Top Part Length 9m
-			if	HM_BoomLen = "76.20m" | HM_BoomLen = "79.25m" | HM_BoomLen = "82.30m" | HM_BoomLen = "85.35m" | HM_BoomLen = "88.40m"	then
-				!	Taper Part_EP
-				_bTaperPart_EP = 1
+			!	Taper Part_EP
+			_bTaperPart_EP = 0
 
-				_TP2_Lth = 4.550
-				_TP2_Wdt_SP = 2.100
-				_TP2_Wdt_EP = 1.550
-				_TP2_Dpt_SP = 2.100
-				_TP2_Dpt_EP = 1.550
-				_TP2_zTruss_SP = 0.240
-				_TP2_zTruss_EP = 0.200
-
-				!	Insert Part_2nd
-				_IP2_Wdt_SP = 1.550
-				_IP2_Wdt_EP = _IP2_Wdt_SP
-				_IP2_Dpt_SP = 1.550
-				_IP2_Dpt_EP = _IP2_Dpt_SP
-				_IP2_zTruss_SP = 0.150
-				_IP2_zTruss_EP = 0.150
-
-					!	76.20m/79.25m/82.30m
-					if	HM_BoomLen = "76.20m" | HM_BoomLen = "79.25m" | HM_BoomLen = "82.30m"	then
-						_nInsertPart_2nd = 1
-
-						if	HM_BoomLen = "76.20m"	then	_boomLength[1] = 3.050
-						if	HM_BoomLen = "79.25m"	then	_boomLength[1] = 6.100
-						if	HM_BoomLen = "82.30m"	then	_boomLength[1] = 9.150
-					endif
-					!	85.35m
-					if	HM_BoomLen = "85.35m"	then
-						_nInsertPart_2nd = 2
-
-						_boomLength[1] = 3.050
-						_boomLength[2] = 9.150
-					endif
-					!	88.40m
-					if	HM_BoomLen = "88.40m"	then
-						_nInsertPart_2nd = 3
-
-						_boomLength[1] = 3.050
-						_boomLength[2] = 3.050
-						_boomLength[3] = 9.150
-					endif
-
-				!	Top Part
-				_bTopPart = 1
-				_TP_Lth = 9.535
-				_TP_Wdt_SP = 1.550
-				_TP_Wdt_EP = 0.516
-				_TP_Dpt_SP = 1.550
-				_TP_Dpt_EP = 0.258
-				_TP_zTruss_SP = 0.150
-				_TP_zTruss_EP = 2.200
-				_TP_bEndPanel = 1
-				_TP_pnlThk = 0.012
-
-			!	Taper Off & Top Part Length 7m
-			else
-				!	Taper Part_EP
-				_bTaperPart_EP = 0
-
-				!	Top Part
-				_bTopPart = 1
-				_TP_Lth = 8.020
-				_TP_Wdt_SP = 2.100
-				_TP_Wdt_EP = 0.630
-				_TP_Dpt_SP = 2.100
-				_TP_Dpt_EP = 0.450
-				_TP_zTruss_SP = 0.240
-				_TP_zTruss_EP = 2.950
-				_TP_bEndPanel = 1
-				_TP_pnlThk = 0.012
-			endif
+			!	Top Part
+			_bTopPart = 1
+			_TP_Lth = 7.900
+			_TP_Wdt_SP = 2.100
+			_TP_Wdt_EP = 0.688
+			_TP_Dpt_SP = 2.100
+			_TP_Dpt_EP = 0.5075
+			_TP_zTruss_SP = 0.240
+			_TP_zTruss_EP = 2.950
+			_TP_bEndPanel = 1
+			_TP_pnlThk = 0.050
 	endif
 
 	if	_iBoomType = _TYPE_MAIN_BOOM_JIB	then
@@ -1922,10 +1853,10 @@ if	_iCraneType = CRAW_SCX2000	then
 		_xPosJib = -0.090
 		_zPosJib = 0
 
-		_jrad = 0.03175
+		_jrad = 0.05715
 
 			!	Base Part
-			_jBP_Lth = 6.100
+			_jBP_Lth = 6.500
 			_jBP_Wdt_SP = 0.914
 			_jBP_Wdt_EP = 1.000
 			_jBP_Dpt_SP = 0.125
@@ -1943,41 +1874,41 @@ if	_iCraneType = CRAW_SCX2000	then
 			_jIP1_zTruss_SP = 0.140
 			_jIP1_zTruss_EP = 0.140
 
-				!	18.30m
-				if	HM_JibLen = "18.30m"	then
+				!	19.0m
+				if	HM_JibLen = "19.0m"	then
 					_jnInsertPart_1st = 1
 
-					_jibLength[1] = 6.100
+					_jibLength[1] = 6.000
 				endif
-				!	24.40m
-				if	HM_JibLen = "24.40m"	then
+				!	25.0m
+				if	HM_JibLen = "25.0m"	then
 					_jnInsertPart_1st = 2
 
-					_jibLength[1] = 6.100
-					_jibLength[2] = 6.100
+					_jibLength[1] = 6.000
+					_jibLength[2] = 6.000
 				endif
-				!	30.50m
-				if	HM_JibLen = "30.50m"	then
+				!	31.0m
+				if	HM_JibLen = "31.0m"	then
 					_jnInsertPart_1st = 3
 
-					_jibLength[1] = 6.100
-					_jibLength[2] = 6.100
-					_jibLength[3] = 6.100
+					_jibLength[1] = 6.000
+					_jibLength[2] = 6.000
+					_jibLength[3] = 6.000
 				endif
-				!	36.55m
-				if	HM_JibLen = "36.55m"	then
+				!	37.0m
+				if	HM_JibLen = "37.0m"	then
 					_jnInsertPart_1st = 4
 
-					_jibLength[1] = 6.100
-					_jibLength[2] = 6.100
-					_jibLength[3] = 6.100
-					_jibLength[4] = 6.100
+					_jibLength[1] = 6.000
+					_jibLength[2] = 6.000
+					_jibLength[3] = 6.000
+					_jibLength[4] = 6.000
 				endif
 
 			!	Top Part
 			_jbTopPart = 1
 
-			_jTP_Lth = 6.100 + 0.376
+			_jTP_Lth = 6.500 + 0.376
 			_jTP_Wdt_SP = 1.100
 			_jTP_Wdt_EP = 0.400
 			_jTP_Dpt_SP = 1.100
@@ -1991,17 +1922,17 @@ if	_iCraneType = CRAW_SCX2000	then
 	if	_iBoomType = _TYPE_TOWER_BOOM_JIB	then
 		!	Boom
 		!-----------------------------------------------------------------------------------------------
-		_rad = 0.0635
+		_rad = 0.0639
 
 			!	Base Part
-			_BP_Lth = 7.620
-			_BP_Wdt_SP = 1.350
+			_BP_Lth = 8.500
+			_BP_Wdt_SP = 2.350
 			_BP_Wdt_EP = 2.100
-			_BP_Dpt_SP = 0.225
+			_BP_Dpt_SP = 0.235
 			_BP_Dpt_EP = 2.100
-			_BP_zOffset_SP = 1.090
-			_BP_zTruss_SP = 1.350
-			_BP_zTruss_EP = 0.250
+			_BP_zOffset_SP = 1.185
+			_BP_zTruss_SP = 1.235
+			_BP_zTruss_EP = 0.255
 			_BP_bAnchor = 1
 
 			!	Taper Part_SP
@@ -2012,63 +1943,70 @@ if	_iCraneType = CRAW_SCX2000	then
 			_IP1_Wdt_EP = _IP1_Wdt_SP
 			_IP1_Dpt_SP = 2.100
 			_IP1_Dpt_EP = _IP1_Dpt_SP
-			_IP1_zTruss_SP = 0.240
-			_IP1_zTruss_EP = 0.240
+			_IP1_zTruss_SP = 0.225
+			_IP1_zTruss_EP = 0.225
 
-				!	36.55m/39.60m/42.65m
-				if	HM_BoomLen = "36.55m" | HM_BoomLen = "39.60m" | HM_BoomLen = "42.65m"	then
+				!	37.0m
+				if	HM_BoomLen = "37.0m"	then
+					_nInsertPart_1st = 3
+
+					_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					_boomLength[3] = 9.000					
+				endif
+				!	40.0m/43.0m/46.0m
+				if	HM_BoomLen = "40.0m" | HM_BoomLen = "43.0m" | HM_BoomLen = "46.0m"	then
 					_nInsertPart_1st = 4
 
-					_boomLength[1] = 6.100
-					_boomLength[2] = 9.150
-					_boomLength[3] = 9.150
-					if	HM_BoomLen = "36.55m"	then	_boomLength[4] = 3.050
-					if	HM_BoomLen = "39.60m"	then	_boomLength[4] = 6.100
-					if	HM_BoomLen = "42.65m"	then	_boomLength[4] = 9.150
+					_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					if	HM_BoomLen = "40.0m"	then	_boomLength[3] = 3.000
+					if	HM_BoomLen = "43.0m"	then	_boomLength[3] = 6.000
+					if	HM_BoomLen = "46.0m"	then	_boomLength[3] = 9.000
+					_boomLength[4] = 9.000
 				endif
-				!	45.70m/48.75m/51.80m
-				if	HM_BoomLen = "45.70m" | HM_BoomLen = "48.75m" | HM_BoomLen = "51.80m"	then
+				!	49.0m/52.0m/55.0m
+				if	HM_BoomLen = "49.0m" | HM_BoomLen = "52.0m" | HM_BoomLen = "55.0m"	then
 					_nInsertPart_1st = 5
 
-					_boomLength[1] = 6.100
-					_boomLength[2] = 9.150
-					_boomLength[3] = 9.150
-					if	HM_BoomLen = "45.70m"	then	_boomLength[4] = 3.050
-					if	HM_BoomLen = "48.75m"	then	_boomLength[4] = 6.100
-					if	HM_BoomLen = "51.80m"	then	_boomLength[4] = 9.150
-					_boomLength[5] = 9.150
+					_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					if	HM_BoomLen = "49.0m"	then	_boomLength[3] = 3.000
+					if	HM_BoomLen = "52.0m"	then	_boomLength[3] = 6.000
+					if	HM_BoomLen = "55.0m"	then	_boomLength[3] = 9.000
+					_boomLength[4] = 9.000
+					_boomLength[5] = 9.000
 				endif
-				!	54.85m/57.90m/60.95m
-				if	HM_BoomLen = "54.85m" | HM_BoomLen = "57.90m" | HM_BoomLen = "60.95m"	then
+				!	58.0m/61.0m
+				if	HM_BoomLen = "58.0m" | HM_BoomLen = "61.0m"	then
 					_nInsertPart_1st = 6
 
-					_boomLength[1] = 6.100
-					_boomLength[2] = 9.150
-					_boomLength[3] = 9.150
-					if	HM_BoomLen = "54.85m"	then	_boomLength[4] = 3.050
-					if	HM_BoomLen = "57.90m"	then	_boomLength[4] = 6.100
-					if	HM_BoomLen = "60.95m"	then	_boomLength[4] = 9.150
-					_boomLength[5] = 9.150
-					_boomLength[6] = 9.150
+					_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					if	HM_BoomLen = "58.0m"	then	_boomLength[3] = 3.000
+					if	HM_BoomLen = "61.0m"	then	_boomLength[3] = 6.000
+					_boomLength[4] = 9.000
+					_boomLength[5] = 9.000
+					_boomLength[6] = 9.000
 				endif
-				!	64.00m
-				if	HM_BoomLen = "64.00m"	then
+				!	64.0m
+				if	HM_BoomLen = "64.0m"	then
 					_nInsertPart_1st = 7
 
-					_boomLength[1] = 6.100
-					_boomLength[2] = 9.150
-					_boomLength[3] = 9.150
-					_boomLength[4] = 3.050
-					_boomLength[5] = 9.150
-					_boomLength[6] = 9.150
-					_boomLength[7] = 9.150
+					_boomLength[1] = 9.000
+					_boomLength[2] = 9.000
+					_boomLength[3] = 3.000
+					_boomLength[4] = 6.000
+					_boomLength[5] = 9.000
+					_boomLength[6] = 9.000
+					_boomLength[7] = 9.000
 				endif
 
 				!	BoomTop
 				_IP1_bBoomTop = 1
 				_IP1_btType = 1
 				_IP1_btRad = 0.057
-				_IP1_zOffset_Bar = 0.220
+				_IP1_zOffset_Bar = 0.200
 				_IP1_btHgt_Rear = 1.830
 				_IP1_btHgt_Front = 1.500
 				_IP1_yPos_Rear = 0.150
@@ -2086,17 +2024,17 @@ if	_iCraneType = CRAW_SCX2000	then
 		_xPosJib = 1.500
 		_zPosJib = 2.130
 
-		_jrad = 0.0445
+		_jrad = 0.045
 
 			!	Base Part
-			_jBP_Lth = 9.150
+			_jBP_Lth = 9.000
 			_jBP_Wdt_SP = 2.100
 			_jBP_Wdt_EP = 1.550
-			_jBP_Dpt_SP = 0.081
+			_jBP_Dpt_SP = 0.080
 			_jBP_Dpt_EP = 1.550
-			_jBP_zOffset_SP = 0.430
-			_jBP_zTruss_SP = 2.100
-			_jBP_zTruss_EP = 0.155
+			_jBP_zOffset_SP = 1.730
+			_jBP_zTruss_SP = 1.000
+			_jBP_zTruss_EP = 0.165
 			_jBP_bAnchor = 1
 
 			!	Insert Part_1st
@@ -2107,55 +2045,55 @@ if	_iCraneType = CRAW_SCX2000	then
 			_jIP1_zTruss_SP = 0.150
 			_jIP1_zTruss_EP = 0.150
 
-				!	27.45m
-				if	HM_JibLen = "27.45m"	then
+				!	27.0m
+				if	HM_JibLen = "27.0m"	then
 					_jnInsertPart_1st = 1
 
-					_jibLength[1] = 9.150
+					_jibLength[1] = 9.000
 				endif
-				!	30.50m/33.50m/36.55m
-				if	HM_JibLen = "30.50m" | HM_JibLen = "33.50m" | HM_JibLen = "36.55m"	then
+				!	30.0m/33.0m/36.0m
+				if	HM_JibLen = "30.0m" | HM_JibLen = "33.0m" | HM_JibLen = "36.0m"	then
 					_jnInsertPart_1st = 2
 
-					if	HM_JibLen = "30.50m"	then	_jibLength[1] = 3.050
-					if	HM_JibLen = "33.50m"	then	_jibLength[1] = 6.100
-					if	HM_JibLen = "36.55m"	then	_jibLength[1] = 9.150
-					_jibLength[2] = 9.150
+					if	HM_JibLen = "30.0m"	then	_jibLength[1] = 3.000
+					if	HM_JibLen = "33.0m"	then	_jibLength[1] = 6.000
+					if	HM_JibLen = "36.0m"	then	_jibLength[1] = 9.000
+					_jibLength[2] = 9.000
 				endif
-				!	39.60m/42.65m/45.70m
-				if	HM_JibLen = "39.60m" | HM_JibLen = "42.65m" | HM_JibLen = "45.70m"	then
+				!	39.0m/42.0m/45.0m
+				if	HM_JibLen = "39.0m" | HM_JibLen = "42.0m" | HM_JibLen = "45.0m"	then
 					_jnInsertPart_1st = 3
 
-					if	HM_JibLen = "39.60m"	then	_jibLength[1] = 3.050
-					if	HM_JibLen = "42.65m"	then	_jibLength[1] = 6.100
-					if	HM_JibLen = "45.70m"	then	_jibLength[1] = 9.150
-					_jibLength[2] = 9.150
-					_jibLength[3] = 9.150
+					if	HM_JibLen = "39.0m"	then	_jibLength[1] = 3.000
+					if	HM_JibLen = "42.0m"	then	_jibLength[1] = 6.000
+					if	HM_JibLen = "45.0m"	then	_jibLength[1] = 9.000
+					_jibLength[2] = 9.000
+					_jibLength[3] = 9.000
 				endif
-				!	48.75m
-				if	HM_JibLen = "48.75m"	then
+				!	48.0m
+				if	HM_JibLen = "48.0m"	then
 					_jnInsertPart_1st = 4
 
-					_jibLength[1] = 3.050
-					_jibLength[2] = 9.150
-					_jibLength[3] = 9.150
-					_jibLength[4] = 9.150
+					_jibLength[1] = 3.000
+					_jibLength[2] = 9.000
+					_jibLength[3] = 9.000
+					_jibLength[4] = 9.000
 				endif
-				!	51.80m
-				if	HM_JibLen = "51.80m"	then
+				!	51.0m
+				if	HM_JibLen = "51.0m"	then
 					_jnInsertPart_1st = 5
 
-					_jibLength[1] = 3.050
-					_jibLength[2] = 3.050
-					_jibLength[3] = 9.150
-					_jibLength[4] = 9.150
-					_jibLength[5] = 9.150
+					_jibLength[1] = 3.000
+					_jibLength[2] = 3.000
+					_jibLength[3] = 9.000
+					_jibLength[4] = 9.000
+					_jibLength[5] = 9.000
 				endif
 
 			!	Top Part
 			_jbTopPart = 1
 
-			_jTP_Lth = 9.150 + 0.385
+			_jTP_Lth = 9.000 + 0.385
 			_jTP_Wdt_SP = 1.550
 			_jTP_Wdt_EP = 0.516
 			_jTP_Dpt_SP = 1.550

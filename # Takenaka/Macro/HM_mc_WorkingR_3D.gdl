@@ -98,6 +98,10 @@ if	GLOB_VIEW_TYPE <> 2	then
 
 	poly_	nsp/3,	get(nsp)
 
+	hotarc	HM_WorkingR,	0,	360,	unID	:	unID = unID + 1
+	hotarc	_WorkingR_min,	0,	360,	unID	:	unID = unID + 1
+	hotarc	_WorkingR_max,	0,	360,	unID	:	unID = unID + 1
+
 	if	HM_3D_guide_show	then
 		!	5M Module
 		pen	HM_2D_WorkingR_subPen

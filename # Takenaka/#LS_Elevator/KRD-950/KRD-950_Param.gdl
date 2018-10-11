@@ -1,0 +1,83 @@
+!===============================================================================================
+!	KRD - 950
+!===============================================================================================
+
+!	Elevator Span Length
+!-----------------------------------------------------------------------------------------------
+values{2}	"iSpanLength"	SPAN_LENGTH_72,	_stSpanLength[SPAN_LENGTH_72]
+
+lock	"iSpanLength"
+
+	!	Elevator Size
+	if	iSpanLength = SPAN_LENGTH_72	then
+		if	iMastType = MAST_B_TYPE	then	_ev_width = 7.060
+	endif
+
+	_ev_depth = 1.000
+
+	parameters	ev_width = _ev_width,
+				ev_depth = _ev_depth
+
+	lock	"ev_width", "ev_depth"
+
+	!	Elevator Z Position
+	! _machHgt = 1.230
+	values	"ev_zPos"	range	[0.950,	endTipHgt]
+
+!	Mast Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMastType"	MAST_B_TYPE,	_stMastType[MAST_B_TYPE]
+
+lock	"iMastType"
+
+!	Mast End Tip Height
+!-----------------------------------------------------------------------------------------------
+_endTipHgt = mastHgt*nMast
+
+parameters	endTipHgt = _endTipHgt
+lock	"endTipHgt"
+
+!	Mast
+!-----------------------------------------------------------------------------------------------
+parameters	mastHgt = 1.430
+lock	"mastHgt"
+
+! lock	"radMast", "mastWdt", "mastDpt"
+
+values	"nMast"	range	[1,	50]
+
+if	GLOB_MODPAR_NAME = "hspHgt"	then
+	parameters	nMast = hspHgt/mastHgt
+
+	if	ev_zPos > hspHgt	then
+		parameters	ev_zPos = (hspHgt - 0.050)
+	endif
+else
+	parameters	hspHgt = mastHgt*nMast
+endif
+
+values	"hspHgt"	range	[0,	]	step	mastHgt,	mastHgt
+
+!	Rail Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iRailType"	RAIL_C_TYPE,	_stRailType[RAIL_C_TYPE]
+
+lock	"iRailType"
+
+!	Rail
+!-----------------------------------------------------------------------------------------------
+if	iMastType = MAST_B_TYPE	then	_xPosRail = 0.195
+_yPosRail = 0.160
+_railWdt = 0.075
+_railDpt = 0.040
+_railSideThk = 0.008
+_railCenterThk = 0.005
+
+parameters	xPosRail = _xPosRail,
+			yPosRail = _yPosRail,
+			railWdt = _railWdt,
+			railDpt = _railDpt,
+			railSideThk = _railSideThk,
+			railCenterThk = _railCenterThk
+
+lock	"tRailSettings"

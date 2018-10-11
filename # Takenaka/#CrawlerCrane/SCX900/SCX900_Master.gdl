@@ -28,12 +28,14 @@ MODE_HEAVY_BOOM = 1
 MODE_MAIN_BOOM = 2
 MODE_LONG_BOOM = 3
 MODE_LUFFING_JIB = 4
+MODE_TOWER_BOOM = 5
 
 dim	_stCraneMode[]
 	_stCraneMode[1] = "ヘビーブーム"
 	_stCraneMode[2] = "メインブーム"
 	_stCraneMode[3] = "ロングブーム"
 	_stCraneMode[4] = "ラッフィングジブ"
+	_stCraneMode[5] = "タワー"
 
 !	Boom Type Index
 _IDX_CRANE_TYPE = 1000
@@ -48,24 +50,61 @@ dim	_stBoomType[]
 	_stBoomType[3] = "TOWER BOOM"
 	_stBoomType[4] = "TOWER BOOM + JIB"
 
-!	Radius
-_xOffset_Rad = 0.350
+!	Crane Specification
+SPEC_BOOM_CRANE_EXCLUSIVE = 1
+SPEC_BOOM_TOWER_COMMON_USE = 2
+
+dim	stCraneSpec[]
+	stCraneSpec[1] = "クレーン専⽤ブーム"
+	stCraneSpec[2] = "タワー併⽤ブーム"
+
+!	Crane Sub Specification
+SUB_SPEC_MAIN_BOOM = 1
+SUB_SPEC_AUX_SHEAVE = 2
+SUB_SPEC_MAIN_BOOM_AUX_SHEAVE = 3
+SUB_SPEC_CRANE_JIB = 4
+SUB_SPEC_MAIN_BOOM_CRANE_JIB = 5
+SUB_SPEC_THIRD_MAIN_BOOM = 6
+SUB_SPEC_THIRD_MAIN_BOOM_AUX_SHEAVE = 7
+
+dim	stCraneSubSpec[]
+	stCraneSubSpec[1] = "主ブーム"
+	stCraneSubSpec[2] = "補助シーブ"
+	stCraneSubSpec[3] = "補助シーブ付き主ブーム"
+	stCraneSubSpec[4] = "クレーンジブ"
+	stCraneSubSpec[5] = "クレーンジブ付き主ブーム"
+	stCraneSubSpec[6] = "第3ウインチ使⽤時の主ブーム"
+	stCraneSubSpec[7] = "第3ウインチ使⽤時の補助シーブ付き主ブーム"
 
 !	'HM_Judgement' Index
 SAFETY = 1
 WARNING_YELLOW = 2
 WARNING_RED = 3
 
-!	Part Pos
-_xPosJib = 1.350
-_zPosJib = 2.250
-_zPosJibPulley = 0.600
+!-----------------------------------------------------------------------------------------------
+!	Hook
+!-----------------------------------------------------------------------------------------------
+!	Hook Index
+HOOK_TYPE_S_SIZE = 4
+HOOK_TYPE_M_SIZE = 5
+HOOK_TYPE_L_SIZE = 6
 
-if	HM_CraneMode = MODE_MAIN_BOOM	then
-	! _zPosMainPulley = 1.510
-endif
-if	HM_CraneMode = MODE_LONG_BOOM	then
-	_zPosMainPulley = 0.500
+!	List
+HOOK_90T = 1
+HOOK_50T = 2
+HOOK_35T = 3
+HOOK_12T = 4
+
+dim	stHookList[]
+	stHookList[1] = "90t"
+	stHookList[2] = "50t"
+	stHookList[3] = "35t"
+	stHookList[4] = "12t"
+
+!	Hook Rotation Angle
+_aRot_Hook = 90
+if	HM_HookType = HOOK_TYPE_S_SIZE	then
+	_aRot_Hook = 0
 endif
 
 !----------------------------------------------------------------------------------------------------
@@ -73,6 +112,53 @@ endif
 !----------------------------------------------------------------------------------------------------
 _xPosBoom = 1.200
 _yPosBoom = 0.170
+
+!	Radius
+_xOffset_Rad = 0
+if	HM_HookType = HOOK_TYPE_S_SIZE	then
+	if	HM_CraneMode = MODE_LONG_BOOM	then
+		if	HM_CraneSubSpec = SUB_SPEC_CRANE_JIB	then
+			_xOffset_Rad = 0.280
+		endif
+		if	HM_CraneSubSpec = SUB_SPEC_AUX_SHEAVE	then
+			_xOffset_Rad = 0.299
+		endif
+	endif
+	if	HM_CraneMode = MODE_TOWER_BOOM	then
+		_xOffset_Rad = 0.299
+	endif
+endif
+
+!	Part Pos
+if	HM_CraneMode = MODE_LONG_BOOM	then
+	_xPosJib = 0.360
+	_zPosJib = 0
+	_zPosJibPulley = 0
+endif
+if	HM_CraneMode = MODE_TOWER_BOOM	then
+	_xPosJib = 0
+	_zPosJib = 1.600
+	_zPosJibPulley = 0.290
+endif
+
+_zPosMainPulley = 0
+if	HM_CraneMode = MODE_LONG_BOOM	then
+	_zPosMainPulley = 0.500
+endif
+
+_aAuxSheave = 18.95
+_xPosAuxSheave = 0.927
+_zPosAuxSheave = _zPosMainPulley + _xPosAuxSheave*tan(_aAuxSheave)
+
+!	Mast/Strut Index
+TYPE_MAST = 1
+TYPE_MAST_HEAVY_LIFT = 2
+TYPE_STRUT = 3
+TYPE_STRUT_HEAVY_LIFT = 4
+
+_mastType = TYPE_MAST
+_mastLth = 4.187
+_xPosEnd = 2.785
 
 !----------------------------------------------------------------------------------------------------
 !	Rated Load

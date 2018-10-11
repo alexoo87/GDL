@@ -48,13 +48,56 @@ dim	_stBoomType[]
 	_stBoomType[3] = "TOWER BOOM"
 	_stBoomType[4] = "TOWER BOOM + JIB"
 
-!	Radius
-_xOffset_Rad = 0.325
-
 !	'HM_Judgement' Index
 SAFETY = 1
 WARNING_YELLOW = 2
 WARNING_RED = 3
+
+!-----------------------------------------------------------------------------------------------
+!	Hook
+!-----------------------------------------------------------------------------------------------
+!	Hook Index
+HOOK_TYPE_S_SIZE = 4
+HOOK_TYPE_M_SIZE = 5
+HOOK_TYPE_L_SIZE = 6
+
+!	List
+HOOK_180T = 1
+HOOK_120T = 2
+HOOK_70T = 3
+HOOK_40T = 4
+
+if	GLOB_SCRIPT_TYPE # 2 & GLOB_SCRIPT_TYPE # 3	then
+	dim	stHookList[]
+		stHookList[1] = "180t"
+		stHookList[2] = "120t"
+		stHookList[3] = "70t"
+		stHookList[4] = "40t"
+endif
+
+!	Hook Rotation Angle
+_aRot_Hook = 90
+if	HM_HookType = HOOK_TYPE_S_SIZE	then
+	_aRot_Hook = 0
+endif
+
+!	Hook Thickness
+HM_HookThick = 0
+if	HM_HookList = HOOK_180T	then	HM_HookThick = 0.382
+if	HM_HookList = HOOK_120T	then	HM_HookThick = 0.520
+if	HM_HookList = HOOK_70T	then	HM_HookThick = 0.300
+if	HM_HookList = HOOK_40T	then	HM_HookThick = 0.300
+
+!----------------------------------------------------------------------------------------------------
+!	Size 
+!----------------------------------------------------------------------------------------------------
+_xPosBoom = 1.600
+
+!	Radius
+_xOffset_Rad = 0
+if	HM_HookType = HOOK_TYPE_S_SIZE	then
+	_xOffset_Rad = 0.325
+endif
 
 !	Part Pos
 _xPosJib = 1.350
@@ -68,10 +111,19 @@ if	HM_CraneMode = MODE_LONG_BOOM	then
 	_zPosMainPulley = 0.600
 endif
 
-!----------------------------------------------------------------------------------------------------
-!	Size 
-!----------------------------------------------------------------------------------------------------
-_xPosBoom = 1.600
+!	Mast/Strut Value
+_mastLth = 10.000
+if	HM_CraneMode = MODE_MAIN_BOOM	then
+	_xPosEnd = 9.000
+endif
+if	HM_CraneMode = MODE_LONG_BOOM	then
+	_xPosEnd = 9.200
+endif
+if	HM_CraneMode = MODE_LUFFING_JIB	then
+	if	abs(HM_boomAng - 66) < eps	then	_xPosEnd = 8.200
+	if	abs(HM_boomAng - 76) < eps	then	_xPosEnd = 8.300
+	if	abs(HM_boomAng - 86) < eps	then	_xPosEnd = 9.200
+endif
 
 !----------------------------------------------------------------------------------------------------
 !	Rated Load

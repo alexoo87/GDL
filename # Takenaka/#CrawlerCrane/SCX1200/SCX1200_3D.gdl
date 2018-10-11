@@ -91,7 +91,11 @@ rotz	HM_WorkingAng
 			put	-3.565,	-1.590,	15,
 				-3.565,	1.400,	15,
 				1.470,	1.400,	15,
-				1.470,	-1.590,	15
+				1.470,	-0.800,	15,
+				2.530,	-0.800,	15,
+				2.530,	-1.740,	15,
+				0.540,	-1.740,	15,
+				0.540,	-1.590,	15
 
 			prism_	nsp/3,	_mainDeckThk,	get(nsp)
 
@@ -151,6 +155,37 @@ rotz	HM_WorkingAng
 			resol	HM_3D_resol
 		del 1
 
+	!	Operator Cap
+	!-----------------------------------------------------------------------------------------------
+		_zPosOper = _zPosMain + _mainDeckThk
+
+		addz	_zPosOper
+			add	0.540,	-0.800,	0
+				call	"HM_mc_OperatorCab.gsm"	parameters	all	HM_OP_Type = 3
+			del 1
+		del 1
+
+	!	Mast
+	!-----------------------------------------------------------------------------------------------\
+		_zPosMast = 2.450
+
+		addz	_zPosMast
+			addy	_yPosBoom
+				addx	1.050
+					call	"HM_mc_MastStrut.gsm"	parameters	all	iType = _mastType,
+																	bAnchor = 1,
+																	xPosEnd = _xPosEnd,
+																	zPosMast = 0.330,
+																	distMast = 1.000,
+																	mastLth = _mastLth,
+																	mastThk = 0.025,
+																	mastRad = 0.130,
+																	pulleyRad_1 = 0.265,
+																	pulleyRad_2 = 0.242
+				del 1
+			del 1
+		del 1
+
 	!	Boom/Jib
 	!-----------------------------------------------------------------------------------------------
 		_zPosBoom = 2.450
@@ -167,35 +202,127 @@ rotz	HM_WorkingAng
 							for	i = 1	to	2
 								muly	-2*i + 3
 									if	(HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
-										addz	-_zPosMainPulley
-											call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.076,
-																						HM_Pulley_R1 = 0.380,
-																						HM_Pulley_R2 = 0.350,
-																						HM_Pulley_Thick = 0.012,
-																						HM_matPulley = HM_matBody2,
-																						HM_Pulley_Fixed = 0
+										!	Common
+										_rPulley = 0.319
+										addy	0.120
+											addz	-_zPosMainPulley
+												call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.076,
+																							HM_Pulley_R1 = 0.350,
+																							HM_Pulley_R2 = 0.319,
+																							HM_Pulley_Thick = 0.012,
+																							HM_matPulley = HM_matBody2,
+																							HM_Pulley_Fixed = 0
+											del 1
+											addx	-0.500
+												addz	0.820
+														call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.076,
+																									HM_Pulley_R1 = 0.331,
+																									HM_Pulley_R2 = 0.299,
+																									HM_Pulley_Thick = 0.012,
+																									HM_matPulley = HM_matBody2,
+																									HM_Pulley_Fixed = 0
+												del 1
+											del 1
+										del 1
+
+										!	Crane Jib
+										if	HM_CraneSubSpec = SUB_SPEC_CRANE_JIB | HM_CraneSubSpec = SUB_SPEC_MAIN_BOOM_CRANE_JIB	then
+											_rPulley = 0.266
+											addx	_xPosJib
+												roty	HM_JibAng
+													addx	HM_JibLength
+														call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.074,
+																									HM_Pulley_R1 = 0.310,
+																									HM_Pulley_R2 = 0.266,
+																									HM_Pulley_Thick = 0.012,
+																									HM_matPulley = HM_matBody2,
+																									HM_Pulley_Fixed = 0
+													del 1
+												del 1
+											del 1
+										endif
+									endif
+									if	HM_CraneMode = MODE_TOWER_BOOM	then
+										_rPulley = 0.295
+										addx	_xPosJib
+											addz	-_zPosJib
+												roty	HM_BoomAng - HM_JibAng
+													addx	HM_JibLength
+														addz	-_zPosJibPulley
+															call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.076,
+																										HM_Pulley_R1 = 0.330,
+																										HM_Pulley_R2 = 0.295,
+																										HM_Pulley_Thick = 0.012,
+																										HM_matPulley = HM_matBody2,
+																										HM_Pulley_Fixed = 0
+														del 1
+														addx	-0.380
+															addz	0.380
+																call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.076,
+																											HM_Pulley_R1 = 0.331,
+																											HM_Pulley_R2 = 0.299,
+																											HM_Pulley_Thick = 0.012,
+																											HM_matPulley = HM_matBody2,
+																											HM_Pulley_Fixed = 0
+															del 1
+														del 1
+													del 1
+												del 1
+											del 1
 										del 1
 									endif
-									! if	HM_CraneMode = MODE_LUFFING_JIB	then
-									! 	addx	_xPosJib
-									! 		addz	-_zPosJib
-									! 			roty	HM_BoomAng - HM_JibAng
-									! 				addx	HM_JibLength
-									! 					addz	-_zPosJibPulley
-									! 						call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.180,
-									! 																	HM_Pulley_R1 = 0.350,
-									! 																	HM_Pulley_R2 = 0.325,
-									! 																	HM_Pulley_Thick = 0.012,
-									! 																	HM_matPulley = HM_matBody2,
-									! 																	HM_Pulley_Fixed = 0
-									! 					del 1
-									! 				del 1
-									! 			del 1
-									! 		del 1
-									! 	del 1
-									! endif
 								del 1
 							next	i
+
+							!	Aux Sheave
+							if	HM_CraneMode = MODE_LONG_BOOM	then
+								if	HM_CraneSubSpec = SUB_SPEC_AUX_SHEAVE | HM_CraneSubSpec = SUB_SPEC_MAIN_BOOM_AUX_SHEAVE | HM_CraneSubSpec = SUB_SPEC_THIRD_MAIN_BOOM_AUX_SHEAVE	then
+									addx	_xPosAuxSheave
+										addz	-_zPosAuxSheave
+											gosub	"draw_Aux_Sheave"
+										del 1
+									del 1
+								endif
+							endif
+
+							!	Strut
+							if	HM_CraneMode = MODE_LONG_BOOM	then
+								if	HM_CraneSubSpec = SUB_SPEC_MAIN_BOOM_CRANE_JIB | HM_CraneSubSpec = SUB_SPEC_CRANE_JIB	then
+									addx	0.582
+										addz	0.2685
+											roty	HM_BoomAng
+												call	"HM_mc_MastStrut.gsm"	parameters	all	iType = TYPE_STRUT,
+																								nStrut = 1,
+																								xPosEnd_Strut_1 = 2.655,
+																								distStrut_SP = 0.750,
+																								distStrut_EP = 0.351,
+																								strutLth_1 = 4.605,
+																								strutThk = 0.016,
+																								strutRad_1 = 0.075
+											del 1
+										del 1
+									del 1
+								endif
+							endif
+							if	HM_CraneMode = MODE_TOWER_BOOM	then
+								addx	0.380
+									addz	0.200
+										roty	HM_BoomAng
+											call	"HM_mc_MastStrut.gsm"	parameters	all	iType = TYPE_STRUT,
+																							nStrut = 2,
+																							xPosEnd_Strut_1 = 5.105,
+																							xPosEnd_Strut_2 = 0.275,
+																							distStrut_SP = 2.000,
+																							distStrut_EP = 2.000,
+																							strutLth_1 = 5.900,
+																							strutLth_2 = 5.900,
+																							strutThk = 0.025,
+																							strutRad_1 = 0.105,
+																							strutRad_2 = 0.105
+										del 1
+									del 1
+								del 1
+							endif
 						del 1
 					del 1
 				del 1
@@ -204,11 +331,28 @@ rotz	HM_WorkingAng
 
 	!	Wire
 	!-----------------------------------------------------------------------------------------------
-		if	(HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
-			_zAddPos = HM_BoomLength*sin(HM_BoomAng) - _zPosMainPulley*cos(HM_BoomAng)
+		if	HM_CraneMode = MODE_LONG_BOOM	then
+			if	HM_CraneSubSpec = SUB_SPEC_MAIN_BOOM | HM_CraneSubSpec = SUB_SPEC_MAIN_BOOM_AUX_SHEAVE \
+			 | HM_CraneSubSpec = SUB_SPEC_MAIN_BOOM_CRANE_JIB | HM_CraneSubSpec = SUB_SPEC_THIRD_MAIN_BOOM | HM_CraneSubSpec = SUB_SPEC_THIRD_MAIN_BOOM_AUX_SHEAVE	then
+				_zAddPos = HM_BoomLength*sin(HM_BoomAng) - _zPosMainPulley*cos(HM_BoomAng)
+				_yPosWire = 0.120
+				_wireLen = HM_boomWireLen
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_AUX_SHEAVE	then
+				_zAddPos = (HM_BoomLength + _xPosAuxSheave)*sin(HM_BoomAng) - _zPosAuxSheave*cos(HM_BoomAng)
+				_yPosWire = 0
+				_wireLen = HM_boomWireLen
+			endif
+			if	HM_CraneSubSpec = SUB_SPEC_CRANE_JIB	then
+				_zAddPos = (HM_BoomLength + _xPosJib)*sin(HM_BoomAng) - _zPosJib*cos(HM_BoomAng) + HM_JibLength*sin(HM_BoomAng - HM_JibAng) - _zPosJibPulley*cos(HM_BoomAng - HM_JibAng)
+				_yPosWire = 0
+				_wireLen = HM_JibWireLen
+			endif
 		endif
-		if	HM_CraneMode = MODE_LUFFING_JIB	then
-			! _zAddPos = (HM_BoomLength + _xPosJib)*sin(HM_BoomAng) - _zPosJib*cos(HM_BoomAng) + HM_JibLength*sin(HM_JibAng) - _zPosJibPulley*cos(HM_JibAng)
+		if	HM_CraneMode = MODE_TOWER_BOOM	then
+			_zAddPos = (HM_BoomLength + _xPosJib)*sin(HM_BoomAng) - _zPosJib*cos(HM_BoomAng) + HM_JibLength*sin(HM_JibAng) - _zPosJibPulley*cos(HM_JibAng)
+			_yPosWire = 0
+			_wireLen = HM_JibWireLen
 		endif
 
 		!	Boom or Jib → Hook
@@ -216,16 +360,32 @@ rotz	HM_WorkingAng
 		_zPosJibPulley = _zPosBoom + _zAddPos
 
 		addy	_yPosBoom
-			! for	i = 1	to	2
-			! 	muly	2*i - 3
-					call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR,
-																x2 = HM_WorkingR,
-																y1 = 0,
-																y2 = 0,
-																z1 = _zPosJibPulley,
-																z2 = _zPosJibPulley - HM_JibWireLen + HM_HookHeight
-			! 	del 1
-			! next	i
+			if	not(HM_HookType = HOOK_TYPE_S_SIZE)	then
+				for	i = 1	to	2
+					muly	-2*i + 3
+						call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR + _rPulley,
+																	x2 = HM_WorkingR + HM_HookRadius,
+																	y1 = _yPosWire,
+																	y2 = 0,
+																	z1 = _zPosJibPulley,
+																	z2 = _zPosJibPulley - _wireLen + HM_HookHeight
+
+						call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR - _rPulley,
+																	x2 = HM_WorkingR - HM_HookRadius,
+																	y1 = _yPosWire,
+																	y2 = 0,
+																	z1 = _zPosJibPulley,
+																	z2 = _zPosJibPulley - _wireLen + HM_HookHeight
+					del 1
+				next	i
+			else
+				call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR,
+															x2 = HM_WorkingR,
+															y1 = 0,
+															y2 = 0,
+															z1 = _zPosJibPulley,
+															z2 = _zPosJibPulley - _wireLen + HM_HookHeight
+			endif
 		del 1
 
 	!	Hook
@@ -233,13 +393,40 @@ rotz	HM_WorkingAng
 		_zPosHook = _zPosBoom + _zAddPos
 
 		add	HM_WorkingR,	_yPosBoom,	_zPosHook
-			hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1+128	:	unID = unID + 1
-			hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3		:	unID = unID + 1
-			hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2		:	unID = unID + 1
+			if	HM_CraneMode = MODE_LONG_BOOM	then
+				if	not(HM_CraneSubSpec = SUB_SPEC_CRANE_JIB)	then
+					hotspot	0,	0,	0,					unID,	HM_boomWireLen,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	1,					unID,	HM_boomWireLen,	3		:	unID = unID + 1
+					hotspot	0,	0,	-HM_boomWireLen,	unID,	HM_boomWireLen,	2		:	unID = unID + 1
 
-			addz	-HM_JibWireLen
-				call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = 0.300
-			del 1
+					addz	-HM_boomWireLen
+						rotz	_aRot_Hook
+							call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = 0.100
+						del 1
+					del 1
+				else
+					hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1+128	:	unID = unID + 1
+					hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3		:	unID = unID + 1
+					hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2		:	unID = unID + 1
+
+					addz	-HM_JibWireLen
+						rotz	_aRot_Hook
+							call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = 0.100
+						del 1
+					del 1
+				endif
+			endif
+			if	HM_CraneMode = MODE_TOWER_BOOM	then
+				hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3		:	unID = unID + 1
+				hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2		:	unID = unID + 1
+
+				addz	-HM_JibWireLen
+					rotz	_aRot_Hook
+						call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = 0.100
+					del 1
+				del 1
+			endif
 		del	1
 
 	!	Suspended Load
@@ -300,3 +487,93 @@ del 1
 
 
 end
+
+
+
+!-----------------------------------------------------------------------------------------------
+"draw_Aux_Sheave":
+!-----------------------------------------------------------------------------------------------
+
+	!	Pulley
+	call	"HM_mc_Pulley.gsm"	parameters	all	HM_Pulley_Width = 0.120,
+												HM_Pulley_R1 = 0.385,
+												HM_Pulley_R2 = 0.322,
+												HM_Pulley_Thick = 0.025,
+												HM_matPulley = HM_matBody2,
+												HM_Pulley_Fixed = 0
+
+	!	Side Plate
+	for	i = 1	to	2
+		muly	-2*i + 3
+			roty	_aAuxSheave
+				addy	0.2035 + 0.066/2
+					rotx	90
+						put	0,			0.1406,		15,
+							-0.4228,	0.1819,		15,
+							-0.4493,	0.1408,		15,
+							-1.070,		-0.170,		15,
+							-1.070,		-0.452,		15,
+							-0.570,		-0.452,		15,
+							0.0642,		-0.1244,	15,
+							0,			0,			900,
+							0,			152.2430,	4000+15
+
+						prism_	nsp/3,	0.066,	get(nsp)
+					del 1
+				del 1
+			del 1
+		del 1
+	next	i
+
+	!	Rod
+	addy	0.2035 - 0.066/2
+		rotx	90
+			cylind	(0.2035 - 0.066/2)*2,	0.070
+		del 1
+	del 1
+
+	roty	_aAuxSheave
+		addx	-1.000
+
+			addz	-0.382
+				addy	0.2035 - 0.066/2
+					rotx	90
+						cylind	(0.2035 - 0.066/2)*2,	0.025
+					del 1
+				del 1
+			del 1
+
+			addz	-0.222
+				addy	0.2035 - 0.066/2
+					rotx	90
+						cylind	(0.2035 - 0.066/2)*2,	0.025
+					del 1
+				del 1
+			del 1
+
+		del 1
+	del 1
+
+	!	Sub Side Plate
+	for	i = 1	to	2
+		muly	-2*i + 3
+			roty	_aAuxSheave
+				addy	0.1485 + 0.025/2
+					rotx	90
+						put	-1.1775,	-0.5218,	15,
+							-1.1775,	-0.5210,	15,
+							-1.0662,	-0.1991,	15,
+							-0.9740,	-0.1570,	15,
+							-0.5740,	-0.3170,	15,
+							-0.5307,	-0.3921,	15,
+							-0.5497,	-0.5218,	15
+
+						prism_	nsp/3,	0.025,	get(nsp)
+					del 1
+				del 1
+			del 1
+		del 1
+	next	i
+
+
+return

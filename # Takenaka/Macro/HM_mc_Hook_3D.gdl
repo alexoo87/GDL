@@ -302,9 +302,8 @@ material	HM_matHook
 	!-----------------------------------------------------------------------------------------------
 	if	HM_HookType = HOOK_TYPE_M_SIZE	then
 		!	Rate
-		_topRate = 0.060
-		_midRate = 0.770
-		_btmRate = 0.170
+		_midRate = 0.715
+		_btmRate = 0.285
 
 		!	Bottom Part
 		_btmHgt = HM_HookHeight*_btmRate
@@ -320,7 +319,6 @@ material	HM_matHook
 
 		!	Middle Part
 		_midHgt = HM_HookHeight*_midRate
-		_topHgt = HM_HookHeight*_topRate
 		_midThk = 0.040
 
 		addz	_btmHgt
@@ -330,18 +328,15 @@ material	HM_matHook
 						muly	(2*i - 3)
 							addy	HM_HookThick/2
 								rotx	90
-									put	-HM_HookRadius*0.55,	0,					15,
-										-HM_HookRadius,			_midHgt*0.3,		15,
-										-HM_HookRadius,			_midHgt,			15,
-										-HM_HookRadius*0.40,	_midHgt,			15,
-										-HM_HookRadius*0.20,	_midHgt + _topHgt,	13,
-										0,						_midHgt + _topHgt,	900,
-										HM_HookRadius*0.20,		-180,				4000+13,
-										HM_HookRadius*0.20,		_midHgt + _topHgt,	13,
-										HM_HookRadius*0.40,		_midHgt,			15,
-										HM_HookRadius,			_midHgt,			15,
-										HM_HookRadius,			_midHgt*0.3,		15,
-										HM_HookRadius*0.55,		0,					15
+									put	-HM_HookRadius*0.6,		0,							15,
+										-HM_HookRadius*1.30,	_midHgt*0.5,				15,
+										-HM_HookRadius*1.30,	_midHgt + HM_HookRadius,	15,
+										-HM_HookRadius*0.30,	_midHgt + HM_HookRadius,	13,
+										0,						_midHgt + HM_HookRadius,	900,
+										HM_HookRadius*0.30,		-180,						4000+13,
+										HM_HookRadius*1.30,		_midHgt + HM_HookRadius,	15,
+										HM_HookRadius*1.30,		_midHgt*0.5,				15,
+										HM_HookRadius*0.6,		0,							15
 
 									prism_	nsp/3,	-_midThk,	get(nsp)
 								del 1
@@ -355,7 +350,7 @@ material	HM_matHook
 				cylind	_cntThk,	HM_HookThick/2
 
 				!	Pulley
-				addz	_midHgt*0.625
+				addz	_midHgt
 					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_HookThick,
 																	HM_Pulley_R1 = HM_HookRadius,
 																	HM_Pulley_R2 = HM_HookRadius*0.9,
@@ -365,28 +360,14 @@ material	HM_matHook
 				del 1
 			del 1
 		del 1
-
-		!	Top Part
-		_topHgt = HM_HookHeight*_topRate
-
-		addz	_btmHgt + _midHgt + _topHgt
-			rotz	90
-				addy	HM_HookThick/2
-					rotx	90
-						cylind	HM_HookThick,	HM_HookRadius*0.10
-					del 1
-				del 1
-			del 1
-		del 1
 	endif
 
 	!	Type : L Size
 	!-----------------------------------------------------------------------------------------------
 	if	HM_HookType = HOOK_TYPE_L_SIZE	then
 		!	Rate
-		_topRate = 0.050
-		_midRate = 0.760
-		_btmRate = 0.190
+		_midRate = 0.715
+		_btmRate = 0.285
 
 		!	Bottom Part
 		_btmHgt = HM_HookHeight*_btmRate
@@ -402,7 +383,6 @@ material	HM_matHook
 
 		!	Middle Part
 		_midHgt = HM_HookHeight*_midRate
-		_topHgt = HM_HookHeight*_topRate
 		_midThk = 0.060
 
 		addz	_btmHgt
@@ -412,18 +392,15 @@ material	HM_matHook
 					muly	(2*i - 3)
 						addy	HM_HookThick/2
 							rotx	90
-								put	-HM_HookRadius*0.55,	0,					15,
-									-HM_HookRadius,			_midHgt*0.3,		15,
-									-HM_HookRadius,			_midHgt,			15,
-									-HM_HookRadius*0.40,	_midHgt,			15,
-									-HM_HookRadius*0.20,	_midHgt + _topHgt,	13,
-									0,						_midHgt + _topHgt,	900,
-									HM_HookRadius*0.20,		-180,				4000+13,
-									HM_HookRadius*0.20,		_midHgt + _topHgt,	13,
-									HM_HookRadius*0.40,		_midHgt,			15,
-									HM_HookRadius,			_midHgt,			15,
-									HM_HookRadius,			_midHgt*0.3,		15,
-									HM_HookRadius*0.55,		0,					15
+								put	-HM_HookRadius*0.6,		0,							15,
+									-HM_HookRadius*1.40,	_midHgt*0.5,				15,
+									-HM_HookRadius*1.40,	_midHgt + HM_HookRadius,	15,
+									-HM_HookRadius*0.30,	_midHgt + HM_HookRadius,	13,
+									0,						_midHgt + HM_HookRadius,	900,
+									HM_HookRadius*0.30,		-180,						4000+13,
+									HM_HookRadius*1.40,		_midHgt + HM_HookRadius,	15,
+									HM_HookRadius*1.40,		_midHgt*0.5,				15,
+									HM_HookRadius*0.6,		0,							15
 
 								prism_	nsp/3,	-_midThk,	get(nsp)
 							del 1
@@ -437,26 +414,13 @@ material	HM_matHook
 				cylind	_cntThk,	HM_HookThick/2
 
 				!	Pulley
-				addz	_midHgt*0.625
+				addz	_midHgt
 					call	"HM_mc_Pulley.gsm"	parameters	all		HM_Pulley_Width = HM_HookThick,
 																	HM_Pulley_R1 = HM_HookRadius,
 																	HM_Pulley_R2 = HM_HookRadius*0.9,
 																	HM_Pulley_Thick = HM_HookThick*0.1,
 																	HM_matPulley = HM_matHook,
 																	HM_Pulley_Fixed = 0
-				del 1
-			del 1
-		del 1
-
-		!	Top Part
-		_topHgt = HM_HookHeight*_topRate
-
-		addz	_btmHgt + _midHgt + _topHgt
-			rotz	90
-				addy	HM_HookThick/2
-					rotx	90
-						cylind	HM_HookThick,	HM_HookRadius*0.10
-					del 1
 				del 1
 			del 1
 		del 1

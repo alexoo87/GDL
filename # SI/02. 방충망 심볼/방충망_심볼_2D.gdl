@@ -1,0 +1,87 @@
+!===============================================================================================
+!	방충망 심볼
+!===============================================================================================
+
+!	원점
+hotspot2	0,	0
+
+!	공통 변수 정의
+!-----------------------------------------------------------------------------------------------
+	!	절단선 각도
+	_aCutLine = atn(symWdt/symHgt)
+
+	!	미러
+	_mulvalue = 1
+	if	symHgt < eps	then	_mulvalue = -1
+
+	!	절단선 변수
+	_snakeHgt = 0.075
+	_snakeWdt = 0.030
+
+	_tailLth = 0.200
+
+	!	채우기 정의
+	_gapHatch = gapHatch*GLOB_SCALE
+
+	define fill	"mainHatch" \
+			36, 36, 255, 36,
+			36, 255, 36, 36,
+			_gapHatch,	0,	2,
+			1.0, 0.0, 0.0, 0.0, 0,
+			1.0, 90.0, 0.0, 0.0, 0
+
+!	방충망 해치
+!-----------------------------------------------------------------------------------------------
+	pen	penHatch
+	fill	"mainHatch"
+
+	put	0,												0,												1,
+		symWdt,											0,												1,
+		symWdt/2 + _snakeWdt*sin(_aCutLine)*_mulvalue,	symHgt/2 - _snakeWdt*cos(_aCutLine)*_mulvalue,	1,
+		symWdt/2 + _snakeHgt*cos(_aCutLine),			symHgt/2 + _snakeHgt*sin(_aCutLine),			1,
+		symWdt/2 - _snakeHgt*cos(_aCutLine),			symHgt/2 - _snakeHgt*sin(_aCutLine),			1,
+		symWdt/2 - _snakeWdt*sin(_aCutLine)*_mulvalue,	symHgt/2 + _snakeWdt*cos(_aCutLine)*_mulvalue,	1,
+		0,												symHgt,											1
+
+	poly2_b{2}	nsp/3,	2+4+8,	penHatch,	0,	-eps,	-eps,	0,	get(nsp)
+
+		!	Hotspot
+		hotspot2	0,		0,	unID,	symWdt,	1+128	:	unID = unID + 1
+		hotspot2	-1,		0,	unID,	symWdt,	3		:	unID = unID + 1
+		hotspot2	symWdt,	0,	unID,	symWdt,	2		:	unID = unID + 1
+
+		hotspot2	0,	0,		unID,	symHgt,	1+128	:	unID = unID + 1
+		hotspot2	0,	-1,		unID,	symHgt,	3		:	unID = unID + 1
+		hotspot2	0,	symHgt,	unID,	symHgt,	2		:	unID = unID + 1
+
+!	절단선
+!-----------------------------------------------------------------------------------------------
+	pen	penCut
+
+	put	symWdt + _tailLth*sin(_aCutLine)*_mulvalue,		-_tailLth*cos(_aCutLine)*_mulvalue,
+		symWdt,											0,
+		symWdt/2 + _snakeWdt*sin(_aCutLine)*_mulvalue,	symHgt/2 - _snakeWdt*cos(_aCutLine)*_mulvalue,
+		symWdt/2 + _snakeHgt*cos(_aCutLine),			symHgt/2 + _snakeHgt*sin(_aCutLine),
+		! symWdt/2,										symHgt/2,
+		symWdt/2 - _snakeHgt*cos(_aCutLine),			symHgt/2 - _snakeHgt*sin(_aCutLine),
+		symWdt/2 - _snakeWdt*sin(_aCutLine)*_mulvalue,	symHgt/2 + _snakeWdt*cos(_aCutLine)*_mulvalue,
+		0,												symHgt,
+		-_tailLth*sin(_aCutLine)*_mulvalue,				symHgt + _tailLth*cos(_aCutLine)*_mulvalue
+
+	poly2	nsp/2,	1,	use(nsp)
+
+	for	h = 1	to	(nsp/2) - 1
+		hotspot2	use(2),	unID	:	unID = unID + 1
+		hotline2	get(2),	use(2),	unID	:	unID = unID + 1
+	next	h
+		hotspot2	get(2),	unID	:	unID = unID + 1
+
+	! hotline2	symWdt + _tailLth*sin(_aCutLine)*_mulvalue,	-_tailLth*cos(_aCutLine)*_mulvalue,
+	! 			-_tailLth*sin(_aCutLine)*_mulvalue,			symHgt + _tailLth*cos(_aCutLine)*_mulvalue
+
+
+
+
+
+
+

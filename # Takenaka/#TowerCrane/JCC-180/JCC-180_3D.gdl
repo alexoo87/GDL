@@ -564,7 +564,7 @@ rotz	HM_WorkingAng
 
 					!	Jib → Hook
 					!-----------------------------------------------------------------------------------------------
-					_zPosJibPulley = 0.400 + (HM_JibLength - 0.620)*sin(HM_JibAng) - 0.050*cos(HM_JibAng)
+					_zPosJibPulley = 0.400 + (HM_JibLength - _mJib_pulleyR)*sin(HM_JibAng) - 0.150*cos(HM_JibAng) - _mJib_pulleyR
 
 					call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR,
 																x2 = HM_WorkingR,

@@ -1,0 +1,167 @@
+!======================================================================================================
+!	TAKENAKA CRANE LIBRARY 
+!======================================================================================================
+!	VER : AC 20
+
+!----------------------------------------------------------------------------------------------------
+!	General
+!----------------------------------------------------------------------------------------------------
+EPS = 0.0001
+unID = 1000
+
+!	Crane Information
+HM_CraneType = 3
+HM_CraneName = "SCX3500"
+HM_CraneMaker = "日立住友"
+
+!	Crane Size
+HM_CraneWidth = 10.440
+HM_CraneDepth = 8.750
+HM_CraneHeight = 1.930
+
+!	Crane Origin (Center Point)
+_mCraneOriginX = 0
+_mCraneOriginY = 0
+
+!	Crane Mode
+MODE_HEAVY_BOOM = 1
+MODE_MAIN_BOOM = 2
+MODE_LONG_BOOM = 3
+MODE_LUFFING_JIB = 4
+MODE_TOWER_BOOM = 5
+
+dim	_stCraneMode[]
+	_stCraneMode[1] = "ヘビーブーム"
+	_stCraneMode[2] = "メインブーム"
+	_stCraneMode[3] = "ロングブーム"
+	_stCraneMode[4] = "ラッフィングジブ"
+	_stCraneMode[5] = "タワー"
+
+!	Boom Type Index
+_IDX_CRANE_TYPE = 1000
+_TYPE_MAIN_BOOM = _IDX_CRANE_TYPE + 1
+_TYPE_MAIN_BOOM_JIB = _IDX_CRANE_TYPE + 2
+_TYPE_TOWER_BOOM = _IDX_CRANE_TYPE + 3
+_TYPE_TOWER_BOOM_JIB = _IDX_CRANE_TYPE + 4
+
+dim	_stBoomType[]
+	_stBoomType[1] = "MAIN BOOM"
+	_stBoomType[2] = "MAIN BOOM + JIB"
+	_stBoomType[3] = "TOWER BOOM"
+	_stBoomType[4] = "TOWER BOOM + JIB"
+
+!	Crane Specification
+SPEC_STANDARD = 1
+SPEC_SMALL_SPIN = 2
+
+dim	stCraneSpec[]
+	stCraneSpec[1] = "標準仕様"
+	stCraneSpec[2] = "⼩旋回仕様"
+
+!	Crane Sub Specification
+SUB_SPEC_MAIN_BOOM = 1
+SUB_SPEC_AUX_SHEAVE = 2
+SUB_SPEC_MAIN_BOOM_AUX_SHEAVE = 3
+
+dim	stCraneSubSpec[]
+	stCraneSubSpec[1] = "主ブーム"
+	stCraneSubSpec[2] = "補助シーブ"
+	stCraneSubSpec[3] = "補助シーブ付き主ブーム"
+
+!	'HM_Judgement' Index
+SAFETY = 1
+WARNING_YELLOW = 2
+WARNING_RED = 3
+
+!-----------------------------------------------------------------------------------------------
+!	Hook
+!-----------------------------------------------------------------------------------------------
+!	Hook Index
+HOOK_TYPE_S_SIZE = 4
+HOOK_TYPE_M_SIZE = 5
+HOOK_TYPE_L_SIZE = 6
+
+!	List
+HOOK_180T = 1
+HOOK_100T = 2
+HOOK_45T = 3
+HOOK_15T = 4
+
+dim	stHookList[]
+	stHookList[1] = "180t"
+	stHookList[2] = "100t"
+	stHookList[3] = "45t"
+	stHookList[4] = "15t"
+
+!	Hook Rotation Angle
+_aRot_Hook = 90
+if	HM_HookType = HOOK_TYPE_S_SIZE	then
+	_aRot_Hook = 0
+endif
+
+!----------------------------------------------------------------------------------------------------
+!	Size 
+!----------------------------------------------------------------------------------------------------
+_xPosBoom = 1.500
+_yPosBoom = 0
+
+!	Radius
+_xOffset_Rad = 0
+if	HM_HookType = HOOK_TYPE_S_SIZE	then
+	if	HM_CraneMode = MODE_MAIN_BOOM	then
+		if	HM_CraneSubSpec = SUB_SPEC_CRANE_JIB	then
+			_xOffset_Rad = 0.320
+		endif
+		if	HM_CraneSubSpec = SUB_SPEC_AUX_SHEAVE	then
+			_xOffset_Rad = 0.320
+		endif
+	endif
+	if	HM_CraneMode = MODE_TOWER_BOOM	then
+		_xOffset_Rad = 0.320
+	endif
+endif
+
+!	Part Pos
+if	HM_CraneMode = MODE_MAIN_BOOM	then
+	_xPosJib = 0
+	_zPosJib = 0
+	_zPosJibPulley = 0
+endif
+if	HM_CraneMode = MODE_TOWER_BOOM	then
+	_xPosJib = 1.500
+	_zPosJib = 2.200
+	_zPosJibPulley = 0.470
+endif
+
+_zPosMainPulley = 0
+if	HM_CraneMode = MODE_MAIN_BOOM	then
+	_zPosMainPulley = 1.600
+endif
+
+_aAuxSheave = 90
+_xPosAuxSheave = 0.9186
+_zPosAuxSheave = 1.1918
+
+!	Mast/Strut Index
+TYPE_MAST = 1
+TYPE_MAST_HEAVY_LIFT = 2
+TYPE_STRUT = 3
+TYPE_STRUT_HEAVY_LIFT = 4
+
+_mastType = TYPE_MAST
+_mastLth = 9.000
+if	HM_CraneMode = MODE_MAIN_BOOM	then
+	_xPosEnd = 6.200
+endif
+if	HM_CraneMode = MODE_TOWER_BOOM	then
+	_xPosEnd = 8.610
+endif
+
+!----------------------------------------------------------------------------------------------------
+!	Rated Load
+!----------------------------------------------------------------------------------------------------
+
+
+!----------------------------------------------------------------------------------------------------
+!	Calculation
+!----------------------------------------------------------------------------------------------------

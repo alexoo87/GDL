@@ -32,7 +32,11 @@ if	GLOB_MODPAR_NAME = "HM_CraneMode"	then
 		_default_boomLen = "48.0m"
 	endif
 	if	HM_CraneMode = MODE_LUFFING_JIB	then
-		_default_boomLen = "48.0m"
+		_default_boomLen = "30.0m"
+
+		!	Boom Angle
+		_default_boomAng = 86
+		parameters	HM_boomAng = _default_boomAng
 	endif
 	_default_jibLen = "24.0m"
 
@@ -40,16 +44,19 @@ if	GLOB_MODPAR_NAME = "HM_CraneMode"	then
 				HM_JibLen = _default_jibLen
 endif
 
+if	GLOB_MODPAR_NAME = "HM_BoomLen"	goto	"reCalculate"
+
 !-----------------------------------------------------------------------------------------------
 !	Macro
 !-----------------------------------------------------------------------------------------------
-!	Global
-call	"HM_Global.gsm"	parameters	all
-
 !	Rated Load
+"reCalculate":
 call	"HM_mc_RatedLoad_Crawler.gsm"	parameters all	returned_parameters	_WorkingR_max,	_WorkingR_min
 parameters	_WorkingR_max = _WorkingR_max,
 			_WorkingR_min = _WorkingR_min
+
+!	Global
+call	"HM_Global.gsm"	parameters	all
 
 !	Suspended Load 
 call	"HM_mc_Suspendedloads.gsm"	parameters	all
@@ -60,44 +67,12 @@ call	"HM_mc_Suspendedloads.gsm"	parameters	all
 
 	!	Working Radius
 	!-----------------------------------------------------------------------------------------------
-	if	GLOB_MODPAR_NAME = "HM_WorkingR"	then
-		print	"check"
-	endif
 
 	!	Boom Angle
 	!-----------------------------------------------------------------------------------------------
-	if	HM_CraneMode = MODE_MAIN_BOOM | HM_CraneMode = MODE_LONG_BOOM	then
-		_bCondition_BoomAng_Min = ((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength <= 1 \
-								& (_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength >= -1)
-		_bCondition_BoomAng_Max = ((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength <= 1 \
-								& (_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength >= -1)
-		if	_bCondition_BoomAng_Min	then
-			_BoomAng_Min = acs((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
-		endif
-		if	_bCondition_BoomAng_Max	then
-			_BoomAng_Max = acs((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
-		endif
-
-		values	"HM_BoomAng"	range	[_BoomAng_Min,	_BoomAng_Max]
-	endif
 
 	!	Jib Angle
 	!-----------------------------------------------------------------------------------------------
-	if	HM_CraneMode = MODE_LUFFING_JIB	then
-		_bCondition_JibAng_Min = ((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength <= 1 \
-								& (_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength >= -1)
-		_bCondition_JibAng_Max = ((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength <= 1 \
-								& (_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength >= -1)
-
-		if	_bCondition_JibAng_Min	then
-			_JibAng_Min = acs((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength)
-		endif
-		if	_bCondition_JibAng_Max	then
-			_JibAng_Max = acs((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_jibAng) + _xOffset_Rad))/HM_JibLength)
-		endif
-
-		values	"HM_JibAng"	range	[_JibAng_Min, _JibAng_Max]
-	endif
 
 	! !	Jib Height
 	! !-----------------------------------------------------------------------------------------------
@@ -126,6 +101,8 @@ if	HM_CraneMode = MODE_MAIN_BOOM | HM_CraneMode = MODE_LONG_BOOM	then
 			HM_BoomAng = acs((HM_WorkingR - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
 		endif
 	endif
+
+	gosub	"range_BoomAng"
 endif
 
 !	Jib Length
@@ -150,15 +127,85 @@ if	HM_CraneMode = MODE_LUFFING_JIB	then
 			endif
 		endif
 	endif
+
+	gosub	"range_JibAng"
 endif
 
 !-----------------------------------------------------------------------------------------------
 !	Define Values
 !-----------------------------------------------------------------------------------------------
 !	Hook
-HM_HookType = 5
-HM_HookRadius = 0.280
-HM_HookHeight = 1.350
+!-----------------------------------------------------------------------------------------------
+	!	Hook List
+	dim	_iHookList[],	_stHookList[]
+
+	if	HM_CraneMode = MODE_MAIN_BOOM	then
+		_idx_HookList = 1
+	endif
+	if	HM_CraneMode = MODE_LONG_BOOM | HM_CraneMode = MODE_LUFFING_JIB	then
+		_idx_HookList = 2
+	endif
+
+	for	i = 1	to	4 - (_idx_HookList - 1)
+		_iHookList[i] = _idx_HookList
+		_stHookList[i] = stHookList[_idx_HookList]
+
+		_idx_HookList = _idx_HookList + 1
+	next	i
+
+	values{2}	"HM_HookList"	_iHookList,	_stHookList
+
+	!	Hook Size
+		!	L Size
+		if	HM_HookList = HOOK_180T	then
+			HM_HookType = HOOK_TYPE_L_SIZE
+			HM_HookRadius = 0.282
+			HM_HookHeight = 1.425
+			HM_HookWeight = 3.1
+		endif
+		if	HM_HookList = HOOK_120T	then
+			HM_HookType = HOOK_TYPE_L_SIZE
+			HM_HookRadius = 0.282
+			HM_HookHeight = 1.450
+			HM_HookWeight = 3.5
+		endif
+
+		!	M Size
+		if	HM_HookList = HOOK_70T	then
+			HM_HookType = HOOK_TYPE_M_SIZE
+			HM_HookRadius = 0.282
+			HM_HookHeight = 1.350
+			HM_HookWeight = 3.1
+		endif
+		if	HM_HookList = HOOK_40T	then
+			HM_HookType = HOOK_TYPE_M_SIZE
+			HM_HookRadius = 0.282
+			HM_HookHeight = 1.130
+			HM_HookWeight = 2.0
+		endif
+
+	!	Hook Wire Max Value
+	if	HM_CraneMode = MODE_MAIN_BOOM	then
+		if	HM_HookList = HOOK_180T	then	_maxWireLth = 4.600
+		if	HM_HookList = HOOK_120T	then	_maxWireLth = 4.700
+		if	HM_HookList = HOOK_70T	then	_maxWireLth = 4.500
+		if	HM_HookList = HOOK_40T	then	_maxWireLth = 4.300
+	endif
+	if	HM_CraneMode = MODE_LONG_BOOM	then
+		! if	HM_HookList = HOOK_180T	then	_maxWireLth = 4.600
+		if	HM_HookList = HOOK_120T	then	_maxWireLth = 6.200
+		if	HM_HookList = HOOK_70T	then	_maxWireLth = 6.000
+		if	HM_HookList = HOOK_40T	then	_maxWireLth = 5.800
+	endif
+	if	HM_CraneMode = MODE_LUFFING_JIB	then
+		! if	HM_HookList = HOOK_180T	then	_maxWireLth = 4.600
+		if	HM_HookList = HOOK_120T	then	_maxWireLth = 6.000
+		if	HM_HookList = HOOK_70T	then	_maxWireLth = 5.800
+		if	HM_HookList = HOOK_40T	then	_maxWireLth = 5.600
+	endif
+
+	values	"HM_JibWireLen"		range	(0.1, _maxWireLth]
+	values	"HM_boomWireLen"	range	(0.1, _maxWireLth]
 
 !	Crane Mode
 values{2}	"HM_BoomType"	_TYPE_MAIN_BOOM,		_stBoomType[1],
@@ -224,7 +271,8 @@ endif
 !	Hook
 parameters	HM_HookType = HM_HookType,
 			HM_HookRadius = HM_HookRadius,
-			HM_HookHeight = HM_HookHeight
+			HM_HookHeight = HM_HookHeight,
+			HM_HookWeight = HM_HookWeight
 
 !	Working Radius
 
@@ -245,4 +293,78 @@ endif
 lock	"HM_Judgement"
 
 !	Hook Size
-lock	"HM_HookRadius", "HM_HookHeight"
+lock	"HM_HookRadius", "HM_HookHeight", "HM_HookWeight"
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"range_BoomAng":
+!-----------------------------------------------------------------------------------------------
+
+	!	Get Boom Angle Limit Value
+	_bCondition_BoomAng_Max = ((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength <= 1 \
+							& (_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength >= -1)
+	_bCondition_BoomAng_Min = ((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength <= 1 \
+							& (_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength >= -1)
+
+	if	_bCondition_BoomAng_Max	then
+		_BoomAng_Max = acs((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
+	endif
+	if	_bCondition_BoomAng_Min	then
+		_BoomAng_Min = acs((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(HM_BoomAng) + _xOffset_Rad))/HM_BoomLength)
+	endif
+
+	for	r = 1	to	10
+		_bCondition_BoomAng_Max = ((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Max) + _xOffset_Rad))/HM_BoomLength <= 1 \
+								& (_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Max) + _xOffset_Rad))/HM_BoomLength >= -1)
+		_bCondition_BoomAng_Min = ((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Min) + _xOffset_Rad))/HM_BoomLength <= 1 \
+								& (_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Min) + _xOffset_Rad))/HM_BoomLength >= -1)
+
+		if	_bCondition_BoomAng_Max	then
+			_BoomAng_Max = acs((_WorkingR_min - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Max) + _xOffset_Rad))/HM_BoomLength)
+		endif
+		if	_bCondition_BoomAng_Min	then
+			_BoomAng_Min = acs((_WorkingR_max - (_xPosBoom + _zPosMainPulley*sin(_BoomAng_Min) + _xOffset_Rad))/HM_BoomLength)
+		endif
+	next	r
+
+	values	"HM_BoomAng"	range	[_BoomAng_Min,	_BoomAng_Max]
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"range_JibAng":
+!-----------------------------------------------------------------------------------------------
+
+	!	Get Jib Angle Limit Value
+	_bCondition_JibAng_Max = ((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength <= 1 \
+							& (_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength >= -1)
+	_bCondition_JibAng_Min = ((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength <= 1 \
+							& (_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength >= -1)
+
+	if	_bCondition_JibAng_Max	then
+		_JibAng_Max = acs((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength)
+	endif
+	if	_bCondition_JibAng_Min	then
+		_JibAng_Min = acs((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(HM_JibAng) + _xOffset_Rad))/HM_JibLength)
+	endif
+
+	for	r = 1	to	5
+		_bCondition_JibAng_Max = ((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Max) + _xOffset_Rad))/HM_JibLength <= 1 \
+								& (_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Max) + _xOffset_Rad))/HM_JibLength >= -1)
+		_bCondition_JibAng_Min = ((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Min) + _xOffset_Rad))/HM_JibLength <= 1 \
+								& (_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Min) + _xOffset_Rad))/HM_JibLength >= -1)
+
+		if	_bCondition_JibAng_Max	then
+			_JibAng_Max = acs((_WorkingR_min - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Max) + _xOffset_Rad))/HM_JibLength)
+		endif
+		if	_bCondition_JibAng_Min	then
+			_JibAng_Min = acs((_WorkingR_max - (_xPosBoom + (HM_BoomLength + _xPosJib)*cos(HM_BoomAng) + _zPosJib*sin(HM_BoomAng) + _zPosJibPulley*sin(_JibAng_Min) + _xOffset_Rad))/HM_JibLength)
+		endif
+	next	r
+
+	values	"HM_JibAng"	range	[_JibAng_Min,	_JibAng_Max]
+
+return

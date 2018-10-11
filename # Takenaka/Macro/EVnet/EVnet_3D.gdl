@@ -1,0 +1,99 @@
+!===============================================================================================
+!	Elevator Net
+!===============================================================================================
+
+!	Common Settings
+!-----------------------------------------------------------------------------------------------
+material	matNet
+
+! hotspot	0,		0,	0,		unID	:	unID = unID + 1
+! hotspot	netWdt,	0,	0,		unID	:	unID = unID + 1
+! hotspot	netWdt,	0,	netHgt,	unID	:	unID = unID + 1
+! hotspot	0,		0,	netHgt,	unID	:	unID = unID + 1
+
+!	Shape
+!-----------------------------------------------------------------------------------------------
+
+	!	Cut
+	_nCut = 0
+	cutplane{3}	1,	1,	0,	1,	1+2+4+256	:	_nCut = _nCut + 1
+	addz	netHgt
+	cutplane{3}	1,	1,	0,	0,	1+2+4+256	:	_nCut = _nCut + 1
+	del 1
+	roty	90
+		cutplane{3}	1,	1,	0,	1,	1+2+4+256	:	_nCut = _nCut + 1
+		addz	netWdt
+			cutplane{3}	1,	1,	0,	0,	1+2+4+256	:	_nCut = _nCut + 1
+		del 1
+	del 1
+
+	!	Net
+	_nWidth = int(netWdt/offsetX)
+	_nHeight = int(netHgt/offsetY)
+	_aNet = atn(offsetY/offsetX)
+
+	_netHgt = netHgt + 0.100
+
+	for	i = 1	to	(_nWidth + 1)
+		addx	offsetX*(i - 1)
+			if	GLOB_FEEDBACK_MODE	then
+				lin_	0,	0,	0,	_netHgt/tan(_aNet),	0,	_netHgt
+			else
+				put	-0.003,	-0.003,	1,
+					-0.003,	0.003,	1,
+					0.003,	0.003,	1,
+					0.003,	-0.003,	1,
+					-0.003 + _netHgt/tan(_aNet),	-0.003,	_netHgt,
+					-0.003 + _netHgt/tan(_aNet),	0.003,	_netHgt,
+					0.003 + _netHgt/tan(_aNet),		0.003,	_netHgt,
+					0.003 + _netHgt/tan(_aNet),		-0.003,	_netHgt
+
+				ruled	(nsp/3)/2,	1+2+4,	get(nsp)
+			endif
+		del 1
+	next	i
+
+	for	i = 1	to	_nHeight
+		addx	-offsetX*i
+			if	GLOB_FEEDBACK_MODE	then
+				lin_	0,	0,	0,	_netHgt/tan(_aNet),	0,	_netHgt
+			else
+				put	-0.003,	-0.003,	1,
+					-0.003,	0.003,	1,
+					0.003,	0.003,	1,
+					0.003,	-0.003,	1,
+					-0.003 + _netHgt/tan(_aNet),	-0.003,	_netHgt,
+					-0.003 + _netHgt/tan(_aNet),	0.003,	_netHgt,
+					0.003 + _netHgt/tan(_aNet),		0.003,	_netHgt,
+					0.003 + _netHgt/tan(_aNet),		-0.003,	_netHgt
+
+				ruled	(nsp/3)/2,	1+2+4,	get(nsp)
+			endif
+		del 1
+	next	i
+
+	for	i = 1	to	(_nWidth + _nHeight + 2)
+		addx	offsetX*(i - 1)
+			if	GLOB_FEEDBACK_MODE	then
+				lin_	0,	0,	0,	-_netHgt/tan(_aNet),	0,	_netHgt
+			else
+				put	-0.003,	-0.003,	1,
+					-0.003,	0.003,	1,
+					0.003,	0.003,	1,
+					0.003,	-0.003,	1,
+					-0.003 - _netHgt/tan(_aNet),	-0.003,	_netHgt,
+					-0.003 - _netHgt/tan(_aNet),	0.003,	_netHgt,
+					0.003 - _netHgt/tan(_aNet),		0.003,	_netHgt,
+					0.003 - _netHgt/tan(_aNet),		-0.003,	_netHgt
+
+				ruled	(nsp/3)/2,	1+2+4,	get(nsp)
+			endif
+		del 1
+	next	i
+
+	!	Cut
+	if	_nCut > eps	then
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+	endif

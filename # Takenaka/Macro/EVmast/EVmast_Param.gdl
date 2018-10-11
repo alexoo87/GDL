@@ -1,0 +1,21 @@
+!===============================================================================================
+!	Elevator Mast
+!===============================================================================================
+
+!	Mast Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMastType"	MAST_F_TYPE,	_stMastType[MAST_F_TYPE],
+						MAST_B_TYPE,	_stMastType[MAST_B_TYPE]
+
+!	Rail Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iRailType"	RAIL_NONE,		_stRailType[RAIL_NONE],
+						RAIL_H_TYPE,	_stRailType[RAIL_H_TYPE],
+						RAIL_C_TYPE,	_stRailType[RAIL_C_TYPE]
+
+!	Mast End Tip Height
+!-----------------------------------------------------------------------------------------------
+_endTipHgt = mastHgt*nMast
+
+parameters	endTipHgt = _endTipHgt
+lock	"endTipHgt"

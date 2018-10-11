@@ -100,6 +100,10 @@ define style{2}	"HM_style" HM_2D_textFont, HM_2D_textSize/1000*100,	0
 	poly2_b	nsp/3,	2+4,	 HM_2D_fillPen,	 HM_2D_fillBackPen,
 			get(nsp)
 
+		hotarc2	0,	0,	HM_WorkingR,	0,	360,	unID	:	unID = unID + 1
+		hotarc2	0,	0,	_WorkingR_min,	0,	360,	unID	:	unID = unID + 1
+		hotarc2	0,	0,	_WorkingR_max,	0,	360,	unID	:	unID = unID + 1
+
 		!	Dot
 		_aModMax = 10
 		_aModMin = _aModMax*(_WorkingR_max/_WorkingR_min)

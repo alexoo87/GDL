@@ -1,0 +1,89 @@
+!===============================================================================================
+!	HSL - 950
+!===============================================================================================
+
+!	Elevator Span Length
+!-----------------------------------------------------------------------------------------------
+values{2}	"iSpanLength"	SPAN_LENGTH_54,	_stSpanLength[SPAN_LENGTH_54],
+							SPAN_LENGTH_36,	_stSpanLength[SPAN_LENGTH_36]
+
+	!	Elevator Size
+	if	iSpanLength = SPAN_LENGTH_54	then
+		if	iMastType = MAST_F_TYPE	then	_ev_width = 5.098
+		if	iMastType = MAST_B_TYPE	then	_ev_width = 4.898
+	endif
+	if	iSpanLength = SPAN_LENGTH_36	then
+		if	iMastType = MAST_F_TYPE	then	_ev_width = 3.520
+		if	iMastType = MAST_B_TYPE	then	_ev_width = 3.320
+	endif
+
+	_ev_depth = 1.280
+
+	parameters	ev_width = _ev_width,
+				ev_depth = _ev_depth
+
+	lock	"ev_width", "ev_depth"
+
+	!	Elevator Z Position
+	_machHgt = 1.000
+	values	"ev_zPos"	range	[0.300,	endTipHgt - _machHgt]
+
+!	Mast Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iMastType"	MAST_F_TYPE,	_stMastType[MAST_F_TYPE],
+						MAST_B_TYPE,	_stMastType[MAST_B_TYPE]
+
+!	Mast End Tip Height
+!-----------------------------------------------------------------------------------------------
+_endTipHgt = mastHgt*nMast
+
+parameters	endTipHgt = _endTipHgt
+lock	"endTipHgt"
+
+!	Mast
+!-----------------------------------------------------------------------------------------------
+parameters	mastHgt = 1.600
+lock	"mastHgt"
+
+lock	"radMast", "mastWdt", "mastDpt"
+
+values	"nMast"	range	[1,	46]
+
+if	GLOB_MODPAR_NAME = "hspHgt"	then
+	parameters	nMast = hspHgt/mastHgt
+
+	if	ev_zPos > (hspHgt - _machHgt)	then
+		parameters	ev_zPos = (hspHgt - _machHgt - 0.050)
+	endif
+else
+	parameters	hspHgt = mastHgt*nMast
+endif
+
+values	"hspHgt"	range	[0,	]	step	mastHgt,	mastHgt
+
+!	Rail Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"iRailType"	RAIL_NONE,		_stRailType[RAIL_NONE],
+						RAIL_H_TYPE,	_stRailType[RAIL_H_TYPE],
+						RAIL_C_TYPE,	_stRailType[RAIL_C_TYPE]
+
+lock	"iRailType"
+
+!	Rail
+!-----------------------------------------------------------------------------------------------
+if	iMastType = MAST_F_TYPE	then	_xPosRail = 0.1715
+if	iMastType = MAST_B_TYPE	then	_xPosRail = 0.0715
+_yPosRail = 0
+_railWdt = 0.056
+_railDpt = 0.050
+_railSideThk = 0.009
+_railCenterThk = 0.022
+
+parameters	xPosRail = _xPosRail,
+			yPosRail = _yPosRail,
+			railWdt = _railWdt,
+			railDpt = _railDpt,
+			railSideThk = _railSideThk,
+			railCenterThk = _railCenterThk
+
+lock	"tRailSettings"

@@ -1,0 +1,438 @@
+!===============================================================================================
+!	KRD - 950
+!===============================================================================================
+
+!	Common
+!-----------------------------------------------------------------------------------------------
+pen		ev_3d_pen
+resol	8
+
+_yOffset = 0.020
+
+!-----------------------------------------------------------------------------------------------
+!	Long Span Elevator
+!-----------------------------------------------------------------------------------------------
+
+	!	Basement
+	!-----------------------------------------------------------------------------------------------
+		material	ev_matMast
+
+		_baseThk = 0.009
+
+		for	i = 1	to	2
+			mulx	-2*i + 3
+				addx	-(ev_width/2 - xPosRail)
+					addy	_yOffset
+						!	Basement Plate
+						put	-0.100,	-0.290,	15,
+							-0.140,	-0.250,	15,
+							-0.140,	0.250,	15,
+							-0.100,	0.290,	15,
+							0.100,	0.290,	15,
+							0.140,	0.250,	15,
+							0.140,	-0.250,	15,
+							0.100,	-0.290,	15
+
+						prism_	nsp/3,	_baseThk,	get(nsp)
+
+						!	Basement Rail
+						addz	_baseThk
+							for	j = 1	to	2
+								muly	-2*j + 3
+									addy	yPosRail
+										put	-railWdt/2,					0,				15,
+											-railWdt/2,					railDpt,		15,
+											-railWdt/2 + railSideThk,	railDpt,		15,
+											-railWdt/2 + railSideThk,	railCenterThk,	15,
+											railWdt/2 - railSideThk,	railCenterThk,	15,
+											railWdt/2 - railSideThk,	railDpt,		15,
+											railWdt/2,					railDpt,		15,
+											railWdt/2,					0,				15
+
+										prism_	nsp/3,	0.100,	get(nsp)
+									del 1
+								del 1
+							next	j
+						del 1
+
+						!	Basement Mast
+						addz	_baseThk + 0.030
+							addx	-xPosRail
+								for	j = 1	to	2
+									muly	-2*j + 3
+										addy	0.180
+											cylind	0.070,	radMast
+										del 1
+									del 1
+								next	j
+							del 1
+						del 1
+					del 1
+				del 1
+			del 1
+		next	i
+
+	!	Mast
+	!-----------------------------------------------------------------------------------------------
+		_zPosMast = _baseThk + 0.100
+
+		addz	_zPosMast
+			addy	_yOffset
+				for	i = 1	to	2
+					mulx	-2*i + 3
+						addx	-ev_width/2
+							call	"HM_mc_EVmast.gsm"	parameters	all	bFullLth_Top = 1
+
+							gosub	"hsp_MastHeight"
+						del 1
+					del 1
+				next	i
+			del 1
+		del 1
+
+	!	Elevator
+	!-----------------------------------------------------------------------------------------------
+		_zPosElev = ev_zPos
+
+		!	Hotspot
+		hotspot	0,	0,	0,			unID,	ev_zPos,	1+128	:	unID = unID + 1
+		hotspot	0,	0,	-1,			unID,	ev_zPos,	3		:	unID = unID + 1
+		hotspot	0,	0,	ev_zPos,	unID,	ev_zPos,	2		:	unID = unID + 1
+
+		addz	_zPosElev
+
+			!	Elevator Base - Side
+			_evBaseHgt_Side = 0.430
+
+			for	i = 1	to	2
+				mulx	-2*i + 3
+					addx	-ev_width/2
+
+						for	j = 1	to	2
+							muly	-2*j + 3
+								put	0.075,	0.315,	15,
+									0.075,	0.380,	15,
+									0.410,	0.380,	15,
+									0.410,	0.315,	15
+
+								prism_	nsp/3,	-_evBaseHgt_Side,	get(nsp)
+							del 1
+						next	j
+
+					del 1
+				del 1
+			next	i
+
+			!	Elevator Base - Center
+			_evBaseHgt_Center = 0.040
+
+			put	-3.120,	-0.520,		15,
+				-3.120,	-0.3105,	15,
+				-3.070,	-0.3105,	15,
+				-3.070,	0.3105,		15,
+				-3.120,	0.3105,		15,
+				-3.120,	0.520,		15,
+				-1.800,	0.520,		15,
+				-1.800,	0.535,		15,
+				1.800,	0.535,		15,
+				1.800,	0.520,		15,
+				3.120,	0.520,		15,
+				3.120,	0.3105,		15,
+				3.070,	0.3105,		15,
+				3.070,	-0.3105,	15,
+				3.120,	-0.3105,	15,
+				3.120,	-0.520,		15,
+				1.800,	-0.520,		15,
+				1.800,	-0.535,		15,
+				-1.800,	-0.535,		15,
+				-1.800,	-0.520,		15
+
+			prism_	nsp/3,	-_evBaseHgt_Center,	get(nsp)
+
+			addz	-_evBaseHgt_Center
+				for	i = 1	to	2
+					mulx	-2*i + 3
+						addx	-(ev_width/2 - 0.425)
+							call	"HM_mc_EVtruss.gsm"	parameters	trussWdt = 0.990,
+																	trussHgt = 0.410,
+																	trussLth = 1.320 - 0.030,
+																	bHideUpr = 1,
+																	uprAddLth = 0.015,
+																	uprWdt = 0.050,
+																	uprHgt = 0,
+																	lwrAddLth = 0.015,
+																	lwrWdt = 0.050,
+																	lwrHgt = 0.050,
+																	midWdt = 0.030,
+																	midHgt = 0.030
+
+							addx	1.320
+								call	"HM_mc_EVtruss.gsm"	parameters	trussWdt = 0.990,
+																		trussHgt = 0.410,
+																		trussLth = 1.800 - 0.030,
+																		bHideUpr = 1,
+																		uprAddLth = 0.015,
+																		uprWdt = 0.050,
+																		uprHgt = 0,
+																		lwrAddLth = 0.015,
+																		lwrWdt = 0.050,
+																		lwrHgt = 0.050,
+																		midWdt = 0.030,
+																		midHgt = 0.030
+							del 1
+						del 1
+					del 1
+				next	i
+			del 1
+
+			!	Elevator Room
+			_evRoomHgt = 1.8695
+
+			for	i = 1	to	2
+				mulx	-2*i + 3
+					addx	-(ev_width/2 - 0.515)
+
+						!	Column/Top Beam/Net - L
+						for	j = 1	to	2
+							muly	-2*j + 3
+								addy	0.485
+									!	Column
+									put	-0.017,	-0.017,	15,
+										-0.017,	0.017,	15,
+										0.017,	0.017,	15,
+										0.017,	-0.017,	15
+
+									prism_	nsp/3,	_evRoomHgt,	get(nsp)
+
+									!	Top Beam - Horizontal
+									addz	_evRoomHgt
+										put	-0.017,			-0.017,	15,
+											-0.017,			0.017,	15,
+											0.966 + 0.017,	0.017,	15,
+											0.966 + 0.017,	-0.017,	15
+
+										prism_	nsp/3,	0.034,	get(nsp)
+									del 1
+
+									!	Net - F/B
+									addx	0.017
+										call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.451,
+																				netHgt = _evRoomHgt,
+																				offsetX = 0.115,
+																				offsetY = 0.200
+									del 1
+								del 1
+							del 1
+						next	j
+
+						!	Net - Side
+						addy	-0.468
+							rotz	90
+								call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.932,
+																		netHgt = _evRoomHgt,
+																		offsetX = 0.115,
+																		offsetY = 0.200
+							del 1
+						del 1
+
+						!	Net - Top
+						add	0.017,	-0.468,	_evRoomHgt + 0.017
+							rotx	-90
+								call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.932,
+																		netHgt = 0.936,
+																		offsetX = 0.200,
+																		offsetY = 0.115
+							del 1
+						del 1
+
+						!	Top Beam - Vertical
+						addz	_evRoomHgt
+							put	-0.017,	-0.468,	15,
+								-0.017,	0.468,	15,
+								0.017,	0.468,	15,
+								0.017,	-0.468,	15
+
+							prism_	nsp/3,	0.034,	get(nsp)
+						del 1
+
+					del 1
+
+					!	Column/Door/Net - C
+					addx	-(ev_width/2 - 0.9955)
+						for	j = 1	to	2
+							muly	-2*j + 3
+								addy	0.485
+									!	Column
+									put	-0.0125,	-0.017,	15,
+										-0.0125,	0.017,	15,
+										0.0125,		0.017,	15,
+										0.0125,		-0.017,	15
+
+									prism_	nsp/3,	_evRoomHgt,	get(nsp)
+
+									!	Door
+									addx	0.031
+										!	Door Frame - L/R
+										addz	0.055
+											put	-0.0125,	-0.0125,	15,
+												-0.0125,	0.0125,		15,
+												0.0125,		0.0125,		15,
+												0.0125,		-0.0125,	15
+
+											prism_	nsp/3,	1.7595,	use(nsp)
+
+											addx	0.425
+												prism_	nsp/3,	1.7595,	get(nsp)
+											del 1
+										del 1
+
+										!	Door Frame - T/D
+										addz	0.055
+											put	0.0125,			-0.0125,	15,
+												0.0125,			0.0125,		15,
+												0.425 - 0.0125,	0.0125,		15,
+												0.425 - 0.0125,	-0.0125,	15
+
+											prism_	nsp/3,	0.025,	use(nsp)
+
+											addz	1.7345
+												prism_	nsp/3,	0.025,	get(nsp)
+											del 1
+										del 1
+
+										!	Door Net
+										addx	0.0125
+											addz	0.080
+												call	"HM_mc_EVnet.gsm"	parameters	netWdt = 0.400,
+																						netHgt = 1.7095,
+																						offsetX = 0.115,
+																						offsetY = 0.200
+											del 1
+										del 1
+									del 1
+								del 1
+							del 1
+						next	j
+					del 1
+
+					!	Column/Top Beam/Net - R
+					addx	-(ev_width/2 - 1.481)
+						!	Column
+						for	j = 1	to	2
+							muly	-2*j + 3
+								addy	0.485
+									put	-0.017,	-0.017,	15,
+										-0.017,	0.017,	15,
+										0.017,	0.017,	15,
+										0.017,	-0.017,	15
+
+									prism_	nsp/3,	_evRoomHgt,	get(nsp)
+								del 1
+							del 1
+						next	J
+
+						!	Top Beam - Vertical
+						addz	_evRoomHgt
+							put	-0.017,	-0.468,	15,
+								-0.017,	0.468,	15,
+								0.017,	0.468,	15,
+								0.017,	-0.468,	15
+
+							prism_	nsp/3,	0.034,	get(nsp)
+						del 1
+					del 1
+
+				del 1
+			next	i
+
+			!	Elevator Guard Rail
+			_radGR = 0.0125
+
+			for	i = 1	to	2
+				for	j = 1	to	2
+					mul	-2*i + 3,	-2*j + 3,	1
+						!	Guard Rail - Room Side
+						add	-(ev_width/2 - 1.7055),	0.485,	0
+							cylind	0.9475,	_radGR
+
+							addz	0.465
+								roty	-90
+									cylind	0.2075,	_radGR
+								del 1
+							del 1
+
+							addz	0.9475
+								rotz	180
+									elbow	0.100,	90,	_radGR
+								del 1
+							del 1
+
+							addz	0.9475 + 0.100
+								addx	-0.100
+									roty	-90
+										cylind	0.1075,	_radGR
+									del 1
+								del 1
+							del 1
+						del 1
+
+						!	Guard Rail - Center
+						add	-(ev_width/2 - 1.7425),	0.510,	0
+							cylind	0.800,	_radGR
+
+							addz	0.465
+								roty	90
+									cylind	1.775,	_radGR
+								del 1
+							del 1
+
+							addz	0.800
+								elbow	0.090,	90,	_radGR
+							del 1
+
+							addz	0.800 + 0.090
+								addx	0.090
+									roty	90
+										cylind	1.595,	_radGR
+									del 1
+								del 1
+							del 1
+
+							addx	1.775
+								cylind	0.800,	_radGR
+
+								addz	0.800
+									rotz	180
+										elbow	0.090,	90,	_radGR
+									del 1
+								del 1
+							del 1
+
+							addx	0.4125
+								cylind	0.890,	_radGR
+							del 1
+							addx	0.8875
+								cylind	0.890,	_radGR
+							del 1
+							addx	1.3625
+								cylind	0.890,	_radGR
+							del 1
+						del 1
+					del 1
+				next	j
+			next	i
+
+		del 1
+
+
+
+end
+
+!-----------------------------------------------------------------------------------------------
+"hsp_MastHeight":
+!-----------------------------------------------------------------------------------------------
+	hotspot	0,	0,	0,		unID,	hspHgt,	1+128,	nMast	:	unID = unID + 1
+	hotspot	0,	0,	-1,		unID,	hspHgt,	3,		nMast	:	unID = unID + 1
+	hotspot	0,	0,	hspHgt,	unID,	hspHgt,	2,		nMast	:	unID = unID + 1
+
+return

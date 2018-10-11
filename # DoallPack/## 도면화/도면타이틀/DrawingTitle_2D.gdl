@@ -29,6 +29,9 @@ unID = 100
 	if	iDrwName = DRW_NAME_DRAWING	then
 		_stDrwName = ac_drawingName
 	endif
+	if	iDrwName = DRW_NAME_CUSTOM	then
+		_stDrwName = stCustomDrw
+	endif
 
 	!	도면명 텍스트 정의
 	!-----------------------------------------------------------------------------------------------
@@ -38,12 +41,13 @@ unID = 100
 			_stDrwName
 	endparagraph
 
-	textblock	"drwN"	0,	8,	0,	txtDrwWF,	txtDrwCF,	0,	"drwNamePrg"
+	textblock	"drwN"	0,	9,	0,	txtDrwWF,	txtDrwCF,	0,	"drwNamePrg"
 
 	r = request ("TEXTBLOCK_INFO", "drwN", drwNwdt, drwNhgt)				!	도면명 길이 / 높이 : drwNwdt / drwNhgt
 	r = request	("Height_of_style",	"drwNsty",	drwNstyHgt)
 
 	_txtLth = drwNwdt
+	! _txtLth = stw(_stDrwName)
 	if	minTxtLth > eps	then
 		if	drwNwdt - minTxtLth < eps	then
 			_txtLth = minTxtLth
@@ -95,17 +99,19 @@ fill	65
 !	도면명
 !-----------------------------------------------------------------------------------------------
 
-	richtext2	Rd*2 + RdOff + _txtLth/2,	0,	"drwN"
+	richtext2	Rd*2 + RdOff + _txtLth,	0,	"drwN"
 	
-	! add2	Rd*2 + RdOff,	0
-	! 	put	0,			0,			0,
-	! 		_txtLth,	0,			0,
-	! 		_txtLth,	drwNhgt,	0,
-	! 		0,			drwNhgt,	0,
-	! 		0,			0,			0
+	add2	Rd*2 + RdOff,	0
+		if	GLOB_PREVIEW_MODE = 0	then
+			put	0,			0,			1,
+				_txtLth,	0,			1,
+				_txtLth,	drwNhgt,	1,
+				0,			drwNhgt,	1,
+				0,			0,			1
 
-	! 	poly2_B	nsp/3,	2,	0,	0,	get(nsp)
-	! del 1
+			poly2_B	nsp/3,	2,	0,	0,	get(nsp)
+		endif
+	del 1
 
 !-----------------------------------------------------------------------------------------------
 !	스케일
@@ -121,22 +127,22 @@ fill	65
 		_stScaleA3 = ""
 		if	iTitleType = TITLE_TYPE1	then
 			!	스케일
-			txtScalePosY_A1 = txtSclSize*0.2/1000
+			_yPosScale_A1 = txtSclSize*0.2/1000
 			ScaleNum_A3 = "1:"
 			ScaleNum_A1 = "1:"
 
 			ScaleTxt_A1 = "Scale A1: "	
 			if	not(bScaleA1)	then
-				txtScalePosY_A3 = txtSclSize*0.2/1000
+				_yPosScale_A3 = txtSclSize*0.2/1000
 				ScaleTxt_A3 = "Scale A3: "
 			else
-				txtScalePosY_A3 = txtSclSize*1.7/1000
+				_yPosScale_A3 = txtSclSize*1.7/1000
 				ScaleTxt_A3 = "A3: "
 			endif
 		endif
 
 		if	iTitleType = TITLE_TYPE2	then
-			txtScalePosY_A3 = txtSclSize*0.2/1000
+			_yPosScale_A3 = txtSclSize*0.2/1000
 			ScaleNum_A3 = "1/"
 			ScaleTxt_A3 = "축척 : "
 
@@ -195,39 +201,55 @@ fill	65
 		textblock	"TB_drwScaleTxt_A1"	0,	3,	0,	txtSclWF,	txtSclCF,	0,	"drwScaleTxt_A1"
 		textblock	"TB_drwScaleNum_A1"	0,	3,	0,	txtSclWF,	txtSclCF,	0,	"drwScaleNum_A1"
 	
-		rr=request ("TEXTBLOCK_INFO", "TB_drwScaleNum_A1", drwScale_A1_Width, notUseData)
+		r = request ("TEXTBLOCK_INFO", "TB_drwScaleNum_A1", drwScale_A1_Width, notUseData)
 
 		maxScaleTextWidth = max(drwScale_A1_Width, drwScale_A3_Width)
 
+	!	Custom Text for Scale
+	!-----------------------------------------------------------------------------------------------
+		paragraph	"p_CustomS"	1,	0,	0,	0,	1
+				pen 	textPen
+				style	drwSsty
+				stCustomS
+		endparagraph
+
+		textblock	"tb_CustomS"	0,	3,	0,	txtSclWF,	txtSclCF,	0,	"p_CustomS"
+
+		_yPosScale_Custom = txtSclSize*0.2/1000
 
 !	텍스트 배치
 !-----------------------------------------------------------------------------------------------
 	if	bScale	then
-		if	iTitleType = TITLE_TYPE1	then
-			if	not(bScaleA1)	then
-				richtext2	Rd*2 + RdOff + _txtLth - drwScale_A3_Width,	-txtScalePosY_A3,	"TB_drwScaleTxt_A3"
-				richtext2	Rd*2 + RdOff + _txtLth,						-txtScalePosY_A3,	"TB_drwScaleNum_A3"
-			else
-				richtext2	Rd*2 + RdOff + _txtLth - maxScaleTextWidth,	-txtScalePosY_A1,	"TB_drwScaleTxt_A1"
-				richtext2	Rd*2 + RdOff + _txtLth,						-txtScalePosY_A1,	"TB_drwScaleNum_A1"
-				
-				richtext2	Rd*2 + RdOff + _txtLth - maxScaleTextWidth,	-txtScalePosY_A3,	"TB_drwScaleTxt_A3"
-				richtext2	Rd*2 + RdOff + _txtLth,						-txtScalePosY_A3,	"TB_drwScaleNum_A3"
+		if	iContentS = CONTENT_S_SCALE	then
+			if	iTitleType = TITLE_TYPE1	then
+				if	not(bScaleA1)	then
+					richtext2	Rd*2 + RdOff + _txtLth - drwScale_A3_Width,	-_yPosScale_A3,	"TB_drwScaleTxt_A3"
+					richtext2	Rd*2 + RdOff + _txtLth,						-_yPosScale_A3,	"TB_drwScaleNum_A3"
+				else
+					richtext2	Rd*2 + RdOff + _txtLth - maxScaleTextWidth,	-_yPosScale_A1,	"TB_drwScaleTxt_A1"
+					richtext2	Rd*2 + RdOff + _txtLth,						-_yPosScale_A1,	"TB_drwScaleNum_A1"
+					
+					richtext2	Rd*2 + RdOff + _txtLth - maxScaleTextWidth,	-_yPosScale_A3,	"TB_drwScaleTxt_A3"
+					richtext2	Rd*2 + RdOff + _txtLth,						-_yPosScale_A3,	"TB_drwScaleNum_A3"
+				endif
+			endif
+
+			if	iTitleType = TITLE_TYPE2	then
+				if	iScaleType = SCALE_A1	then
+					richtext2	Rd*2 + RdOff + _txtLth - drwScale_A3_Width,	-_yPosScale_A3,	"TB_drwScaleTxt_A1"
+					richtext2	Rd*2 + RdOff + _txtLth,						-_yPosScale_A3,	"TB_drwScaleNum_A1"
+				endif
+				if	iScaleType = SCALE_A3	then
+					richtext2	Rd*2 + RdOff + _txtLth - drwScale_A3_Width,	-_yPosScale_A3,	"TB_drwScaleTxt_A3"
+					richtext2	Rd*2 + RdOff + _txtLth,						-_yPosScale_A3,	"TB_drwScaleNum_A3"
+				endif
+				if	iScaleType = SCALE_A1_A3	then
+					richtext2	Rd*2 + RdOff + _txtLth,						-_yPosScale_A3,	"TB_drwScale_A1_A3"
+				endif
 			endif
 		endif
-
-		if	iTitleType = TITLE_TYPE2	then
-			if	iScaleType = SCALE_A1	then
-				richtext2	Rd*2 + RdOff + _txtLth - drwScale_A3_Width,	-txtScalePosY_A3,	"TB_drwScaleTxt_A1"
-				richtext2	Rd*2 + RdOff + _txtLth,						-txtScalePosY_A3,	"TB_drwScaleNum_A1"
-			endif
-			if	iScaleType = SCALE_A3	then
-				richtext2	Rd*2 + RdOff + _txtLth - drwScale_A3_Width,	-txtScalePosY_A3,	"TB_drwScaleTxt_A3"
-				richtext2	Rd*2 + RdOff + _txtLth,						-txtScalePosY_A3,	"TB_drwScaleNum_A3"
-			endif
-			if	iScaleType = SCALE_A1_A3	then
-				richtext2	Rd*2 + RdOff + _txtLth,						-txtScalePosY_A3,	"TB_drwScale_A1_A3"
-			endif
+		if	iContentS = CONTENT_S_CUSTOM	then
+			richtext2	Rd*2 + RdOff + _txtLth,	-_yPosScale_Custom,	"tb_CustomS"
 		endif
 	endif
 
@@ -240,10 +262,17 @@ _ratioText = 0.425
 
 !	도면ID
 !-----------------------------------------------------------------------------------------------
+if	iContentT = CONTENT_T_DRWID	then
+	_stDrwID = ac_drawingNumber
+endif
+if	iContentT = CONTENT_T_CUSTOM	then
+	_stDrwID = stCustomT
+endif
+
 paragraph	"drwIDB"	1,	0,	0,	0,	1
 		pen 	TextPen
 		style	drwIDsty
-		ac_drawingNumber
+		_stDrwID
 endparagraph
 
 textblock	"drwID"	0,	8,	0,	txtIDWF,	txtIDCF,	0,	"drwIDB"
@@ -259,9 +288,9 @@ if	iTitleType = TITLE_TYPE1	then
 			txtPrc
 	endparagraph
 
-	textblock	"drwPrc"	0,	5,	0,	txtIDWF,	txtIDCF,	0,	"drwPrcB"
+	textblock	"drwPrc"	0,	8,	0,	txtIDWF,	txtIDCF,	0,	"drwPrcB"
 
-	richtext2	Rd/5*3,	-Rd/7*3,	"drwPrc"
+	richtext2	Rd/5*3,	-Rd*_ratioText - _yPosText,	"drwPrc"
 
 	!	도면번호(우측하단)
 	!-----------------------------------------------------------------------------------------------
@@ -271,9 +300,9 @@ if	iTitleType = TITLE_TYPE1	then
 			txtCst
 	endparagraph
 
-	textblock	"drwCst"	0,	5,	0,	txtIDWF,	txtIDCF,	0,	"drwCstB"
+	textblock	"drwCst"	0,	8,	0,	txtIDWF,	txtIDCF,	0,	"drwCstB"
 
-	richtext2	Rd + Rd/5*2,	-Rd/7*3,	"drwCst"
+	richtext2	Rd + Rd/5*2,	-Rd*_ratioText - _yPosText,	"drwCst"
 else
 	if	iCircleType = CIRCLE_NORMAL	then
 		richtext2	Rd,	-_yPosText,	"drwID"
@@ -296,7 +325,7 @@ else
 			_stContent
 		endparagraph
 
-		textblock	"tb_drwContentB"	0,	8,	0,	txtIDWF,	txtIDCF,	0,	"p_drwContentB"
+		textblock	"tb_drwContentB"	0,	8,	0,	txtIDWF_B,	txtIDCF_B,	0,	"p_drwContentB"
 
 		richtext2	Rd,	-Rd*_ratioText - _yPosText,	"tb_drwContentB"
 	endif

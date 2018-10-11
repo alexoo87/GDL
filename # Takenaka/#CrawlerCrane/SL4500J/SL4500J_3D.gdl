@@ -85,23 +85,29 @@ rotz	HM_WorkingAng
 
 	!	Main Deck
 	!-----------------------------------------------------------------------------------------------
-		_zPosMain = 2.095
+		dim	_coorGR[][]
 
+		_zPosMain = 2.095
 		_mainDpt = 2.990
 
 		addz	_zPosMain
 			!	Main Object
 			addy	_mainDpt/2
 				rotx	90
-					put	-1.480,	0,		15,
-						-1.480,	0.039,	15,
-						-5.466,	0.380,	15,
-						-5.466,	1.457,	15,
-						-3.215,	1.746,	15,
-						0.275,	1.748,	15,
-						0.700,	1.589,	15,
-						1.800,	1.589,	15,
-						1.800,	0,		15
+					put	-1.480,		0,			15,
+						-1.480,		0.0393,		15,
+						-7.665,		0.577,		15,
+						-7.665,		1.194,		15,
+						-3.2012,	1.748,		15,
+						0.275,		1.748,		15,
+						0.700,		1.589,		15,
+						1.250,		1.570,		15,
+						1.668,		1.4191,		13,
+						1.600,		1.231,		900,
+						0,			-109.2829,	4000+13,
+						1.7551,		1.1048,		15,
+						1.3375,		0.5915,		15,
+						1.3375,		0,			15
 
 					prism_	nsp/3,	_mainDpt,	get(nsp)
 				del 1
@@ -145,7 +151,175 @@ rotz	HM_WorkingAng
 
 				del 1
 			next	j
+
+			!	Main Deck - 1
+			_zPosDeck_1 = 0.592
+			_deckThk_1 = 0.060
+
+			addz	_zPosDeck_1
+				!	Bottom
+				put	-1.038,	-1.948,	15,
+					-1.038,	-1.516,	15,
+					0.955,	-1.516,	15,
+					0.955,	-1.948,	15
+
+				prism_	nsp/3,	_deckThk_1,	get(nsp)
+
+				put	0.965,	-2.907,	15,
+					0.965,	-1.520,	15,
+					2.023,	-1.520,	15,
+					2.023,	-3.407,	15,
+					1.803,	-3.407,	15
+
+				prism_	nsp/3,	_deckThk_1,	get(nsp)
+
+					!	Guard Rail
+					_coorGR[1][1] = -1.008
+					_coorGR[1][2] = -1.948
+
+					_coorGR[2][1] = 0.965
+					_coorGR[2][2] = -1.948
+
+					_coorGR[3][1] = 0.965
+					_coorGR[3][2] = -2.907
+
+					_coorGR[4][1] = 1.803
+					_coorGR[4][2] = -3.407
+
+					_coorGR[5][1] = 1.993
+					_coorGR[5][2] = -3.407
+
+					call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 5,
+																		HM_GRail_Pt = _coorGR,
+																		HM_GRailType = 1,
+																		HM_GRailRef = 3,
+																		HM_GRailH = 1.000 + 0.025/2,
+																		HM_GRailD = 0.025,
+																		HM_GRailT = 0.025,
+																		HM_GRailDist = 1.000,
+																		HM_GRailDist_hori = 0.450,
+																		HM_matGRail = HM_matBody2
+			del 1
+
+			!	Main Deck - 2
+			_zPosDeck_2 = 1.543
+			_deckThk_2 = 0.060
+
+			addz	_zPosDeck_2
+				!	Flat
+				put	-3.190,	-1.948,	15,
+					-3.190,	-1.508,	15,
+					-1.090,	-1.508,	15,
+					-1.090,	-1.948,	15
+
+				prism_	nsp/3,	_deckThk_2,	get(nsp)
+
+					!	Guard Rail
+					_coorGR[1][1] = -3.160
+					_coorGR[1][2] = -1.948
+
+					_coorGR[2][1] = -1.120
+					_coorGR[2][2] = -1.948
+
+					call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 2,
+																		HM_GRail_Pt = _coorGR,
+																		HM_GRailType = 1,
+																		HM_GRailRef = 3,
+																		HM_GRailH = 1.000 + 0.025/2,
+																		HM_GRailD = 0.025,
+																		HM_GRailT = 0.025,
+																		HM_GRailDist = 2.040/2,
+																		HM_GRailDist_hori = 0.450,
+																		HM_matGRail = HM_matBody2
+
+				!	Slope
+				addz	-0.221
+					put	-4.990,	-1.948,	0,		15,
+						-4.990,	-1.508,	0,		15,
+						-3.280,	-1.508,	0.221,	15,
+						-3.280,	-1.948,	0.221,	15
+
+					slab_	nsp/4,	_deckThk_2,	get(nsp)
+
+					!	Guard Rail
+					add	-4.960,	-1.948,	0
+						call	"HM_mc_GuardRail.gsm"	parameters	all	HM_GRailType = 1,
+																		HM_GRailRef = 3,
+																		HM_GRailL = 1.650,
+																		HM_GRailH = 1.000 + 0.025/2,
+																		HM_GRailD = 0.025,
+																		HM_GRailT = 0.025,
+																		HM_GRailDist = 1.650/2,
+																		HM_zPosEnd = 0.221,
+																		HM_matGRail = HM_matBody2
+					del 1
+				del 1
+			del 1
 		del 1
+
+	!	Operator's Cab
+	!-----------------------------------------------------------------------------------------------
+		_zPosOper = 2.095 + 0.120
+
+		addz	_zPosOper
+			!	Deck
+			_deckThk_Oper = 0.260
+
+			put	2.0465,	-3.410,	15,
+				2.0465,	-1.675,	15,
+				3.9115,	-1.675,	15,
+				3.9115,	-3.410,	15
+
+			prism_	nsp/3,	_deckThk_Oper,	get(nsp)
+
+				!	Guard Rail
+				addz	0.195
+					_coorGR[1][1] = 2.0765
+					_coorGR[1][2] = -3.410
+
+					_coorGR[2][1] = 3.8815
+					_coorGR[2][2] = -3.410
+
+					call	"HM_mc_GuardRail_Line.gsm"	parameters	all	HM_GRail_PtNum = 2,
+																		HM_GRail_Pt = _coorGR,
+																		HM_GRailType = 1,
+																		HM_GRailRef = 3,
+																		HM_GRailH = 1.000 + 0.025/2,
+																		HM_GRailD = 0.025,
+																		HM_GRailT = 0.025,
+																		HM_GRailDist = 1.805/2,
+																		HM_GRailDist_hori = 0.450,
+																		HM_matGRail = HM_matBody2
+				del 1
+
+			!	Operator's Cab
+			add	2.0635,	-1.614,	_deckThk_Oper! + 0.040
+				call	"HM_mc_OperatorCab.gsm"	parameters	all	HM_OP_Type = 4,
+																HM_OP_SL = 1
+			del 1
+		del 1
+
+	!	Mast
+	!-----------------------------------------------------------------------------------------------\
+		_zPosMast = 3.326 + 0.358
+
+		addz	_zPosMast
+			addx	1.000
+				call	"HM_mc_MastStrut.gsm"	parameters	all	iType = 1,
+																bAnchor = 1,
+																xPosEnd = _xPosEnd,
+																zPosMast = 0.342,
+																distMast = 1.860,
+																mastLth = _mastLth,
+																mastThk = 0.032,
+																mastRad = 0.185,
+																pulleyRad_1 = 0.325,
+																pulleyRad_2 = 0.300
+
+
+			del 1
+		del 1
+
 
 	!	Boom/Jib
 	!-----------------------------------------------------------------------------------------------
@@ -191,6 +365,31 @@ rotz	HM_WorkingAng
 								endif
 							del 1
 						next	i
+
+						!	Strut
+						if	HM_CraneMode = MODE_LUFFING_JIB	then
+							!	Strut 1st
+							addx	1.360
+								addz	-1.650
+									roty	HM_BoomAng
+										call	"HM_mc_MastStrut.gsm"	parameters	all	iCraneName = 1,
+																						iType = 4,	
+																						iStrutLct = 1
+									del 1
+								del 1
+							del 1
+
+							!	Strut 2nd
+							addx	0.700
+								addz	0.300
+									roty	HM_BoomAng
+										call	"HM_mc_MastStrut.gsm"	parameters	all	iCraneName = 1,
+																						iType = 4,	
+																						iStrutLct = 2
+									del 1
+								del 1
+							del 1
+						endif
 					del 1
 				del 1
 			del 1
@@ -200,9 +399,11 @@ rotz	HM_WorkingAng
 	!-----------------------------------------------------------------------------------------------
 		if	(HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
 			_zAddPos = HM_BoomLength*sin(HM_BoomAng) - _zPosMainPulley*cos(HM_BoomAng)
+			_wireLen = HM_boomWireLen
 		endif
 		if	HM_CraneMode = MODE_LUFFING_JIB	then
 			_zAddPos = (HM_BoomLength + _xPosJib)*sin(HM_BoomAng) - _zPosJib*cos(HM_BoomAng) + HM_JibLength*sin(HM_JibAng) - _zPosJibPulley*cos(HM_JibAng)
+			_wireLen = HM_JibWireLen
 		endif
 
 
@@ -210,30 +411,52 @@ rotz	HM_WorkingAng
 		!-----------------------------------------------------------------------------------------------
 		_zPosJibPulley = _zPosBoom + _zAddPos
 
-		call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR,
-													x2 = HM_WorkingR,
+		call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR + 0.325,
+													x2 = HM_WorkingR + HM_HookRadius,
 													y1 = 0,
 													y2 = 0,
 													z1 = _zPosJibPulley,
-													z2 = _zPosJibPulley - HM_JibWireLen + HM_HookHeight
+													z2 = _zPosJibPulley - _wireLen + HM_HookHeight
+
+		call	"HM_mc_Wire.gsm"	parameters	all	x1 = HM_WorkingR - 0.325,
+													x2 = HM_WorkingR - HM_HookRadius,
+													y1 = 0,
+													y2 = 0,
+													z1 = _zPosJibPulley,
+													z2 = _zPosJibPulley - _wireLen + HM_HookHeight
 
 	!	Hook
 	!-----------------------------------------------------------------------------------------------
 		_zPosHook = _zPosBoom + _zAddPos
 
 		add	HM_WorkingR,	0,	_zPosHook
-			hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1+128	:	unID = unID + 1
-			hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3		:	unID = unID + 1
-			hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2		:	unID = unID + 1
+			if	(HM_CraneMode = MODE_MAIN_BOOM) | (HM_CraneMode = MODE_LONG_BOOM)	then
+				hotspot	0,	0,	0,					unID,	HM_boomWireLen,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	1,					unID,	HM_boomWireLen,	3		:	unID = unID + 1
+				hotspot	0,	0,	-HM_boomWireLen,	unID,	HM_boomWireLen,	2		:	unID = unID + 1
 
-			addz	-HM_JibWireLen
-				call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = 0.100
-			del 1
+				addz	-HM_boomWireLen
+					rotz	_aRot_Hook
+						call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = HM_HookThick
+					del 1
+				del 1
+			endif
+			if	HM_CraneMode = MODE_LUFFING_JIB	then
+				hotspot	0,	0,	0,				unID,	HM_JibWireLen,	1+128	:	unID = unID + 1
+				hotspot	0,	0,	1,				unID,	HM_JibWireLen,	3		:	unID = unID + 1
+				hotspot	0,	0,	-HM_JibWireLen,	unID,	HM_JibWireLen,	2		:	unID = unID + 1
+
+				addz	-HM_JibWireLen
+					rotz	_aRot_Hook
+						call	"HM_mc_Hook.gsm"	parameters	all	HM_HookThick = HM_HookThick
+					del 1
+				del 1
+			endif
 		del	1
 
 	!	Suspended Load
 	!----------------------------------------------------------------------------------------------------
-		_zPosLoad = _zPosHook - HM_JibWireLen
+		_zPosLoad = _zPosHook - _wireLen
 
 		if	HM_SLshow	then
 			add	HM_WorkingR,	0,	_zPosLoad

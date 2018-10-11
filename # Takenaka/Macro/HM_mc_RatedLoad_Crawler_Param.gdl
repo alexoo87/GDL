@@ -22,33 +22,6 @@ values "HM_2D_textFont" _stFont,	custom
 !	Define Range
 !----------------------------------------------------------------------------------------------------
 
-breakpoint	1
-
-	!	Working Radius
-	!----------------------------------------------------------------------------------------------------
-	_WorkingR_min = 0
-	_WorkingR_max = 0
-
-	_nCount_Zero = 0
-	for	i = 1	to	_iDataNum_row
-		if	_rLoad[i][_xPosData_RLoad] < eps	then
-			if	_nCount_Zero > eps 	then
-				_WorkingR_max = _rWorkR[i - 1]
-				i = _iDataNum_row
-			endif
-		else
-			if	_nCount_Zero < eps	then
-				_WorkingR_min = _rWorkR[i]
-				_nCount_Zero = _nCount_Zero + 1
-			endif
-			if	abs(i - _iDataNum_row) < eps	then
-				_WorkingR_max = _rWorkR[_iDataNum_row]
-			endif
-		endif
-	next	i
-
-	! values	"HM_WorkingR"	range [_WorkingR_min, _WorkingR_max]
-
 	!	Suspended Loads
 	!----------------------------------------------------------------------------------------------------
 	values	"HM_SLweight"	range [0, )
@@ -63,8 +36,6 @@ parameters	_JudgementColor = _JudgementColor
 parameters	HM_RatedLoad = str(_RatedLoad, 3, 2)
 parameters	HM_Judgement = _JudgementColor
 
-
-
 !	Warning Color
 if	_JudgementColor = SAFETY then
 	parameters	HM_matWarning = ""
@@ -78,9 +49,20 @@ else
 endif
 
 !	Working Radius
+_WorkingR_max = _WorkingR_max - eps/4
+_WorkingR_min = _WorkingR_min + eps/4
 parameters	_WorkingR_max = _WorkingR_max,
 			_WorkingR_min = _WorkingR_min
 
+_HM_WorkingR = HM_WorkingR
+if	HM_WorkingR - _WorkingR_max > eps	then
+	_HM_WorkingR = _WorkingR_max - eps/20
+endif
+if	HM_WorkingR - _WorkingR_min < -eps	then
+	_HM_WorkingR = _WorkingR_min + eps/20
+endif
+
+parameters	HM_WorkingR = _HM_WorkingR
 
 !----------------------------------------------------------------------------------------------------
 !	Hide / Lock

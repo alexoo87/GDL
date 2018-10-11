@@ -1,0 +1,220 @@
+!===============================================================================================
+!	Elevator Truss
+!===============================================================================================
+
+!	Common
+!-----------------------------------------------------------------------------------------------
+_b = 1
+
+material	matTruss
+
+!	Upper Parts
+!-----------------------------------------------------------------------------------------------
+	_uprLth = trussLth + uprAddLth*2
+
+	if	not(bHideUpr)	then
+		for	i = 1	to	2
+			muly	-2*i + 3
+				addy	trussWdt/2
+					addx	-uprAddLth
+						roty	90
+							put	-uprHgt/2,	-uprWdt/2,	15,
+								-uprHgt/2,	uprWdt/2,	15,
+								uprHgt/2,	uprWdt/2,	15,
+								uprHgt/2,	-uprWdt/2,	15
+
+							prism_	nsp/3,	_uprLth,	get(nsp)
+						del 1
+					del 1
+				del 1
+			del 1
+		next	i
+	endif
+
+!	Lower Parts
+!-----------------------------------------------------------------------------------------------
+	_lwrLth = trussLth - trussOff*2 + lwrAddLth*2
+
+	addz	-trussHgt
+		for	i = 1	to	2
+			muly	-2*i + 3
+				addy	trussWdt/2
+					addx	trussOff - lwrAddLth
+						roty	90
+							put	-lwrHgt/2,	-lwrWdt/2,	15,
+								-lwrHgt/2,	lwrWdt/2,	15,
+								lwrHgt/2,	lwrWdt/2,	15,
+								lwrHgt/2,	-lwrWdt/2,	15
+
+							prism_	nsp/3,	_lwrLth,	get(nsp)
+						del 1
+					del 1
+				del 1
+			del 1
+		next	i
+	del 1
+
+!	Middle Parts
+!-----------------------------------------------------------------------------------------------
+	!	Module Length
+	_originLth = (_lwrLth - lwrAddLth*2)
+	_modLth = 0.900
+	_nMod = round_int(_originLth/_modLth)
+
+	_midLth = _originLth/_nMod
+	_aMid = atn((_midLth/2)/trussHgt)
+	_diagLth = trussHgt/cos(_aMid)
+
+	!	Offset Value
+	_bOffset = (trussOff > eps)
+	_aOff = atn(trussOff/trussHgt)
+	_offLth = trussHgt/cos(_aOff)
+
+	!	Grouping
+	group	"gShape_mid_Vert"
+		!	Vertical
+		for	n = 1	to	_nMod
+			addx	_midLth*(n - 1)
+				gosub	"shape_mid_Vert"
+
+				addx	_midLth/2
+					gosub	"shape_mid_Vert"
+				del 1
+
+				if	n = _nMod 	then
+					addx	_midLth
+						gosub	"shape_mid_Vert"
+					del 1
+				endif
+			del 1
+		next	n
+	endgroup
+
+	group	"gShape_mid_Diag"
+		!	Diagonal
+		for	n = 1	to	_nMod
+			addx	_midLth*(n - 1)
+				addx	_midLth/2
+					roty	_aMid
+						gosub	"shape_mid_Diag"
+					del 1
+					roty	-_aMid
+						gosub	"shape_mid_Diag"
+					del 1
+				del 1
+			del 1
+
+			!	Offset Value
+			if	_bOffset	then
+				if	n = 1	then
+					addx	-trussOff
+						roty	-_aOff
+							gosub	"shape_mid_Off"
+						del 1
+					del 1
+				endif
+				if	n = _nMod	then
+					addx	-trussOff + trussLth
+						roty	_aOff
+							gosub	"shape_mid_Off"
+						del 1
+					del 1
+				endif
+			endif
+		next	n
+	endgroup
+
+	_midShape_Diag = subgroup("gShape_mid_Diag",	"gShape_mid_Vert")
+
+	!	Cut : Start
+	_nCut = 0
+	addz	-uprHgt/2
+		cutplane	1,	1,	0,	0	:	_nCut = _nCut + 1
+	del 1
+	addz	-trussHgt + lwrHgt/2
+		cutplane	1,	1,	0,	1	:	_nCut = _nCut + 1
+	del 1
+
+	!	Shape
+	addx	trussOff
+		for	i = 1	to	2
+			muly	-2*i + 3
+				addy	trussWdt/2
+
+					placegroup	"gShape_mid_Vert"
+					placegroup	_midShape_Diag
+
+				del 1
+			del 1
+		next	i
+	del 1
+
+	!	Cut : End
+	if	_nCut > eps	then
+		for	c = 1	to	_nCut
+			cutend
+		next	c
+	endif
+
+!	Under Beam
+!-----------------------------------------------------------------------------------------------
+	addx	trussOff
+		for	n = 1	to	(_nMod + 1)
+			addx	_midLth*(n - 1)
+				addy	-(trussWdt/2 - lwrWdt/2)
+					addz	-trussHgt
+						rotx	-90
+							put	-midWdt/2,	-midHgt/2,	15,
+								-midWdt/2,	midHgt/2,	15,
+								midWdt/2,	midHgt/2,	15,
+								midWdt/2,	-midHgt/2,	15
+
+							prism_	nsp/3,	(trussWdt - lwrWdt),	get(nsp)
+						del 1
+					del 1
+				del 1
+			del 1
+		next	n
+	del 1
+
+
+
+end
+
+
+
+!-----------------------------------------------------------------------------------------------
+"shape_mid_Vert":
+!-----------------------------------------------------------------------------------------------
+	put	-midHgt/2,	-midWdt/2,	15,
+		-midHgt/2,	midWdt/2,	15,
+		midHgt/2,	midWdt/2,	15,
+		midHgt/2,	-midWdt/2,	15
+
+	prism_	nsp/3,	-trussHgt,	get(nsp)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"shape_mid_Diag":
+!-----------------------------------------------------------------------------------------------
+	put	-midHgt/2,	-midWdt/2,	15,
+		-midHgt/2,	midWdt/2,	15,
+		midHgt/2,	midWdt/2,	15,
+		midHgt/2,	-midWdt/2,	15
+
+	prism_	nsp/3,	-_diagLth,	get(nsp)
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"shape_mid_Off":
+!-----------------------------------------------------------------------------------------------
+	put	-midHgt/2,	-midWdt/2,	15,
+		-midHgt/2,	midWdt/2,	15,
+		midHgt/2,	midWdt/2,	15,
+		midHgt/2,	-midWdt/2,	15
+
+	prism_	nsp/3,	-_offLth,	get(nsp)
+
+return

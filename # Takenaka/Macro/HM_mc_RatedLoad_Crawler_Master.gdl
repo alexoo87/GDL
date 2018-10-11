@@ -73,24 +73,26 @@ _bType1 = (_typeName = "メインブーム") | (_typeName = "ロングブーム"
 _bType2 = (_typeName = "ラッフィングジブ") | (_typeName = "タワー") 																					!	Type that has Main Boom, Addtional Jib, Boom Angle
 _bType3 = (_typeName = "クレーンジブ") | (_typeName = "クレーンジブ付き主ブーム")																			!	Type that has Main Boom, Addtional Jib, Jib Angle
 
+breakpoint	1
+
 !-----------------------------------------------------------------------------------------------
 !	DB
 !-----------------------------------------------------------------------------------------------
 if	_bType1	then
 	!	Call Text file 
 	!-----------------------------------------------------------------------------------------------
-		_stCraneTXT = HM_ListName + ".txt"
+	_stCraneTXT = HM_ListName + ".txt"
 	ch = open("TEXT", _stCraneTXT, "library")
 	if	ch <> 1	then
 		text2	0, 0, "Can not find Crane Text File. Please check DB folder."
 		end
 	endif
 
+breakpoint	1
 
 		!	Data Check
 		!-----------------------------------------------------------------------------------------------
 		_iStart_row = 7											! 7번째 데이터부터 시작
-		_iMax_col = 30											! 수직열 값 입력 최대 수
 
 		n = input(ch,	2,	2,	_nData_Row)
 		n = input(ch,	3,	2,	_nData_Col)
@@ -98,23 +100,9 @@ if	_bType1	then
 		_iDataNum_row = _nData_Row							! 데이터 수 (수평 열)
 		_iDataNum_col = _nData_Col							! 데이터 수 (수직 열)
 
-		dim	_rWorkR[]
 		dim _stBoomL[]
 
-		!	Vertical : Working Radius Value
-		!-----------------------------------------------------------------------------------------------
-		for	i = 1	to	_iDataNum_row
-			_stWorkR_temp = ""
-			n = input(ch, (_iStart_row + i), 1, _stWorkR_temp)
-			if	_stWorkR_temp = "↓"	then
-				_rWorkR[i] = _rWorkR[i - 1]
-			else
-				stN = split(_stWorkR_temp, "%nm", _rTemp)
-				_rWorkR[i] = _rTemp
-			endif
-		next	i
-
-		parameters	_tWorkR = _rWorkR
+breakpoint	1
 
 		!	Horizontal : Boom Length Value
 		!-----------------------------------------------------------------------------------------------
@@ -128,86 +116,139 @@ if	_bType1	then
 
 		values	"HM_boomLen"	_stBoomL
 
+breakpoint	1
+
+		!	Find Selected Start Index
+		!-----------------------------------------------------------------------------------------------
+		_xPosData_idxS = 0
+		_nBoom = vardim1(_stBoomL)
+
+		for	i = 1	to	_nBoom
+			if	_stBoomL[i] = HM_boomLen	then
+				_xPosData_idxS = i
+				i = _nBoom
+			endif
+		next	i
+
+		parameters	xPosData_idxS = _xPosData_idxS
+
+breakpoint	1
+
+		!	Find Working Radius Index
+		!-----------------------------------------------------------------------------------------------
+		_idx_MinR = 1
+		_idx_MaxR = 1
+
+		_bFind_Min = 0
+		_bFind_Max = 0
+
+		for	i = 1	to	_iDataNum_row
+			_stLoad = ""
+			n = input(ch, (_iStart_row + i), 1 + _xPosData_idxS, _stLoad)
+
+			if	i = 1	then
+				if	not(_stLoad = "-")	then
+					_idx_MinR = i
+					_bFind_Min = 1
+				endif
+			endif
+
+			if	not(i = 1 & i = _iDataNum_row)	then
+				if	_stLoad = "-"	then
+					if	_bFind_Min	then
+						_idx_MaxR = i - 1
+						_bFind_Max = 1
+						i = _iDataNum_row
+					endif
+				else
+					if	not(_bFind_Min)	then
+						_idx_MinR = i
+						_bFind_Min = 1
+					endif
+				endif
+			endif
+
+			if	i = _iDataNum_row	then
+				if	not(_bFind_Max)	then
+					_idx_MaxR = i
+				endif
+			endif
+		next	i
+
+		_nWorkR = _idx_MaxR - _idx_MinR + 1
+
+		!	Working Radius / Min, Max
+		!-----------------------------------------------------------------------------------------------
+		dim	_rWorkR[]
+
+		for	i = 1	to	_nWorkR
+			_stWorkR = ""
+			_yPosData_rWork = _idx_MinR + (i - 1)
+			n = input(ch, (_iStart_row + _yPosData_rWork), 1, _stWorkR)
+
+			if	_stWorkR = "↓"	then
+				_rWorkR[i] = _rWorkR[i - 1]
+			else
+				stN = split(_stWorkR, "%nm", _rTemp)
+				_rWorkR[i] = _rTemp
+			endif
+		next	i
+
+		_WorkingR_min = _rWorkR[1]
+		_WorkingR_max = _rWorkR[_nWorkR]
+
+		parameters	_tWorkR = _rWorkR
+
+breakpoint	1
+
 		!	Load Data Import
 		!-----------------------------------------------------------------------------------------------
 		dim	_rLoad[][]
-		_stLoad_temp = 0
 
-		for	iCol = 1	to	_iDataNum_col
-			for	iRow = 1	to	_iDataNum_row
-				n = input(ch, (_iStart_row + iRow), (1 + iCol), _stLoad_temp)
-				if	_stLoad_temp <> "-"	then
-					if	_stLoad_temp = "↓"	then
-						_rLoad[iRow][iCol] = _rLoad[iRow-1][iCol]
-					else
-						stN = split(_stLoad_temp, "%nt", _rTemp)
-						_rLoad[iRow][iCol] = _rTemp
-					endif
-				else
-					_rLoad[iRow][iCol] = 0
-				endif
-			next	iRow
-		next	iCol
+		for	i = 1	to	_nWorkR
+			_stLoad = ""
+			_yPosData_rLoad = _idx_MinR + (i - 1)
+			n = input(ch, (_iStart_row + _yPosData_rLoad), 1 + _xPosData_idxS, _stLoad)
+
+			if	_stLoad = "↓"	then
+				_rLoad[i][1] = _rLoad[i - 1][1]
+			else
+				stN = split(_stLoad,	"%nt",	_rTemp)
+				_rLoad[i][1] = _rTemp
+			endif
+		next	i
 
 		parameters	_tLoad = _rLoad
 
-	!	Value Initialize
-	!-----------------------------------------------------------------------------------------------
-	if	GLOB_MODPAR_NAME = "HM_ListName"	then
-		HM_boomLen = _stBoomL[1]
-		parameters	HM_boomLen = HM_boomLen
-	endif
+breakpoint	1
 
-	!	Load Range
-	!-----------------------------------------------------------------------------------------------
-	_xPosData_RLoad = 0
-	_yPosData_RLoad = 0
+		!	Find Rated Load
+		!-----------------------------------------------------------------------------------------------
+			_xPosData_RLoad = 1
+			_yPosData_RLoad = 1
 
-	for	iCol = 1	to	_iDataNum_col
-		if	_stBoomL[iCol] = HM_boomLen	then
-			_xPosData_RLoad = iCol
-			iCol = _iDataNum_col
-		endif
-	next	iCol
+			for	i = 1	to	_nWorkR
+				if	not(i = _nWorkR)	then
+					_bJudge_Low = (HM_WorkingR - _rWorkR[i + 1]) >= 0
 
-	for	iRow = 1	to	_iDataNum_row
-		if	iRow = 1	then
-			if	HM_WorkingR <= _rWorkR[iRow]	then
-				_yPosData_RLoad = iRow
-				iRow = _iDataNum_row
-			endif
-		endif
-		if	iRow > 1 & iRow < _iDataNum_row	then
-			if	HM_WorkingR > _rWorkR[iRow]	then
-				if	HM_WorkingR <= _rWorkR[iRow+1]	then
-					_yPosData_RLoad = iRow+1
-					iRow = _iDataNum_row
+					if	_bJudge_Low	then
+						_yPosData_RLoad = _yPosData_RLoad + 1
+					endif
+				else
+					_bJudge_Low = (HM_WorkingR - _rWorkR[i]) >= 0
+
+					if	_bJudge_Low	then
+						_yPosData_RLoad = _nWorkR
+					endif
 				endif
-			else
-				if	HM_WorkingR >= _rWorkR[iRow-1]	then
-					_yPosData_RLoad = iRow
-					iRow = _iDataNum_row
-				endif
-			endif
-		endif
-		if	iRow = _iDataNum_row & _yPosData_RLoad = 0	then
-			if	HM_WorkingR >= _rWorkR[iRow+1]	then
-				_yPosData_RLoad = iRow
-				iRow = _iDataNum_row
-			endif
-		endif
-	next	iRow
+			next	i
 
-	if	(_xPosData_RLoad >= 1 & _xPosData_RLoad <= _iDataNum_col) & (_yPosData_RLoad >= 1 & _yPosData_RLoad <= _iDataNum_row)	then
-		_RatedLoad = _rLoad[_yPosData_RLoad][_xPosData_RLoad]				!	Load Limit (ton)
-	else
-		text2	0, 0, "Can not find Crane suspended load limit."
-		end
-	endif
+			!	Insert Rated Load Value
+			_RatedLoad = _rLoad[_yPosData_RLoad][_xPosData_RLoad]
 
-	parameters	_tRatedLoad = _RatedLoad
-	parameters	aa = _iDataNum_row
-	parameters	ab = _yPosData_RLoad
+			parameters	_tRatedLoad = _RatedLoad
+
+breakpoint	1
 
 	close	ch
 endif
@@ -222,11 +263,9 @@ if	_bType2	then
 		end
 	endif
 
-
 		!	Data Check
 		!-----------------------------------------------------------------------------------------------
 		_iStart_row = 7											! 7번째 데이터부터 시작
-		_iMax_col = 30											! 수직열 값 입력 최대 수
 
 		n = input(ch,	2,	2,	_nData_Row)
 		n = input(ch,	3,	2,	_nData_Col)
@@ -238,25 +277,9 @@ if	_bType2	then
 		n = input(ch,	3,	4,	_nJib)
 		n = input(ch,	2,	6,	_nBoomAng)
 
-		dim	_rWorkR[]
 		dim _stBoomL[],
 			_stJibL[],
 			_boomAng[]
-
-		!	Vertical : Working Radius Value
-		!-----------------------------------------------------------------------------------------------
-		for	i = 1	to	_iDataNum_row
-			_stWorkR_temp = ""
-			n = input(ch, (_iStart_row + i), 1, _stWorkR_temp)
-			if	_stWorkR_temp = "↓"	then
-				_rWorkR[i] = _rWorkR[i - 1]
-			else
-				stN = split(_stWorkR_temp, "%nm", _rTemp)
-				_rWorkR[i] = _rTemp
-			endif
-		next	i
-
-		parameters	_tWorkR = _rWorkR
 
 		!	Horizontal : Boom Length Value
 		!-----------------------------------------------------------------------------------------------
@@ -291,18 +314,17 @@ if	_bType2	then
 			endif
 		next	i
 
-		!	Load Data Import
-		!-----------------------------------------------------------------------------------------------
-		dim	_rLoad[][]
-		_stLoad_temp = ""
+breakpoint	1
 
 		!	Find Selected Start Index
+		!-----------------------------------------------------------------------------------------------
 		_xPosData_idxS = 0
 		_xPosData_jibLth = 0
 
 		for	i = 1	to	_nBoom
 			if	_stBoomL[i] = HM_boomLen	then
 				_xPosData_idxS = _xPosData_idxS + ((_nBoomAng*_nJib)*i - (_nBoomAng*_nJib - 1))
+				i = _nBoom
 			endif
 		next	i
 			!	for Jib Length List
@@ -310,155 +332,204 @@ if	_bType2	then
 		for	i = 1	to	_nJib
 			if	_stJibL[i] = HM_JibLen	then
 				_xPosData_idxS = (_xPosData_idxS - 1) + (_nBoomAng*i - (_nBoomAng - 1))
+				i = _nJib
+			endif
+		next	i
+
+		for	i = 1	to	_nBoomAng
+			if	abs(_boomAng[i] - HM_boomAng) < eps	then
+				_xPosData_idxS = _xPosData_idxS + (i - 1)
+				i = _nBoomAng
 			endif
 		next	i
 
 		parameters	xPosData_idxS = _xPosData_idxS
 
-		for	i = 1	to	_nBoomAng
-			for	j = 1	to	_iDataNum_row
-				n = input(ch, (_iStart_row + j), (_xPosData_idxS + i), _stLoad_temp)
-				if	n = 1	then
-					if	not(_stLoad_temp = "-")	then
-						if	_stLoad_temp = "↓"	then
-							_rLoad[j][i] = _rLoad[j - 1][i]
-						else
-							stN = split(_stLoad_temp,	"%nt",	_rTemp)
-							_rLoad[j][i] = _rTemp
-						endif
-					else
-						_rLoad[j][i] = 0
-					endif
+breakpoint	1
+
+		!	Data Check
+		!-----------------------------------------------------------------------------------------------
+		dim	_dataCheck[]
+
+		!	Load Data for Jib Length List
+		for	i = 1	to	(_nBoomAng*_nJib)
+			for	j = 1	to	_iDataNum_row	step	10
+				n = input(ch, (_iStart_row + j), (_xPosData_jibLth + i), _stLoad_temp)
+
+				if	not(_stLoad_temp = "-")	then
+					_dataCheck[i] = 1
+					j = _iDataNum_row
+				else
+					_dataCheck[i] = 0
 				endif
 			next	j
+		next	i
+
+		parameters	_dataCheck = _dataCheck
+
+breakpoint	1
+
+		!	Delete Jib Length on List
+		!-----------------------------------------------------------------------------------------------
+		dim	_sortList_jibLth[]
+		_sortIdx = 1
+
+		for	n = 1	to	_nJib
+			_sIdx = 1 + _nBoomAng*(n - 1)
+			_eIdx = _nBoomAng + _nBoomAng*(n - 1)
+
+			for	i = _sIdx	to	_eIdx
+				if	_dataCheck[i] > eps	then
+					_sortList_jibLth[_sortIdx] = _stJibL[n]	:	_sortIdx = _sortIdx + 1
+					i = _eIdx
+				endif
+			next	i
+		next	n
+
+		values	"HM_JibLen"	_sortList_jibLth
+
+breakpoint	1
+
+		!	Delete Boom Angle on List
+		!-----------------------------------------------------------------------------------------------
+		dim	_sortList_boomAng[]
+		_idx = 1
+		_sortIdx = 1
+
+		for	i = 1	to	_nJib
+			if	_stJibL[i] = HM_JibLen	then
+				_idx = 1 + _nBoomAng*(i - 1)
+				i = _nJib
+			endif
+		next	i
+
+		for	n = 1	to	_nBoomAng
+			if	_dataCheck[_idx] > eps	then
+				_sortList_boomAng[_sortIdx] = _boomAng[n]	:	_sortIdx = _sortIdx + 1
+			endif
+
+			_idx = _idx + 1
+		next	n
+
+		values	"HM_boomAng"	_sortList_boomAng
+
+breakpoint	1
+
+		!	Find Working Radius Index
+		!-----------------------------------------------------------------------------------------------
+		_idx_MinR = 1
+		_idx_MaxR = 1
+
+		_bFind_Min = 0
+		_bFind_Max = 0
+
+		for	i = 1	to	_iDataNum_row
+			_stLoad = ""
+			n = input(ch, (_iStart_row + i), 1 + _xPosData_idxS, _stLoad)
+
+			if	i = 1	then
+				if	not(_stLoad = "-")	then
+					_idx_MinR = i
+					_bFind_Min = 1
+				endif
+			endif
+
+			if	not(i = 1 & i = _iDataNum_row)	then
+				if	_stLoad = "-"	then
+					if	_bFind_Min	then
+						_idx_MaxR = i - 1
+						_bFind_Max = 1
+						i = _iDataNum_row
+					endif
+				else
+					if	not(_bFind_Min)	then
+						_idx_MinR = i
+						_bFind_Min = 1
+					endif
+				endif
+			endif
+
+			if	i = _iDataNum_row	then
+				if	not(_bFind_Max)	then
+					_idx_MaxR = i
+				endif
+			endif
+		next	i
+
+		_nWorkR = _idx_MaxR - _idx_MinR + 1
+
+		!	Working Radius / Min, Max
+		!-----------------------------------------------------------------------------------------------
+		dim	_rWorkR[]
+
+		for	i = 1	to	_nWorkR
+			_stWorkR = ""
+			_yPosData_rWork = _idx_MinR + (i - 1)
+			n = input(ch, (_iStart_row + _yPosData_rWork), 1, _stWorkR)
+
+			if	_stWorkR = "↓"	then
+				_rWorkR[i] = _rWorkR[i - 1]
+			else
+				stN = split(_stWorkR, "%nm", _rTemp)
+				_rWorkR[i] = _rTemp
+			endif
+		next	i
+
+		_WorkingR_min = _rWorkR[1]
+		_WorkingR_max = _rWorkR[_nWorkR]
+
+		parameters	_tWorkR = _rWorkR
+
+breakpoint	1
+
+		!	Load Data Import
+		!-----------------------------------------------------------------------------------------------
+		dim	_rLoad[][]
+
+		for	i = 1	to	_nWorkR
+			_stLoad = ""
+			_yPosData_rLoad = _idx_MinR + (i - 1)
+			n = input(ch, (_iStart_row + _yPosData_rLoad), 1 + _xPosData_idxS, _stLoad)
+
+			if	_stLoad = "↓"	then
+				_rLoad[i][1] = _rLoad[i - 1][1]
+			else
+				stN = split(_stLoad,	"%nt",	_rTemp)
+				_rLoad[i][1] = _rTemp
+			endif
 		next	i
 
 		parameters	_tLoad = _rLoad
 
-	!	Delete Jib Length on List
-	!-----------------------------------------------------------------------------------------------
-	dim	_rLoad_jibLth[][]
-
-		!	Load Data for Jib Length List
-		for	i = 1	to	(_nBoomAng*_nJib)
-			for	j = 1	to	_iDataNum_row
-				n = input(ch, (_iStart_row + j), (_xPosData_jibLth + i), _stLoad_temp)
-				if	n = 1	then
-					if	not(_stLoad_temp = "-")	then
-						if	_stLoad_temp = "↓"	then
-							_rLoad_jibLth[j][i] = _rLoad_jibLth[j - 1][i]
-						else
-							stN = split(_stLoad_temp,	"%nt",	_rTemp)
-							_rLoad_jibLth[j][i] = _rTemp
-						endif
-					else
-						_rLoad_jibLth[j][i] = 0
-					endif
-				endif
-			next	j
-		next	i
-
-	parameters	_tLoad_jibLth = _rLoad_jibLth
-
-	dim	_sortList_jibLth[]
-
-	_sortIdx = 1
-	for	n = 1	to	_nJib
-		_nCount_rLoad_jibLth = 0
-		_sIdx = 1 + _nBoomAng*(n - 1)
-		_eIdx = _nBoomAng + _nBoomAng*(n - 1)
-
-		for	i = _sIdx	to	_eIdx
-			for	j = 1	to	_iDataNum_row
-				if	_rLoad_jibLth[j][i] > eps	then
-					_nCount_rLoad_jibLth = _nCount_rLoad_jibLth + 1
-					j = _iDataNum_row
-				endif
-			next	j
-		next	i
-
-		if	abs(_nCount_rLoad_jibLth) > eps	then
-			_sortList_jibLth[_sortIdx] = _stJibL[n]	:	_sortIdx = _sortIdx + 1
-		else
-			! n = _nJib
-		endif
-	next	n
-
-	values	"HM_JibLen"	_sortList_jibLth
-
-	!	Delete Boom Angle on List
-	!-----------------------------------------------------------------------------------------------
-	dim	_sortList_boomAng[]
-	_nCount_boomAng = 0
-
-	for	i = 1	to	_nBoomAng
-		_nCount_rLoad = 0
-
-		for	 j = 1	to	_iDataNum_row
-			if	_rLoad[j][i] > eps	then
-				_nCount_rLoad = _nCount_rLoad + 1
-				j = _iDataNum_row
-			endif
-		next	j
-
-		if	_nCount_rLoad > eps	then
-			_sortList_boomAng[i] = _boomAng[i]
-			_nCount_boomAng = _nCount_boomAng + 1
-		endif
-	next	i
-
-	if	_nCount_boomAng > eps	then
-		values	"HM_boomAng"	_sortList_boomAng
+breakpoint	1
 
 		!	Find Rated Load
-		_xPosData_RLoad = 0
+		!-----------------------------------------------------------------------------------------------
+			_xPosData_RLoad = 1
+			_yPosData_RLoad = 1
 
-		for	i = 1	to	_nBoomAng
-			if	abs(_boomAng[i] - HM_boomAng) < eps	then
-				_xPosData_RLoad = i
-			endif
-		next	i
+			for	i = 1	to	_nWorkR
+				if	not(i = _nWorkR)	then
+					_bJudge_Low = (HM_WorkingR - _rWorkR[i + 1]) >= 0
 
-		_yPosData_RLoad = 1
+					if	_bJudge_Low	then
+						_yPosData_RLoad = _yPosData_RLoad + 1
+					endif
+				else
+					_bJudge_Low = (HM_WorkingR - _rWorkR[i]) >= 0
 
-		for	i = 1	to	_iDataNum_row
-			if	not(i = _iDataNum_row)	then
-				_bJudge_Low = (HM_WorkingR - _rWorkR[i + 1]) >= 0
-
-				if	_bJudge_Low	then
-					_yPosData_RLoad = _yPosData_RLoad + 1
+					if	_bJudge_Low	then
+						_yPosData_RLoad = _nWorkR
+					endif
 				endif
-			else
-				_bJudge_Low = (HM_WorkingR - _rWorkR[i]) >= 0
+			next	i
 
-				if	_bJudge_Low	then
-					_yPosData_RLoad = _iDataNum_row
-				endif
-			endif
-		next	i
+			!	Insert Rated Load Value
+			_RatedLoad = _rLoad[_yPosData_RLoad][_xPosData_RLoad]
 
-		parameters	aa = _xPosData_RLoad,
-					ab = _yPosData_RLoad
+			parameters	_tRatedLoad = _RatedLoad
 
-		!	Insert Rated Load Value
-		_RatedLoad = _rLoad[_yPosData_RLoad][_xPosData_RLoad]
-
-		parameters	_tRatedLoad = _RatedLoad
-	endif
-
-
-	!	Value Initialize
-	!-----------------------------------------------------------------------------------------------
-	if	GLOB_MODPAR_NAME = "HM_ListName"	then
-		HM_boomLen = _stBoomL[1]
-		HM_JibLen = _stJibL[1]
-		parameters	HM_boomLen = HM_boomLen,
-					HM_JibLen = HM_JibLen
-	endif
-
-	! if	GLOB_MODPAR_NAME = "HM_boomLen"	then
-	! 	parameters	HM_JibLen = _stJibL[1]
-	! endif
+breakpoint	1
 
 	close	ch
 endif
@@ -476,7 +547,6 @@ if	_bType3	then
 		!	Data Check
 		!-----------------------------------------------------------------------------------------------
 		_iStart_row = 7											! 7번째 데이터부터 시작
-		_iMax_col = 30											! 수직열 값 입력 최대 수
 
 		n = input(ch,	2,	2,	_nData_Row)
 		n = input(ch,	3,	2,	_nData_Col)
@@ -488,25 +558,11 @@ if	_bType3	then
 		n = input(ch,	3,	4,	_nJib)
 		n = input(ch,	2,	6,	_nJibAng)
 
-		dim	_rWorkR[]
 		dim _stBoomL[],
 			_stJibL[],
 			_jibAng[]
 
-		!	Vertical : Working Radius Value
-		!-----------------------------------------------------------------------------------------------
-		for	i = 1	to	_iDataNum_row
-			_stWorkR_temp = ""
-			n = input(ch, (_iStart_row + i), 1, _stWorkR_temp)
-			if	_stWorkR_temp = "↓"	then
-				_rWorkR[i] = _rWorkR[i - 1]
-			else
-				stN = split(_stWorkR_temp, "%nm", _rTemp)
-				_rWorkR[i] = _rTemp
-			endif
-		next	i
-
-		parameters	_tWorkR = _rWorkR
+breakpoint	1
 
 		!	Horizontal : Boom Length Value
 		!-----------------------------------------------------------------------------------------------
@@ -520,6 +576,8 @@ if	_bType3	then
 
 		values	"HM_boomLen"	_stBoomL
 
+breakpoint	1
+
 		!	Horizontal : Jib Length Value
 		!-----------------------------------------------------------------------------------------------
 		for	i = 1	to	_nJib
@@ -532,6 +590,8 @@ if	_bType3	then
 
 		values	"HM_JibLen"	_stJibL
 
+breakpoint	1
+
 		!	Horizontal : Boom Angle Value
 		!-----------------------------------------------------------------------------------------------
 		for	i = 1	to	_nJibAng
@@ -543,14 +603,10 @@ if	_bType3	then
 			endif
 		next	i
 
-		values	"HM_jibAng"	_jibAng
-
-		!	Load Data Import
-		!-----------------------------------------------------------------------------------------------
-		dim	_rLoad[][]
-		_stLoad_temp = ""
+breakpoint	1
 
 		!	Find Selected Start Index
+		!-----------------------------------------------------------------------------------------------
 		_xPosData_idxS = 0
 		_xPosData_jibLth = 0
 
@@ -567,75 +623,187 @@ if	_bType3	then
 			endif
 		next	i
 
+		for	i = 1	to	_nJibAng
+			if	abs(_boomAng[i] - HM_boomAng) < eps	then
+				_xPosData_idxS = _xPosData_idxS + (i - 1)
+				i = _nJibAng
+			endif
+		next	i
+
 		parameters	xPosData_idxS = _xPosData_idxS
 
-		for	i = 1	to	_nJibAng
-			for	j = 1	to	_iDataNum_row
-				n = input(ch, (_iStart_row + j), (_xPosData_idxS + i), _stLoad_temp)
-				if	n = 1	then
-					if	not(_stLoad_temp = "-")	then
-						if	_stLoad_temp = "↓"	then
-							_rLoad[j][i] = _rLoad[j - 1][i]
-						else
-							stN = split(_stLoad_temp,	"%nt",	_rTemp)
-							_rLoad[j][i] = _rTemp
-						endif
-					else
-						_rLoad[j][i] = 0
-					endif
+breakpoint	1
+
+		!	Data Check
+		!-----------------------------------------------------------------------------------------------
+		dim	_dataCheck[]
+
+		!	Load Data for Jib Length List
+		for	i = 1	to	(_nJibAng*_nJib)
+			for	j = 1	to	_iDataNum_row	step	10
+				n = input(ch, (_iStart_row + j), (_xPosData_jibLth + i), _stLoad_temp)
+
+				if	not(_stLoad_temp = "-")	then
+					_dataCheck[i] = 1
+					j = _iDataNum_row
+				else
+					_dataCheck[i] = 0
 				endif
 			next	j
 		next	i
 
-		parameters	_tLoad = _rLoad
+		parameters	_dataCheck = _dataCheck
 
-		!	Find Rated Load
-		_xPosData_RLoad = 0
+breakpoint	1
 
-		for	i = 1	to	_nJibAng
-			if	abs(_jibAng[i] - HM_jibAng) < eps	then
-				_xPosData_RLoad = i
+		!	Delete Jib Angle on List
+		!-----------------------------------------------------------------------------------------------
+		dim	_sortList_jibAng[]
+		_idx = 1
+		_sortIdx = 1
+
+		for	i = 1	to	_nJib
+			if	_stJibL[i] = HM_JibLen	then
+				_idx = 1 + _nJibAng*(i - 1)
+				i = _nJib
 			endif
 		next	i
 
-		_yPosData_RLoad = 1
+		for	n = 1	to	_nJibAng
+			if	_dataCheck[_idx] > eps	then
+				_sortList_jibAng[_sortIdx] = _jibAng[n]	:	_sortIdx = _sortIdx + 1
+			endif
+
+			_idx = _idx + 1
+		next	n
+
+		values	"HM_JibAng"	_sortList_jibAng
+
+breakpoint	1
+
+		!	Find Working Radius Index
+		!-----------------------------------------------------------------------------------------------
+		_idx_MinR = 1
+		_idx_MaxR = 1
+
+		_bFind_Min = 0
+		_bFind_Max = 0
 
 		for	i = 1	to	_iDataNum_row
-			if	not(i = _iDataNum_row)	then
-				_bJudge_Low = (HM_WorkingR - _rWorkR[i + 1]) >= 0
+			_stLoad = ""
+			n = input(ch, (_iStart_row + i), 1 + _xPosData_idxS, _stLoad)
 
-				if	_bJudge_Low	then
-					_yPosData_RLoad = _yPosData_RLoad + 1
+			if	i = 1	then
+				if	not(_stLoad = "-")	then
+					_idx_MinR = i
+					_bFind_Min = 1
 				endif
-			else
-				_bJudge_Low = (HM_WorkingR - _rWorkR[i]) >= 0
+			endif
 
-				if	_bJudge_Low	then
-					_yPosData_RLoad = _iDataNum_row
+			if	not(i = 1 & i = _iDataNum_row)	then
+				if	_stLoad = "-"	then
+					if	_bFind_Min	then
+						_idx_MaxR = i - 1
+						_bFind_Max = 1
+						i = _iDataNum_row
+					endif
+				else
+					if	not(_bFind_Min)	then
+						_idx_MinR = i
+						_bFind_Min = 1
+					endif
+				endif
+			endif
+
+			if	i = _iDataNum_row	then
+				if	not(_bFind_Max)	then
+					_idx_MaxR = i
 				endif
 			endif
 		next	i
 
-		parameters	aa = _xPosData_RLoad,
-					ab = _yPosData_RLoad
+		_nWorkR = _idx_MaxR - _idx_MinR + 1
 
-		!	Insert Rated Load Value
-		_RatedLoad = _rLoad[_yPosData_RLoad][_xPosData_RLoad]
+		!	Working Radius / Min, Max
+		!-----------------------------------------------------------------------------------------------
+		dim	_rWorkR[]
 
-		parameters	_tRatedLoad = _RatedLoad
+		for	i = 1	to	_nWorkR
+			_stWorkR = ""
+			_yPosData_rWork = _idx_MinR + (i - 1)
+			n = input(ch, (_iStart_row + _yPosData_rWork), 1, _stWorkR)
 
+			if	_stWorkR = "↓"	then
+				_rWorkR[i] = _rWorkR[i - 1]
+			else
+				stN = split(_stWorkR, "%nm", _rTemp)
+				_rWorkR[i] = _rTemp
+			endif
+		next	i
 
-	!	Value Initialize
-	!-----------------------------------------------------------------------------------------------
-	if	GLOB_MODPAR_NAME = "HM_ListName"	then
-		HM_boomLen = _stBoomL[1]
-		HM_JibLen = _stJibL[1]
-		parameters	HM_boomLen = HM_boomLen,
-					HM_JibLen = HM_JibLen
-	endif
+		_WorkingR_min = _rWorkR[1]
+		_WorkingR_max = _rWorkR[_nWorkR]
+
+		parameters	_tWorkR = _rWorkR
+
+breakpoint	1
+
+		!	Load Data Import
+		!-----------------------------------------------------------------------------------------------
+		dim	_rLoad[][]
+
+		for	i = 1	to	_nWorkR
+			_stLoad = ""
+			_yPosData_rLoad = _idx_MinR + (i - 1)
+			n = input(ch, (_iStart_row + _yPosData_rLoad), 1 + _xPosData_idxS, _stLoad)
+
+			if	_stLoad = "↓"	then
+				_rLoad[i][1] = _rLoad[i - 1][1]
+			else
+				stN = split(_stLoad,	"%nt",	_rTemp)
+				_rLoad[i][1] = _rTemp
+			endif
+		next	i
+
+		parameters	_tLoad = _rLoad
+
+breakpoint	1
+
+		!	Find Rated Load
+		!-----------------------------------------------------------------------------------------------
+			_xPosData_RLoad = 1
+			_yPosData_RLoad = 1
+
+			for	i = 1	to	_nWorkR
+				if	not(i = _nWorkR)	then
+					_bJudge_Low = (HM_WorkingR - _rWorkR[i + 1]) >= 0
+
+					if	_bJudge_Low	then
+						_yPosData_RLoad = _yPosData_RLoad + 1
+					endif
+				else
+					_bJudge_Low = (HM_WorkingR - _rWorkR[i]) >= 0
+
+					if	_bJudge_Low	then
+						_yPosData_RLoad = _nWorkR
+					endif
+				endif
+			next	i
+
+			!	Insert Rated Load Value
+			_RatedLoad = _rLoad[_yPosData_RLoad][_xPosData_RLoad]
+
+			parameters	_tRatedLoad = _RatedLoad
+
+breakpoint	1
 
 	close	ch
 endif
+
+!-----------------------------------------------------------------------------------------------
+!	Rated Load
+!-----------------------------------------------------------------------------------------------
+_RatedLoad = _RatedLoad - HM_HookWeight
 
 
 !-----------------------------------------------------------------------------------------------

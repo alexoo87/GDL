@@ -12,15 +12,9 @@ call	"HM_Material_Blue.gsm"
 call	"HM_Material_White.gsm"
 call	"HM_Material_Black.gsm"
 
-if	HM_matWarning = ""	then
 	_stMat_Red = HM_matBody1
 	_stMat_White = HM_matBody2
 	_stMat_Black = "HM_matBlack"
-else
-	_stMat_Red = HM_matWarning
-	_stMat_White = HM_matWarning
-	_stMat_Black = HM_matWarning
-endif
 
 if	HM_matWarning = ""	then
 	material	HM_matBody2
@@ -217,6 +211,7 @@ if	iType = TYPE_MAST_HEAVY_LIFT	then
 			_TP_zTruss_SP = 0.300
 			_TP_zTruss_EP = 2.490
 			_TP_bEndPanel = 1
+			_TP_pnlThk = 0.481
 
 		roty	_aRot
 			gosub	"draw_Strut"
@@ -241,7 +236,7 @@ if	iType = TYPE_STRUT	then
 	!	Strut_1
 	!-----------------------------------------------------------------------------------------------
 		!	Calculate Degree
-		_aRot_1 = -(180 - acs(xPosEnd_Strut_1/strutLth_1))
+		_aRot_1 = -(180 - acs(xPosEnd_Strut_1/strutLth_1)*(-2*bMirror_Strut_1 + 1))
 
 		!	Group
 		group	"gSphere_Strut_1"
@@ -251,6 +246,10 @@ if	iType = TYPE_STRUT	then
 		group	"gSphere_Strut_2"
 			resol	8
 			sphere	strutRad_2
+		endgroup
+		group	"gSphere_Strut_3"
+			resol	8
+			sphere	strutRad_1*0.7
 		endgroup
 
 		!	Mirror
@@ -391,7 +390,7 @@ if	iType = TYPE_STRUT	then
 							del 1
 						del 1
 						
-						placegroup	sweepgroup{3} ("gSphere_Strut_2",	_spLth,	0,	0,	0,	0,	0,	0)
+						placegroup	sweepgroup{3} ("gSphere_Strut_3",	_spLth,	0,	0,	0,	0,	0,	0)
 
 						cutend
 
@@ -493,7 +492,7 @@ if	iType = TYPE_STRUT	then
 				addy	distStrut_EP/2
 					_x1 = strutLth_1*cos(_aRot_1)
 					_y1 = 0
-					_z1 = strutLth_1*sin(_aRot_1)
+					_z1 = -strutLth_1*sin(_aRot_1)
 					_x2 = strutLth_2*cos(_aRot_2)
 					_y2 = 0
 					_z2 = -strutLth_2*sin(_aRot_2)
@@ -905,6 +904,7 @@ end
 														zTruss_EP = _TP_zTruss_EP,
 														bAnchor = 0,
 														bEndPanel = _TP_bEndPanel,
+														pnlThk = _TP_pnlThk,
 														matMod = _nextMat
 
 			_xPosPart = _xPosPart + _TP_Lth

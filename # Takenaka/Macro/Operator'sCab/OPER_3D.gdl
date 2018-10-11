@@ -1,0 +1,623 @@
+!===============================================================================================
+!	Operator's Cab
+!===============================================================================================
+!-----------------------------------------------------------------------------------------------
+!	TEST
+!-----------------------------------------------------------------------------------------------
+if	bOrigin	then
+	hotspot	0, 0, 0
+	model	wire
+	circle	0.1
+	circle	0.2
+	model	solid
+endif
+
+if	bTest	then
+
+endif
+
+!-----------------------------------------------------------------------------------------------
+!	General
+!-----------------------------------------------------------------------------------------------
+
+
+
+
+
+!-----------------------------------------------------------------------------------------------
+!	Representation
+!-----------------------------------------------------------------------------------------------
+resol 10
+
+
+!-----------------------------------------------------------------------------------------------
+!	Shape - Type 1
+!-----------------------------------------------------------------------------------------------
+if	HM_OP_Type = OPER_TYPE_1	then
+	pen		HM_3D_pen
+
+		!	Body
+		!-----------------------------------------------------------------------------------------------
+		if	HM_matWarning = ""	then
+			material HM_matBody2
+		else
+			material HM_matWarning
+		endif
+
+		si = 1+2+4+8
+		_mBotT = 0.200
+		_mAng = atn((HM_OP_Depth-HM_OP_Depth_bot-0.460)/(HM_OP_Height-_mBotT))			!	깎이는 각도
+		_mAngZ = 30																		!	Z축 기준이로 깎이는 각도
+
+		put 	0, _mBotT, si,
+				HM_OP_Depth_bot, _mBotT, si,
+				HM_OP_Depth-(HM_OP_Height-0.270-_mBotT)*tan(_mAng), _mBotT, si,
+				HM_OP_Depth, HM_OP_Height-0.270, si,
+				HM_OP_Depth-0.460, HM_OP_Height, si,
+				0, HM_OP_Height-0.040, si,
+				0, _mBotT, si
+
+		block	HM_OP_Depth_bot, HM_OP_Width, _mBotT
+
+		group	"body"
+			addx	HM_OP_Depth_bot
+				addz	_mBotT
+					roty	_mAng
+						rotz	_mAngZ
+							cutplane{2} 90
+						del	1
+					del	1
+					addy	HM_OP_Width
+						roty	_mAng
+							rotz	180-_mAngZ
+								cutplane{2} 90
+							del	1
+						del	1
+					del	1
+				del	1
+			del	1
+
+			addy	HM_OP_Width
+				rotx	90
+					prism_	nsp/3, HM_OP_Width, get(nsp)
+				del	1
+			del	1
+
+			cutend
+			cutend
+		endgroup
+
+		group	"body_sub"
+			_mT = 0.030
+			_iMulx = (HM_OP_Depth-_mT*2)/HM_OP_Depth
+			_iMuly = (HM_OP_Width-_mT*2)/HM_OP_Width
+			_iMulz = (HM_OP_Height-_mT*2)/HM_OP_Height
+			
+			add	_mT,_mT,_mT
+				mul	_iMulx, _iMuly, _iMulz
+					placegroup "body"
+				del	1
+			del	1
+		endgroup
+
+		shape_oper = subgroup ("body", "body_sub")
+
+
+		!	Window
+		!-----------------------------------------------------------------------------------------------
+		material	HM_matWindow
+
+		if	HM_OP_Window_show	then
+			_mOffset = 0.040
+			_mWinH1 = 0.700
+			_mWinH2 = 0.920
+			_mWinH4 = (HM_OP_Height-_mBotT-_mOffset-_mWinH1-_mOffset-0.270-_mOffset)
+			_mWinW1 = 0.500
+			_mWinW2 = _mWinW1 + (_mWinH1+_mOffset)*tan(_mAng)
+			_mWinW3 = HM_OP_Depth-HM_OP_Depth_bot-(HM_OP_Height-0.270-_mBotT)*tan(_mAng)-_mOffset*2
+
+			group	"window_sub"
+				addz	_mBotT + _mOffset
+					addx	HM_OP_Depth_bot - _mWinW1 - _mOffset
+
+						!	Window-1
+						put 	0, 0, si,
+								_mWinW1, 0, si,
+								_mWinW1+_mWinH1*tan(_mAng), _mWinH1, si,
+								0, _mWinH1, si,
+								0, 0, si
+
+						addy	HM_OP_Width
+							rotx	90
+								prism_	nsp/3, HM_OP_Width, get(nsp)
+							del	1
+						del	1
+
+						!	Window-2
+						addz	_mWinH1 + _mOffset
+							put 	0, 0, si,
+									_mWinW2, 0, si,
+									_mWinW2+_mWinH2*tan(_mAng), _mWinH2, si,
+									0, _mWinH2, si,
+									0, 0, si
+
+							addy	HM_OP_Width
+								rotx	90
+									prism_	nsp/3, HM_OP_Width, get(nsp)
+								del	1
+							del	1
+						del	1
+
+					del	1
+
+
+					addx	HM_OP_Depth_bot + _mOffset
+
+						!	Window-3
+						put 	0, 0, si,
+								_mWinW3, 0, si,
+								_mWinW3+_mWinH1*tan(_mAng), _mWinH1, si,
+								_mWinH1*tan(_mAng), _mWinH1, si,
+								0, 0, si
+
+						addy	HM_OP_Width
+							rotx	90
+								prism_	nsp/3, HM_OP_Width, get(nsp)
+							del	1
+						del	1
+
+						!	Window-4
+						addz	_mWinH1 + _mOffset
+							addx	(_mWinH1+_mOffset)*tan(_mAng)
+							put 	0, 0, si,
+									_mWinW3, 0, si,
+									 _mWinW3+_mWinH4*tan(_mAng), _mWinH4, si,
+									! _mWinW3, _mWinH4, si,
+									(_mWinH4+0.270)*tan(_mAng),(_mWinH4+0.270-_mOffset), si,
+									0, 0, si
+
+							addy	HM_OP_Width
+								rotx	90
+									prism_	nsp/3, HM_OP_Width, get(nsp)
+								del	1
+							del	1
+						del	1
+
+					del	1
+				del	1
+
+				addx	_mT
+					addy	0.460*tan(_mAngZ) + _mOffset*2
+						!	Window-5
+						block	HM_OP_Depth, HM_OP_Width-(0.460*tan(_mAngZ)+_mOffset*2)*2, _mWinH1
+
+						!	Window-6
+						addz	_mWinH1 + _mOffset
+							block	HM_OP_Depth, HM_OP_Width-(0.460*tan(_mAngZ)+_mOffset*2)*2, _mWinH4
+						del	1
+					del	1
+				del	1
+			endgroup
+
+			shape_window = isectgroup{2} ("window_sub", shape_oper, HM_3D_pen, HM_matWindow, 0)
+			shape_oper = subgroup (shape_oper, "window_sub")
+		endif
+
+		placegroup shape_oper
+		placegroup shape_window
+
+endif	! Type 1
+
+
+!-----------------------------------------------------------------------------------------------
+!	Shape - Type 2
+!-----------------------------------------------------------------------------------------------
+if	HM_OP_Type = OPER_TYPE_2	then
+
+	pen		HM_3D_pen
+	si = 1+2+4+8
+
+		!	Body Mass
+		!-----------------------------------------------------------------------------------------------
+		if	HM_matWarning = ""	then
+			material HM_matBody2
+		else
+			material HM_matWarning
+		endif
+
+		! Body_Mass
+		group	"Body_Mass"
+			rotx	90
+				addz	-HM_OP_Width
+					put	0,						0,				si,
+						HM_OP_Depth_bot,		0,				si,
+						HM_OP_Depth_bot*1.25,	1.031,			si,
+						HM_OP_Depth_roo,		HM_OP_Height,	si,
+						0,						HM_OP_Height,	si
+						
+					prism_	nsp/3,	HM_OP_Width,	get(nsp)
+				del	1
+			del	1
+		endgroup
+
+		!	Sub. Mass
+		!-----------------------------------------------------------------------------------------------
+		group	"Opening_Mass"
+			! Inner_Mass
+			addy	-0.030
+				addz	0.030
+					addx	0.030
+
+						rotx	90
+							addz	-HM_OP_Width
+								put	0,								0,						si,
+									HM_OP_Depth_bot-0.030*2,		0,						si,
+									HM_OP_Depth_bot*1.25-0.030*2,	1.031,					si,
+									HM_OP_Depth_roo-0.030*2,		HM_OP_Height-0.030*2,	si,
+									0,								HM_OP_Height-0.030*2,	si
+									
+								prism_	nsp/3,	HM_OP_Width-0.030*2,	get(nsp)
+							del	1
+						del	1
+
+					del	1
+				del	1
+			del	1
+
+			! Side_Mass
+			rotx	90
+				addz	-HM_OP_Width
+					put	0.5825,						1.116,				si,
+						HM_OP_Depth_bot*1.25-0.092,	1.116,				si,
+						HM_OP_Depth_roo-0.0491,		HM_OP_Height-0.065,	si,
+						0.5825,						HM_OP_Height-0.065,	si
+
+					prism_	nsp/3,	HM_OP_Width,	get(nsp)
+
+				del	1
+			del	1
+
+			! Front_Mass
+			addx	0.5825
+				addy	HM_OP_Width/2-HM_OP_Width*0.9/2
+					addz	1.116
+						block	HM_OP_Depth_bot*1.25,	HM_OP_Width*0.9,	HM_OP_Height-0.065-1.116
+					del	1
+				del	1
+			del	1
+		endgroup
+
+		subBody_Mass_Opening_Mass = subgroup("Body_Mass", "Opening_Mass")
+		placegroup	subBody_Mass_Opening_Mass
+
+		! Roof
+		addx	-0.030
+			addy	-0.030
+				addz	HM_OP_Height
+					block	HM_OP_Depth_roo+0.030,	HM_OP_Width+0.030*2,	0.020
+				del	1
+			del	1
+		del	1
+
+		! Glass
+		material	HM_matWindow
+		addy	-0.030
+			addz	0.030
+				addx	0.030
+
+					rotx	90
+						addz	-HM_OP_Width
+							put	0,								0,						si,
+								HM_OP_Depth_bot-0.030*2,		0,						si,
+								HM_OP_Depth_bot*1.25-0.030*2,	1.031,					si,
+								HM_OP_Depth_roo-0.030*2,		HM_OP_Height-0.030*2,	si,
+								0,								HM_OP_Height-0.030*2,	si
+
+							prism_	nsp/3,	HM_OP_Width-0.030*2,	get(nsp)
+						del	1
+					del	1
+
+				del	1
+			del	1
+		del	1
+
+
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	Shape - Crawler's Cab(SCX)
+!-----------------------------------------------------------------------------------------------
+if	HM_OP_Type = OPER_TYPE_CRAWLER_SCX	then
+	pen		HM_3D_pen
+
+	!	Parameters
+	!-----------------------------------------------------------------------------------------------
+		_operThk = 0.050
+		_operWdt = 2.000
+		_operDpt = 0.940
+
+	!	Body Mass
+	!-----------------------------------------------------------------------------------------------
+		if	HM_matWarning = ""	then
+			material HM_matBody2
+		else
+			material HM_matWarning
+		endif
+
+		group	"gBase_Body_SCX"
+			put	1.990,	0,		15,
+				2.000,	0.150,	15,
+				1.920,	0.850,	15,
+				1.765,	1.530,	15,
+				1.645,	1.620,	15,
+				0.807,	1.665,	15,
+				0.305,	1.665,	15,
+				0.115,	1.530,	15,
+				0,		1.280,	15,
+				0,		0,		15
+
+			prism_	nsp/3,	_operDpt,	get(nsp)
+		endgroup
+
+		group	"gInner_Body_SCX"
+			addz	_operThk
+				put	1.943,	0.050,	15,
+					1.950,	0.149,	15,
+					1.870,	0.842,	15,
+					1.720,	1.501,	15,
+					1.627,	1.570,	15,
+					0.805,	1.615,	15,
+					0.321,	1.615,	15,
+					0.155,	1.497,	15,
+					0.050,	1.269,	15,
+					0.050,	0.050,	15
+
+				prism_	nsp/3,	(_operDpt - _operThk*2),	get(nsp)
+			del 1
+		endgroup
+
+	!	Window
+	!-----------------------------------------------------------------------------------------------
+		material	HM_matWindow
+
+		!	Side
+		group	"gInner_SideWindow_SCX"
+			!	1st Window
+			gosub	"coor_Window1st_SCX"
+
+			prism_	nsp/3,	_operDpt,	get(nsp)
+
+			!	2nd Window
+			gosub	"coor_Window2nd_SCX"
+
+			prism_	nsp/3,	_operDpt,	get(nsp)
+
+			!	3rd Window
+			gosub	"coor_Window3rd_SCX"
+
+			prism_	nsp/3,	_operDpt,	get(nsp)
+		endgroup
+
+		!	Front
+		group	"gInner_FrontWindow_SCX"
+			addx	_operWdt/2
+				roty	-90
+					put	0.0645,	1.4161,	15,
+						0.1350,	1.4856,	15,
+						0.8050,	1.4856,	15,
+						0.8755,	1.4161,	15,
+						0.8755,	0.1983,	15,
+						0.8050,	0.1289,	15,
+						0.1350,	0.1289,	15,
+						0.0645,	0.1983,	15
+
+					prism_	nsp/3,	-_operWdt,	get(nsp)
+				del 1
+			del 1
+		endgroup
+
+	!	Mass
+	!-----------------------------------------------------------------------------------------------
+		rotx	90
+
+		!	Body
+		!-----------------------------------------------------------------------------------------------
+			_subBody_1st = subgroup{2}("gBase_Body_SCX",	"gInner_Body_SCX",	0,	HM_matBody2,	0)
+			_subBody_2nd = subgroup{2}(_subBody_1st,	"gInner_SideWindow_SCX",	0,	HM_matBody2,	0)
+			_subBody_3rd = subgroup{2}(_subBody_2nd,	"gInner_FrontWindow_SCX",	0,	HM_matBody2,	0)
+
+			placegroup	_subBody_3rd
+
+		!	Window
+		!-----------------------------------------------------------------------------------------------
+			!	Side
+			_isectSideWindow_1st = isectgroup{2}("gInner_SideWindow_SCX",	_subBody_1st,	0,	HM_matWindow,	0)
+
+			placegroup	_isectSideWindow_1st
+
+			!	Front
+			_isectFrontWindow_1st = isectgroup{2}("gInner_FrontWindow_SCX",	_subBody_1st,	0,	HM_matWindow,	0)
+
+			placegroup	_isectFrontWindow_1st
+
+		del 1
+endif
+
+
+!-----------------------------------------------------------------------------------------------
+!	Shape - Crawler's Cab(SL/SLX)
+!-----------------------------------------------------------------------------------------------
+if	HM_OP_Type = OPER_TYPE_CRAWLER_SLX	then
+	pen		HM_3D_pen
+
+	!	Parameters
+	!-----------------------------------------------------------------------------------------------
+		_operThk = 0.050
+		_operWdt = 2.080
+
+		if	HM_OP_SL = SL_4500	then
+			_operDpt = 0.940
+		endif
+		if	HM_OP_SL = SL_6000	then
+			_operDpt = 1.200
+		endif
+
+	!	Body Mass
+	!-----------------------------------------------------------------------------------------------
+		if	HM_matWarning = ""	then
+			material HM_matBody2
+		else
+			material HM_matWarning
+		endif
+
+		group	"gBase_Body_SLX"
+			put	0,		0,		15,
+				0,		1.580,	15,
+				0.100,	1.680,	15,
+				1.790,	1.620,	15,
+				1.840,	1.580,	15,
+				2.080,	0.810,	15,
+				2.080,	0.560,	15,
+				2.045,	0.260,	15,
+				1.810,	0,		15
+
+			prism_	nsp/3,	_operDpt,	get(nsp)
+		endgroup
+
+		group	"gInner_Body_SLX"
+			addz	_operThk
+				put	0.050,	0.050,	15,
+					0.050,	1.560,	15,
+					0.120,	1.630,	15,
+					1.772,	1.571,	15,
+					1.797,	1.550,	15,
+					2.030,	0.802,	15,
+					2.030,	0.563,	15,
+					1.997,	0.282,	15,
+					1.788,	0.050,	15
+
+				prism_	nsp/3,	(_operDpt - _operThk*2),	get(nsp)
+			del 1
+		endgroup
+
+	!	Window
+	!-----------------------------------------------------------------------------------------------
+		material	HM_matWindow
+
+		!	Side
+		group	"gInner_SideWindow_SLX"
+			!	1st Window
+			gosub	"coor_Window1st_SLX"
+
+			prism_	nsp/3,	_operDpt,	get(nsp)
+		endgroup
+
+		!	Front
+		group	"gInner_FrontWindow_SLX"
+			addx	_operWdt/2
+				roty	-90
+					put	0.080,				0.154,	15,
+						0.080,				1.557,	15,
+						_operDpt - 0.080,	1.557,	15,
+						_operDpt - 0.080,	0.154,	15,
+						_operDpt - 0.168,	0.066,	15,
+						0.168,				0.066,	15
+
+					prism_	nsp/3,	-_operWdt,	get(nsp)
+				del 1
+			del 1
+		endgroup
+
+	!	Mass
+	!-----------------------------------------------------------------------------------------------
+		rotx	90
+
+		!	Body
+		!-----------------------------------------------------------------------------------------------
+			_subBody_1st = subgroup{2}("gBase_Body_SLX",	"gInner_Body_SLX",	0,	HM_matBody2,	0)
+			_subBody_2nd = subgroup{2}(_subBody_1st,	"gInner_SideWindow_SLX",	0,	HM_matBody2,	0)
+			_subBody_3rd = subgroup{2}(_subBody_2nd,	"gInner_FrontWindow_SLX",	0,	HM_matBody2,	0)
+
+			placegroup	_subBody_3rd
+
+		!	Window
+		!-----------------------------------------------------------------------------------------------
+			!	Side
+			_isectSideWindow_1st = isectgroup{2}("gInner_SideWindow_SLX",	_subBody_1st,	0,	HM_matWindow,	0)
+
+			placegroup	_isectSideWindow_1st
+
+			!	Front
+			_isectFrontWindow_1st = isectgroup{2}("gInner_FrontWindow_SLX",	_subBody_1st,	0,	HM_matWindow,	0)
+
+			placegroup	_isectFrontWindow_1st
+
+
+		del 1
+
+
+
+endif
+
+
+
+
+end
+
+
+!-----------------------------------------------------------------------------------------------
+"coor_Window1st_SCX":
+!-----------------------------------------------------------------------------------------------
+	put	0.165,	1.039,	15,
+		0.165,	1.243,	15,
+		0.266,	1.460,	15,
+		0.635,	1.460,	15,
+		0.683,	1.405,	15,
+		0.683,	0.960,	15,
+		0.617,	0.907,	15,
+		0.209,	0.989,	15
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"coor_Window2nd_SCX":
+!-----------------------------------------------------------------------------------------------
+	put	0.903,	1.397,	15,
+		0.903,	0.898,	15,
+		0.942,	0.852,	15,
+		1.671,	0.709,	15,
+		1.727,	0.764,	15,
+		1.613,	1.405,	15,
+		1.569,	1.444,	15,
+		0.951,	1.444,	15
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"coor_Window3rd_SCX":
+!-----------------------------------------------------------------------------------------------
+	put 1.080,	0.556,	15,
+		1.121,	0.654,	15,
+		1.748,	0.532,	15,
+		1.792,	0.488,	15,
+		1.821,	0.320,	15,
+		1.767,	0.255,	15,
+		1.432,	0.255,	15,
+		1.391,	0.273,	15
+
+return
+
+!-----------------------------------------------------------------------------------------------
+"coor_Window1st_SLX":
+!-----------------------------------------------------------------------------------------------
+	put	0.865,	1.360,	15,
+		0.865,	0.776,	15,
+		0.963,	0.676,	15,
+		1.839,	0.659,	15,
+		1.941,	0.767,	15,
+		1.784,	1.389,	15,
+		1.695,	1.447,	15,
+		0.967,	1.461,	15
+
+return

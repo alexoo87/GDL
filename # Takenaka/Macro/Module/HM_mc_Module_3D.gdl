@@ -18,11 +18,20 @@ endif
 if	bTest	then
 endif
 
+call	"HM_Material_Red.gsm"
+call	"HM_Material_Yellow.gsm"
+
 
 !----------------------------------------------------------------------------------------------------
 !	Representation
 !----------------------------------------------------------------------------------------------------
-material	matMod
+if	HM_matWarning = ""	then
+	_material = matMod
+else
+	_material = HM_matWarning
+endif
+
+material	_material
 pen			HM_3D_pen
 
 rotz	-90

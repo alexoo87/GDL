@@ -1,0 +1,81 @@
+!===============================================================================================
+!	단위세대라벨
+!===============================================================================================
+
+!	원점
+!-----------------------------------------------------------------------------------------------
+hotspot2	0,	0,	unID	:	unID = unID + 1
+
+!	라벨
+!-----------------------------------------------------------------------------------------------
+pen		lbPen
+fill	lbFill
+
+	!	변수 변환
+	lbHgt_Half = lbHgt_Half*GLOB_SCALE
+
+	!	그리기
+	put	0,					0,				1,
+		lbHgt_Half,			lbHgt_Half,		1,
+		lbLth - lbHgt_Half,	lbHgt_Half,		1,
+		lbLth,				0,				1,
+		lbLth - lbHgt_Half,	-lbHgt_Half,	1,
+		lbHgt_Half,			-lbHgt_Half,	1,
+		0,					0,				1
+
+	poly2_b	nsp/3,	1+2,	lbFillPen,	lbBackPen,	use(nsp)
+
+		!	Hotline/Hotspot
+		for	i = 1	to	(nsp/3) - 2
+			hotspot2	use(2),	unID	:	unID = unID + 1
+			hotline2	get(2) + (use(1) - get(1)),	use(2),	unID	:	unID = unID + 1
+		next	i
+			hotspot2	use(2),	unID	:	unID = unID + 1
+			hotline2	get(2) + (use(1) - get(1)),	get(2) + (use(1) - get(1)),	unID	:	unID = unID + 1
+
+	!	Moving Hotspot
+	hotspot2	0,		0,	unID,	lbLth,	1+256	:	unID = unID + 1
+	hotspot2	-1,		0,	unID,	lbLth,	3		:	unID = unID + 1
+	hotspot2	lbLth,	0,	unID,	lbLth,	2		:	unID = unID + 1
+
+	add2	lbLth/2,	0
+		hotspot2	0,	0,			unID,	lbHgt_Half,	1+1024,	lbHgt	:	unID = unID + 1
+		hotspot2	0,	-1,			unID,	lbHgt_Half,	3,		lbHgt	:	unID = unID + 1
+		hotspot2	0,	lbHgt_Half,	unID,	lbHgt_Half,	2,		lbHgt	:	unID = unID + 1
+
+		hotspot2	0,	0,				unID,	lbHgt_Half,	1+1024,	lbHgt	:	unID = unID + 1
+		hotspot2	0,	1,				unID,	lbHgt_Half,	3,		lbHgt	:	unID = unID + 1
+		hotspot2	0,	-lbHgt_Half,	unID,	lbHgt_Half,	2,		lbHgt	:	unID = unID + 1
+	del 1
+
+!	텍스트
+!-----------------------------------------------------------------------------------------------
+pen	txtPen
+
+	!	스타일 정의
+	!-----------------------------------------------------------------------------------------------
+	define style{2}	"mainSty"	stFontType,	txtSize,	bBold + 2*bItalic
+
+		r = request("Height_of_style", "mainSty",	_textHgt,	_descent,	_leading)
+		_yPosText = txtSize/2 + _descent + _leading
+		_yPosText = _yPosText/1000*GLOB_SCALE
+
+	!	텍스트 조합
+	!-----------------------------------------------------------------------------------------------
+	_stMerge = stUnitType + stSuffix
+
+	!	텍스트 블럭
+	!-----------------------------------------------------------------------------------------------
+	paragraph	"pg_Unit"	2,	0,	0,	0,	1
+		pen		txtPen
+		style	"mainSty"
+		_stMerge
+	endparagraph
+
+	textblock	"tb_Unit"	0,	8,	0,	widthFt,	charFt,	1,	"pg_Unit"
+
+	!	텍스트 배치
+	!-----------------------------------------------------------------------------------------------
+	add2	lbLth/2,	-_yPosText
+		richtext2	0,	0,	"tb_Unit"
+	del 1

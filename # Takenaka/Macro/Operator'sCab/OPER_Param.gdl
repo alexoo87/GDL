@@ -1,0 +1,15 @@
+!===============================================================================================
+!	Operator's Cab
+!===============================================================================================
+
+!	Operator's Cab Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"HM_OP_Type"	OPER_TYPE_1,			stOperType[OPER_TYPE_1],
+							OPER_TYPE_2,			stOperType[OPER_TYPE_2],
+							OPER_TYPE_CRAWLER_SCX,	stOperType[OPER_TYPE_CRAWLER_SCX],
+							OPER_TYPE_CRAWLER_SLX,	stOperType[OPER_TYPE_CRAWLER_SLX]
+
+!	SL Type
+!-----------------------------------------------------------------------------------------------
+values{2}	"HM_OP_SL"	SL_4500,	stSLtype[SL_4500],
+						SL_6000,	stSLtype[SL_6000]
